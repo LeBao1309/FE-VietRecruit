@@ -10,6 +10,10 @@ lerna-debug.log*
 # Build output
 node_modules
 dist
+
+# pnpm temporary lockfile artifacts (leftover from interrupted installs)
+# Format: pnpm-lock.yaml.{PID} — safe to delete, never commit
+pnpm-lock.yaml.*
 dist-ssr
 
 # ─── Environment Files (SECURITY) ───────────────────────────────────────────
