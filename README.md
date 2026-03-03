@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/img/vietrecruit-banner.svg" alt="VietRecruit ATS" height="48" />
+  <img src="src/assets/img/vietrecruit-banner.svg" alt="VietRecruit ATS" height="100" />
   <h1>VietRecruit ATS — Frontend</h1>
   <p>Enterprise ATS platform for Vietnamese businesses</p>
 
