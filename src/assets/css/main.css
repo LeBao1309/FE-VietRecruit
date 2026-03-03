@@ -1,0 +1,155 @@
+/* src/assets/css/main.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties (mirrors Tailwind config for use in plain CSS) ── */
+:root {
+  --color-brand: #009898;
+  --color-brand-light: #e6f6f6;
+  --color-brand-dark: #007878;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8fafa;
+  --color-surface-muted: #f1f5f5;
+  --color-panel: #ffffff;
+  --color-border: #e2e8e8;
+  --color-text-primary: #1a2b2b;
+  --color-text-secondary: #4a6565;
+  --color-text-muted: #7a9595;
+}
+
+@layer base {
+  /* Font rendering — optimized for white backgrounds */
+  html {
+    font-feature-settings:
+      "kern" 1,
+      "liga" 1,
+      "calt" 1;
+    -webkit-font-smoothing: subpixel-antialiased; /* Better on white vs antialiased on dark */
+    -moz-osx-font-smoothing: auto;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(
+      --color-surface-soft
+    ); /* #F8FAFA — slightly tinted, not clinical white */
+    color: var(--color-text-primary);
+  }
+
+  body {
+    @apply bg-surface-soft text-text-primary;
+  }
+
+  /* Focus ring — brand teal, accessible */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: #cce9e9; /* brand.muted */
+    color: #1a2b2b;
+  }
+
+  /* Scrollbar styling (Chromium) — subtle, brand-tinted */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #9ab4b4;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6e9090;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ── Reusable Component Layer ── */
+@layer components {
+  /* Primary button — teal bg, white text */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-brand text-brand-contrast font-semibold
+           px-5 py-2.5 rounded-lg text-sm
+           transition-all duration-200
+           hover:bg-brand-dark
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow:
+      0 1px 3px rgba(0, 100, 100, 0.15),
+      0 1px 2px rgba(0, 100, 100, 0.1);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(0, 152, 152, 0.25);
+  }
+
+  /* Secondary button — white bg, teal border and text */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-white text-brand font-semibold
+           px-5 py-2.5 rounded-lg text-sm
+           border border-brand/30
+           transition-all duration-200
+           hover:bg-brand-light hover:border-brand/50
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Ghost button — no border, subtle hover */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           bg-transparent text-text-secondary font-medium
+           px-4 py-2 rounded-lg text-sm
+           transition-all duration-200
+           hover:bg-surface-muted hover:text-text-primary
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+  }
+
+  /* Standard card */
+  .card {
+    @apply bg-panel rounded-2xl border border-border p-6
+           transition-all duration-200;
+    box-shadow: 0 1px 3px rgba(0, 100, 100, 0.05);
+  }
+  .card:hover {
+    box-shadow: 0 8px 30px rgba(0, 100, 100, 0.1);
+    @apply border-brand/20;
+  }
+
+  /* Section heading badge */
+  .section-badge {
+    @apply inline-flex items-center gap-1.5
+           bg-brand-light text-brand-darker font-medium
+           text-xs uppercase tracking-widest
+           px-3 py-1 rounded-full;
+  }
+
+  /* Input field */
+  .input {
+    @apply w-full bg-white text-text-primary placeholder-text-muted
+           border border-border rounded-lg px-4 py-2.5 text-sm
+           transition-all duration-200
+           hover:border-border-strong
+           focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20;
+  }
+}
