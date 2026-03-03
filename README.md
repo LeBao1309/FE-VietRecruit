@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/img/logo.svg" alt="VietRecruit ATS" height="48" />
+  <img src="src/assets/img/vietrecruit-banner.svg" alt="VietRecruit ATS" height="48" />
   <h1>VietRecruit ATS — Frontend</h1>
   <p>Enterprise ATS platform for Vietnamese businesses</p>
 
@@ -268,110 +268,34 @@ pnpm add -D @types/three
 
 ### 🔴 Error Auth-1: Infinite 401 Loop
 
-**Symptom:**
-
-The user cannot complete any API request. The Network tab in DevTools shows a
-continuous stream of requests to `POST /vietrecruit/auth/refresh`, each one
-receiving a `401 Unauthorized` response.
-
-**Cause:**
-
-The Refresh Token has expired or been invalidated server-side (e.g. the backend
-rotated its JWT signing key, or the user was signed out from all devices).
-When the Access Token expires, the Interceptor calls `/auth/refresh`, but the
-Refresh Token is equally invalid — the backend rejects it, and a loop forms if
-the anti-loop guard fails.
-
-**Prevention already in the codebase:**
-
-```typescript
-// src/core/api/axios.instance.ts
-// This guard breaks the loop: if the /refresh endpoint itself returns 401
-// → the session is fully expired → force logout immediately
-if (originalRequest.url?.includes("/auth/refresh")) {
-  tokenService.clearAll();
+- **Symptom:** The Network tab shows a continuous stream of `POST /auth/refresh` requests, each returning `401 Unauthorized`. The app is stuck and no API calls succeed.
+- **Quick Fix:** Clear all auth tokens from the browser and force a re-login.
+  ```javascript
+  // Run in the browser DevTools Console (F12):
+  localStorage.removeItem("vr_access_token");
+  localStorage.removeItem("vr_refresh_token");
+  localStorage.removeItem("vr_expires_at");
   window.location.href = "/login";
-  return Promise.reject(error);
-}
-```
-
-**Manual fix for a stuck user:**
-
-```javascript
-// Open the browser DevTools Console (F12) and run:
-localStorage.removeItem("vr_access_token");
-localStorage.removeItem("vr_refresh_token");
-localStorage.removeItem("vr_expires_at");
-window.location.href = "/login";
-```
-
-> **Developer note:** If the loop occurs despite the guard being in place,
-> check whether `originalRequest.url` is `undefined` (this happens when
-> `baseURL` is misconfigured in `axios.instance.ts`). Verify the value of
-> `VITE_API_BASE_URL` in your `.env.local` file.
+  ```
+  If the loop persists, verify `VITE_API_BASE_URL` is correctly set in your `.env.local`.
+- **Deep Dive:** See [`docs/features/AUTH_ARCHITECTURE.md`](docs/features/AUTH_ARCHITECTURE.md) for root causes and architectural decisions.
 
 ---
 
 ### 🔴 Error Auth-2: Zod Parsing Failure on Login
 
-**Symptom:**
+- **Symptom:** After a successful `200 OK` from `POST /auth/login`, the app does not navigate to `/workspace`. The browser Console shows a `ZodError` with `"code": "invalid_type"` on a field such as `accessToken`.
+- **Quick Fix:** The backend API response shape has changed. Verify the actual payload, update `src/features/auth/types/auth.dto.ts` to match, then run the type-checker.
 
-After entering correct credentials and receiving a `200 OK` from the backend,
-the app does not navigate to `/workspace`. The browser Console shows an error
-of the form:
+  ```bash
+  # Step 1: Inspect the real API response shape
+  curl -X POST http://localhost:8080/vietrecruit/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"test@test.com","password":"password123"}' \
+    | python -m json.tool
 
-```
-ZodError: [
-  {
-    "code": "invalid_type",
-    "expected": "string",
-    "received": "undefined",
-    "path": ["accessToken"],
-    "message": "Required"
-  }
-]
-```
+  # Step 2: After updating auth.dto.ts, confirm no downstream TS errors
+  pnpm type-check
+  ```
 
-**Cause:**
-
-The backend changed the response shape of `POST /vietrecruit/auth/login`
-(e.g. renamed `accessToken` → `access_token`, or added/removed a required field)
-without notifying the frontend. The Zod Schema in `auth.dto.ts` no longer
-matches the actual API payload.
-
-**Fix:**
-
-**Step 1:** Inspect the actual response payload from the backend:
-
-```bash
-# Use curl to verify the real API response shape
-curl -X POST http://localhost:8080/vietrecruit/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@test.com","password":"password123"}' \
-  | python -m json.tool
-```
-
-**Step 2:** Update the Zod schema to match:
-
-```typescript
-// src/features/auth/types/auth.dto.ts
-export const LoginResponseSchema = z.object({
-  accessToken: z.string(), // ← Confirm exact field name (camelCase vs snake_case)
-  refreshToken: z.string(), // ← Confirm no renames occurred
-  expiresIn: z.number(),
-  tokenType: z.string().default("Bearer"),
-});
-```
-
-**Step 3:** After updating the schema, run the type-checker to confirm no
-downstream TypeScript errors were introduced:
-
-```bash
-pnpm type-check
-```
-
-> **Process rule:** When the backend changes an OpenAPI specification, the backend
-> developer is **responsible** for notifying the frontend team immediately.
-> Every breaking change to a response schema must be reflected in
-> `src/features/auth/types/auth.dto.ts` before deployment.
-> See also: [`docs/features/AUTH_ARCHITECTURE.md`](docs/features/AUTH_ARCHITECTURE.md)
+- **Deep Dive:** See [`docs/features/AUTH_ARCHITECTURE.md`](docs/features/AUTH_ARCHITECTURE.md) for root causes and architectural decisions.
