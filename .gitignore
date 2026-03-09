@@ -47,3 +47,4 @@ vitest-report.json
 test_output.txt
 test*.json
 *.log
+.agent

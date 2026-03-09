@@ -260,39 +260,95 @@ Importing only required weights reduces font payload by **60–70%** versus load
 
 ---
 
+## Dependency Pinning Strategy
+
+> [!IMPORTANT]
+> **AI RULE:** All versions in this project are **exact-pinned** (no `^` or `~` in `package.json`). When writing code, referencing docs, or suggesting package installs, you MUST use the exact version numbers listed in the [Pinned Version Matrix](#pinned-version-matrix) below. Do NOT suggest upgrading any package unless the developer explicitly requests it.
+
+### Why Exact Pinning?
+
+This project pins **all dependency versions exactly** (e.g., `"vue": "3.5.25"` instead of `"^3.5.25"`).
+Here is why:
+
+| Problem with `^` ranges                                                                                                                | How exact pinning solves it                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| A minor/patch release can introduce breaking changes (Tailwind v3→v3.5 changed JIT defaults)                                           | `pnpm install` always installs exactly what is listed — zero drift    |
+| CI/CD builds on Vercel do a fresh `pnpm install`. A package author pushing a bad patch at the wrong moment breaks the production build | The lockfile AND `package.json` both agree — two layers of protection |
+| AI models trained on older docs may suggest incorrect syntax for a newer auto-installed version                                        | Exact versions in this doc anchor the AI to the correct API reference |
+| A teammate running `pnpm install` on a new machine gets the exact same tree as everyone else                                           | Reproducible installs across all environments (local, CI, Vercel)     |
+
+### Real incident that triggered this policy
+
+On 2026-03-09, the Vercel build failed with:
+
+```
+sh: line 1: run-p: command not found
+ELIFECYCLE  Command failed.
+```
+
+**Root cause:** `npm-run-all2` (which provides the `run-p` command used in the `build` script) was missing from `devDependencies`. Vercel's clean install did not have it. The package was added, and exact pinning was adopted to prevent similar silent regressions.
+
+### `packageManager` field
+
+`package.json` now declares:
+
+```json
+"packageManager": "pnpm@10.28.0"
+```
+
+This eliminates the Vercel warning:
+
+> _"Using package.json#engines.pnpm without corepack and package.json#packageManager could lead to failed builds"_
+
+It also ensures all teammates and CI environments use the identical pnpm major version.
+
+### How to upgrade a dependency
+
+1. Check the package's **changelog** for breaking changes.
+2. Update the **exact version** in `package.json`.
+3. Re-run `pnpm install` to regenerate the lockfile.
+4. Update the **Exact Version** and **Critical Notes** columns in the [Pinned Version Matrix](#pinned-version-matrix) below.
+5. Update the **Last Updated** date in the matrix header.
+6. If the API changed, update any code examples in this file and the relevant `docs/` files.
+7. Run `pnpm run build` and `pnpm test` locally before pushing.
+
+---
+
 ## Pinned Version Matrix
 
 > [!IMPORTANT]
-> The **Exact Version** column reflects the version declared in `package.json` as of the last update to this document (2026-03-03). AI agents and developers **MUST** reference only these versions when generating or reviewing code.
+> The **Exact Version** column reflects the version declared in `package.json` as of the last update to this document (2026-03-09). AI agents and developers **MUST** reference only these versions when generating or reviewing code. All versions are exact-pinned — no `^` or `~` — see the [Dependency Pinning Strategy](#dependency-pinning-strategy) section above.
 
-| Package                      | Range in `package.json` | Exact Version | Environment | Purpose                      | Critical Notes                                                   |
-| ---------------------------- | ----------------------- | ------------- | ----------- | ---------------------------- | ---------------------------------------------------------------- |
-| `vue`                        | `^3.5.25`               | **3.5.25**    | prod        | Core framework               | Use Composition API + `<script setup lang="ts">` only            |
-| `vite`                       | `^7.3.1`                | **7.3.1**     | dev         | Build tool & dev server      | Config API changed from v4/v5 — check v7 docs                    |
-| `@vitejs/plugin-vue`         | `^6.0.2`                | **6.0.2**     | dev         | Vue SFC support for Vite     |                                                                  |
-| `tailwindcss`                | `^3.4.19`               | **3.4.19**    | dev         | Utility-first CSS            | ⚠️ v3 only — do NOT use v4 config syntax                         |
-| `pinia`                      | `^3.0.4`                | **3.0.4**     | prod        | State management             | Use Composition Store pattern (`defineStore('id', ()=>`)         |
-| `vue-router`                 | `^5.0.3`                | **5.0.3**     | prod        | Client-side routing          |                                                                  |
-| `axios`                      | `^1.13.5`               | **1.13.5**    | prod        | HTTP client                  | Always use typed generics: `axios.get<T>()`                      |
-| `zod`                        | `^4.3.6`                | **4.3.6**     | prod        | Runtime schema validation    | ⚠️ **v4 syntax** — `.required_error` removed; use `.min(1, msg)` |
-| `@tresjs/core`               | `^5.5.0`                | **5.5.0**     | prod        | Vue 3D component wrapper     | ⚠️ v5 API differs from v4 — check TresJS v5 docs                 |
-| `@tresjs/cientos`            | `^5.4.0`                | **5.4.0**     | prod        | TresJS helper components     | Must match `@tresjs/core` major version                          |
-| `three`                      | `^0.183.1`              | **0.183.1**   | prod        | WebGL rendering engine       |                                                                  |
-| `@types/three`               | `^0.183.1`              | **0.183.1**   | dev         | Three.js TypeScript types    | Must match `three` version exactly                               |
-| `lucide-vue-next`            | `^0.575.0`              | **0.575.0**   | prod        | Icon library                 |                                                                  |
-| `@fontsource/be-vietnam-pro` | `^5.2.8`                | **5.2.8**     | prod        | Self-hosted Vietnamese font  | Import weight-specific CSS files only                            |
-| `@vueuse/core`               | `^14.2.1`               | **14.2.1**    | prod        | Vue composable utilities     |                                                                  |
-| `dompurify`                  | `^3.3.2`                | **3.3.2**     | prod        | HTML Sanitation              | Secure v-html implementations                                    |
-| `vue-draggable-plus`         | `^0.6.1`                | **0.6.1**     | prod        | Drag & Drop library          | Used for Kanban board                                            |
-| `clsx`                       | `^2.1.1`                | **2.1.1**     | prod        | Class name management        | Combines classes                                                 |
-| `tailwind-merge`             | `^3.5.0`                | **3.5.0**     | prod        | Tailwind class merge helper  | Prevents class conflicts                                         |
-| `typescript`                 | `~5.9.3`                | **5.9.3**     | dev         | Type checking                |                                                                  |
-| `vitest`                     | `^4.0.18`               | **4.0.18**    | dev         | Test runner                  | Vite-native testing environment                                  |
-| `@vue/test-utils`            | `^2.4.6`                | **2.4.6**     | dev         | Component testing            |                                                                  |
-| `jsdom`                      | `^28.1.0`               | **28.1.0**    | dev         | DOM simulation               | Headless DOM for test mounting                                   |
-| `vue-tsc`                    | `^3.1.5`                | **3.1.5**     | dev         | Vue TypeScript compiler      |                                                                  |
-| `postcss`                    | `^8.5.6`                | **8.5.6**     | dev         | CSS post-processing          |                                                                  |
-| `autoprefixer`               | `^10.4.27`              | **10.4.27**   | dev         | CSS vendor prefix automation |                                                                  |
+| Package                      | Exact Version | Environment | Purpose                       | Critical Notes                                                   |
+| ---------------------------- | ------------- | ----------- | ----------------------------- | ---------------------------------------------------------------- |
+| `vue`                        | **3.5.25**    | prod        | Core framework                | Use Composition API + `<script setup lang="ts">` only            |
+| `vite`                       | **7.3.1**     | dev         | Build tool & dev server       | Config API changed from v4/v5 — check v7 docs                    |
+| `@vitejs/plugin-vue`         | **6.0.2**     | dev         | Vue SFC support for Vite      |                                                                  |
+| `tailwindcss`                | **3.4.19**    | dev         | Utility-first CSS             | ⚠️ v3 only — do NOT use v4 config syntax                         |
+| `pinia`                      | **3.0.4**     | prod        | State management              | Use Composition Store pattern (`defineStore('id', ()=>`)         |
+| `vue-router`                 | **5.0.3**     | prod        | Client-side routing           |                                                                  |
+| `axios`                      | **1.13.5**    | prod        | HTTP client                   | Always use typed generics: `axios.get<T>()`                      |
+| `zod`                        | **4.3.6**     | prod        | Runtime schema validation     | ⚠️ **v4 syntax** — `.required_error` removed; use `.min(1, msg)` |
+| `@tresjs/core`               | **5.5.0**     | prod        | Vue 3D component wrapper      | ⚠️ v5 API differs from v4 — check TresJS v5 docs                 |
+| `@tresjs/cientos`            | **5.4.0**     | prod        | TresJS helper components      | Must match `@tresjs/core` major version                          |
+| `three`                      | **0.183.1**   | prod        | WebGL rendering engine        |                                                                  |
+| `@types/three`               | **0.183.1**   | dev         | Three.js TypeScript types     | Must match `three` version exactly                               |
+| `lucide-vue-next`            | **0.575.0**   | prod        | Icon library                  |                                                                  |
+| `@fontsource/be-vietnam-pro` | **5.2.8**     | prod        | Self-hosted Vietnamese font   | Import weight-specific CSS files only                            |
+| `@vueuse/core`               | **14.2.1**    | prod        | Vue composable utilities      |                                                                  |
+| `dompurify`                  | **3.3.2**     | prod        | HTML sanitation               | Always use with `v-html` to prevent XSS                          |
+| `vue-draggable-plus`         | **0.6.1**     | prod        | Drag & Drop library           | Used for Kanban board                                            |
+| `clsx`                       | **2.1.1**     | prod        | Class name utility            | Combines conditional class strings                               |
+| `tailwind-merge`             | **3.5.0**     | prod        | Tailwind class merge helper   | Prevents conflicting Tailwind utility classes                    |
+| `npm-run-all2`               | **8.0.4**     | dev         | Parallel/serial script runner | Provides `run-p` used in `build` script — **MUST be present**    |
+| `typescript`                 | **5.9.3**     | dev         | Type checking                 |                                                                  |
+| `vitest`                     | **4.0.18**    | dev         | Test runner                   | Vite-native testing environment                                  |
+| `@vitest/coverage-v8`        | **4.0.18**    | dev         | Code coverage                 | Always keep in sync with `vitest` version                        |
+| `@vue/test-utils`            | **2.4.6**     | dev         | Component testing             |                                                                  |
+| `jsdom`                      | **28.1.0**    | dev         | DOM simulation                | Headless DOM for test mounting                                   |
+| `vue-tsc`                    | **3.1.5**     | dev         | Vue TypeScript compiler       |                                                                  |
+| `postcss`                    | **8.5.6**     | dev         | CSS post-processing           |                                                                  |
+| `autoprefixer`               | **10.4.27**   | dev         | CSS vendor prefix automation  |                                                                  |
 
 ---
 
