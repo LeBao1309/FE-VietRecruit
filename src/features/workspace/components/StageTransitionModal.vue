@@ -2,7 +2,7 @@
 import { X, ArrowRight } from "lucide-vue-next";
 import { type ApplicationStatus } from "../types";
 
-const props = defineProps<{
+defineProps<{
   show: boolean;
   candidateName: string;
   sourceStage: { id: ApplicationStatus; label: string; color: string };
