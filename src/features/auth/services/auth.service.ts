@@ -7,9 +7,7 @@ import type {
   LoginResponse,
   RegisterApiPayload,
   VerifyOtpRequest,
-  ResendOtpRequest,
   TokenRefreshResponse,
-  ForgotPasswordRequest,
 } from '@/features/auth/types/auth.dto'
 
 const BASE = '/vietrecruit/auth'

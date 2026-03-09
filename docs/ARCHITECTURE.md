@@ -56,77 +56,32 @@ src/
 ├── assets/
 │   ├── css/
 │   │   └── main.css                    # Tailwind directives + global base styles
-│   ├── fonts/                          # Self-hosted fonts (if not using Fontsource)
-│   └── img/
-│       ├── logo.svg                    # Full logo (logomark + wordmark)
-│       ├── logo-mark.svg               # Icon only — used for favicon and mobile nav
-│       └── marquee/                    # SVG logos for the tech-stack marquee section
-│           ├── vue.svg
-│           ├── typescript.svg
-│           └── ...
+│   ├── fonts/                          # Self-hosted fonts
+│   └── img/                            # Static images and SVGs
 │
 ├── components/
+│   ├── layouts/                        # Base layouts (Admin, Auth)
 │   └── ui/                             # Shadcn-vue PRIMITIVES ONLY
-│       ├── Button.vue                  # No business logic
-│       ├── Input.vue                   # Only: styling + accessibility
-│       ├── Card.vue
-│       ├── Badge.vue
-│       ├── Dialog.vue
-│       ├── Select.vue
-│       └── Spinner.vue
 │
 ├── core/
-│   ├── api/
-│   │   ├── axios.instance.ts           # Axios instance + Request/Response interceptors
-│   │   ├── token.service.ts            # Read/write/delete tokens from localStorage
-│   │   └── index.ts                    # Re-exports
-│   ├── router/
-│   │   ├── index.ts                    # createRouter + Navigation Guards
-│   │   └── routes.ts                   # Route definitions (lazy-loaded)
-│   └── stores/
-│       └── auth.store.ts               # Pinia store: user session, auth state
+│   ├── api/                            # Axios instance + Token handling
+│   ├── composables/                    # Global core composables
+│   ├── router/                         # Route configuration and Navigation Guards
+│   ├── stores/                         # Global Pinia stores (Auth, etc)
+│   └── utils/                          # Shared JS utilities
 │
-├── features/
-│   │
-│   ├── landing/                        # PUBLIC — no auth required
-│   │   ├── components/
-│   │   │   ├── NavBar.vue
-│   │   │   ├── HeroSection.vue
-│   │   │   ├── HeroVisual3D.vue        # TresJS WebGL canvas
-│   │   │   ├── LogoMarquee.vue
-│   │   │   ├── FeaturesGrid.vue
-│   │   │   ├── MetricsSection.vue
-│   │   │   ├── TestimonialsSection.vue
-│   │   │   ├── PricingSection.vue
-│   │   │   ├── FaqSection.vue
-│   │   │   ├── CtaSection.vue
-│   │   │   └── FooterSection.vue
-│   │   └── views/
-│   │       └── LandingPage.vue
-│   │
-│   ├── auth/                           # PUBLIC — no auth required
-│   │   ├── components/
-│   │   │   ├── AuthLayout.vue          # Split-screen layout wrapper
-│   │   │   └── SocialLoginButtons.vue
-│   │   ├── composables/
-│   │   │   └── useAuth.ts              # Encapsulates login/register logic
-│   │   ├── types/
-│   │   │   └── auth.dto.ts             # Zod schemas + inferred types
-│   │   └── views/
-│   │       ├── LoginPage.vue
-│   │       └── RegisterPage.vue
-│   │
-│   └── workspace/                      # PROTECTED — auth required
-│       ├── components/
-│       │   └── ...
-│       └── views/
-│           └── WorkspacePage.vue
+├── features/                           # FEATURE-DRIVEN DOMAINS
+│   ├── auth/                           # Authentication logic, Types, Modals, Views
+│   ├── kanban/                         # Secondary Kanban components
+│   ├── landing/                        # Public Marketing / Landing pages
+│   └── workspace/                      # Primary ATS Dashboard & Kanban Boards
 │
-├── locales/                            # i18n (for future multi-language support)
-│   └── vi.json
+├── test/
+│   ├── helpers.ts                      # Test utility helpers
+│   └── setup.ts                        # Vitest initialization bounds
 │
-└── types/
-    └── global.d.ts                     # Type augmentations (Vue plugins, env vars...)
+├── App.vue
+└── main.ts
 ```
 
 ---
