@@ -282,7 +282,14 @@ Importing only required weights reduces font payload by **60–70%** versus load
 | `lucide-vue-next`            | `^0.575.0`              | **0.575.0**   | prod        | Icon library                 |                                                                  |
 | `@fontsource/be-vietnam-pro` | `^5.2.8`                | **5.2.8**     | prod        | Self-hosted Vietnamese font  | Import weight-specific CSS files only                            |
 | `@vueuse/core`               | `^14.2.1`               | **14.2.1**    | prod        | Vue composable utilities     |                                                                  |
+| `dompurify`                  | `^3.3.2`                | **3.3.2**     | prod        | HTML Sanitation              | Secure v-html implementations                                    |
+| `vue-draggable-plus`         | `^0.6.1`                | **0.6.1**     | prod        | Drag & Drop library          | Used for Kanban board                                            |
+| `clsx`                       | `^2.1.1`                | **2.1.1**     | prod        | Class name management        | Combines classes                                                 |
+| `tailwind-merge`             | `^3.5.0`                | **3.5.0**     | prod        | Tailwind class merge helper  | Prevents class conflicts                                         |
 | `typescript`                 | `~5.9.3`                | **5.9.3**     | dev         | Type checking                |                                                                  |
+| `vitest`                     | `^4.0.18`               | **4.0.18**    | dev         | Test runner                  | Vite-native testing environment                                  |
+| `@vue/test-utils`            | `^2.4.6`                | **2.4.6**     | dev         | Component testing            |                                                                  |
+| `jsdom`                      | `^28.1.0`               | **28.1.0**    | dev         | DOM simulation               | Headless DOM for test mounting                                   |
 | `vue-tsc`                    | `^3.1.5`                | **3.1.5**     | dev         | Vue TypeScript compiler      |                                                                  |
 | `postcss`                    | `^8.5.6`                | **8.5.6**     | dev         | CSS post-processing          |                                                                  |
 | `autoprefixer`               | `^10.4.27`              | **10.4.27**   | dev         | CSS vendor prefix automation |                                                                  |

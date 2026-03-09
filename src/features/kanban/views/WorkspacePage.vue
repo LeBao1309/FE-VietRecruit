@@ -36,12 +36,9 @@ const authStore = useAuthStore();
       <p class="text-[#6B7280] text-sm mb-8">
         Dashboard đang trong quá trình phát triển. Cảm ơn bạn đã đăng ký!
       </p>
-      <p v-if="authStore.user" class="text-sm text-white mb-6">
+      <p v-if="authStore.isAuthenticated" class="text-sm text-white mb-6">
         Xin chào,
-        <span class="text-brand font-semibold">{{
-          authStore.user.fullName
-        }}</span
-        >!
+        <span class="text-brand font-semibold">Thành viên Workspace</span>!
       </p>
       <button
         type="button"

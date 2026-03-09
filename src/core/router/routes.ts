@@ -40,6 +40,12 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/workspace/views/WorkspacePage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/workspace/pipeline',
+    name: 'Pipeline',
+    component: () => import('@/features/workspace/views/PipelinePage.vue'),
+    meta: { requiresAuth: true },
+  },
   // ── Fallback ───────────────────────────────────────────────
   {
     path: '/:pathMatch(.*)*',

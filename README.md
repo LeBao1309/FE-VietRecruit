@@ -13,6 +13,15 @@
 
 ---
 
+## 🚀 Current Features
+
+- **Marketing Landing Page:** Feature grid, responsive hero layout, and 3D Visualizer (TresJS).
+- **Secure Authentication System:** Login, Signup functionality bundled with Pinia, Axios Guards and Zod validations.
+- **Workspace & ATS Kanban Board:** Candidate cards, Stage Transitions component with automated drag and drop (`vue-draggable-plus`), nested interaction modals.
+- **Behavioral Setup:** Isolated test environments configured natively (`vitest` + `jsdom`).
+
+---
+
 ## System Requirements
 
 | Tool        | Minimum version | Notes                                    |
@@ -94,9 +103,9 @@ VITE_APP_ENV=development   # development | staging | production
 | `pnpm dev`        | Start dev server at `localhost:5173`    |
 | `pnpm build`      | Build for production into `dist/`       |
 | `pnpm preview`    | Preview the production build locally    |
+| `pnpm test`       | Run the Vitest testing suite            |
+| `pnpm coverage`   | Generate project test coverage reports  |
 | `pnpm type-check` | Run TypeScript compiler check (no emit) |
-| `pnpm lint`       | Run ESLint across all of `src/`         |
-| `pnpm lint:fix`   | Run ESLint with auto-fix                |
 
 ---
 
@@ -226,21 +235,18 @@ pnpm add -D @types/three
 
 ```
 .
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── TECH_STACK.md
+├── docs/                   # Documentation Markdown Files
 ├── src/
-│   ├── assets/
-│   ├── components/ui/
-│   ├── core/
-│   │   ├── api/
-│   │   ├── router/
-│   │   └── stores/
-│   └── features/
-│       ├── landing/
-│       └── auth/
+│   ├── assets/             # Global CSS and images
+│   ├── components/         # Common UI & Layout layers
+│   ├── core/               # API Interceptors, Stores, Router setup
+│   ├── features/           # Feature-Driven Design Components
+│   │   ├── auth/
+│   │   ├── kanban/
+│   │   ├── landing/
+│   │   └── workspace/      # ATS UI implementations
+│   └── test/               # Vitest helpers & integrations
 ├── .env.example
-├── .gitignore
 ├── index.html
 ├── package.json
 ├── pnpm-lock.yaml       # COMMIT this file — ensures reproducible builds

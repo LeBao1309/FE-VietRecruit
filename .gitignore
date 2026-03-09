@@ -37,3 +37,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#Local files
+Ui-generate-tool/
+Script_Database.md
+# Testing coverage & reports
+coverage/
+vitest-report.json
+test_output.txt
+test*.json
+*.log
