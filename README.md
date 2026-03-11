@@ -15,10 +15,13 @@
 
 ## 🚀 Current Features
 
-- **Marketing Landing Page:** Feature grid, responsive hero layout, and 3D Visualizer (TresJS).
-- **Secure Authentication System:** Login, Signup functionality bundled with Pinia, Axios Guards and Zod validations.
-- **Workspace & ATS Kanban Board:** Candidate cards, Stage Transitions component with automated drag and drop (`vue-draggable-plus`), nested interaction modals.
-- **Behavioral Setup:** Isolated test environments configured natively (`vitest` + `jsdom`).
+- **Marketing Landing Page:** Feature grid, responsive hero, 3D Visualizer (TresJS), dynamic pricing from API.
+- **Full Authentication System (9/9 endpoints):** Login, Register, OTP Verify, Forgot/Reset/Change Password — all with Pinia stores, Axios interceptors, Zod validation, and dedicated views.
+- **Plan Service:** API-driven pricing section with loading/error states (replaces hardcoded tiers).
+- **Workspace & ATS Kanban Board:** Candidate cards, stage transitions with drag-and-drop (`vue-draggable-plus`), detail panels, interview slots. *(UI complete — waiting for backend API)*
+- **Router Navigation Guard:** `requiresAuth` + `guestOnly` route protection via `beforeEach`.
+- **Testing:** Unit tests with Vitest + jsdom (25 tests passing).
+- **Deployment:** Vercel-ready with SPA rewrites (`vercel.json`).
 
 ---
 
@@ -241,10 +244,11 @@ pnpm add -D @types/three
 │   ├── components/         # Common UI & Layout layers
 │   ├── core/               # API Interceptors, Stores, Router setup
 │   ├── features/           # Feature-Driven Design Components
-│   │   ├── auth/
+│   │   ├── auth/           # Login, Register, OTP, Forgot/Reset/Change Password
 │   │   ├── kanban/
-│   │   ├── landing/
-│   │   └── workspace/      # ATS UI implementations
+│   │   ├── landing/        # PricingSection (API-driven)
+│   │   ├── plan/           # Plan DTOs, service, and Pinia store
+│   │   └── workspace/      # ATS UI components (mock data — waiting for API)
 │   └── test/               # Vitest helpers & integrations
 ├── .env.example
 ├── index.html

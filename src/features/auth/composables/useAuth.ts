@@ -9,6 +9,8 @@ import type {
   RegisterRequest,
   VerifyOtpRequest,
   ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
 } from '@/features/auth/types/auth.dto'
 
 export function useAuth() {
@@ -24,12 +26,15 @@ export function useAuth() {
     pendingVerificationEmail,
     hasError,
     // actions (not refs — call directly)
-    login:           (p: LoginRequest)          => store.login(p),
-    register:        (p: RegisterRequest)       => store.register(p),
-    verifyOtp:       (p: VerifyOtpRequest)      => store.verifyOtp(p),
-    resendOtp:       (email: string)            => store.resendOtp(email),
-    logout:          ()                         => store.logout(),
-    forgotPassword:  (p: ForgotPasswordRequest) => store.forgotPassword(p),
-    clearError:      ()                         => store.clearError(),
+    login:           (p: LoginRequest)           => store.login(p),
+    register:        (p: RegisterRequest)        => store.register(p),
+    verifyOtp:       (p: VerifyOtpRequest)       => store.verifyOtp(p),
+    resendOtp:       (email: string)             => store.resendOtp(email),
+    logout:          ()                          => store.logout(),
+    forgotPassword:  (p: ForgotPasswordRequest)  => store.forgotPassword(p),
+    resetPassword:   (p: ResetPasswordRequest)   => store.resetPassword(p),
+    changePassword:  (p: ChangePasswordRequest)  => store.changePassword(p),
+    clearError:      ()                          => store.clearError(),
   }
 }
+

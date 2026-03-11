@@ -14,7 +14,7 @@ router.beforeEach((to, _from, next) => {
 
   // Protected route → redirect to login
   if (to.meta.requiresAuth && !hasSession) {
-    // return next({ name: 'Login', query: { redirect: to.fullPath } })
+    return next({ name: 'Login', query: { redirect: to.fullPath } })
   }
 
   // Guest-only route (login/register) → redirect to workspace if already logged in
