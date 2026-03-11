@@ -10,6 +10,8 @@ import type {
   RegisterApiPayload,
   VerifyOtpRequest,
   ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
 } from '@/features/auth/types/auth.dto'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -143,6 +145,41 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /** 8. Reset Password — uses token from email link */
+  async function resetPassword(payload: ResetPasswordRequest): Promise<boolean> {
+    clearError()
+    isLoading.value = true
+    try {
+      await authService.resetPassword(payload)
+      await router.push('/login?reset=true')
+      return true
+    } catch (err) {
+      handleApiError(err)
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /** 9. Change Password — revokes all sessions, forces re-login */
+  async function changePassword(payload: ChangePasswordRequest): Promise<boolean> {
+    clearError()
+    isLoading.value = true
+    try {
+      await authService.changePassword(payload)
+      // Server revokes all sessions → force re-login
+      tokenService.clearAll()
+      isAuthenticated.value = false
+      await router.push('/login?passwordChanged=true')
+      return true
+    } catch (err) {
+      handleApiError(err)
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // state
     isAuthenticated,
@@ -159,6 +196,9 @@ export const useAuthStore = defineStore('auth', () => {
     resendOtp,
     logout,
     forgotPassword,
+    resetPassword,
+    changePassword,
     clearError,
   }
 })
+
