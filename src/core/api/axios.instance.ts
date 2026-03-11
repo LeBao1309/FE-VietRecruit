@@ -9,8 +9,9 @@ interface RetryableRequest extends InternalAxiosRequestConfig {
 }
 
 // ── Base Axios instance ──
+// Empty baseURL = same-origin requests → proxied by Vercel/Vite to backend
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL as string,
+  baseURL: (import.meta.env.VITE_API_BASE_URL as string) || '',
   timeout: 15_000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -64,7 +65,7 @@ apiClient.interceptors.response.use(
     try {
       // Call refresh endpoint directly (bypass interceptor with a plain axios call)
       const { data } = await axios.post<{ data: TokenRefreshResponse }>(
-        `${import.meta.env.VITE_API_BASE_URL}/vietrecruit/auth/refresh`,
+        `${(import.meta.env.VITE_API_BASE_URL as string) || ''}/vietrecruit/auth/refresh`,
         { refreshToken },
         { headers: { 'Content-Type': 'application/json' } },
       )
