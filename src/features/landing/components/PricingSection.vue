@@ -1,100 +1,54 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import { Check } from "lucide-vue-next";
+import { Check, Loader2 } from "lucide-vue-next";
+import { usePlanStore } from "@/features/plan/stores/plan.store";
+import type { PlanResponse } from "@/features/plan/types/plan.dto";
 
 type BillingCycle = "monthly" | "yearly";
 
 const billing = ref<BillingCycle>("monthly");
+const planStore = usePlanStore();
 
-interface PricingTier {
-  id: string;
-  name: string;
-  monthlyPrice: number | null;
-  description: string;
-  popular: boolean;
-  jobs: string;
-  users: string;
-  aiScreening: boolean;
-  analytics: string;
-  support: string;
-  features: string[];
-  cta: string;
-  ctaLink: string;
+onMounted(() => {
+  planStore.fetchPlans();
+});
+
+// ── Derived state from API data ──
+
+/** Map a PlanResponse into feature bullet strings for UI display */
+function buildFeatureList(plan: PlanResponse): string[] {
+  const features: string[] = [];
+
+  if (plan.maxActiveJobs === -1) {
+    features.push("Tin tuyển dụng không giới hạn");
+  } else {
+    features.push(`${plan.maxActiveJobs} tin tuyển dụng`);
+  }
+
+  features.push(`Hiển thị ${plan.jobDurationDays} ngày`);
+
+  if (plan.resumeAccess) features.push("Truy cập hồ sơ ứng viên");
+  if (plan.aiMatching) features.push("AI Sàng lọc & đối sánh CV");
+  if (plan.priorityListing) features.push("Ưu tiên hiển thị tin tuyển dụng");
+
+  return features;
 }
 
-const tiers: PricingTier[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    monthlyPrice: 2900000,
-    description: "Cho doanh nghiệp vừa bắt đầu",
-    popular: false,
-    jobs: "5 tin",
-    users: "3 HR",
-    aiScreening: false,
-    analytics: "Cơ bản",
-    support: "Email",
-    features: [
-      "5 tin tuyển dụng",
-      "3 tài khoản HR",
-      "Pipeline Kanban",
-      "Báo cáo cơ bản",
-      "Hỗ trợ qua email",
-    ],
-    cta: "Dùng thử miễn phí",
-    ctaLink: "/register",
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    monthlyPrice: 6900000,
-    description: "Cho team HR đang phát triển",
-    popular: true,
-    jobs: "30 tin",
-    users: "15 HR",
-    aiScreening: true,
-    analytics: "Nâng cao",
-    support: "Ưu tiên",
-    features: [
-      "30 tin tuyển dụng",
-      "15 tài khoản HR",
-      "AI Sàng lọc CV",
-      "Pipeline Kanban nâng cao",
-      "Analytics 20+ metrics",
-      "Đăng tin đa kênh",
-      "Tích hợp Google Calendar & Zoom",
-      "Hỗ trợ ưu tiên",
-    ],
-    cta: "Bắt đầu dùng thử →",
-    ctaLink: "/register",
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    monthlyPrice: null,
-    description: "Cho tập đoàn lớn, yêu cầu tùy chỉnh",
-    popular: false,
-    jobs: "Không giới hạn",
-    users: "Không giới hạn",
-    aiScreening: true,
-    analytics: "Custom",
-    support: "Dedicated CSM",
-    features: [
-      "Tin tuyển dụng không giới hạn",
-      "Người dùng không giới hạn",
-      "SSO & RBAC nâng cao",
-      "Audit logs đầy đủ",
-      "Analytics tùy chỉnh",
-      "API riêng & tích hợp custom",
-      "Dedicated Customer Success Manager",
-      "SLA cam kết uptime 99.9%",
-      "Đào tạo onboarding team",
-    ],
-    cta: "Liên hệ kinh doanh",
-    ctaLink: "/contact",
-  },
-];
+/** Determine if a plan should be "popular" — pick PREMIUM as the highlighted plan */
+function isPopular(plan: PlanResponse): boolean {
+  return plan.code === "PREMIUM";
+}
+
+/** Determine if a plan is enterprise (contact us) */
+function isEnterprise(plan: PlanResponse): boolean {
+  return plan.code === "ENTERPRISE";
+}
+
+/** Visible plans: hide DEV plan (internal testing only) */
+const visiblePlans = computed(() =>
+  planStore.plans.filter((p) => p.code !== "DEV"),
+);
 
 const YEARLY_DISCOUNT = 0.2;
 
@@ -102,13 +56,23 @@ function formatPrice(price: number): string {
   return new Intl.NumberFormat("vi-VN").format(price);
 }
 
-function getDisplayPrice(tier: PricingTier): string {
-  if (tier.monthlyPrice === null) return "Liên hệ";
-  const price =
-    billing.value === "yearly"
-      ? Math.round(tier.monthlyPrice * (1 - YEARLY_DISCOUNT))
-      : tier.monthlyPrice;
-  return formatPrice(price);
+function getDisplayPrice(plan: PlanResponse): string {
+  if (isEnterprise(plan)) return "Liên hệ";
+  if (billing.value === "yearly" && plan.priceYearly != null) {
+    return formatPrice(Math.round(plan.priceYearly / 12));
+  }
+  return formatPrice(plan.priceMonthly);
+}
+
+function getCtaText(plan: PlanResponse): string {
+  if (isEnterprise(plan)) return "Liên hệ kinh doanh";
+  if (plan.priceMonthly === 0) return "Dùng thử miễn phí";
+  return "Bắt đầu dùng thử →";
+}
+
+function getCtaLink(plan: PlanResponse): string {
+  if (isEnterprise(plan)) return "/contact";
+  return "/register";
 }
 
 const yearlySavingLabel = computed(
@@ -132,187 +96,211 @@ const yearlySavingLabel = computed(
         </p>
       </div>
 
-      <!-- Billing Toggle -->
+      <!-- Loading State -->
+      <div v-if="planStore.isLoading" class="flex justify-center py-20">
+        <Loader2 :size="32" class="animate-spin text-brand" />
+      </div>
+
+      <!-- Error State -->
       <div
-        class="flex items-center justify-center gap-4 mb-12"
-        role="group"
-        aria-label="Chu kỳ thanh toán"
+        v-else-if="planStore.error"
+        class="text-center py-16 text-text-secondary"
       >
-        <span
-          :class="
-            billing === 'monthly'
-              ? 'text-text-primary font-semibold'
-              : 'text-text-secondary'
-          "
-          class="text-sm transition-colors"
-        >
-          Hàng tháng
-        </span>
+        <p class="text-sm mb-2">Không thể tải bảng giá.</p>
         <button
           type="button"
-          :aria-label="`Chuyển sang thanh toán ${billing === 'monthly' ? 'hàng năm' : 'hàng tháng'}`"
-          :aria-pressed="billing === 'yearly'"
-          class="relative w-12 h-6 rounded-full transition-colors duration-200"
-          :class="
-            billing === 'yearly'
-              ? 'bg-brand'
-              : 'bg-surface-muted border border-border'
-          "
-          @click="billing = billing === 'monthly' ? 'yearly' : 'monthly'"
+          class="text-brand text-sm font-medium hover:underline"
+          @click="planStore.clearError(); planStore.fetchPlans()"
+        >
+          Thử lại
+        </button>
+      </div>
+
+      <template v-else>
+        <!-- Billing Toggle -->
+        <div
+          class="flex items-center justify-center gap-4 mb-12"
+          role="group"
+          aria-label="Chu kỳ thanh toán"
         >
           <span
-            class="absolute top-[2px] left-[2px] w-4 h-4 rounded-full transition-transform duration-200"
-            :class="[
-              billing === 'yearly'
-                ? 'translate-x-[22px] bg-white'
-                : 'translate-x-0 bg-text-secondary',
-            ]"
-          />
-        </button>
-        <span class="flex items-center gap-2">
-          <span
             :class="
-              billing === 'yearly'
+              billing === 'monthly'
                 ? 'text-text-primary font-semibold'
                 : 'text-text-secondary'
             "
             class="text-sm transition-colors"
           >
-            Hàng năm
+            Hàng tháng
           </span>
-          <span
-            v-if="billing === 'yearly'"
-            class="px-2 py-0.5 rounded-full bg-success-light text-success-dark text-[10px] font-semibold"
+          <button
+            type="button"
+            :aria-label="`Chuyển sang thanh toán ${billing === 'monthly' ? 'hàng năm' : 'hàng tháng'}`"
+            :aria-pressed="billing === 'yearly'"
+            class="relative w-12 h-6 rounded-full transition-colors duration-200"
+            :class="
+              billing === 'yearly'
+                ? 'bg-brand'
+                : 'bg-surface-muted border border-border'
+            "
+            @click="billing = billing === 'monthly' ? 'yearly' : 'monthly'"
           >
-            {{ yearlySavingLabel }}
+            <span
+              class="absolute top-[2px] left-[2px] w-4 h-4 rounded-full transition-transform duration-200"
+              :class="[
+                billing === 'yearly'
+                  ? 'translate-x-[22px] bg-white'
+                  : 'translate-x-0 bg-text-secondary',
+              ]"
+            />
+          </button>
+          <span class="flex items-center gap-2">
+            <span
+              :class="
+                billing === 'yearly'
+                  ? 'text-text-primary font-semibold'
+                  : 'text-text-secondary'
+              "
+              class="text-sm transition-colors"
+            >
+              Hàng năm
+            </span>
+            <span
+              v-if="billing === 'yearly'"
+              class="px-2 py-0.5 rounded-full bg-success-light text-success-dark text-[10px] font-semibold"
+            >
+              {{ yearlySavingLabel }}
+            </span>
+            <span
+              v-else
+              class="px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary text-[10px] font-medium border border-border"
+            >
+              Tiết kiệm 20%
+            </span>
           </span>
-          <span
-            v-else
-            class="px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary text-[10px] font-medium border border-border"
-          >
-            Tiết kiệm 20%
-          </span>
-        </span>
-      </div>
+        </div>
 
-      <!-- Pricing Cards -->
-      <div class="grid md:grid-cols-3 gap-5 items-stretch">
-        <article v-for="tier in tiers" :key="tier.id">
-          <div
-            v-if="tier.popular"
-            class="h-full rounded-2xl bg-brand p-8 text-white ring-4 ring-brand/20 lg:scale-105 shadow-brand-lg relative flex flex-col"
-          >
+        <!-- Pricing Cards -->
+        <div class="grid md:grid-cols-3 gap-5 items-stretch">
+          <article v-for="plan in visiblePlans" :key="plan.id">
+            <!-- Popular plan (highlighted) -->
             <div
-              class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-4"
+              v-if="isPopular(plan)"
+              class="h-full rounded-2xl bg-brand p-8 text-white ring-4 ring-brand/20 lg:scale-105 shadow-brand-lg relative flex flex-col"
             >
-              Phổ biến nhất
-            </div>
-
-            <div class="mb-6">
-              <div class="flex items-end gap-1.5">
-                <span
-                  class="font-mono text-4xl font-bold text-white leading-none"
-                >
-                  {{ getDisplayPrice(tier) }}
-                </span>
-                <span
-                  v-if="tier.monthlyPrice !== null"
-                  class="text-white/60 text-sm mb-0.5"
-                  >đ/tháng</span
-                >
-              </div>
-              <p
-                v-if="billing === 'yearly' && tier.monthlyPrice !== null"
-                class="text-white/60 text-xs mt-1"
+              <div
+                class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-4"
               >
-                Thanh toán hàng năm
-              </p>
-            </div>
-
-            <div class="flex-1">
-              <ul class="space-y-3 mb-8">
-                <li
-                  v-for="feature in tier.features"
-                  :key="feature"
-                  class="flex items-start gap-2.5 text-sm text-white/90"
-                >
-                  <Check
-                    :size="14"
-                    class="text-white flex-shrink-0 mt-0.5"
-                    aria-hidden="true"
-                  />
-                  {{ feature }}
-                </li>
-              </ul>
-            </div>
-
-            <RouterLink
-              :to="tier.ctaLink"
-              class="mt-auto block text-center bg-white text-brand font-semibold rounded-lg py-3 text-sm hover:bg-brand-light transition-colors"
-            >
-              {{ tier.cta }}
-            </RouterLink>
-          </div>
-
-          <div
-            v-else
-            class="h-full rounded-2xl bg-white p-8 border border-border flex flex-col"
-            style="box-shadow: 0 1px 3px rgba(0, 100, 100, 0.06)"
-          >
-            <div class="mb-6">
-              <h3 class="text-text-primary font-bold text-lg mb-1">
-                {{ tier.name }}
-              </h3>
-              <p class="text-text-secondary text-xs">{{ tier.description }}</p>
-            </div>
-
-            <div class="mb-6">
-              <div class="flex items-end gap-1.5">
-                <span
-                  class="font-mono text-4xl font-bold text-brand leading-none"
-                >
-                  {{ getDisplayPrice(tier) }}
-                </span>
-                <span
-                  v-if="tier.monthlyPrice !== null"
-                  class="text-text-muted text-sm mb-0.5"
-                  >đ/tháng</span
-                >
+                Phổ biến nhất
               </div>
-              <p
-                v-if="billing === 'yearly' && tier.monthlyPrice !== null"
-                class="text-text-muted text-xs mt-1"
-              >
-                Thanh toán hàng năm
-              </p>
-            </div>
 
-            <div class="flex-1">
-              <ul class="space-y-3 mb-8">
-                <li
-                  v-for="feature in tier.features"
-                  :key="feature"
-                  class="flex items-start gap-2.5 text-sm text-text-secondary"
+              <div class="mb-6">
+                <div class="flex items-end gap-1.5">
+                  <span
+                    class="font-mono text-4xl font-bold text-white leading-none"
+                  >
+                    {{ getDisplayPrice(plan) }}
+                  </span>
+                  <span
+                    v-if="!isEnterprise(plan)"
+                    class="text-white/60 text-sm mb-0.5"
+                    >đ/tháng</span
+                  >
+                </div>
+                <p
+                  v-if="billing === 'yearly' && !isEnterprise(plan)"
+                  class="text-white/60 text-xs mt-1"
                 >
-                  <Check
-                    :size="14"
-                    class="text-brand flex-shrink-0 mt-0.5"
-                    aria-hidden="true"
-                  />
-                  {{ feature }}
-                </li>
-              </ul>
+                  Thanh toán hàng năm
+                </p>
+              </div>
+
+              <div class="flex-1">
+                <ul class="space-y-3 mb-8">
+                  <li
+                    v-for="feature in buildFeatureList(plan)"
+                    :key="feature"
+                    class="flex items-start gap-2.5 text-sm text-white/90"
+                  >
+                    <Check
+                      :size="14"
+                      class="text-white flex-shrink-0 mt-0.5"
+                      aria-hidden="true"
+                    />
+                    {{ feature }}
+                  </li>
+                </ul>
+              </div>
+
+              <RouterLink
+                :to="getCtaLink(plan)"
+                class="mt-auto block text-center bg-white text-brand font-semibold rounded-lg py-3 text-sm hover:bg-brand-light transition-colors"
+              >
+                {{ getCtaText(plan) }}
+              </RouterLink>
             </div>
 
-            <RouterLink
-              :to="tier.ctaLink"
-              class="mt-auto block text-center btn-secondary py-3 text-sm"
+            <!-- Normal plan -->
+            <div
+              v-else
+              class="h-full rounded-2xl bg-white p-8 border border-border flex flex-col"
+              style="box-shadow: 0 1px 3px rgba(0, 100, 100, 0.06)"
             >
-              {{ tier.cta }}
-            </RouterLink>
-          </div>
-        </article>
-      </div>
+              <div class="mb-6">
+                <h3 class="text-text-primary font-bold text-lg mb-1">
+                  {{ plan.name }}
+                </h3>
+                <p class="text-text-secondary text-xs">{{ plan.description }}</p>
+              </div>
+
+              <div class="mb-6">
+                <div class="flex items-end gap-1.5">
+                  <span
+                    class="font-mono text-4xl font-bold text-brand leading-none"
+                  >
+                    {{ getDisplayPrice(plan) }}
+                  </span>
+                  <span
+                    v-if="!isEnterprise(plan)"
+                    class="text-text-muted text-sm mb-0.5"
+                    >đ/tháng</span
+                  >
+                </div>
+                <p
+                  v-if="billing === 'yearly' && !isEnterprise(plan)"
+                  class="text-text-muted text-xs mt-1"
+                >
+                  Thanh toán hàng năm
+                </p>
+              </div>
+
+              <div class="flex-1">
+                <ul class="space-y-3 mb-8">
+                  <li
+                    v-for="feature in buildFeatureList(plan)"
+                    :key="feature"
+                    class="flex items-start gap-2.5 text-sm text-text-secondary"
+                  >
+                    <Check
+                      :size="14"
+                      class="text-brand flex-shrink-0 mt-0.5"
+                      aria-hidden="true"
+                    />
+                    {{ feature }}
+                  </li>
+                </ul>
+              </div>
+
+              <RouterLink
+                :to="getCtaLink(plan)"
+                class="mt-auto block text-center btn-secondary py-3 text-sm"
+              >
+                {{ getCtaText(plan) }}
+              </RouterLink>
+            </div>
+          </article>
+        </div>
+      </template>
 
       <!-- Bottom note -->
       <p class="text-center text-text-muted text-xs mt-12">

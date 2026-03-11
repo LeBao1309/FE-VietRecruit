@@ -8,6 +8,8 @@ import type {
   RegisterApiPayload,
   VerifyOtpRequest,
   TokenRefreshResponse,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
 } from '@/features/auth/types/auth.dto'
 
 const BASE = '/vietrecruit/auth'
@@ -55,4 +57,15 @@ export const authService = {
   async forgotPassword(email: string): Promise<void> {
     await apiClient.post(`${BASE}/forgot-password`, { email })
   },
+
+  /** 8. Reset password — uses token from password reset email */
+  async resetPassword(payload: ResetPasswordRequest): Promise<void> {
+    await apiClient.post(`${BASE}/reset-password`, payload)
+  },
+
+  /** 9. Change password — requires authenticated session, revokes all sessions */
+  async changePassword(payload: ChangePasswordRequest): Promise<void> {
+    await apiClient.post(`${BASE}/change-password`, payload)
+  },
 }
+

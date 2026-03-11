@@ -39,7 +39,6 @@ dist-ssr
 *.sw?
 
 #Local files
-Ui-generate-tool/
 Script_Database.md
 # Testing coverage & reports
 coverage/
@@ -48,3 +47,4 @@ test_output.txt
 test*.json
 *.log
 .agent
+api.json

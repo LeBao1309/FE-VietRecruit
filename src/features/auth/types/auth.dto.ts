@@ -1,19 +1,8 @@
 // src/features/auth/types/auth.dto.ts
 import { z } from 'zod'
 
-// ─────────────────────────────────────────────────────────────
-// SHARED API RESPONSE ENVELOPE
-// Maps to ApiResponseVoid / ApiResponseLoginResponse / etc.
-// ─────────────────────────────────────────────────────────────
-
-export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-  z.object({
-    success:   z.boolean(),
-    code:      z.string().optional(),
-    message:   z.string(),
-    data:      dataSchema,
-    timestamp: z.string().optional(),
-  })
+// Re-export shared API envelope for backward compatibility
+export { ApiResponseSchema } from '@/core/types/api.types'
 
 // ─────────────────────────────────────────────────────────────
 // 1. LOGIN
@@ -141,3 +130,38 @@ export const ForgotPasswordRequestSchema = z.object({
     .email('Email không hợp lệ'),
 })
 export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequestSchema>
+
+// ─────────────────────────────────────────────────────────────
+// 8. RESET PASSWORD
+// POST /vietrecruit/auth/reset-password
+// ⚠️ Requires token from password reset email
+// ─────────────────────────────────────────────────────────────
+
+export const ResetPasswordRequestSchema = z.object({
+  email: z
+    .string({ message: 'Email không được để trống' })
+    .email('Email không hợp lệ'),
+  token: z
+    .string({ message: 'Token không hợp lệ' })
+    .min(1, 'Token không được để trống'),
+  newPassword: z
+    .string({ message: 'Mật khẩu mới không được để trống' })
+    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự'),
+})
+export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>
+
+// ─────────────────────────────────────────────────────────────
+// 9. CHANGE PASSWORD
+// POST /vietrecruit/auth/change-password
+// ⚠️ Requires authenticated session — revokes all sessions on success
+// ─────────────────────────────────────────────────────────────
+
+export const ChangePasswordRequestSchema = z.object({
+  currentPassword: z
+    .string({ message: 'Mật khẩu hiện tại không được để trống' })
+    .min(1, 'Mật khẩu hiện tại không được để trống'),
+  newPassword: z
+    .string({ message: 'Mật khẩu mới không được để trống' })
+    .min(8, 'Mật khẩu mới phải có ít nhất 8 ký tự'),
+})
+export type ChangePasswordRequest = z.infer<typeof ChangePasswordRequestSchema>
