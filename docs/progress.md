@@ -1,75 +1,73 @@
-# VietRecruit FE — Theo dõi tiến độ
+# VietRecruit FE — Progress Tracker
 
-> Cập nhật lần cuối: 2026-03-11
+> Last updated: 2026-03-11
 
 ---
 
-## ✅ Hoàn thành
+## ✅ Completed
 
-### Module Auth (9/9 endpoints)
+### Auth Module (9/9 endpoints — 6 views)
 - [x] Login / Logout
-- [x] Register → OTP verify → Resend OTP
-- [x] Forgot Password
-- [x] Reset Password *(service + store, thiếu UI)*
-- [x] Change Password *(service + store, thiếu UI)*
+- [x] Register → OTP Verify → Resend OTP
+- [x] Forgot Password (form + email-sent success state)
+- [x] Reset Password (token from email, confirm password, success state)
+- [x] Change Password (current + new + confirm, auto-logout on success)
 
-### Module Plan
-- [x] [plan.dto.ts] — Zod schema khớp SQL constraints
-- [x] [plan.service.ts] — [listPlans], [getPlan]
-- [x] [plan.store.ts] — Pinia store với caching
-- [x] [PricingSection.vue] — refactor từ hardcode → API
+### Plan Module (API integrated)
+- [x] `plan.dto.ts` — Zod schema matching SQL constraints
+- [x] `plan.service.ts` — `listPlans`, `getPlan`
+- [x] `plan.store.ts` — Pinia store with caching
+- [x] `PricingSection.vue` — replaced hardcoded tiers with API data + loading/error states
 
-### Workspace UI Components (Chờ API backend)
+### Workspace UI Components (built — waiting for backend API)
 - [x] KanbanBoard, KanbanColumn
 - [x] CandidateCard, CandidateDetailPanel
 - [x] InterviewSlot, JobPostingRow
 - [x] StageProgressBar, ScoreTag, CommentThread, AiScoreBadge
 - [x] PipelineSidebar, PipelineTopBar, StageTransitionModal
 
+### Infrastructure
+- [x] Axios instance with dual-token interceptor (auto-refresh on 401)
+- [x] Token service (localStorage, expiry buffer)
+- [x] Router navigation guard (`requiresAuth` + `guestOnly`)
+- [x] Shared `ApiResponse<T>` envelope type
+- [x] Error utils with Vietnamese error code mapping
+- [x] Vercel SPA rewrite (`vercel.json`)
+
 ---
 
-## 🔴 Còn thiếu
+## 🔴 Remaining
 
-### Router & Navigation
-- [ ] `beforeEach` navigation guard — chưa có, `requiresAuth: true` không được thực thi
-- [ ] Route `/contact` — `PricingSection` link đến `/contact` nhưng không có route/page
-- [ ] Redirect sau login nếu user đã có session khi vào `/login`
-
-### Auth
-- [ ] `ResetPasswordPage.vue` — UI cho reset-password (service đã sẵn)
-- [ ] `ChangePasswordPage.vue` — UI cho change-password (service đã sẵn)
+### Workspace / Pipeline (blocked — backend endpoints not available)
+- [ ] `useWorkspaceStore.ts` — replace mock with `GET /workspace/dashboard`
+- [ ] `usePipelineStore.ts` — replace mock with `GET /applications`
+- [ ] `useWorkspace.ts` composable — same as above
+- [ ] `PATCH /applications/:id/status` — update stage on Kanban drag
 
 ### User Profile
-- [ ] `user.store.ts` — lưu thông tin user sau login (tên, role, avatar)
-- [ ] `GET /vietrecruit/auth/me` hoặc tương đương — cần endpoint lấy profile
-
-### Workspace / Pipeline (Chờ backend expose API)
-- [ ] [useWorkspaceStore.ts] — thay mock bằng `GET /workspace/dashboard`
-- [ ] [usePipelineStore.ts] — thay mock bằng `GET /applications`
-- [ ] [useWorkspace.ts] composable — như trên
-- [ ] `PATCH /applications/:id/status` — cập nhật stage khi kéo Kanban
+- [ ] `user.store.ts` — persist user info after login (name, role, avatar)
+- [ ] Needs backend endpoint: `GET /auth/me` or equivalent
 
 ### UI / UX
-- [ ] Global toast/notification system — hiện chỉ có inline error trong form
-- [ ] 404 Not Found page — route fallback đang redirect về `/` thay vì hiển thị 404
-- [ ] Empty states — workspace trống khi chưa có dữ liệu
-- [ ] Loading skeleton cho WorkspacePage, PipelinePage
+- [ ] Global toast/notification system (currently inline errors only)
+- [ ] 404 Not Found page (fallback currently redirects to `/`)
+- [ ] Empty states for workspace when no data
+- [ ] Loading skeletons for WorkspacePage, PipelinePage
 
-### Chất lượng
-- [ ] Unit tests cho [plan.store.ts]
-- [ ] Unit tests cho [auth.store.ts] (resetPassword, changePassword)
-- [ ] E2E test login flow (Playwright)
-- [ ] `.env` production — chưa có file `.env.production`
+### Quality
+- [ ] Unit tests for `plan.store.ts`
+- [ ] Unit tests for `auth.store.ts` (resetPassword, changePassword)
+- [ ] E2E test for login flow (Playwright)
 
 ---
 
-## ⏳ Phụ thuộc backend (Chưa có endpoint)
+## ⏳ Blocked on Backend (endpoints not in API spec yet)
 
-| Tính năng | Endpoint cần có |
+| Feature | Required Endpoint |
 |---|---|
 | Dashboard metrics | `GET /workspace/dashboard` |
-| Danh sách ứng viên | `GET /applications?jobId=...` |
-| Cập nhật stage | `PATCH /applications/:id/status` |
-| Thông tin user hiện tại | `GET /auth/me` |
-| Upload CV | `POST /candidates/cv` |
-| Danh sách jobs | `GET /jobs` |
+| Application list | `GET /applications?jobId=...` |
+| Stage update | `PATCH /applications/:id/status` |
+| Current user profile | `GET /auth/me` |
+| CV upload | `POST /candidates/cv` |
+| Job listing | `GET /jobs` |

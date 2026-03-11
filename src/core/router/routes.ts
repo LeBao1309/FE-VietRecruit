@@ -33,6 +33,18 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/auth/views/ForgotPasswordPage.vue'),
     meta: { requiresAuth: false, guestOnly: true },
   },
+  {
+    path: '/auth/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/features/auth/views/ResetPasswordPage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/auth/change-password',
+    name: 'ChangePassword',
+    component: () => import('@/features/auth/views/ChangePasswordPage.vue'),
+    meta: { requiresAuth: true },
+  },
   // ── Protected routes ───────────────────────────────────────
   {
     path: '/workspace',
