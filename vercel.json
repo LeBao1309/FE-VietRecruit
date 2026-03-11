@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/vietrecruit/:path*", "destination": "https://nguyenminh.site/vietrecruit/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
