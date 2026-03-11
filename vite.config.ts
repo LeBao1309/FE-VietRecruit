@@ -15,4 +15,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/vietrecruit': {
+        target: 'https://nguyenminh.site',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })
