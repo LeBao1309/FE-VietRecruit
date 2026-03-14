@@ -49,3 +49,4 @@ test*.json
 .agent
 api.json
 BE-Document
+.specify
