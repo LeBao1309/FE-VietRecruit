@@ -74,7 +74,7 @@ const HeroVisual3D = defineAsyncComponent(
             class="flex items-center gap-4 flex-wrap animate-fade-up"
             style="animation-delay: 300ms"
           >
-            <a href="/register" class="btn-primary px-7 py-3.5 text-base">
+            <a href="/auth/register" class="btn-primary px-7 py-3.5 text-base">
               Bắt đầu miễn phí — 14 ngày
             </a>
             <button

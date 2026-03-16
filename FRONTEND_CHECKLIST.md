@@ -1,54 +1,93 @@
 # Frontend Implementation Checklist - VietRecruit
 
-Dựa trên phân tích tài liệu API, Database schemas và source code Frontend hiện tại, dưới đây là danh sách các tính năng cần được tiếp tục triển khai ở phía Frontend.
+Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_db.sql`) và Flow Documents, dưới đây là danh sách phân chia các tính năng chi tiết cần triển khai phía Frontend, được gom nhóm theo các Module chức năng (Functional Modules) và chuẩn hóa theo phân quyền.
 
-## 1. Module Công ty & Gói cước (Company & Subscription - Role: COMPANY_ADMIN)
-- [ ] **Quản lý Hồ sơ Công ty**
+## 1. Module Xác Thực & Onboarding (Auth & Onboarding - Public / All Roles)
+- [/] **Đăng ký / Đăng nhập** (Đã có service `auth.service.ts`)
+  - [x] Trang Đăng ký (Chọn Account Type: Candidate hoặc Employer)
+  - [x] Xác thực OTP qua Email (`/auth/verify-otp`)
+  - [x] Trang Đăng nhập (Hỗ trợ trả về Access/Refresh Token)
+  - [x] Chức năng Quên mật khẩu / Reset Mật khẩu (Implemented in service)
+- [ ] **Thiết lập tài khoản (Onboarding)** (Mock/Chưa hoàn thiện)
+  - [ ] Employer Onboarding: Cập nhật thông tin công ty lần đầu
+  - [ ] Candidate Onboarding: Cập nhật thông tin cá nhân bổ sung sau khi xác thực
+
+## 2. Module Công ty & Tổ chức (Company Management - Role: COMPANY_ADMIN)
+- [ ] **Hồ sơ Công ty** (MOCK - Thiếu `Company Service`)
   - [ ] Trang cập nhật thông tin công ty (Tên, Domain, Website, Ngành nghề)
+- [ ] **Cấu trúc Tổ chức** (MOCK - Thiếu `Department`, `Location`, `Category` Services)
   - [ ] Thêm / Sửa / Xóa Phòng ban (Departments)
   - [ ] Thêm / Sửa / Xóa Địa điểm làm việc (Locations)
-- [ ] **Gói cước & Thanh toán**
-  - [ ] Trang danh sách bảng giá / gói cước (Hiển thị list từ API)
-  - [ ] Tích hợp luồng checkout thanh toán qua PayOS
-  - [ ] Trang trạng thái giao dịch (Thành công / Thất bại) sau khi redirect từ PayOS về
-  - [ ] Quản lý Quota (Số lượng bài đăng còn lại, chu kỳ gói cước)
+  - [ ] Thêm / Sửa / Xóa Danh mục công việc (Categories)
+- [ ] **Quản lý Thành viên** (CHƯA LÀM)
+  - [ ] Mời HR / Interviewer vào Workspace của công ty (`/invitations` flow)
+  - [ ] Phân quyền thành viên trong công ty (dựa vào Role HR, INTERVIEWER)
 
-## 2. Module Quản lý Tuyển dụng (Job Management - Role: HR/COMPANY_ADMIN)
-- [ ] **Danh sách Công việc (Job List)**
-  - [ ] Trang danh sách Job nội bộ (kèm trạng thái DRAFT, PUBLISHED, CLOSED)
-- [ ] **Tạo / Chỉnh sửa Công việc**
-  - [ ] Form tạo Job mới (Lưu nháp - DRAFT)
-  - [ ] Chức năng Publish Job (Kiểm tra xem còn Quota không)
-  - [ ] Chức năng Close Job
+## 3. Module Gói Cước & Thanh Toán (Subscription & Payment - Role: COMPANY_ADMIN)
+- [/] **Gói cước (Plans)** (Đã có `plan.service.ts`)
+  - [x] Trang hiển thị danh sách các gói cước (Lấy từ API `subscription_plans`)
+  - [ ] Giao diện xác nhận đăng ký / Nâng cấp gói cước
+- [ ] **Thanh toán & Quota** (CHƯA LÀM - Thiếu `Payment Service`, `Subscription Service`)
+  - [ ] Tích hợp luồng Checkout thanh toán qua PayOS (Nhận link và redirect)
+  - [ ] Trang theo dõi trạng thái giao dịch (Thành công / Thất bại) sau khi từ PayOS trả về
+  - [ ] Dashboard theo dõi Quota (Số Job khả dụng, Thời hạn chu kỳ)
+  - [ ] Chức năng Hủy gia hạn gói cước (Cancel Subscription)
 
-## 3. Module Đường ống & Phỏng vấn (Pipeline & Interview - Role: HR/INTERVIEWER)
-- [ ] **Quản lý Ứng viên (Kanban Pipeline - Đã có sườn)**
-  - [ ] Cập nhật gọi API thật lấy danh sách Ứng viên đang nộp vào Job cụ thể
-  - [ ] Kéo thả cập nhật trạng thái Application (NEW -> SCREENING -> INTERVIEW -> OFFER -> HIRED)
-- [ ] **Lịch Phỏng vấn (Interviews)**
-  - [ ] Dialog tạo/lên lịch phỏng vấn (Chọn Interviewer, thời gian, link meet/địa điểm)
-  - [ ] Cập nhật trạng thái Phỏng vấn (COMPLETED, CANCELED)
-- [ ] **Đánh giá (Scorecard)**
-  - [ ] Form điền điểm đánh giá sau phỏng vấn (Skill, Attitude, English, Note, Result)
-  - [ ] Hiển thị tổng hợp điểm đánh giá cho HR quyết định
-- [ ] **Quản lý Offer**
-  - [ ] Form tạo Offer (Lương cơ bản, Ngày bắt đầu làm việc, Link JD/Offer letter)
-  - [ ] Hành động gửi (Send) Offer cho ứng viên
+## 4. Module Quản Lý Việc Làm (Job Management - Role: HR / COMPANY_ADMIN)
+- [/] **Danh sách Công việc** (UI MOCK - Thiếu `Job Service`)
+  - [ ] Bảng danh sách Job nội bộ (Lọc theo trạng thái: DRAFT, PUBLISHED, CLOSED)
+- [ ] **Tạo & Quản lý Job** (CHƯA LÀM - Thiếu `Job Service`)
+  - [ ] Form tạo Job (Chọn Department, Location, Category, Lương, Yêu cầu...)
+  - [ ] Chức năng Publish Job (Kèm logic kiểm tra hạn mức / Quota của gói)
+  - [ ] Chức năng Đóng (Close) Job
+  - [ ] Sửa việc làm đang ở trạng thái DRAFT
 
-## 4. Module Ứng viên (Candidate - Role: CANDIDATE)
-- [ ] **Hồ sơ cá nhân (Candidate Profile)**
-  - [ ] Cập nhật Bio, Kỹ năng, Kinh nghiệm làm việc
-  - [ ] Tải lên (Upload) CV mặc định (PDF/DOCX)
-  - [ ] Upload Avatar / Banner cá nhân
-- [ ] **Cổng thông tin Việc làm (Job Portal)**
-  - [ ] Trang chủ: Hiển thị danh sách việc làm đang Publish (Tìm kiếm, Lọc theo category, location)
+## 5. Module Quản Lý Đường Ống Ứng Viên (ATS Pipeline - Role: HR)
+- [/] **Bảng Kanban Đường ống (Pipeline)** (UI MOCK - Thiếu `Application Service`)
+  - [ ] Giao diện Board kéo thả theo cột trạng thái (NEW -> SCREENING -> INTERVIEW -> OFFER -> HIRED -> REJECTED)
+  - [ ] Kéo thả cập nhật trạng thái Application (Gọi API cập nhật lịch sử trạng thái)
+- [ ] **Đánh giá AI (AI Screening)** (CHƯA LÀM)
+  - [ ] Nút Trigger kích hoạt AI đánh giá hàng loạt CV cho Job
+  - [ ] Hiển thị danh sách Application kèm điểm số `aiScore` từ cao xuống thấp
+- [/] **Chi tiết Ứng tuyển (Application Detail)** (UI MOCK)
+  - [ ] Xem nội dung đơn ứng tuyển, Cover Letter
+  - [ ] Xem và Tải CV của ứng viên
+  - [ ] Lịch sử trạng thái ứng tuyển (Status History)
+
+## 6. Module Phỏng Vấn & Đánh Giá (Interview & Scorecard - Role: HR / INTERVIEWER)
+- [/] **Lịch Phỏng Vấn (Interviews)** (UI MOCK - Thiếu `Interview Service`)
+  - [ ] Dialog Tạo/Lên lịch phỏng vấn (Thời gian, Hình thức/Link Meet, Chọn Interviewers)
+  - [ ] Hiển thị danh sách Lịch phỏng vấn sắp tới (Dashboard cho Interviewer và HR)
+  - [ ] Cập nhật trạng thái Phỏng vấn (SCHEDULED -> COMPLETED hoặc CANCELED)
+- [/] **Phiếu Đánh Giá (Scorecard)** (UI MOCK - Thiếu `Scorecard Service`)
+  - [ ] Form điền điểm đánh giá của Interviewer (Skill, Attitude, English, Nhận xét, Kết quả: PASS/FAIL/CONSIDERING)
+  - [ ] Hiển thị bảng tổng hợp kết quả / điểm trung bình từ các Interviewer (Cho HR xem)
+
+## 7. Module Chào Giá (Offer Management - Role: HR)
+- [ ] **Tạo và Gửi Offer** (CHƯA LÀM - Thiếu `Offer Service`)
+  - [ ] Form tạo Offer letter (Mức lương, Ngày bắt đầu, Gắn link file) - Trạng thái DRAFT
+  - [ ] Chức năng "Send Offer" gởi tới ứng viên
+  - [ ] Theo dõi phản hồi Offer từ Candidate (ACCEPTED, DECLINED) (kèm tự dộng chuyển status sang HIRED nếu Accept)
+
+## 8. Module Ứng Viên (Candidate Portal - Role: CANDIDATE)
+- [ ] **Hồ Sơ Ứng Viên (Profile)** (Thiếu `Client User Service`, `Candidate Service`)
+  - [ ] Chỉnh sửa cá nhân (Headline, Summary, Nhập kỹ năng, Kinh nghiệm)
+  - [ ] Cập nhật Ảnh đại diện (Avatar), Ảnh bìa (Banner Url)
+  - [ ] Upload CV mặc định (Tích hợp luồng upload lên Cloud và lưu URL)
+- [/] **Tìm Kiếm Việc Làm (Job Board)** (UI Landing Page Mock)
+  - [ ] Trang chủ: Hiển thị danh sách Việc làm Public (Thanh tìm kiếm, Bộ lọc)
   - [ ] Trang chi tiết việc làm (Job Detail)
-- [ ] **Quá trình ứng tuyển**
-  - [ ] Chức năng Nộp đơn (Apply) kèm CV và Cover Letter
-  - [ ] Trang lịch sử ứng tuyển (Xem trạng thái CV của mình đến vòng nào)
-  - [ ] Chức năng Phản hồi Offer (Chấp nhận / Từ chối)
+- [ ] **Ứng Tuyển & Theo Dõi (Application Tracking)** (CHƯA LÀM)
+  - [ ] Chức năng Nộp đơn (Apply) kèm CV (Chọn CV cũ hoặc Upload mới) và Cover Letter
+  - [ ] Trang "Việc làm của tôi": Quản lý các đơn ứng tuyển và xem trạng thái (`/applications/mine`)
+  - [ ] Xem thông tin Lịch phỏng vấn khi được HR xếp lịch
+  - [ ] Xem nội dung Offer và Nút Phản hồi (Chấp nhận / Từ chối Offer)
 
-## 5. Các tính năng hệ thống khác (System / Admin)
-- [ ] Danh sách nhân viên (Mời HR / Interviewer vào trong workspace công ty)
-- [ ] Lịch sử giao dịch (Cho Admin kiểm tra toàn bộ thanh toán PayOS)
-- [ ] Phân quyền Sidebar/Menu động theo Role cục bộ (Role-Based Access Control)
+## 9. Module Quản Trị Hệ Thống (System Admin - Role: SYSTEM_ADMIN / CUSTOMER_SERVICE) (CHƯA LÀM)
+- [ ] **Quản trị người dùng & Công ty** (Thiếu `Admin User Service`)
+  - [ ] Xem danh sách các công ty tham gia hệ thống
+  - [ ] Quản lý, Khóa/Mở Khóa Account người dùng
+- [ ] **Lịch sử Giao dịch (Transactions)** (Thiếu `Admin Transaction History`)
+  - [ ] Bảng theo dõi toàn bộ lịch sử thanh toán từ PayOS (`TRANSACTION:VIEW_ALL`)
+- [/] **Roles & Permissions (RBAC)** (Đã có logic router/store cơ bản)
+  - [ ] Logic Route Guards: Hiển thị Sidebar / Menu động và tự động chặn các route dựa theo bộ quyền (Permissions) và Roles của user hiện tại.

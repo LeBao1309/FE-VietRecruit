@@ -55,8 +55,8 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 
       <!-- CTA Row -->
       <div class="flex items-center gap-3">
-        <a href="/login" class="btn-ghost text-sm">Đăng nhập</a>
-        <a href="/register" class="btn-primary text-sm">
+        <a href="/auth/login" class="btn-ghost text-sm">Đăng nhập</a>
+        <a href="/auth/register" class="btn-primary text-sm">
           Dùng thử miễn phí →
         </a>
       </div>
