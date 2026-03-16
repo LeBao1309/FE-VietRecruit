@@ -8,9 +8,10 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [x] Xác thực OTP qua Email (`/auth/verify-otp`)
   - [x] Trang Đăng nhập (Hỗ trợ trả về Access/Refresh Token)
   - [x] Chức năng Quên mật khẩu / Reset Mật khẩu (Implemented in service)
+  - [ ] **Đăng ký theo lời mời** (Flow: `POST /auth/register/invite`)
 - [ ] **Thiết lập tài khoản (Onboarding)** (Mock/Chưa hoàn thiện)
-  - [ ] Employer Onboarding: Cập nhật thông tin công ty lần đầu
-  - [ ] Candidate Onboarding: Cập nhật thông tin cá nhân bổ sung sau khi xác thực
+  - [ ] Employer Onboarding: Cập nhật thông tin công ty lần đầu (`PUT /companies/me`)
+  - [ ] Candidate Onboarding: Cập nhật thông tin cá nhân bổ sung sau khi xác thực (`PUT /candidates/me`)
 
 ## 2. Module Công ty & Tổ chức (Company Management - Role: COMPANY_ADMIN)
 - [ ] **Hồ sơ Công ty** (MOCK - Thiếu `Company Service`)
@@ -60,8 +61,9 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [ ] Hiển thị danh sách Lịch phỏng vấn sắp tới (Dashboard cho Interviewer và HR)
   - [ ] Cập nhật trạng thái Phỏng vấn (SCHEDULED -> COMPLETED hoặc CANCELED)
 - [/] **Phiếu Đánh Giá (Scorecard)** (UI MOCK - Thiếu `Scorecard Service`)
-  - [ ] Form điền điểm đánh giá của Interviewer (Skill, Attitude, English, Nhận xét, Kết quả: PASS/FAIL/CONSIDERING)
+  - [ ] Form điền điểm đánh giá của Interviewer (Skill, Attitude, English, Kết quả: PASS/FAIL/CONSIDERING)
   - [ ] Hiển thị bảng tổng hợp kết quả / điểm trung bình từ các Interviewer (Cho HR xem)
+  - [ ] Tích hợp `GET /interviews/{id}/scorecards` để xem kết quả đánh giá.
 
 ## 7. Module Chào Giá (Offer Management - Role: HR)
 - [ ] **Tạo và Gửi Offer** (CHƯA LÀM - Thiếu `Offer Service`)
@@ -80,8 +82,8 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
 - [ ] **Ứng Tuyển & Theo Dõi (Application Tracking)** (CHƯA LÀM)
   - [ ] Chức năng Nộp đơn (Apply) kèm CV (Chọn CV cũ hoặc Upload mới) và Cover Letter
   - [ ] Trang "Việc làm của tôi": Quản lý các đơn ứng tuyển và xem trạng thái (`/applications/mine`)
-  - [ ] Xem thông tin Lịch phỏng vấn khi được HR xếp lịch
-  - [ ] Xem nội dung Offer và Nút Phản hồi (Chấp nhận / Từ chối Offer)
+  - [ ] Xem thông tin Lịch phỏng vấn (`GET /interviews/{id}`)
+  - [ ] Xem nội dung Offer và Phản hồi (ACCEPT/DECLINE) - API: `PUT /offers/{id}/respond`
 
 ## 9. Module Quản Trị Hệ Thống (System Admin - Role: SYSTEM_ADMIN / CUSTOMER_SERVICE) (CHƯA LÀM)
 - [ ] **Quản trị người dùng & Công ty** (Thiếu `Admin User Service`)
