@@ -72,7 +72,7 @@ function getCtaText(plan: PlanResponse): string {
 
 function getCtaLink(plan: PlanResponse): string {
   if (isEnterprise(plan)) return "/contact";
-  return "/register";
+  return "/auth/register";
 }
 
 const yearlySavingLabel = computed(

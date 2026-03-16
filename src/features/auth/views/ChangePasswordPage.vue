@@ -264,7 +264,7 @@ watch([currentPassword, newPassword, confirmPassword], () => {
         </p>
 
         <RouterLink
-          to="/login"
+          to="/auth/login"
           class="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm"
         >
           Đăng nhập ngay

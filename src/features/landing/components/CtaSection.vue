@@ -23,7 +23,7 @@
       </p>
       <div class="flex items-center justify-center gap-4 flex-wrap">
         <a
-          href="/register"
+          href="/auth/register"
           class="bg-white text-brand font-semibold px-8 py-4 rounded-xl text-base hover:bg-brand-light transition-all hover:shadow-lg"
         >
           Bắt đầu miễn phí ngay →

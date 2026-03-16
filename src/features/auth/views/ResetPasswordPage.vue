@@ -242,7 +242,7 @@ watch([newPassword, confirmPassword], () => {
       <!-- Back link -->
       <div class="mt-8 text-center">
         <RouterLink
-          to="/login"
+          to="/auth/login"
           class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors"
         >
           <ArrowLeft :size="14" aria-hidden="true" />
@@ -270,7 +270,7 @@ watch([newPassword, confirmPassword], () => {
         </p>
 
         <RouterLink
-          to="/login"
+          to="/auth/login"
           class="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm"
         >
           Đăng nhập ngay

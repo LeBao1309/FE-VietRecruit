@@ -250,7 +250,7 @@ onMounted(() => {
                   Tin tuyển dụng nổi bật
                 </h3>
                 <button
-                  @click.prevent="$router.push('/workspace/pipeline')"
+                  @click.prevent="$router.push('/workspace/applications')"
                   class="text-sm text-brand font-semibold hover:underline"
                 >
                   Xem tất cả
