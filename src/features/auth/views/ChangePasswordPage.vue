@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { RouterLink } from "vue-router";
-import { Eye, EyeOff, Loader2, CheckCircle, ArrowLeft } from "lucide-vue-next";
+import { CheckCircle } from "lucide-vue-next";
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
 import { ChangePasswordRequestSchema } from "@/features/auth/types/auth.dto";
@@ -120,17 +120,16 @@ watch([currentPassword, newPassword, confirmPassword], () => {
               :type="showCurrent ? 'text' : 'password'"
               autocomplete="current-password"
               placeholder="••••••••"
+              maxlength="72"
               class="input pr-11"
               :class="{ '!border-danger': submitted && fieldErrors.currentPassword }"
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
               @click="showCurrent = !showCurrent"
-              :aria-label="showCurrent ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
             >
-              <EyeOff v-if="showCurrent" :size="16" aria-hidden="true" />
-              <Eye v-else :size="16" aria-hidden="true" />
+              {{ showCurrent ? 'Ẩn' : 'Hiện' }}
             </button>
           </div>
           <p
@@ -162,12 +161,10 @@ watch([currentPassword, newPassword, confirmPassword], () => {
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
               @click="showNew = !showNew"
-              :aria-label="showNew ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
             >
-              <EyeOff v-if="showNew" :size="16" aria-hidden="true" />
-              <Eye v-else :size="16" aria-hidden="true" />
+              {{ showNew ? 'Ẩn' : 'Hiện' }}
             </button>
           </div>
           <p
@@ -199,12 +196,10 @@ watch([currentPassword, newPassword, confirmPassword], () => {
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
               @click="showConfirm = !showConfirm"
-              :aria-label="showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
             >
-              <EyeOff v-if="showConfirm" :size="16" aria-hidden="true" />
-              <Eye v-else :size="16" aria-hidden="true" />
+              {{ showConfirm ? 'Ẩn' : 'Hiện' }}
             </button>
           </div>
           <p
@@ -219,16 +214,10 @@ watch([currentPassword, newPassword, confirmPassword], () => {
         <button
           id="change-password-submit"
           type="submit"
-          class="btn-primary w-full py-3 text-base mt-2"
+          class="btn-primary w-full px-4 py-3 text-base mt-2"
           :disabled="auth.isLoading.value"
         >
-          <Loader2
-            v-if="auth.isLoading.value"
-            :size="18"
-            class="animate-spin"
-            aria-hidden="true"
-          />
-          <span v-else>Đổi mật khẩu</span>
+          <span>{{ auth.isLoading.value ? 'Đang xử lý...' : 'Đổi mật khẩu' }}</span>
         </button>
       </form>
 
@@ -236,9 +225,8 @@ watch([currentPassword, newPassword, confirmPassword], () => {
       <div class="mt-8 text-center">
         <RouterLink
           to="/workspace"
-          class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors"
+          class="inline-flex text-sm text-text-secondary hover:text-brand transition-colors"
         >
-          <ArrowLeft :size="14" aria-hidden="true" />
           Quay lại trang quản lý
         </RouterLink>
       </div>

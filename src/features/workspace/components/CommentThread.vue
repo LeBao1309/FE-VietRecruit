@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { MessageSquare, Send } from "lucide-vue-next";
 import type { ApplicationStatusHistory } from "../types";
 
 defineProps<{
@@ -22,8 +21,7 @@ const submitComment = () => {
 
 <template>
   <div class="flex flex-col h-full max-h-[400px]">
-    <div class="flex items-center gap-2 mb-4">
-      <MessageSquare class="w-4 h-4 text-brand" />
+    <div class="flex items-center mb-4">
       <h3 class="text-sm font-semibold text-text-primary">Thảo luận đội ngũ</h3>
     </div>
 
@@ -73,10 +71,10 @@ const submitComment = () => {
       />
       <button
         @click="submitComment"
-        class="bg-brand hover:bg-brand-dark text-white p-2 rounded-lg transition-colors flex items-center justify-center w-10 shrink-0 shadow-brand-sm"
+        class="bg-brand hover:bg-brand-dark text-white px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-brand-sm"
         :disabled="!newComment.trim()"
       >
-        <Send class="w-4 h-4" />
+        Gửi
       </button>
     </div>
   </div>

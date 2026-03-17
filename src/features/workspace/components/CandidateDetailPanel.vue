@@ -1,15 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import {
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  ExternalLink,
-  Clock,
-  Send,
-  Plus,
-} from "lucide-vue-next";
 import type { ApplicationWithDetails } from "../types";
 
 import CommentThread from "./CommentThread.vue";
@@ -94,9 +84,9 @@ const handleAddComment = (notes: string) => {
     <!-- Close -->
     <button
       @click="emit('close')"
-      class="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors z-20"
+      class="absolute top-4 right-4 px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors z-20"
     >
-      <X class="w-5 h-5" />
+      Đóng
     </button>
 
     <div class="overflow-y-auto flex-1 p-6 pb-24 relative z-10">
@@ -146,27 +136,23 @@ const handleAddComment = (notes: string) => {
       <div v-show="activeTab === 'overview'" data-testid="tab-overview">
         <!-- Info -->
         <div class="mb-8 space-y-3">
-          <div class="flex items-center gap-3 text-sm text-gray-600">
-            <Mail class="w-4 h-4 text-gray-400" />
-            <a href="#" class="hover:text-[#008C8C] hover:underline">{{
-              email
-            }}</a>
-          </div>
-          <div class="flex items-center gap-3 text-sm text-gray-600">
-            <Phone class="w-4 h-4 text-gray-400" />
-            <span>+84 (Chưa cập nhật)</span>
-          </div>
-          <div class="flex items-center gap-3 text-sm text-gray-600">
-            <MapPin class="w-4 h-4 text-gray-400" />
-            <span>Hồ Chí Minh, Việt Nam</span>
-          </div>
-          <div class="flex items-center gap-3 text-sm text-gray-600">
-            <ExternalLink class="w-4 h-4 text-gray-400" />
-            <a
-              href="#"
-              class="text-[#008C8C] hover:underline flex items-center gap-1"
-              >linkedin.com/in/...</a
-            >
+          <div class="flex flex-col gap-1 text-sm text-gray-600">
+            <div class="flex justify-between">
+              <span class="text-gray-400">Email:</span>
+              <a href="#" class="hover:text-[#008C8C] hover:underline">{{ email }}</a>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-400">SĐT:</span>
+              <span>+84 (Chưa cập nhật)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-400">Địa chỉ:</span>
+              <span>Hồ Chí Minh, Việt Nam</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-400">Liên kết:</span>
+              <a href="#" class="text-[#008C8C] hover:underline">linkedin.com/in/...</a>
+            </div>
           </div>
         </div>
 
@@ -239,7 +225,6 @@ const handleAddComment = (notes: string) => {
             <div>
               <p class="text-sm font-medium text-gray-900">Nộp hồ sơ</p>
               <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                <Clock class="w-3 h-3" />
                 {{
                   new Date(candidate.created_at || "").toLocaleDateString(
                     "vi-VN",
@@ -288,9 +273,9 @@ const handleAddComment = (notes: string) => {
             @click="handleAddComment(newComment)"
             data-testid="comment-submit-btn"
             :disabled="!newComment.trim()"
-            class="absolute bottom-3 right-3 p-1.5 bg-[#008C8C] hover:bg-[#007070] disabled:bg-gray-300 text-white rounded-md transition-colors"
+            class="absolute bottom-2 right-2 px-3 py-1.5 text-xs font-medium bg-[#008C8C] hover:bg-[#007070] disabled:bg-gray-300 text-white rounded-md transition-colors"
           >
-            <Send class="w-3.5 h-3.5" />
+            Gửi
           </button>
         </div>
 
@@ -324,9 +309,9 @@ const handleAddComment = (notes: string) => {
             <button
               disabled
               data-testid="add-scorecard-btn"
-              class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed"
+              class="flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed"
             >
-              <Plus class="w-4 h-4" /> Add Scorecard
+              Add Scorecard
             </button>
             <div
               class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10"

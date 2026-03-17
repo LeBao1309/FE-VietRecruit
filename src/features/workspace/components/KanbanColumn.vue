@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Plus } from "lucide-vue-next";
 import { VueDraggable } from "vue-draggable-plus";
 import CandidateCard from "./CandidateCard.vue";
 import type { ApplicationWithDetails, ApplicationStatus } from "../types";
@@ -48,9 +47,9 @@ const localList = computed({
       </div>
       <button
         @click.prevent=""
-        class="text-gray-400 hover:text-[#008C8C] hover:bg-[#008C8C]/10 rounded-lg p-1 transition-colors"
+        class="text-xs font-medium text-gray-500 hover:text-[#008C8C] hover:bg-[#008C8C]/10 rounded-lg px-2 py-1 transition-colors"
       >
-        <Plus class="w-4 h-4" />
+        Thêm
       </button>
     </div>
 

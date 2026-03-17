@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Users, CalendarClock, Briefcase } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import type { JobWithDetails } from "../types";
 
@@ -28,11 +27,6 @@ const statusLabels = {
     class="flex items-center justify-between p-4 bg-white border border-border rounded-xl hover:shadow-hover hover:border-brand-muted transition-all group cursor-pointer"
   >
     <div class="flex items-start gap-4">
-      <div
-        class="w-10 h-10 rounded-lg bg-brand-light flex items-center justify-center shrink-0"
-      >
-        <Briefcase class="w-5 h-5 text-brand" />
-      </div>
       <div>
         <h3
           class="font-semibold text-text-primary group-hover:text-brand transition-colors"
@@ -40,15 +34,13 @@ const statusLabels = {
           {{ job.title }}
         </h3>
         <div class="flex items-center gap-3 mt-1 text-sm text-text-secondary">
-          <span class="flex items-center gap-1.5">
-            <Users class="w-4 h-4" />
+          <span class="flex items-center">
             <!-- TODO(api-ready): replace mock field job.headcount -> jobs.headcount -->
             {{ job.department?.name || "Chưa xếp ban" }} • 3 tuyển
           </span>
           <span class="w-1 h-1 rounded-full bg-border-strong"></span>
-          <span class="flex items-center gap-1.5">
-            <CalendarClock class="w-4 h-4" />
-            Vòng:
+          <span class="flex items-center">
+            Hạn chót:
             {{
               new Date(job.deadline || "").toLocaleDateString("vi-VN") || "N/A"
             }}

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { RouterLink } from "vue-router";
-import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
+
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
 import { RegisterRequestSchema } from "@/features/auth/types/auth.dto";
+import type { AccountType } from "@/features/auth/types/auth.dto";
 
 const auth = useAuth();
 
@@ -14,6 +15,7 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const phone = ref("");
+const accountType = ref<AccountType>("CANDIDATE");
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const agreeToTerms = ref(false);
@@ -24,7 +26,8 @@ type FieldName =
   | "email"
   | "password"
   | "confirmPassword"
-  | "phone";
+  | "phone"
+  | "accountType";
 const fieldErrors = ref<Partial<Record<FieldName, string>>>({});
 const submitted = ref(false);
 const termsError = ref<string | null>(null);
@@ -36,6 +39,7 @@ function validate(): boolean {
     password: password.value,
     confirmPassword: confirmPassword.value,
     phone: phone.value || undefined,
+    accountType: accountType.value,
   });
 
   const errs: Partial<Record<FieldName, string>> = {};
@@ -67,11 +71,12 @@ async function handleSubmit(): Promise<void> {
     password: password.value,
     confirmPassword: confirmPassword.value,
     phone: phone.value || undefined,
+    accountType: accountType.value,
   });
 }
 
 // Clear API error on any input change
-watch([fullName, email, password, confirmPassword, phone], () => {
+watch([fullName, email, password, confirmPassword, phone, accountType], () => {
   if (auth.hasError.value) auth.clearError();
 });
 
@@ -123,6 +128,83 @@ const valueProps = [
     </div>
 
     <form class="space-y-4" novalidate @submit.prevent="handleSubmit">
+      <!-- Account Type Selector -->
+      <div>
+        <label
+          class="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2"
+        >
+          Loại tài khoản
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <label
+            class="relative flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200"
+            :class="[
+              accountType === 'CANDIDATE'
+                ? 'border-brand bg-brand/5 ring-1 ring-brand/20'
+                : 'border-border hover:border-border-strong',
+            ]"
+          >
+            <input
+              type="radio"
+              name="accountType"
+              value="CANDIDATE"
+              v-model="accountType"
+              class="sr-only"
+            />
+            <div
+              class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+              :class="[
+                accountType === 'CANDIDATE'
+                  ? 'border-brand'
+                  : 'border-border',
+              ]"
+            >
+              <div
+                v-if="accountType === 'CANDIDATE'"
+                class="w-2 h-2 rounded-full bg-brand"
+              />
+            </div>
+            <div>
+              <span class="text-sm font-medium text-text-primary">Ứng viên</span>
+              <p class="text-xs text-text-muted mt-0.5">Tìm việc & ứng tuyển</p>
+            </div>
+          </label>
+          <label
+            class="relative flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200"
+            :class="[
+              accountType === 'EMPLOYER'
+                ? 'border-brand bg-brand/5 ring-1 ring-brand/20'
+                : 'border-border hover:border-border-strong',
+            ]"
+          >
+            <input
+              type="radio"
+              name="accountType"
+              value="EMPLOYER"
+              v-model="accountType"
+              class="sr-only"
+            />
+            <div
+              class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+              :class="[
+                accountType === 'EMPLOYER'
+                  ? 'border-brand'
+                  : 'border-border',
+              ]"
+            >
+              <div
+                v-if="accountType === 'EMPLOYER'"
+                class="w-2 h-2 rounded-full bg-brand"
+              />
+            </div>
+            <div>
+              <span class="text-sm font-medium text-text-primary">Nhà tuyển dụng</span>
+              <p class="text-xs text-text-muted mt-0.5">Đăng tin & quản lý</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <!-- Full Name -->
       <div>
         <label
@@ -137,6 +219,7 @@ const valueProps = [
           type="text"
           autocomplete="name"
           placeholder="Nguyễn Văn A"
+          maxlength="255"
           class="input"
           :class="{ '!border-danger': submitted && fieldErrors.fullName }"
         />
@@ -162,6 +245,7 @@ const valueProps = [
           type="email"
           autocomplete="email"
           placeholder="you@company.com"
+          maxlength="255"
           class="input"
           :class="{ '!border-danger': submitted && fieldErrors.email }"
         />
@@ -188,17 +272,16 @@ const valueProps = [
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
             placeholder="Tối thiểu 8 ký tự"
+            maxlength="72"
             class="input pr-11"
             :class="{ '!border-danger': submitted && fieldErrors.password }"
           />
           <button
             type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
             @click="showPassword = !showPassword"
-            :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
           >
-            <EyeOff v-if="showPassword" :size="16" aria-hidden="true" />
-            <Eye v-else :size="16" aria-hidden="true" />
+            {{ showPassword ? 'Ẩn' : 'Hiện' }}
           </button>
         </div>
         <p
@@ -224,6 +307,7 @@ const valueProps = [
             :type="showConfirmPassword ? 'text' : 'password'"
             autocomplete="new-password"
             placeholder="Nhập lại mật khẩu"
+            maxlength="72"
             class="input pr-11"
             :class="{
               '!border-danger': submitted && fieldErrors.confirmPassword,
@@ -231,12 +315,10 @@ const valueProps = [
           />
           <button
             type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
             @click="showConfirmPassword = !showConfirmPassword"
-            :aria-label="showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
           >
-            <EyeOff v-if="showConfirmPassword" :size="16" aria-hidden="true" />
-            <Eye v-else :size="16" aria-hidden="true" />
+            {{ showConfirmPassword ? 'Ẩn' : 'Hiện' }}
           </button>
         </div>
         <p
@@ -264,6 +346,7 @@ const valueProps = [
           type="tel"
           autocomplete="tel"
           placeholder="0912 345 678"
+          maxlength="50"
           class="input"
           :class="{ '!border-danger': submitted && fieldErrors.phone }"
         />
@@ -335,16 +418,10 @@ const valueProps = [
       <button
         id="register-submit"
         type="submit"
-        class="btn-primary w-full py-3 text-base mt-2"
+        class="btn-primary w-full px-4 py-3 text-base mt-2"
         :disabled="auth.isLoading.value"
       >
-        <Loader2
-          v-if="auth.isLoading.value"
-          :size="18"
-          class="animate-spin"
-          aria-hidden="true"
-        />
-        <span v-else>Tạo tài khoản</span>
+        <span>{{ auth.isLoading.value ? 'Đang xử lý...' : 'Tạo tài khoản' }}</span>
       </button>
     </form>
 

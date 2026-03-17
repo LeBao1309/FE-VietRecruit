@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Mail, Calendar, Star, X } from "lucide-vue-next";
 import AiScoreBadge from "./AiScoreBadge.vue";
 import type { ApplicationWithDetails } from "../types";
 
@@ -84,9 +83,9 @@ const aiScore = computed(() => {
         <div class="flex items-center justify-between mt-2">
           <AiScoreBadge :score="aiScore" />
           <button
-            class="text-xs text-gray-500 hover:text-[#008C8C] flex items-center gap-1 transition-colors"
+            class="text-xs font-medium text-gray-600 hover:text-[#008C8C] transition-colors"
           >
-            <Star class="w-3.5 h-3.5" /> Shortlist
+            Shortlist
           </button>
         </div>
       </div>
@@ -97,28 +96,28 @@ const aiScore = computed(() => {
       class="absolute bottom-0 left-0 right-0 h-9 bg-white border-t border-gray-100 rounded-b-xl flex items-center opacity-0 group-hover:opacity-100 transition-opacity overflow-hidden z-20 shadow-sm"
     >
       <button
-        class="flex-1 flex items-center justify-center text-gray-500 hover:text-[#008C8C] hover:bg-[#008C8C]/10 transition-colors h-full text-xs gap-1"
+        class="flex-1 flex items-center justify-center text-gray-600 font-medium hover:text-[#008C8C] hover:bg-[#008C8C]/10 transition-colors h-full text-[11px]"
         @click.stop
       >
-        <Mail class="w-3.5 h-3.5" />
+        Email
       </button>
       <button
-        class="flex-1 flex items-center justify-center text-gray-500 hover:text-[#008C8C] hover:bg-[#008C8C]/10 transition-colors h-full text-xs gap-1 border-l border-gray-100"
+        class="flex-1 flex items-center justify-center text-gray-600 font-medium hover:text-[#008C8C] hover:bg-[#008C8C]/10 transition-colors h-full text-[11px] border-l border-gray-100"
         @click.stop
       >
-        <Calendar class="w-3.5 h-3.5" />
+        Lịch
       </button>
       <button
-        class="flex-1 flex items-center justify-center text-gray-500 hover:text-[#008C8C] hover:bg-[#008C8C]/10 transition-colors h-full text-xs gap-1 border-l border-gray-100"
+        class="flex-1 flex items-center justify-center text-gray-600 font-medium hover:text-[#008C8C] hover:bg-[#008C8C]/10 transition-colors h-full text-[11px] border-l border-gray-100"
         @click.stop
       >
-        <Star class="w-3.5 h-3.5" />
+        Lưu
       </button>
       <button
-        class="flex-1 flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors h-full text-xs gap-1 border-l border-gray-100"
+        class="flex-1 flex items-center justify-center text-gray-600 font-medium hover:text-red-600 hover:bg-red-50 transition-colors h-full text-[11px] border-l border-gray-100"
         @click.stop
       >
-        <X class="w-3.5 h-3.5" />
+        Từ chối
       </button>
     </div>
   </div>

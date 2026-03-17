@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
-import { Loader2 } from "lucide-vue-next";
+
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
 import { VerifyOtpRequestSchema } from "@/features/auth/types/auth.dto";
@@ -194,16 +194,10 @@ onUnmounted(() => {
       <button
         id="verify-otp-submit"
         type="submit"
-        class="btn-primary w-full py-3 text-base mt-4"
+        class="btn-primary w-full px-4 py-3 text-base mt-4"
         :disabled="auth.isLoading.value"
       >
-        <Loader2
-          v-if="auth.isLoading.value"
-          :size="18"
-          class="animate-spin"
-          aria-hidden="true"
-        />
-        <span v-else>Xác nhận</span>
+        <span>{{ auth.isLoading.value ? 'Đang xử lý...' : 'Xác nhận' }}</span>
       </button>
     </form>
 

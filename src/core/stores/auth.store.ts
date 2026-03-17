@@ -8,6 +8,7 @@ import { parseApiError } from '@/core/utils/error.utils'
 import type {
   LoginRequest,
   RegisterApiPayload,
+  RegisterByInviteApiPayload,
   VerifyOtpRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
@@ -73,6 +74,26 @@ export const useAuthStore = defineStore('auth', () => {
       await router.push('/auth/verify-otp')
     } catch (err) {
       handleApiError(err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /** 2b. Register by Invite
+   *  Strips confirmPassword before sending — it's UI-only
+   *  On success → navigate to login with ?invited=true
+   */
+  async function registerByInvite(payload: RegisterByInviteApiPayload & { confirmPassword: string }): Promise<boolean> {
+    clearError()
+    isLoading.value = true
+    const { confirmPassword: _, ...apiPayload } = payload
+    try {
+      await authService.registerByInvite(apiPayload)
+      await router.push('/auth/login?invited=true')
+      return true
+    } catch (err) {
+      handleApiError(err)
+      return false
     } finally {
       isLoading.value = false
     }
@@ -192,6 +213,7 @@ export const useAuthStore = defineStore('auth', () => {
     // actions
     login,
     register,
+    registerByInvite,
     verifyOtp,
     resendOtp,
     logout,
@@ -201,4 +223,3 @@ export const useAuthStore = defineStore('auth', () => {
     clearError,
   }
 })
-

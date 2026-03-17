@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Sparkles } from "lucide-vue-next";
 
 const props = defineProps<{
   score: number;
@@ -20,6 +19,6 @@ const badgeClass = computed(() => {
       badgeClass,
     ]"
   >
-    <Sparkles class="w-3 h-3 mr-1" /> AI: {{ score }}%
+    AI: {{ score }}%
   </span>
 </template>

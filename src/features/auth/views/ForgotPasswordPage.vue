@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { RouterLink } from "vue-router";
-import { Loader2, CheckCircle, ArrowLeft } from "lucide-vue-next";
+import { CheckCircle } from "lucide-vue-next";
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
 import { ForgotPasswordRequestSchema } from "@/features/auth/types/auth.dto";
@@ -114,6 +114,7 @@ watch(email, () => {
             type="email"
             autocomplete="email"
             placeholder="you@company.com"
+            maxlength="255"
             class="input"
             :class="{ '!border-danger': submitted && fieldErrors.email }"
           />
@@ -129,16 +130,10 @@ watch(email, () => {
         <button
           id="forgot-password-submit"
           type="submit"
-          class="btn-primary w-full py-3 text-base"
+          class="btn-primary w-full px-4 py-3 text-base"
           :disabled="auth.isLoading.value"
         >
-          <Loader2
-            v-if="auth.isLoading.value"
-            :size="18"
-            class="animate-spin"
-            aria-hidden="true"
-          />
-          <span v-else>Gửi hướng dẫn đặt lại mật khẩu</span>
+          <span>{{ auth.isLoading.value ? 'Đang xử lý...' : 'Gửi hướng dẫn đặt lại mật khẩu' }}</span>
         </button>
       </form>
 
@@ -146,9 +141,8 @@ watch(email, () => {
       <div class="mt-8 text-center">
         <RouterLink
           to="/auth/login"
-          class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors"
+          class="inline-flex text-sm text-text-secondary hover:text-brand transition-colors"
         >
-          <ArrowLeft :size="14" aria-hidden="true" />
           Quay lại đăng nhập
         </RouterLink>
       </div>
@@ -193,9 +187,8 @@ watch(email, () => {
 
         <RouterLink
           to="/auth/login"
-          class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors mt-4"
+          class="inline-flex text-sm text-text-secondary hover:text-brand transition-colors mt-4"
         >
-          <ArrowLeft :size="14" aria-hidden="true" />
           Quay lại đăng nhập
         </RouterLink>
       </div>
