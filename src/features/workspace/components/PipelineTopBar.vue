@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ArrowLeft, Settings, Share, UserPlus } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { mockJobs } from "../mocks/pipeline.mock";
 const currentJob = mockJobs[0]!;
@@ -15,9 +14,9 @@ const showAlert = (msg: string) => window.alert(msg);
     <div class="flex items-center gap-4">
       <button
         @click="router.push('/workspace')"
-        class="text-gray-400 hover:text-gray-900 transition-colors"
+        class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
       >
-        <ArrowLeft class="w-5 h-5" />
+        Quay lại
       </button>
       <div class="h-6 w-px bg-gray-200"></div>
 
@@ -48,23 +47,23 @@ const showAlert = (msg: string) => window.alert(msg);
     <div class="flex items-center gap-3">
       <button
         @click.prevent="showAlert('Tính năng [Chia sẻ] đang được phát triển!')"
-        class="px-3 py-1.5 flex items-center gap-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
+        class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
       >
-        <Share class="w-4 h-4" /> Chia sẻ
+        Chia sẻ
       </button>
       <button
         @click.prevent="showAlert('Tính năng [Cài đặt] đang được phát triển!')"
-        class="px-3 py-1.5 flex items-center gap-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
+        class="px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
       >
-        <Settings class="w-4 h-4" /> Cài đặt
+        Cài đặt
       </button>
       <button
         @click.prevent="
           showAlert('Tính năng [Thêm ứng viên] đang được phát triển!')
         "
-        class="px-4 py-2 bg-[#008C8C] text-white hover:bg-[#007070] rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"
+        class="px-4 py-2 bg-[#008C8C] text-white hover:bg-[#007070] rounded-lg text-sm font-medium transition-colors shadow-sm"
       >
-        <UserPlus class="w-4 h-4" /> Thêm ứng viên
+        Thêm ứng viên
       </button>
     </div>
   </div>

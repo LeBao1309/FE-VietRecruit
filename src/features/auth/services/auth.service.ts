@@ -6,6 +6,7 @@ import type {
   LoginRequest,
   LoginResponse,
   RegisterApiPayload,
+  RegisterByInviteApiPayload,
   VerifyOtpRequest,
   TokenRefreshResponse,
   ResetPasswordRequest,
@@ -27,6 +28,11 @@ export const authService = {
   /** 2. Register → 201, no response data */
   async register(payload: RegisterApiPayload): Promise<void> {
     await apiClient.post(`${BASE}/register`, payload)
+  },
+
+  /** 2b. Register by Invite → uses invitation token */
+  async registerByInvite(payload: RegisterByInviteApiPayload): Promise<void> {
+    await apiClient.post(`${BASE}/register/invite`, payload)
   },
 
   /** 3. Verify OTP — field name is "code" per spec */
@@ -68,4 +74,3 @@ export const authService = {
     await apiClient.post(`${BASE}/change-password`, payload)
   },
 }
-

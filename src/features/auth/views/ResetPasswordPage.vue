@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { useRoute, RouterLink } from "vue-router";
-import { Eye, EyeOff, Loader2, CheckCircle, ArrowLeft } from "lucide-vue-next";
+import { CheckCircle } from "lucide-vue-next";
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
 import { ResetPasswordRequestSchema } from "@/features/auth/types/auth.dto";
@@ -169,12 +169,10 @@ watch([newPassword, confirmPassword], () => {
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
               @click="showPassword = !showPassword"
-              :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
             >
-              <EyeOff v-if="showPassword" :size="16" aria-hidden="true" />
-              <Eye v-else :size="16" aria-hidden="true" />
+              {{ showPassword ? 'Ẩn' : 'Hiện' }}
             </button>
           </div>
           <p
@@ -206,12 +204,10 @@ watch([newPassword, confirmPassword], () => {
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
               @click="showConfirm = !showConfirm"
-              :aria-label="showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
             >
-              <EyeOff v-if="showConfirm" :size="16" aria-hidden="true" />
-              <Eye v-else :size="16" aria-hidden="true" />
+              {{ showConfirm ? 'Ẩn' : 'Hiện' }}
             </button>
           </div>
           <p
@@ -226,16 +222,10 @@ watch([newPassword, confirmPassword], () => {
         <button
           id="reset-password-submit"
           type="submit"
-          class="btn-primary w-full py-3 text-base mt-2"
+          class="btn-primary w-full px-4 py-3 text-base mt-2"
           :disabled="auth.isLoading.value || !token"
         >
-          <Loader2
-            v-if="auth.isLoading.value"
-            :size="18"
-            class="animate-spin"
-            aria-hidden="true"
-          />
-          <span v-else>Đặt lại mật khẩu</span>
+          <span>{{ auth.isLoading.value ? 'Đang xử lý...' : 'Đặt lại mật khẩu' }}</span>
         </button>
       </form>
 
@@ -243,9 +233,8 @@ watch([newPassword, confirmPassword], () => {
       <div class="mt-8 text-center">
         <RouterLink
           to="/auth/login"
-          class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors"
+          class="inline-flex text-sm text-text-secondary hover:text-brand transition-colors"
         >
-          <ArrowLeft :size="14" aria-hidden="true" />
           Quay lại đăng nhập
         </RouterLink>
       </div>

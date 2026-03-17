@@ -4,16 +4,35 @@ import { z } from 'zod'
 // Re-export shared API envelope for backward compatibility
 export { ApiResponseSchema } from '@/core/types/api.types'
 
+// ─── Shared constants (mapped from SQL constraints) ───────────
+const EMAIL_MAX = 255       // VARCHAR(255) in users table
+const PASSWORD_MIN = 8      // Backend @Size(min=8)
+const PASSWORD_MAX = 72     // BCrypt limit / backend @Size(max=72)
+const FULLNAME_MAX = 255    // VARCHAR(255) in users table
+const PHONE_MAX = 50        // VARCHAR(50) in users table
+const OTP_LENGTH = 8        // 8-digit verification code
+
+// ─── Shared field builders ────────────────────────────────────
+const emailField = () =>
+  z.string({ message: 'Email không được để trống' })
+    .email('Email không hợp lệ')
+    .max(EMAIL_MAX, `Email không được vượt quá ${EMAIL_MAX} ký tự`)
+
+const passwordField = (label = 'Mật khẩu') =>
+  z.string({ message: `${label} không được để trống` })
+    .min(PASSWORD_MIN, `${label} phải có ít nhất ${PASSWORD_MIN} ký tự`)
+    .max(PASSWORD_MAX, `${label} không được vượt quá ${PASSWORD_MAX} ký tự`)
+
 // ─────────────────────────────────────────────────────────────
 // 1. LOGIN
 // POST /vietrecruit/auth/login
 // ─────────────────────────────────────────────────────────────
 
 export const LoginRequestSchema = z.object({
-  email:    z.string({ message: 'Email không được để trống' })
-             .email('Email không hợp lệ'),
+  email:    emailField(),
   password: z.string({ message: 'Mật khẩu không được để trống' })
-             .min(1, 'Mật khẩu không được để trống'),
+              .min(1, 'Mật khẩu không được để trống')
+              .max(PASSWORD_MAX, `Mật khẩu không được vượt quá ${PASSWORD_MAX} ký tự`),
 })
 export type LoginRequest = z.infer<typeof LoginRequestSchema>
 
@@ -28,32 +47,31 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>
 // ─────────────────────────────────────────────────────────────
 // 2. REGISTER
 // POST /vietrecruit/auth/register
-// ⚠️ Spec fields: email, password (min:8,max:72), fullName (max:255), phone? (max:50)
-// ⚠️ NO companyName, NO confirmPassword, NO agreeToTerms in the API payload
+// ⚠️ API fields: email, password (min:8,max:72), fullName (max:255),
+//    phone? (max:50), accountType (CANDIDATE | EMPLOYER)
+// ⚠️ NO confirmPassword in the API payload
 // ─────────────────────────────────────────────────────────────
+
+export const AccountTypeEnum = z.enum(['CANDIDATE', 'EMPLOYER'])
+export type AccountType = z.infer<typeof AccountTypeEnum>
 
 export const RegisterRequestSchema = z
   .object({
     fullName: z
       .string({ message: 'Họ tên không được để trống' })
-      .min(1,   'Họ tên không được để trống')
-      .max(255, 'Họ tên quá dài'),
-    email: z
-      .string({ message: 'Email không được để trống' })
-      .email('Email không hợp lệ'),
-    password: z
-      .string({ message: 'Mật khẩu không được để trống' })
-      .min(8,  'Mật khẩu phải có ít nhất 8 ký tự')
-      .max(72, 'Mật khẩu không được vượt quá 72 ký tự'),
-    // confirmPassword: UI-only field — validated locally, NOT sent to API
+      .min(1,            'Họ tên không được để trống')
+      .max(FULLNAME_MAX, `Họ tên không được vượt quá ${FULLNAME_MAX} ký tự`),
+    email: emailField(),
+    password: passwordField('Mật khẩu'),
     confirmPassword: z
       .string({ message: 'Vui lòng xác nhận mật khẩu' })
       .min(1, 'Vui lòng xác nhận mật khẩu'),
     phone: z
       .string()
-      .max(50, 'Số điện thoại quá dài')
+      .max(PHONE_MAX, `Số điện thoại không được vượt quá ${PHONE_MAX} ký tự`)
       .optional()
       .or(z.literal('')),
+    accountType: AccountTypeEnum.default('CANDIDATE'),
   })
   .refine((d) => d.password === d.confirmPassword, {
     message: 'Mật khẩu xác nhận không khớp',
@@ -66,18 +84,46 @@ export type RegisterRequest = z.infer<typeof RegisterRequestSchema>
 export type RegisterApiPayload = Omit<RegisterRequest, 'confirmPassword'>
 
 // ─────────────────────────────────────────────────────────────
+// 2b. REGISTER BY INVITE
+// POST /vietrecruit/auth/register/invite
+// Fields: token (required), password (min:8,max:72), fullName (max:255)
+// ─────────────────────────────────────────────────────────────
+
+export const RegisterByInviteRequestSchema = z
+  .object({
+    token: z
+      .string({ message: 'Token mời không hợp lệ' })
+      .min(1, 'Token mời không được để trống'),
+    fullName: z
+      .string({ message: 'Họ tên không được để trống' })
+      .min(1,            'Họ tên không được để trống')
+      .max(FULLNAME_MAX, `Họ tên không được vượt quá ${FULLNAME_MAX} ký tự`),
+    password: passwordField('Mật khẩu'),
+    confirmPassword: z
+      .string({ message: 'Vui lòng xác nhận mật khẩu' })
+      .min(1, 'Vui lòng xác nhận mật khẩu'),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path:    ['confirmPassword'],
+  })
+
+export type RegisterByInviteRequest = z.infer<typeof RegisterByInviteRequestSchema>
+
+// API payload strips confirmPassword
+export type RegisterByInviteApiPayload = Omit<RegisterByInviteRequest, 'confirmPassword'>
+
+// ─────────────────────────────────────────────────────────────
 // 3. VERIFY OTP
 // POST /vietrecruit/auth/verify-otp
 // ⚠️ field is "code" (not "otp") — 8-digit string
 // ─────────────────────────────────────────────────────────────
 
 export const VerifyOtpRequestSchema = z.object({
-  email: z
-    .string({ message: 'Email không được để trống' })
-    .email('Email không hợp lệ'),
+  email: emailField(),
   code: z
     .string({ message: 'Vui lòng nhập mã xác thực' })
-    .length(8,   'Mã xác thực phải đúng 8 chữ số')
+    .length(OTP_LENGTH, `Mã xác thực phải đúng ${OTP_LENGTH} chữ số`)
     .regex(/^\d{8}$/, 'Mã xác thực chỉ được chứa chữ số'),
 })
 export type VerifyOtpRequest = z.infer<typeof VerifyOtpRequestSchema>
@@ -88,9 +134,7 @@ export type VerifyOtpRequest = z.infer<typeof VerifyOtpRequestSchema>
 // ─────────────────────────────────────────────────────────────
 
 export const ResendOtpRequestSchema = z.object({
-  email: z
-    .string({ message: 'Email không được để trống' })
-    .email('Email không hợp lệ'),
+  email: emailField(),
 })
 export type ResendOtpRequest = z.infer<typeof ResendOtpRequestSchema>
 
@@ -125,9 +169,7 @@ export type TokenRefreshResponse = z.infer<typeof TokenRefreshResponseSchema>
 // ─────────────────────────────────────────────────────────────
 
 export const ForgotPasswordRequestSchema = z.object({
-  email: z
-    .string({ message: 'Email không được để trống' })
-    .email('Email không hợp lệ'),
+  email: emailField(),
 })
 export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequestSchema>
 
@@ -138,15 +180,11 @@ export type ForgotPasswordRequest = z.infer<typeof ForgotPasswordRequestSchema>
 // ─────────────────────────────────────────────────────────────
 
 export const ResetPasswordRequestSchema = z.object({
-  email: z
-    .string({ message: 'Email không được để trống' })
-    .email('Email không hợp lệ'),
+  email: emailField(),
   token: z
     .string({ message: 'Token không hợp lệ' })
     .min(1, 'Token không được để trống'),
-  newPassword: z
-    .string({ message: 'Mật khẩu mới không được để trống' })
-    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự'),
+  newPassword: passwordField('Mật khẩu mới'),
 })
 export type ResetPasswordRequest = z.infer<typeof ResetPasswordRequestSchema>
 
@@ -160,8 +198,6 @@ export const ChangePasswordRequestSchema = z.object({
   currentPassword: z
     .string({ message: 'Mật khẩu hiện tại không được để trống' })
     .min(1, 'Mật khẩu hiện tại không được để trống'),
-  newPassword: z
-    .string({ message: 'Mật khẩu mới không được để trống' })
-    .min(8, 'Mật khẩu mới phải có ít nhất 8 ký tự'),
+  newPassword: passwordField('Mật khẩu mới'),
 })
 export type ChangePasswordRequest = z.infer<typeof ChangePasswordRequestSchema>

@@ -3,15 +3,15 @@
 Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_db.sql`) và Flow Documents, dưới đây là danh sách phân chia các tính năng chi tiết cần triển khai phía Frontend, được gom nhóm theo các Module chức năng (Functional Modules) và chuẩn hóa theo phân quyền.
 
 ## 1. Module Xác Thực & Onboarding (Auth & Onboarding - Public / All Roles)
-- [/] **Đăng ký / Đăng nhập** (Đã có service `auth.service.ts`)
+- [x] **Đăng ký / Đăng nhập** (Service `auth.service.ts` + Zod DTOs + Pinia Store hoàn chỉnh)
   - [x] Trang Đăng ký (Chọn Account Type: Candidate hoặc Employer)
   - [x] Xác thực OTP qua Email (`/auth/verify-otp`)
   - [x] Trang Đăng nhập (Hỗ trợ trả về Access/Refresh Token)
   - [x] Chức năng Quên mật khẩu / Reset Mật khẩu (Implemented in service)
-  - [ ] **Đăng ký theo lời mời** (Flow: `POST /auth/register/invite`)
-- [ ] **Thiết lập tài khoản (Onboarding)** (Mock/Chưa hoàn thiện)
-  - [ ] Employer Onboarding: Cập nhật thông tin công ty lần đầu (`PUT /companies/me`)
-  - [ ] Candidate Onboarding: Cập nhật thông tin cá nhân bổ sung sau khi xác thực (`PUT /candidates/me`)
+  - [x] **Đăng ký theo lời mời** (Flow: `POST /auth/register/invite` — InviteRegisterPage.vue)
+- [x] **Thiết lập tài khoản (Onboarding)**
+  - [x] Employer Onboarding: Cập nhật thông tin công ty lần đầu (`PUT /companies/me` — EmployerOnboardingPage.vue)
+  - [x] Candidate Onboarding: Cập nhật thông tin cá nhân bổ sung sau khi xác thực (`PUT /candidates/me` — CandidateOnboardingPage.vue)
 
 ## 2. Module Công ty & Tổ chức (Company Management - Role: COMPANY_ADMIN)
 - [ ] **Hồ sơ Công ty** (MOCK - Thiếu `Company Service`)

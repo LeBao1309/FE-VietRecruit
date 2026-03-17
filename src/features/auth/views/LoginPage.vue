@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { RouterLink } from "vue-router";
-import { Eye, EyeOff, Loader2 } from "lucide-vue-next";
+
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
 import { LoginRequestSchema } from "@/features/auth/types/auth.dto";
@@ -110,6 +110,7 @@ const valueProps = [
           type="email"
           autocomplete="email"
           placeholder="you@company.com"
+          maxlength="255"
           class="input"
           :class="{ '!border-danger': submitted && fieldErrors.email }"
         />
@@ -144,17 +145,16 @@ const valueProps = [
             :type="showPassword ? 'text' : 'password'"
             autocomplete="current-password"
             placeholder="••••••••"
+            maxlength="72"
             class="input pr-11"
             :class="{ '!border-danger': submitted && fieldErrors.password }"
           />
           <button
             type="button"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors px-2 py-1 bg-white"
             @click="showPassword = !showPassword"
-            :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
           >
-            <EyeOff v-if="showPassword" :size="16" aria-hidden="true" />
-            <Eye v-else :size="16" aria-hidden="true" />
+            {{ showPassword ? 'Ẩn' : 'Hiện' }}
           </button>
         </div>
         <p
@@ -169,16 +169,10 @@ const valueProps = [
       <button
         id="login-submit"
         type="submit"
-        class="btn-primary w-full py-3 text-base mt-2"
+        class="btn-primary w-full px-4 py-3 text-base mt-2"
         :disabled="auth.isLoading.value"
       >
-        <Loader2
-          v-if="auth.isLoading.value"
-          :size="18"
-          class="animate-spin"
-          aria-hidden="true"
-        />
-        <span v-else>Đăng nhập</span>
+        <span>{{ auth.isLoading.value ? 'Đang xử lý...' : 'Đăng nhập' }}</span>
       </button>
     </form>
 

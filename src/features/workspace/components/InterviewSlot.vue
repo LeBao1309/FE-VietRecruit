@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Video, Clock, MapPin } from "lucide-vue-next";
 import type { InterviewWithDetails } from "../types";
 
 const props = defineProps<{
@@ -58,11 +57,6 @@ const interviewDate = computed(() => {
           v-if="interview.location_or_link"
           class="flex items-center gap-1.5 text-xs text-text-muted"
         >
-          <Video
-            v-if="interview.location_or_link.includes('http')"
-            class="w-3.5 h-3.5"
-          />
-          <MapPin v-else class="w-3.5 h-3.5" />
           <a
             v-if="interview.location_or_link.includes('http')"
             :href="interview.location_or_link"
@@ -75,8 +69,7 @@ const interviewDate = computed(() => {
           }}</span>
         </div>
         <div class="flex items-center gap-1.5 text-xs text-text-muted">
-          <Clock class="w-3.5 h-3.5" />
-          <span>{{ interview.duration_minutes }} phút</span>
+          <span>Thời lượng: {{ interview.duration_minutes }} phút</span>
         </div>
       </div>
 

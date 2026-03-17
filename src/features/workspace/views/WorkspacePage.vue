@@ -11,7 +11,6 @@ import {
   Building2,
   UsersRound,
   CalendarDays,
-  Plus,
   BellRing,
   CircleCheckBig,
 } from "lucide-vue-next";
@@ -66,18 +65,16 @@ onMounted(() => {
               @click.prevent="
                 showAlert('Tính năng [Lịch phỏng vấn] đang được phát triển!')
               "
-              class="px-4 py-2 border border-border text-text-primary bg-white rounded-lg hover:bg-surface-muted transition-colors text-sm font-semibold flex items-center gap-2 shadow-xs"
+              class="px-4 py-2 border border-border text-text-primary bg-white rounded-lg hover:bg-surface-muted transition-colors text-sm font-semibold shadow-xs"
             >
-              <CalendarDays class="w-4 h-4" />
               Lịch phỏng vấn
             </button>
             <button
               @click.prevent="
                 showAlert('Tính năng [Tạo Job mới] đang được phát triển!')
               "
-              class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold flex items-center gap-2"
+              class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold"
             >
-              <Plus class="w-4 h-4" />
               Tạo Job mới
             </button>
           </div>
