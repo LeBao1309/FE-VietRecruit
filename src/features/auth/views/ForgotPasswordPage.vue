@@ -145,7 +145,7 @@ watch(email, () => {
       <!-- Back to login -->
       <div class="mt-8 text-center">
         <RouterLink
-          to="/login"
+          to="/auth/login"
           class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors"
         >
           <ArrowLeft :size="14" aria-hidden="true" />
@@ -192,7 +192,7 @@ watch(email, () => {
         </p>
 
         <RouterLink
-          to="/login"
+          to="/auth/login"
           class="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-brand transition-colors mt-4"
         >
           <ArrowLeft :size="14" aria-hidden="true" />

@@ -10,13 +10,13 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false },
   },
   {
-    path: '/login',
+    path: '/auth/login',
     name: 'Login',
     component: () => import('@/features/auth/views/LoginPage.vue'),
     meta: { requiresAuth: false, guestOnly: true },
   },
   {
-    path: '/register',
+    path: '/auth/register',
     name: 'Register',
     component: () => import('@/features/auth/views/RegisterPage.vue'),
     meta: { requiresAuth: false, guestOnly: true },
@@ -53,7 +53,7 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/workspace/pipeline',
+    path: '/workspace/applications',
     name: 'Pipeline',
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
     meta: { requiresAuth: true },

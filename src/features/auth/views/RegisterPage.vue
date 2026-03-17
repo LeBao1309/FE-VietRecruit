@@ -352,7 +352,7 @@ const valueProps = [
     <p class="text-center text-sm text-text-secondary mt-8">
       Đã có tài khoản?
       <RouterLink
-        to="/login"
+        to="/auth/login"
         class="text-brand hover:text-brand-dark transition-colors font-semibold"
       >
         Đăng nhập →
