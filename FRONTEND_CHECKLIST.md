@@ -66,10 +66,11 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [ ] Tích hợp `GET /interviews/{id}/scorecards` để xem kết quả đánh giá.
 
 ## 7. Module Chào Giá (Offer Management - Role: HR)
-- [ ] **Tạo và Gửi Offer** (CHƯA LÀM - Thiếu `Offer Service`)
-  - [ ] Form tạo Offer letter (Mức lương, Ngày bắt đầu, Gắn link file) - Trạng thái DRAFT
-  - [ ] Chức năng "Send Offer" gởi tới ứng viên
-  - [ ] Theo dõi phản hồi Offer từ Candidate (ACCEPTED, DECLINED) (kèm tự dộng chuyển status sang HIRED nếu Accept)
+- [x] **Tạo và Gửi Offer** (HOÀN TẤT - Đã có `Offer Service` & `Application Service` thực tế)
+  - [x] Tích hợp lấy danh sách Ứng viên (Application) làm base query
+  - [x] Form tạo Offer letter (Lương cơ bản, Đơn vị tiền tệ, Ngày bắt đầu, Gắn link file) - Trạng thái DRAFT
+  - [x] Chức năng "Send Offer" gởi tới ứng viên
+  - [x] Theo dõi phản hồi Offer từ Candidate (ACCEPTED, DECLINED) (Kết nối API thực)
 
 ## 8. Module Ứng Viên (Candidate Portal - Role: CANDIDATE)
 - [ ] **Hồ Sơ Ứng Viên (Profile)** (Thiếu `Client User Service`, `Candidate Service`)
