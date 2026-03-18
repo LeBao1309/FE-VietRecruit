@@ -98,6 +98,18 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/payment/pages/PaymentStatusPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/offers',
+    name: 'OfferDashboard',
+    component: () => import('@/features/offer/views/OfferDashboardView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/offers/create',
+    name: 'OfferCreate',
+    component: () => import('@/features/offer/views/OfferCreateView.vue'),
+    meta: { requiresAuth: true },
+  },
   // ── Fallback ───────────────────────────────────────────────
   {
     path: '/:pathMatch(.*)*',
