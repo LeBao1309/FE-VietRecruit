@@ -65,6 +65,13 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/onboarding/views/CandidateOnboardingPage.vue'),
     meta: { requiresAuth: true },
   },
+  // Company Settings
+  {
+    path: '/company/settings',
+    name: 'CompanySettings',
+    component: () => import('@/features/company/views/CompanySettingsPage.vue'),
+    meta: { requiresAuth: true },
+  },
   // Workspace
   {
     path: '/workspace',

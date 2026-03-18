@@ -14,15 +14,15 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [x] Candidate Onboarding: Cập nhật thông tin cá nhân bổ sung sau khi xác thực (`PUT /candidates/me` — CandidateOnboardingPage.vue)
 
 ## 2. Module Công ty & Tổ chức (Company Management - Role: COMPANY_ADMIN)
-- [ ] **Hồ sơ Công ty** (MOCK - Thiếu `Company Service`)
-  - [ ] Trang cập nhật thông tin công ty (Tên, Domain, Website, Ngành nghề)
-- [ ] **Cấu trúc Tổ chức** (MOCK - Thiếu `Department`, `Location`, `Category` Services)
-  - [ ] Thêm / Sửa / Xóa Phòng ban (Departments)
-  - [ ] Thêm / Sửa / Xóa Địa điểm làm việc (Locations)
-  - [ ] Thêm / Sửa / Xóa Danh mục công việc (Categories)
-- [ ] **Quản lý Thành viên** (CHƯA LÀM)
-  - [ ] Mời HR / Interviewer vào Workspace của công ty (`/invitations` flow)
-  - [ ] Phân quyền thành viên trong công ty (dựa vào Role HR, INTERVIEWER)
+- [x] **Hồ sơ Công ty** (Company Service + Pinia Store + CompanySettingsPage.vue)
+  - [x] Trang cập nhật thông tin công ty (Tên, Domain, Website, Ngành nghề)
+- [x] **Cấu trúc Tổ chức**
+  - [x] Thêm / Sửa / Xóa Phòng ban (Departments)
+  - [x] Thêm / Sửa / Xóa Địa điểm làm việc (Locations)
+  - [x] Thêm / Sửa / Xóa Danh mục công việc (Categories)
+- [x] **Quản lý Thành viên**
+  - [x] Mời HR / Interviewer vào Workspace của công ty (`/invitations` flow)
+  - [x] Phân quyền thành viên trong công ty (dựa vào Role HR, INTERVIEWER)
 
 ## 3. Module Gói Cước & Thanh Toán (Subscription & Payment - Role: COMPANY_ADMIN)
 - [/] **Gói cước (Plans)** (Đã có `plan.service.ts`)
