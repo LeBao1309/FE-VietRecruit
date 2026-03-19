@@ -97,6 +97,37 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/offer/views/OfferCreateView.vue'),
     meta: { requiresAuth: true },
   },
+  // ── Candidate Portal ───────────────────────────────────────
+  {
+    path: '/candidate/profile',
+    name: 'CandidateProfile',
+    component: () => import('@/features/candidate/views/CandidateProfilePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/jobs',
+    name: 'JobBoard',
+    component: () => import('@/features/candidate/views/JobBoardPage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/jobs/:id',
+    name: 'JobDetail',
+    component: () => import('@/features/candidate/views/JobDetailPage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/applications/mine',
+    name: 'MyApplications',
+    component: () => import('@/features/candidate/views/MyApplicationsPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/applications/:id',
+    name: 'ApplicationDetail',
+    component: () => import('@/features/candidate/views/ApplicationDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
   // ── Fallback ───────────────────────────────────────────────
   {
     path: '/:pathMatch(.*)*',
