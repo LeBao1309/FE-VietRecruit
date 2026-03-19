@@ -73,18 +73,18 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [x] Theo dõi phản hồi Offer từ Candidate (ACCEPTED, DECLINED) (Kết nối API thực)
 
 ## 8. Module Ứng Viên (Candidate Portal - Role: CANDIDATE)
-- [ ] **Hồ Sơ Ứng Viên (Profile)** (Thiếu `Client User Service`, `Candidate Service`)
-  - [ ] Chỉnh sửa cá nhân (Headline, Summary, Nhập kỹ năng, Kinh nghiệm)
-  - [ ] Cập nhật Ảnh đại diện (Avatar), Ảnh bìa (Banner Url)
-  - [ ] Upload CV mặc định (Tích hợp luồng upload lên Cloud và lưu URL)
-- [/] **Tìm Kiếm Việc Làm (Job Board)** (UI Landing Page Mock)
-  - [ ] Trang chủ: Hiển thị danh sách Việc làm Public (Thanh tìm kiếm, Bộ lọc)
-  - [ ] Trang chi tiết việc làm (Job Detail)
-- [ ] **Ứng Tuyển & Theo Dõi (Application Tracking)** (CHƯA LÀM)
-  - [ ] Chức năng Nộp đơn (Apply) kèm CV (Chọn CV cũ hoặc Upload mới) và Cover Letter
-  - [ ] Trang "Việc làm của tôi": Quản lý các đơn ứng tuyển và xem trạng thái (`/applications/mine`)
-  - [ ] Xem thông tin Lịch phỏng vấn (`GET /interviews/{id}`)
-  - [ ] Xem nội dung Offer và Phản hồi (ACCEPT/DECLINE) - API: `PUT /offers/{id}/respond`
+- [x] **Hồ Sơ Ứng Viên (Profile)** (HOÀN TẤT)
+  - [x] Chỉnh sửa cá nhân (Headline, Summary, Nhập kỹ năng, Kinh nghiệm)
+  - [x] Cập nhật Ảnh đại diện (Avatar), Ảnh bìa (Banner Url)
+  - [x] Upload CV mặc định (Tích hợp luồng upload lên Cloud và lưu URL)
+- [x] **Tìm Kiếm Việc Làm (Job Board)** (HOÀN TẤT)
+  - [x] Trang chủ: Hiển thị danh sách Việc làm Public (Thanh tìm kiếm, Bộ lọc)
+  - [x] Trang chi tiết việc làm (Job Detail)
+- [x] **Ứng Tuyển & Theo Dõi (Application Tracking)** (HOÀN TẤT)
+  - [x] Chức năng Nộp đơn (Apply) kèm CV (Chọn CV cũ hoặc Upload mới) và Cover Letter
+  - [x] Trang "Việc làm của tôi": Quản lý các đơn ứng tuyển và xem trạng thái (`/applications/mine`)
+  - [x] Xem thông tin Lịch phỏng vấn (`GET /interviews/{id}`)
+  - [x] Xem nội dung Offer và Phản hồi (ACCEPT/DECLINE) - API: `PUT /offers/{id}/respond`
 
 ## 9. Module Quản Trị Hệ Thống (System Admin - Role: SYSTEM_ADMIN / CUSTOMER_SERVICE) (CHƯA LÀM)
 - [ ] **Quản trị người dùng & Công ty** (Thiếu `Admin User Service`)
