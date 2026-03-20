@@ -85,6 +85,19 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
     meta: { requiresAuth: true },
   },
+  // Job Management (Module 4)
+  {
+    path: '/workspace/jobs',
+    name: 'JobList',
+    component: () => import('@/features/job/views/JobListPage.vue'),
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+  },
+  {
+    path: '/workspace/jobs/create',
+    name: 'JobCreate',
+    component: () => import('@/features/job/views/JobFormPage.vue'),
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+  },
   {
     path: '/offers',
     name: 'OfferDashboard',

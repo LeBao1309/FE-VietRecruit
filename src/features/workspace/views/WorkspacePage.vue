@@ -70,9 +70,7 @@ onMounted(() => {
               Lịch phỏng vấn
             </button>
             <button
-              @click.prevent="
-                showAlert('Tính năng [Tạo Job mới] đang được phát triển!')
-              "
+              @click="$router.push({ name: 'JobCreate' })"
               class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold"
             >
               Tạo Job mới
