@@ -86,11 +86,11 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [x] Xem thông tin Lịch phỏng vấn (`GET /interviews/{id}`)
   - [x] Xem nội dung Offer và Phản hồi (ACCEPT/DECLINE) - API: `PUT /offers/{id}/respond`
 
-## 9. Module Quản Trị Hệ Thống (System Admin - Role: SYSTEM_ADMIN / CUSTOMER_SERVICE) (CHƯA LÀM)
-- [ ] **Quản trị người dùng & Công ty** (Thiếu `Admin User Service`)
-  - [ ] Xem danh sách các công ty tham gia hệ thống
-  - [ ] Quản lý, Khóa/Mở Khóa Account người dùng
-- [ ] **Lịch sử Giao dịch (Transactions)** (Thiếu `Admin Transaction History`)
-  - [ ] Bảng theo dõi toàn bộ lịch sử thanh toán từ PayOS (`TRANSACTION:VIEW_ALL`)
-- [/] **Roles & Permissions (RBAC)** (Đã có logic router/store cơ bản)
-  - [ ] Logic Route Guards: Hiển thị Sidebar / Menu động và tự động chặn các route dựa theo bộ quyền (Permissions) và Roles của user hiện tại.
+## 9. Module Quản Trị Hệ Thống (System Admin - Role: SYSTEM_ADMIN / CUSTOMER_SERVICE) (HOÀN TẤT)
+- [x] **Quản trị người dùng & Công ty** (Đã có `Admin Mock Service`)
+  - [x] Xem danh sách các công ty tham gia hệ thống
+  - [x] Quản lý, Khóa/Mở Khóa Account người dùng
+- [x] **Lịch sử Giao dịch (Transactions)** (Đã có `Admin Mock Service`)
+  - [x] Bảng theo dõi toàn bộ lịch sử thanh toán từ PayOS (`TRANSACTION:VIEW_ALL`)
+- [x] **Roles & Permissions (RBAC)** (Đã tích hợp JWT Payload Decode)
+  - [x] Logic Route Guards: Hiển thị Sidebar / Menu động và tự động chặn các route dựa theo bộ quyền (Permissions) và Roles của user hiện tại.
