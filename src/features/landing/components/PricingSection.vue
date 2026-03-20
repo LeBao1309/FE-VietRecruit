@@ -7,6 +7,16 @@ import type { PlanResponse } from "@/features/plan/types/plan.dto";
 
 type BillingCycle = "monthly" | "yearly";
 
+const props = defineProps<{
+  isDashboard?: boolean;
+  activePlanCode?: string;
+  isLoading?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'subscribe', payload: { plan: PlanResponse, billingCycle: BillingCycle }): void;
+}>();
+
 const billing = ref<BillingCycle>("monthly");
 const planStore = usePlanStore();
 
@@ -65,6 +75,10 @@ function getDisplayPrice(plan: PlanResponse): string {
 }
 
 function getCtaText(plan: PlanResponse): string {
+  if (props.isDashboard) {
+    if (props.activePlanCode === plan.code) return "Gói hiện tại";
+    return "Nâng cấp / Đăng ký";
+  }
   if (isEnterprise(plan)) return "Liên hệ kinh doanh";
   if (plan.priceMonthly === 0) return "Dùng thử miễn phí";
   return "Bắt đầu dùng thử →";
@@ -232,12 +246,24 @@ const yearlySavingLabel = computed(
                 </ul>
               </div>
 
-              <RouterLink
-                :to="getCtaLink(plan)"
-                class="mt-auto block text-center bg-white text-brand font-semibold rounded-lg py-3 text-sm hover:bg-brand-light transition-colors"
-              >
-                {{ getCtaText(plan) }}
-              </RouterLink>
+              <template v-if="isDashboard">
+                <button
+                  :disabled="activePlanCode === plan.code || isLoading"
+                  class="mt-auto block w-full text-center bg-white text-brand font-semibold rounded-lg py-3 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="activePlanCode === plan.code ? '' : 'hover:bg-brand-light'"
+                  @click="emit('subscribe', { plan, billingCycle: billing })"
+                >
+                  {{ getCtaText(plan) }}
+                </button>
+              </template>
+              <template v-else>
+                <RouterLink
+                  :to="getCtaLink(plan)"
+                  class="mt-auto block text-center bg-white text-brand font-semibold rounded-lg py-3 text-sm hover:bg-brand-light transition-colors"
+                >
+                  {{ getCtaText(plan) }}
+                </RouterLink>
+              </template>
             </div>
 
             <!-- Normal plan -->
@@ -291,12 +317,23 @@ const yearlySavingLabel = computed(
                 </ul>
               </div>
 
-              <RouterLink
-                :to="getCtaLink(plan)"
-                class="mt-auto block text-center btn-secondary py-3 text-sm"
-              >
-                {{ getCtaText(plan) }}
-              </RouterLink>
+              <template v-if="isDashboard">
+                <button
+                  :disabled="activePlanCode === plan.code || isLoading"
+                  class="mt-auto block w-full text-center btn-secondary py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  @click="emit('subscribe', { plan, billingCycle: billing })"
+                >
+                  {{ getCtaText(plan) }}
+                </button>
+              </template>
+              <template v-else>
+                <RouterLink
+                  :to="getCtaLink(plan)"
+                  class="mt-auto block text-center btn-secondary py-3 text-sm"
+                >
+                  {{ getCtaText(plan) }}
+                </RouterLink>
+              </template>
             </div>
           </article>
         </div>
