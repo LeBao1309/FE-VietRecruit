@@ -128,6 +128,35 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/candidate/views/ApplicationDetailPage.vue'),
     meta: { requiresAuth: true },
   },
+  // ── Admin routes ───────────────────────────────────────────
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('@/features/admin/components/AdminLayout.vue'),
+    meta: { requiresAuth: true, roles: ['SYSTEM_ADMIN', 'CUSTOMER_SERVICE'] },
+    children: [
+      {
+        path: '',
+        redirect: '/admin/companies',
+      },
+      {
+        path: 'companies',
+        name: 'AdminCompanies',
+        component: () => import('@/features/admin/views/AdminCompanyListPage.vue'),
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: () => import('@/features/admin/views/AdminUserListPage.vue'),
+      },
+      {
+        path: 'transactions',
+        name: 'AdminTransactions',
+        component: () => import('@/features/admin/views/AdminTransactionHistoryPage.vue'),
+        meta: { permissions: ['TRANSACTION:VIEW_ALL'] },
+      },
+    ],
+  },
   // ── Fallback ───────────────────────────────────────────────
   {
     path: '/:pathMatch(.*)*',

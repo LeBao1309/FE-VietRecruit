@@ -22,6 +22,41 @@ router.beforeEach((to, _from, next) => {
     return next({ name: 'Workspace' })
   }
 
+  // RBAC checks
+  if (to.meta.requiresAuth && hasSession) {
+    const token = tokenService.getAccessToken()
+    let currentRole = ''
+    let permissions: string[] = []
+    
+    if (token) {
+      try {
+        const payloadStr = token.split('.')[1]
+        if (payloadStr) {
+          const payload = JSON.parse(atob(payloadStr))
+          currentRole = payload.role || ''
+          permissions = payload.permissions || []
+        }
+      } catch (e) {
+        // Ignored, defaults apply
+      }
+    }
+
+    // Check Role
+    if (to.meta.roles && Array.isArray(to.meta.roles)) {
+      if (!to.meta.roles.includes(currentRole)) {
+        return next({ name: 'Workspace' }) // Redirect unauthorized to home
+      }
+    }
+
+    // Check Permissions
+    if (to.meta.permissions && Array.isArray(to.meta.permissions)) {
+      const hasPermission = to.meta.permissions.every(p => permissions.includes(p))
+      if (!hasPermission) {
+        return next({ name: 'Workspace' }) // Missing specific explicit capability
+      }
+    }
+  }
+
   next()
 })
 
