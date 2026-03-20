@@ -85,6 +85,19 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
     meta: { requiresAuth: true },
   },
+  // Subscription & Payment
+  {
+    path: '/subscriptions/current',
+    name: 'SubscriptionDashboard',
+    component: () => import('@/features/subscription/pages/SubscriptionDashboard.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payment/status',
+    name: 'PaymentStatus',
+    component: () => import('@/features/payment/pages/PaymentStatusPage.vue'),
+    meta: { requiresAuth: true },
+  },
   // ── Fallback ───────────────────────────────────────────────
   {
     path: '/:pathMatch(.*)*',
