@@ -11,7 +11,7 @@ vi.mock('@/core/api/axios.instance', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
-    patch: vi.fn(),
+    put: vi.fn(),
   },
 }))
 
@@ -83,26 +83,34 @@ describe('jobService.createJob', () => {
   })
 })
 
-describe('jobService.updateJobStatus', () => {
-  it('calls PATCH /vietrecruit/jobs/:id/status with correct payload', async () => {
-    const updatedJob: Job = { ...mockJob, status: 'PUBLISHED' }
-    vi.mocked(apiClient.patch).mockResolvedValueOnce({ data: { data: updatedJob } })
+describe('jobService.publishJob', () => {
+  it('calls PUT /vietrecruit/jobs/:id/publish and returns the published job', async () => {
+    const publishedJob: Job = { ...mockJob, status: 'PUBLISHED' }
+    vi.mocked(apiClient.put).mockResolvedValueOnce({ data: { data: publishedJob } })
 
-    const result = await jobService.updateJobStatus('job-1', { status: 'PUBLISHED' })
+    const result = await jobService.publishJob('job-1')
 
-    expect(apiClient.patch).toHaveBeenCalledWith(
-      '/vietrecruit/jobs/job-1/status',
-      { status: 'PUBLISHED' },
-    )
+    expect(apiClient.put).toHaveBeenCalledWith('/vietrecruit/jobs/job-1/publish')
     expect(result.status).toBe('PUBLISHED')
   })
 
-  it('propagates Axios error when the request fails', async () => {
+  it('propagates Axios error when publish fails', async () => {
     const axiosError = Object.assign(new Error('Request failed'), { isAxiosError: true })
-    vi.mocked(apiClient.patch).mockRejectedValueOnce(axiosError)
+    vi.mocked(apiClient.put).mockRejectedValueOnce(axiosError)
 
-    await expect(
-      jobService.updateJobStatus('job-1', { status: 'PUBLISHED' }),
-    ).rejects.toThrow('Request failed')
+    await expect(jobService.publishJob('job-1')).rejects.toThrow('Request failed')
   })
 })
+
+describe('jobService.closeJob', () => {
+  it('calls PUT /vietrecruit/jobs/:id/close and returns the closed job', async () => {
+    const closedJob: Job = { ...mockJob, status: 'CLOSED' }
+    vi.mocked(apiClient.put).mockResolvedValueOnce({ data: { data: closedJob } })
+
+    const result = await jobService.closeJob('job-1')
+
+    expect(apiClient.put).toHaveBeenCalledWith('/vietrecruit/jobs/job-1/close')
+    expect(result.status).toBe('CLOSED')
+  })
+})
+

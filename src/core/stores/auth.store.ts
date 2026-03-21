@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
         response.expiresIn,
       )
       isAuthenticated.value = true
-      await router.push('/workspace')
+      await router.push({ name: 'Workspace' })
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -71,7 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
       await authService.register(apiPayload)
       // Store email so VerifyOtpPage knows which email to verify
       pendingVerificationEmail.value = payload.email
-      await router.push('/auth/verify-otp')
+      await router.push({ name: 'VerifyOtp' })
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -89,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
     const { confirmPassword: _, ...apiPayload } = payload
     try {
       await authService.registerByInvite(apiPayload)
-      await router.push('/auth/login?invited=true')
+      await router.push({ name: 'Login', query: { invited: 'true' } })
       return true
     } catch (err) {
       handleApiError(err)
@@ -108,7 +108,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.verifyOtp(payload)
       pendingVerificationEmail.value = null
-      await router.push('/auth/login?verified=true')
+      await router.push({ name: 'Login', query: { verified: 'true' } })
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -147,7 +147,7 @@ export const useAuthStore = defineStore('auth', () => {
       tokenService.clearAll()
       isAuthenticated.value = false
       isLoading.value = false
-      await router.push('/auth/login')
+      await router.push({ name: 'Login' })
     }
   }
 
@@ -172,7 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     try {
       await authService.resetPassword(payload)
-      await router.push('/auth/login?reset=true')
+      await router.push({ name: 'Login', query: { reset: 'true' } })
       return true
     } catch (err) {
       handleApiError(err)
@@ -191,7 +191,7 @@ export const useAuthStore = defineStore('auth', () => {
       // Server revokes all sessions → force re-login
       tokenService.clearAll()
       isAuthenticated.value = false
-      await router.push('/auth/login?passwordChanged=true')
+      await router.push({ name: 'Login', query: { passwordChanged: 'true' } })
       return true
     } catch (err) {
       handleApiError(err)

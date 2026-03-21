@@ -49,7 +49,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       companyProfile.value = await onboardingService.updateCompany(payload)
-      await router.push('/workspace')
+      await router.push({ name: 'Workspace' })
       return true
     } catch (err) {
       handleApiError(err)
@@ -78,7 +78,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       candidateProfile.value = await onboardingService.updateCandidateProfile(payload)
-      await router.push('/workspace')
+      await router.push({ name: 'Workspace' })
       return true
     } catch (err) {
       handleApiError(err)

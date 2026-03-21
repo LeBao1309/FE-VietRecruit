@@ -1,4 +1,5 @@
 // src/core/stores/org.store.ts
+import { getErrorMessage } from '@/core/utils/error'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { orgService } from '@/features/company/services/org.service'
@@ -94,9 +95,9 @@ export const useOrgStore = defineStore('org', () => {
     } catch (err: unknown) {
       const axiosErr = err as AxiosError
       if (axiosErr.response?.status === 409 || axiosErr.response?.status === 500) {
-        error.value = 'Cannot delete: This entity is currently in use.'
+        error.value = getErrorMessage(err)
       } else {
-        error.value = 'Lỗi xóa phòng ban'
+        error.value = getErrorMessage(err)
       }
       return false
     } finally {
@@ -161,9 +162,9 @@ export const useOrgStore = defineStore('org', () => {
     } catch (err: unknown) {
       const axiosErr = err as AxiosError
       if (axiosErr.response?.status === 409 || axiosErr.response?.status === 500) {
-        error.value = 'Cannot delete: This entity is currently in use.'
+        error.value = getErrorMessage(err)
       } else {
-        error.value = 'Lỗi xóa địa điểm'
+        error.value = getErrorMessage(err)
       }
       return false
     } finally {
@@ -228,9 +229,9 @@ export const useOrgStore = defineStore('org', () => {
     } catch (err: unknown) {
       const axiosErr = err as AxiosError
       if (axiosErr.response?.status === 409 || axiosErr.response?.status === 500) {
-        error.value = 'Cannot delete: This entity is currently in use.'
+        error.value = getErrorMessage(err)
       } else {
-        error.value = 'Lỗi xóa danh mục'
+        error.value = getErrorMessage(err)
       }
       return false
     } finally {

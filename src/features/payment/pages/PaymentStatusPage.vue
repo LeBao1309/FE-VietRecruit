@@ -40,7 +40,7 @@ const isFailed = computed(() => {
         <AlertCircle class="mx-auto text-error w-16 h-16 mb-4" />
         <h2 class="text-xl font-bold text-text-primary mb-2">Lỗi Xác Minh</h2>
         <p class="text-text-secondary mb-8">{{ paymentStore.error }}</p>
-        <button @click="router.push('/workspace')" class="btn-primary w-full py-3">Quay lại Workspace</button>
+        <button @click="router.push({ name: 'Workspace' })" class="btn-primary w-full py-3">Quay lại Workspace</button>
       </div>
 
       <div v-else-if="paymentStore.paymentStatus">
@@ -77,7 +77,7 @@ const isFailed = computed(() => {
           </div>
         </div>
 
-        <button @click="router.push('/workspace')" class="btn-primary w-full py-3 hover:bg-brand-dark transition-colors">
+        <button @click="router.push({ name: 'Workspace' })" class="btn-primary w-full py-3 hover:bg-brand-dark transition-colors">
           Quay lại Bảng điều khiển
         </button>
       </div>

@@ -14,11 +14,6 @@ export type { Job, JobStatus }
 /** Inferred from the Zod schema — single source of truth for form +  service */
 export type CreateJobRequest = z.infer<typeof createJobSchema>
 
-/** Payload sent to PATCH /vietrecruit/jobs/:id/status */
-export interface UpdateJobStatusRequest {
-  status: 'PUBLISHED' | 'CLOSED'
-}
-
 /** Query parameters for GET /vietrecruit/jobs */
 export interface JobListParams {
   status?: JobStatus

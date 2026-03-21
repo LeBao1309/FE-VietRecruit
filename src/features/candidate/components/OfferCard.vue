@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 import { ref } from 'vue'
 import type { OfferResponse } from '../types/application.schema'
 import { applicationService } from '../services/application.service'
@@ -33,10 +35,10 @@ const respond = async (action: 'ACCEPT' | 'DECLINE') => {
   isResponding.value = true
   try {
     await applicationService.respondToOffer(props.offer.id, action)
-    alert(`Đã ${action === 'ACCEPT' ? 'chấp nhận' : 'từ chối'} offer.`)
+    toast.success(`Đã ${action === 'ACCEPT' ? 'chấp nhận' : 'từ chối'} offer.`)
     emit('updated')
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Thao tác thất bại.')
+    toast.error(err.response?.data?.message || 'Thao tác thất bại.')
   } finally {
     isResponding.value = false
   }

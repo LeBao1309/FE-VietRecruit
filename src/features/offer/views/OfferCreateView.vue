@@ -1,5 +1,7 @@
 <!-- src/features/offer/views/OfferCreateView.vue -->
 <script setup lang="ts">
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 import { useRouter, useRoute } from 'vue-router';
 import { useOfferStore } from '../stores/offer.store';
 import OfferForm from '../components/OfferForm.vue';
@@ -15,8 +17,8 @@ const applicationId = route.query.applicationId as string;
 
 onMounted(() => {
   if (!applicationId) {
-    alert("Application ID is missing. Returning to dashboard.");
-    router.push('/offers');
+    toast.error("Application ID is missing. Returning to dashboard.");
+    router.push({ name: 'OfferDashboard' });
   }
 });
 
@@ -24,14 +26,13 @@ const handleCreate = async (data: CreateOfferDTO) => {
   if (!applicationId) return;
   try {
     await offerStore.createOffer(applicationId, data);
-    router.push('/offers');
+    router.push({ name: 'OfferDashboard' });
   } catch (error) {
-    console.error('Failed to create offer:', error);
-  }
+    }
 };
 
 const handleCancel = () => {
-  router.push('/offers');
+  router.push({ name: 'OfferDashboard' });
 };
 </script>
 

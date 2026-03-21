@@ -8,6 +8,18 @@ interface RetryableRequest extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
 
+// ── Lazy router import to avoid circular dependency ──
+// router module imports axios instance; importing router here would create a cycle.
+// Using a dynamic import inside the handler breaks the cycle safely.
+const redirectToLogin = (redirectPath?: string) => {
+  import('@/core/router/index').then(({ default: router }) => {
+    router.push({
+      name: 'Login',
+      query: redirectPath ? { redirect: redirectPath } : undefined,
+    })
+  })
+}
+
 // ── Base Axios instance ──
 // Empty baseURL = same-origin requests → proxied by Vercel/Vite to backend
 export const apiClient = axios.create({
@@ -48,7 +60,7 @@ apiClient.interceptors.response.use(
     // Guard: if the failing request IS the refresh endpoint → session expired
     if (originalRequest.url?.includes('/auth/refresh')) {
       tokenService.clearAll()
-      window.location.href = '/login'
+      redirectToLogin()
       return Promise.reject(error)
     }
 
@@ -58,7 +70,7 @@ apiClient.interceptors.response.use(
     const refreshToken = tokenService.getRefreshToken()
     if (!refreshToken) {
       tokenService.clearAll()
-      window.location.href = '/login'
+      redirectToLogin(originalRequest.url)
       return Promise.reject(error)
     }
 
@@ -80,8 +92,9 @@ apiClient.interceptors.response.use(
       return apiClient(originalRequest)
     } catch {
       tokenService.clearAll()
-      window.location.href = '/login'
+      redirectToLogin()
       return Promise.reject(error)
     }
   },
 )
+

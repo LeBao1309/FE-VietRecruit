@@ -25,11 +25,11 @@ export const applicationService = {
   },
 
   /**
-   * PATCH /vietrecruit/applications/{id}/status
+   * PUT /vietrecruit/applications/{id}/status
    * Drag-and-drop trigger. Backend runs @Transactional (status + history in one tx).
    */
   async updateStatus(id: string, payload: UpdateStatusRequest): Promise<Application> {
-    const { data } = await apiClient.patch<ApiResponse<Application>>(
+    const { data } = await apiClient.put<ApiResponse<Application>>(
       `${BASE}/${id}/status`,
       payload,
     )
@@ -37,12 +37,12 @@ export const applicationService = {
   },
 
   /**
-   * POST /vietrecruit/applications/{id}/ai-screening
-   * Backend returns 202 Accepted immediately and computes score asynchronously.
-   * TODO: confirm async completion callback mechanism with backend team.
+   * POST /vietrecruit/applications/jobs/{jobId}/screening/trigger
+   * Triggers async AI screening for all applications of a job.
+   * Backend returns 202 Accepted immediately; scoring is computed asynchronously.
    */
-  async triggerAiScreening(id: string): Promise<void> {
-    await apiClient.post(`${BASE}/${id}/ai-screening`)
+  async triggerAiScreening(jobId: string): Promise<void> {
+    await apiClient.post(`${BASE}/jobs/${jobId}/screening/trigger`)
   },
 
   /**

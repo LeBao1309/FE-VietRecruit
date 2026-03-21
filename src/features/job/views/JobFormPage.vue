@@ -11,9 +11,11 @@ import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue
 import PipelineTopBar from '@/features/workspace/components/PipelineTopBar.vue'
 import { useJobStore } from '@/features/job/stores/useJobStore'
 import { createJobSchema, createJobDefaults } from '@/features/job/schemas/job.schema'
+import { useToast } from 'vue-toastification'
 
 const router = useRouter()
 const jobStore = useJobStore()
+const toast = useToast()
 
 // ── Form state ─────────────────────────────────────────────────────────────
 const form = reactive({ ...createJobDefaults })
@@ -92,7 +94,7 @@ async function handleSubmit(): Promise<void> {
 
   try {
     await jobStore.createJob(result.data)
-    window.alert('Job created successfully and saved as Draft.')
+    toast.success('Job created successfully and saved as Draft.')
     router.push({ name: 'JobList' })
   } catch {
     submitError.value =
@@ -124,7 +126,7 @@ function handleCancel(): void {
           </button>
           <div>
             <nav class="flex text-sm text-text-muted mb-1 font-medium">
-              <span class="hover:text-brand cursor-pointer" @click="$router.push('/workspace')">
+              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: 'Workspace' })">
                 Workspace
               </span>
               <span class="mx-2">/</span>

@@ -17,7 +17,7 @@ export const paymentService = {
   },
 
   async getPaymentStatus(orderCode: number): Promise<PaymentStatusResponse> {
-    const response = await apiClient.get<ApiResponse<PaymentStatusResponse>>(`${BASE}/payment-status/${orderCode}`);
+    const response = await apiClient.get<ApiResponse<PaymentStatusResponse>>(`${BASE}/status/${orderCode}`);
     return response.data.data;
   },
 

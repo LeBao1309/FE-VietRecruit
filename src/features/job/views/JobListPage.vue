@@ -14,9 +14,11 @@ import JobTableRow from '@/features/job/components/JobTableRow.vue'
 import { useJobStore } from '@/features/job/stores/useJobStore'
 import { QuotaExceededError } from '@/features/job/types/job.dto'
 import type { JobStatus } from '@/features/workspace/types'
+import { useToast } from 'vue-toastification'
 
 const router = useRouter()
 const jobStore = useJobStore()
+const toast = useToast()
 const { jobs, isLoading, error, draftJobs, publishedJobs, closedJobs } = storeToRefs(jobStore)
 
 // ── Local UI state ────────────────────────────────────────────────────────────
@@ -52,6 +54,7 @@ async function handlePublish(id: string): Promise<void> {
   quotaError.value = null
   try {
     await jobStore.publishJob(id)
+    toast.success('Job published successfully')
   } catch (e) {
     if (e instanceof QuotaExceededError) {
       quotaError.value = e.message
@@ -65,6 +68,7 @@ async function handleClose(id: string): Promise<void> {
   )
   if (!confirmed) return
   await jobStore.closeJob(id)
+  toast.success('Job closed successfully')
 }
 
 function goToCreate(): void {
@@ -86,7 +90,7 @@ function goToCreate(): void {
         >
           <div>
             <nav class="flex text-sm text-text-muted mb-2 font-medium">
-              <span class="hover:text-brand cursor-pointer" @click="$router.push('/workspace')">
+              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: 'Workspace' })">
                 Workspace
               </span>
               <span class="mx-2">/</span>

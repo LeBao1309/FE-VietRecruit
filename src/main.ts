@@ -10,10 +10,18 @@ import '@fontsource/be-vietnam-pro/800.css' // ExtraBold — hero display
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from '@/core/router/index'
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
 import App from './App.vue'
 import './assets/css/main.css'
 
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
+app.use(Toast, {
+  position: 'bottom-right',
+  timeout: 3000,
+  closeOnClick: true,
+  pauseOnHover: true,
+})
 app.mount('#app')

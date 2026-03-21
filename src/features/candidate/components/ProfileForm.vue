@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 import { ref, onMounted, reactive } from 'vue'
 import { useCandidateStore } from '../stores/candidate.store'
 import { candidateService } from '../services/candidate.service'
@@ -92,9 +94,9 @@ const saveProfile = async () => {
     ])
     candidateStore.userProfile = userResponse
     candidateStore.candidateProfile = candResponse
-    alert('Profile saved successfully!')
+    toast.success('Profile saved successfully!')
   } catch (err) {
-    alert('Failed to save profile.')
+    toast.error('Failed to save profile.')
   } finally {
     isSaving.value = false
   }

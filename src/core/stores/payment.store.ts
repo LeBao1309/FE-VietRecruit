@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/core/utils/error'
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { paymentService } from '@/features/payment/services/payment.service';
@@ -24,7 +25,7 @@ export const usePaymentStore = defineStore('payment', () => {
         throw new Error('No checkout URL provided by backend.');
       }
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Có lỗi xảy ra khi tạo giao dịch.';
+      error.value = getErrorMessage(err);
       isGlobalLoading.value = false;
     }
   }
@@ -35,7 +36,7 @@ export const usePaymentStore = defineStore('payment', () => {
     try {
       paymentStatus.value = await paymentService.getPaymentStatus(orderCode);
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Không thể lấy trạng thái giao dịch.';
+      error.value = getErrorMessage(err);
     } finally {
       isLoading.value = false;
     }
@@ -47,7 +48,7 @@ export const usePaymentStore = defineStore('payment', () => {
     try {
       transactionsData.value = await paymentService.getTransactions(page, size);
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Không thể lấy lịch sử giao dịch.';
+      error.value = getErrorMessage(err);
     } finally {
       isLoading.value = false;
     }

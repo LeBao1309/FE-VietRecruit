@@ -47,7 +47,7 @@ const viewOffersForApplication = async (appId: string) => {
 };
 
 const draftOffer = (appId: string) => {
-  router.push(`/offers/create?applicationId=${appId}`);
+  router.push({ name: 'OfferCreate', query: { applicationId: appId } });
 };
 
 const formatCurrency = (amount: number, currency: string) => {

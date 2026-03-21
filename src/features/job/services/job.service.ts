@@ -6,7 +6,6 @@ import { apiClient } from '@/core/api/axios.instance'
 import type { ApiResponse } from '@/core/types/api.types'
 import type {
   CreateJobRequest,
-  UpdateJobStatusRequest,
   JobListParams,
   JobListResponse,
 } from '@/features/job/types/job.dto'
@@ -36,15 +35,21 @@ export const jobService = {
   },
 
   /**
-   * PATCH /vietrecruit/jobs/:id/status
-   * Transitions a Job to PUBLISHED or CLOSED.
+   * PUT /vietrecruit/jobs/:id/publish
+   * Transitions a DRAFT Job to PUBLISHED.
    * Backend returns 402 when the company's active job quota is exceeded.
    */
-  async updateJobStatus(id: string, payload: UpdateJobStatusRequest): Promise<Job> {
-    const { data } = await apiClient.patch<ApiResponse<Job>>(
-      `${BASE}/${id}/status`,
-      payload,
-    )
+  async publishJob(id: string): Promise<Job> {
+    const { data } = await apiClient.put<ApiResponse<Job>>(`${BASE}/${id}/publish`)
+    return data.data
+  },
+
+  /**
+   * PUT /vietrecruit/jobs/:id/close
+   * Closes a PUBLISHED Job (status → CLOSED). Quota is restored.
+   */
+  async closeJob(id: string): Promise<Job> {
+    const { data } = await apiClient.put<ApiResponse<Job>>(`${BASE}/${id}/close`)
     return data.data
   },
 }

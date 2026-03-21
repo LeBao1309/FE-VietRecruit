@@ -44,6 +44,7 @@ export const applicationService = {
   },
 
   respondToOffer: async (offerId: string, action: 'ACCEPT' | 'DECLINE'): Promise<void> => {
-    await apiClient.put(`/vietrecruit/offers/${offerId}/respond`, { action })
+    const status = action === 'ACCEPT' ? 'ACCEPTED' : 'DECLINED'
+    await apiClient.put(`/vietrecruit/offers/${offerId}/respond`, { status })
   }
 }

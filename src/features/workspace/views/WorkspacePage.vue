@@ -14,8 +14,10 @@ import {
   BellRing,
   CircleCheckBig,
 } from "lucide-vue-next";
+import { useToast } from "vue-toastification";
 
 const workspaceStore = useWorkspaceStore();
+const toast = useToast();
 const {
   applications,
   recentJobs,
@@ -25,7 +27,7 @@ const {
   isLoading,
 } = storeToRefs(workspaceStore);
 
-const showAlert = (msg: string) => window.alert(msg);
+const showAlert = (msg: string) => toast.info(msg);
 
 onMounted(() => {
   workspaceStore.fetchWorkspaceData();
@@ -57,7 +59,7 @@ onMounted(() => {
               <span class="text-text-primary">Workspace Dashboard</span>
             </nav>
             <h1 class="text-3xl font-display font-bold text-text-primary">
-              Xin chào đội ngũ Tuyển dụng 👋
+              Xin chào đội ngũ Tuyển dụng
             </h1>
           </div>
           <div class="mt-4 md:mt-0 flex gap-3">
@@ -245,7 +247,7 @@ onMounted(() => {
                   Tin tuyển dụng nổi bật
                 </h3>
                 <button
-                  @click.prevent="$router.push('/workspace/applications')"
+                  @click.prevent="$router.push({ name: 'Pipeline' })"
                   class="text-sm text-brand font-semibold hover:underline"
                 >
                   Xem tất cả

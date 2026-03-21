@@ -43,11 +43,11 @@ export const interviewService = {
   },
 
   /**
-   * PATCH /vietrecruit/interviews/{id}/status
+   * PUT /vietrecruit/interviews/{id}/status
    * Update interview status to COMPLETED or CANCELED.
    */
   async updateStatus(id: string, payload: UpdateInterviewStatusRequest): Promise<Interview> {
-    const { data } = await apiClient.patch<ApiResponse<Interview>>(
+    const { data } = await apiClient.put<ApiResponse<Interview>>(
       `${BASE}/${id}/status`,
       payload,
     )

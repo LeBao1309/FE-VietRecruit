@@ -1,4 +1,5 @@
 // src/core/stores/subscription.store.ts
+import { getErrorMessage } from '@/core/utils/error'
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { subscriptionService } from '@/features/subscription/services/subscription.service';
@@ -24,7 +25,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
       subscription.value = subData;
       quota.value = quotaData;
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to fetch subscription details';
+      error.value = getErrorMessage(err);
     } finally {
       isLoading.value = false;
     }

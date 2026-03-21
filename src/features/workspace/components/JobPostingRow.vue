@@ -23,7 +23,7 @@ const statusLabels = {
 
 <template>
   <div
-    @click="router.push('/workspace/applications')"
+    @click="router.push({ name: 'Pipeline' })"
     class="flex items-center justify-between p-4 bg-white border border-border rounded-xl hover:shadow-hover hover:border-brand-muted transition-all group cursor-pointer"
   >
     <div class="flex items-start gap-4">

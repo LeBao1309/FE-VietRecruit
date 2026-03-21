@@ -6,6 +6,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { usePipelineStore } from '@/features/pipeline/stores/usePipelineStore'
+import { APP_CONFIG } from '@/core/constants/app-config'
 import {
   APPLICATION_STATUSES,
   type ApplicationStatus,
@@ -37,7 +38,7 @@ let errorTimer: ReturnType<typeof setTimeout> | null = null
 function showDragError(msg: string): void {
   dragError.value = msg
   if (errorTimer) clearTimeout(errorTimer)
-  errorTimer = setTimeout(() => { dragError.value = null }, 4000)
+  errorTimer = setTimeout(() => { dragError.value = null }, APP_CONFIG.TOAST_DURATION_MS)
 }
 
 // ── Column display config ────────────────────────────────────────────────────

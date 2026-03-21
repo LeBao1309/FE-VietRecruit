@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { LayoutDashboard, Users, BarChart3, Settings } from "lucide-vue-next";
+import { useToast } from "vue-toastification";
 
-const showAlert = (msg: string) => window.alert(msg);
+const toast = useToast();
+const showAlert = (msg: string) => toast.info(msg);
 
 const navItems = [
   {
