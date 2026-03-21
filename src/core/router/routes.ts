@@ -80,10 +80,10 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/workspace/applications',
+    path: '/workspace/pipeline',
     name: 'Pipeline',
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
   },
   // Subscription & Payment
   {
@@ -157,12 +157,13 @@ export const routes: RouteRecordRaw[] = [
   // ── Admin routes ───────────────────────────────────────────
   {
     path: '/admin',
-    name: 'Admin',
+    name: 'AdminLayout',
     component: () => import('@/features/admin/components/AdminLayout.vue'),
     meta: { requiresAuth: true, roles: ['SYSTEM_ADMIN', 'CUSTOMER_SERVICE'] },
     children: [
       {
         path: '',
+        name: 'AdminDashboard',
         redirect: '/admin/companies',
       },
       {
