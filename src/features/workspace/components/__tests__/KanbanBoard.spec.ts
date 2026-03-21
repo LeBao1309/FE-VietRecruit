@@ -42,12 +42,12 @@ describe('KanbanBoard — rendering', () => {
   })
 
   it('passes candidates to the correct KanbanColumn based on status', async () => {
-    const store = usePipelineStore()
+
     const mockApp1 = createMockAppDetails('c1')
     mockApp1.status = 'SCREENING'
     const mockApp2 = createMockAppDetails('c2')
     mockApp2.status = 'INTERVIEW'
-    store.applications = [mockApp1, mockApp2]
+
     
     // Instead of directly using store.columns (which is not in our app logic), we pass them 
     // as props which represents standard flow
@@ -105,7 +105,7 @@ describe('KanbanBoard — StageTransitionModal', () => {
 describe('StageTransitionModal — actions', () => {
   it('calls confirmTransition and closes modal when Confirm is clicked', async () => {
     const store = usePipelineStore()
-    store.updateApplicationStage = vi.fn().mockResolvedValue(undefined)
+    store.moveApplication = vi.fn().mockResolvedValue(undefined)
 
     const mockApp = createMockAppDetails('c1')
     mockApp.status = 'SCREENING'
@@ -121,14 +121,14 @@ describe('StageTransitionModal — actions', () => {
     await wrapper.findComponent(StageTransitionModal).vm.$emit('confirm')
     await flushPromises()
 
-    expect(store.updateApplicationStage).toHaveBeenCalledOnce()
+    expect(store.moveApplication).toHaveBeenCalledOnce()
     const modalCheck = wrapper.findComponent(StageTransitionModal)
     expect(modalCheck.exists()).toBe(false)
   })
 
   it('cancels the move and closes modal when Cancel is clicked', async () => {
     const store = usePipelineStore()
-    store.updateApplicationStage = vi.fn().mockResolvedValue(undefined)
+    store.moveApplication = vi.fn().mockResolvedValue(undefined)
     store.fetchApplications = vi.fn().mockResolvedValue(undefined)
 
     const mockApp = createMockAppDetails('c1')
@@ -145,7 +145,7 @@ describe('StageTransitionModal — actions', () => {
     await wrapper.findComponent(StageTransitionModal).vm.$emit('cancel')
     await flushPromises()
 
-    expect(store.updateApplicationStage).not.toHaveBeenCalled()
+    expect(store.moveApplication).not.toHaveBeenCalled()
     const modalCheck = wrapper.findComponent(StageTransitionModal)
     expect(modalCheck.exists()).toBe(false)
   })

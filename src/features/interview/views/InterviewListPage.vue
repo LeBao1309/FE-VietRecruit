@@ -14,7 +14,7 @@ import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue
 
 const route = useRoute()
 const store = useInterviewStore()
-const { interviews, isLoading, isSaving, error } = storeToRefs(store)
+const { interviews, isLoading, error } = storeToRefs(store)
 
 const applicationId = computed(() => (route.query['applicationId'] as string) ?? '')
 const jobId         = computed(() => (route.query['jobId'] as string) ?? '')

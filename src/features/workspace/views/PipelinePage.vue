@@ -152,7 +152,7 @@ onMounted(() => {
     <Transition name="drawer-slide">
       <ApplicationDetailDrawer
         v-if="openDetailId"
-        :detail="openDetailId && detailCache[openDetailId] ? detailCache[openDetailId] : null"
+        :detail="openDetailId && detailCache[openDetailId] ? detailCache[openDetailId]! : null"
         :is-loading="isDetailLoading"
         @close="store.closeDetail()"
       />

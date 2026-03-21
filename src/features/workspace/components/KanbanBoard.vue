@@ -59,7 +59,7 @@ const getStageDetails = (stageId: ApplicationStatus) => {
 const handleConfirmMove = async () => {
   if (!pendingMove.value) return;
   const { candidateId, targetStageId } = pendingMove.value;
-  await pipelineStore.updateApplicationStage(candidateId, targetStageId);
+  await pipelineStore.moveApplication(candidateId, targetStageId);
   showModal.value = false;
   pendingMove.value = null;
 };
@@ -68,7 +68,8 @@ const handleCancelMove = () => {
   showModal.value = false;
   pendingMove.value = null;
   // VueDraggable might have mutated its internal DOM state, the best way to revert is to force update
-  pipelineStore.fetchApplications(); // Reload from store to revert frontend DOM
+  const jobId = props.candidates.length > 0 ? (props.candidates[0] as any).jobId || '' : '';
+  pipelineStore.fetchApplications(jobId); // Reload from store to revert frontend DOM
 };
 </script>
 

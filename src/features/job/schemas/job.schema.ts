@@ -28,12 +28,12 @@ export const createJobSchema = z
       .min(1, 'Please select a category.'),
 
     min_salary: z
-      .number({ invalid_type_error: 'Min salary must be a number.' })
+      .number({ message: 'Min salary must be a number.' })
       .positive('Min salary must be greater than 0.')
       .optional(),
 
     max_salary: z
-      .number({ invalid_type_error: 'Max salary must be a number.' })
+      .number({ message: 'Max salary must be a number.' })
       .positive('Max salary must be greater than 0.')
       .optional(),
 

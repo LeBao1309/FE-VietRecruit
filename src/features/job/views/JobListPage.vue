@@ -10,7 +10,7 @@ import { Plus, Briefcase, AlertTriangle } from 'lucide-vue-next'
 import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue'
 import PipelineTopBar from '@/features/workspace/components/PipelineTopBar.vue'
 import JobTableRow from '@/features/job/components/JobTableRow.vue'
-import JobStatusBadge from '@/features/job/components/JobStatusBadge.vue'
+
 import { useJobStore } from '@/features/job/stores/useJobStore'
 import { QuotaExceededError } from '@/features/job/types/job.dto'
 import type { JobStatus } from '@/features/workspace/types'
