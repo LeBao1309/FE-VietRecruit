@@ -85,6 +85,25 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
     meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
   },
+  // Interview & Scorecard (Module 6)
+  {
+    path: '/workspace/interviews',
+    name: 'InterviewList',
+    component: () => import('@/features/interview/views/InterviewListPage.vue'),
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+  },
+  {
+    path: '/workspace/my-interviews',
+    name: 'InterviewerDashboard',
+    component: () => import('@/features/interview/views/InterviewerDashboard.vue'),
+    meta: { requiresAuth: true, roles: ['INTERVIEWER'] },
+  },
+  {
+    path: '/workspace/scorecards',
+    name: 'ScorecardDashboard',
+    component: () => import('@/features/interview/views/ScorecardDashboard.vue'),
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+  },
   // Job Management (Module 4)
   {
     path: '/workspace/jobs',
