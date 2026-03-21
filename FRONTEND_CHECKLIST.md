@@ -25,14 +25,14 @@ Dựa trên phân tích tài liệu API (`api.json`), Database schemas (`script_
   - [x] Phân quyền thành viên trong công ty (dựa vào Role HR, INTERVIEWER)
 
 ## 3. Module Gói Cước & Thanh Toán (Subscription & Payment - Role: COMPANY_ADMIN)
-- [/] **Gói cước (Plans)** (Đã có `plan.service.ts`)
+- [x] **Gói cước (Plans)** (Đã có `plan.service.ts`)
   - [x] Trang hiển thị danh sách các gói cước (Lấy từ API `subscription_plans`)
-  - [ ] Giao diện xác nhận đăng ký / Nâng cấp gói cước
-- [ ] **Thanh toán & Quota** (CHƯA LÀM - Thiếu `Payment Service`, `Subscription Service`)
-  - [ ] Tích hợp luồng Checkout thanh toán qua PayOS (Nhận link và redirect)
-  - [ ] Trang theo dõi trạng thái giao dịch (Thành công / Thất bại) sau khi từ PayOS trả về
-  - [ ] Dashboard theo dõi Quota (Số Job khả dụng, Thời hạn chu kỳ)
-  - [ ] Chức năng Hủy gia hạn gói cước (Cancel Subscription)
+  - [x] Giao diện xác nhận đăng ký / Nâng cấp gói cước
+- [x] **Thanh toán & Quota** (CHƯA LÀM - Thiếu `Payment Service`, `Subscription Service`)
+  - [x] Tích hợp luồng Checkout thanh toán qua PayOS (Nhận link và redirect)
+  - [x] Trang theo dõi trạng thái giao dịch (Thành công / Thất bại) sau khi từ PayOS trả về
+  - [x] Dashboard theo dõi Quota (Số Job khả dụng, Thời hạn chu kỳ)
+  - [x] Chức năng Hủy gia hạn gói cước (Cancel Subscription)
 
 ## 4. Module Quản Lý Việc Làm (Job Management - Role: HR / COMPANY_ADMIN)
 - [/] **Danh sách Công việc** (UI MOCK - Thiếu `Job Service`)

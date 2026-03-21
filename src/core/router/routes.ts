@@ -117,6 +117,19 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/job/views/JobFormPage.vue'),
     meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
   },
+  // Subscription & Payment
+  {
+    path: '/subscriptions/current',
+    name: 'SubscriptionDashboard',
+    component: () => import('@/features/subscription/pages/SubscriptionDashboard.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/payment/status',
+    name: 'PaymentStatus',
+    component: () => import('@/features/payment/pages/PaymentStatusPage.vue'),
+    meta: { requiresAuth: true },
+  },
   {
     path: '/offers',
     name: 'OfferDashboard',
