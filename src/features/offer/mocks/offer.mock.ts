@@ -4,25 +4,23 @@ import type { Offer, CreateOfferDTO, UpdateOfferStatusDTO } from '../types/offer
 let mockOffers: Offer[] = [
   {
     id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-    candidateId: 'c-1001',
-    hrId: 'hr-1',
-    salary: '120M VND + 10% KPI Bonus',
+    applicationId: 'app-1001',
+    baseSalary: 120000000,
+    currency: 'VND',
     startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-    fileLink: 'https://docs.google.com/document/d/1mockoffer',
+    offerLetterUrl: 'https://docs.google.com/document/d/1mockoffer',
     status: 'DRAFT',
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   },
   {
     id: 'c23e80a0-9c1d-4d8e-b5c6-8f2e1a3b4c5d',
-    candidateId: 'c-1002',
-    hrId: 'hr-1',
-    salary: '200M VND/year',
+    applicationId: 'app-1002',
+    baseSalary: 200000000,
+    currency: 'VND',
     startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    fileLink: 'https://docs.google.com/document/d/2mockoffer',
+    offerLetterUrl: 'https://docs.google.com/document/d/2mockoffer',
     status: 'SENT',
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   }
 ];
 
@@ -38,10 +36,9 @@ export const offerApiMock = {
     const newOffer: Offer = {
       ...data,
       id: crypto.randomUUID(),
-      hrId: 'hr-1', // Mocked currently logged in HR
+      applicationId: crypto.randomUUID(), // Mocking applicationId since it isn't in DTO
       status: 'DRAFT',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
     mockOffers.push(newOffer);
     return newOffer;
@@ -57,14 +54,13 @@ export const offerApiMock = {
     const updatedOffer: Offer = {
       ...existing,
       status: data.status,
-      updatedAt: new Date().toISOString(),
     };
     
     mockOffers[offerIndex] = updatedOffer;
     
     // Simulate side effect: Candidate status updates to HIRED
     if (data.status === 'ACCEPTED') {
-      console.log(`[MOCK DB] Candidate ${existing.candidateId} status updated to HIRED`);
+      console.log(`[MOCK DB] Application ${existing.applicationId} status updated to HIRED`);
     }
 
     return updatedOffer;
@@ -75,10 +71,10 @@ export const offerApiMock = {
     const now = new Date();
     mockOffers = mockOffers.map(offer => {
       if (offer.status === 'SENT') {
-        const sentDate = new Date(offer.updatedAt);
+        const sentDate = new Date(offer.createdAt);
         const daysDiff = (now.getTime() - sentDate.getTime()) / (1000 * 3600 * 24);
         if (daysDiff > 7) {
-          return { ...offer, status: 'EXPIRED', updatedAt: now.toISOString() };
+          return { ...offer, status: 'EXPIRED' };
         }
       }
       return offer;

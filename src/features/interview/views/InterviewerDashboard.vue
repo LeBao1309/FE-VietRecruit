@@ -12,7 +12,7 @@ import PipelineTopBar from '@/features/workspace/components/PipelineTopBar.vue'
 import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue'
 
 const store = useInterviewStore()
-const { myInterviews, myScheduled, myCompleted, isLoading, error } = storeToRefs(store)
+const { myScheduled, myCompleted, isLoading, error } = storeToRefs(store)
 
 const scoringInterviewId = ref<string | null>(null)
 
