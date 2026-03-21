@@ -23,12 +23,8 @@ router.beforeEach((to, _from) => {
   }
 
   // RBAC checks
-  // TEMPORARILY DISABLED FOR DEVELOPMENT - ALL USERS CAN ACCESS ALL ROUTES
-  // TODO: Re-enable role checks before production deployment
-  /*
   if (to.meta.requiresAuth && hasSession) {
     const token = tokenService.getAccessToken()
-    // Old: let currentRole = ''
     let permissions: string[] = []
 
     if (token) {
@@ -37,7 +33,6 @@ router.beforeEach((to, _from) => {
         if (payloadStr) {
           const payload = JSON.parse(atob(payloadStr))
           // Backend JWT uses "roles" (array), not "role" (string)
-          // Old: currentRole = payload.role || ''
           const userRoles: string[] = payload.roles || (payload.role ? [payload.role] : [])
           permissions = payload.permissions || []
 
@@ -62,7 +57,6 @@ router.beforeEach((to, _from) => {
       }
     }
   }
-  */
 
   // Explicit return true = allow navigation (Vue Router 4 style)
   return true
