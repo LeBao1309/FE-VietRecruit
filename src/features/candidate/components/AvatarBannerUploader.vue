@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 import { ref } from 'vue'
 import { useCandidateStore } from '../stores/candidate.store'
 import { userService } from '../services/user.service'
@@ -13,7 +15,7 @@ const handleAvatarUpload = async (event: Event) => {
   if (!file) return
   
   if (file.size > 2 * 1024 * 1024) {
-    alert('Khối lượng Avatar tối đa là 2MB.')
+    toast.error('Khối lượng Avatar tối đa là 2MB.')
     return
   }
 
@@ -24,7 +26,7 @@ const handleAvatarUpload = async (event: Event) => {
       candidateStore.userProfile.avatarUrl = url
     }
   } catch (error) {
-    alert('Upload Avatar thất bại.')
+    toast.error('Upload Avatar thất bại.')
   } finally {
     isUploadingAvatar.value = false
   }
@@ -36,7 +38,7 @@ const handleBannerUpload = async (event: Event) => {
   if (!file) return
   
   if (file.size > 3 * 1024 * 1024) {
-    alert('Khối lượng Banner tối đa là 3MB.')
+    toast.error('Khối lượng Banner tối đa là 3MB.')
     return
   }
 
@@ -47,7 +49,7 @@ const handleBannerUpload = async (event: Event) => {
       candidateStore.userProfile.bannerUrl = url
     }
   } catch (error) {
-    alert('Upload Banner thất bại.')
+    toast.error('Upload Banner thất bại.')
   } finally {
     isUploadingBanner.value = false
   }

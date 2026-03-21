@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getErrorMessage } from '@/core/utils/error'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useJobBoardStore } from '../stores/job-board.store'
@@ -37,7 +38,7 @@ onMounted(async () => {
   try {
     store.selectedJob = await jobService.getPublicJob(jobId)
   } catch (err) {
-    error.value = 'Không tìm thấy chi tiết công việc.'
+    error.value = getErrorMessage(err)
   } finally {
     isLoading.value = false
   }

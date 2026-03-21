@@ -12,7 +12,7 @@ const router = useRouter();
 // ── Redirect if no pending email ──
 onMounted(() => {
   if (!auth.pendingVerificationEmail.value) {
-    router.push("/auth/register");
+    router.push({ name: 'Register' });
   }
 });
 

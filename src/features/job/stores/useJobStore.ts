@@ -29,7 +29,7 @@ export const useJobStore = defineStore('job', () => {
     if (e instanceof Error) {
       error.value = e.message
     } else {
-      error.value = 'An unexpected error occurred.'
+      error.value = 'An unknown error occurred'
     }
   }
 
@@ -92,7 +92,7 @@ export const useJobStore = defineStore('job', () => {
     isLoading.value = true
     error.value = null
     try {
-      const updated = await jobService.updateJobStatus(id, { status: 'PUBLISHED' })
+      const updated = await jobService.publishJob(id)
       updateJobInList(updated)
     } catch (e) {
       if (isAxiosError(e) && e.response?.status === 402) {
@@ -115,7 +115,7 @@ export const useJobStore = defineStore('job', () => {
     isLoading.value = true
     error.value = null
     try {
-      const updated = await jobService.updateJobStatus(id, { status: 'CLOSED' })
+      const updated = await jobService.closeJob(id)
       updateJobInList(updated)
     } catch (e) {
       setError(e)

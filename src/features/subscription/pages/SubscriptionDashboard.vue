@@ -25,8 +25,7 @@ const handleCancel = async () => {
     await subStore.cancelSubscription();
     showCancelModal.value = false;
   } catch (error) {
-    console.error("Failed to cancel", error);
-  }
+    }
 };
 
 const quotaPercent = computed(() => {

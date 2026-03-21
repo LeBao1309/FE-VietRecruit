@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getErrorMessage } from '@/core/utils/error'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { applicationService } from '../services/application.service'
@@ -33,7 +34,7 @@ const loadData = async () => {
     interviews.value = intRes
     offers.value = offRes
   } catch (err) {
-    error.value = 'Không thể tải chi tiết đơn ứng tuyển.'
+    error.value = getErrorMessage(err)
   } finally {
     isLoading.value = false
   }

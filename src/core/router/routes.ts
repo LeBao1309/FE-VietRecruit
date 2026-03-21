@@ -70,7 +70,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/company/settings',
     name: 'CompanySettings',
     component: () => import('@/features/company/views/CompanySettingsPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'HR'] },
   },
   // Workspace
   {
@@ -122,13 +122,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/subscriptions/current',
     name: 'SubscriptionDashboard',
     component: () => import('@/features/subscription/pages/SubscriptionDashboard.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] },
   },
   {
     path: '/payment/status',
     name: 'PaymentStatus',
     component: () => import('@/features/payment/pages/PaymentStatusPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] },
   },
   // Interview & Scorecard (Module 6)
   {
@@ -163,16 +163,22 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
   },
   {
+    path: '/workspace/jobs/:id/edit',
+    name: 'JobEdit',
+    component: () => import('@/features/job/views/JobFormPage.vue'),
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+  },
+  {
     path: '/offers',
     name: 'OfferDashboard',
     component: () => import('@/features/offer/views/OfferDashboardView.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
   },
   {
     path: '/offers/create',
     name: 'OfferCreate',
     component: () => import('@/features/offer/views/OfferCreateView.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
   },
   // ── Candidate Portal ───────────────────────────────────────
   {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getErrorMessage } from '@/core/utils/error'
 import { ref, onMounted } from 'vue'
 import { useCandidateStore } from '../stores/candidate.store'
 import { candidateService } from '../services/candidate.service'
@@ -18,8 +19,8 @@ onMounted(async () => {
     candidateStore.isLoading = true
     try {
       candidateStore.candidateProfile = await candidateService.getProfile()
-    } catch {
-      error.value = 'Failed to load candidate profile. Please try again.'
+    } catch (err: any) {
+      error.value = getErrorMessage(err)
     } finally {
       candidateStore.isLoading = false
     }
@@ -54,7 +55,7 @@ const submitApplication = async () => {
     await applicationService.apply({ jobId: props.jobId, coverLetter: coverLetter.value })
     emit('success')
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Có lỗi xảy ra khi nộp đơn ứng tuyển.'
+    error.value = getErrorMessage(err)
   } finally {
     isSubmitting.value = false
   }

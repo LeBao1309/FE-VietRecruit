@@ -13,7 +13,8 @@ vi.mock('@/features/job/services/job.service', () => ({
   jobService: {
     getJobs: vi.fn(),
     createJob: vi.fn(),
-    updateJobStatus: vi.fn(),
+    publishJob: vi.fn(),
+    closeJob: vi.fn(),
   },
 }))
 
@@ -159,7 +160,7 @@ describe('useJobStore — publishJob', () => {
   it('updates the job status to PUBLISHED in the list', async () => {
     const draftJob = makeMockJob({ id: 'j1', status: 'DRAFT' })
     const publishedJob = makeMockJob({ id: 'j1', status: 'PUBLISHED' })
-    vi.mocked(jobService.updateJobStatus).mockResolvedValueOnce(publishedJob)
+    vi.mocked(jobService.publishJob).mockResolvedValueOnce(publishedJob)
 
     const store = useJobStore()
     store.jobs.push(draftJob)
@@ -176,7 +177,7 @@ describe('useJobStore — publishJob', () => {
         data: { message: 'Your subscription has reached the maximum job quota.' },
       },
     })
-    vi.mocked(jobService.updateJobStatus).mockRejectedValueOnce(axiosError)
+    vi.mocked(jobService.publishJob).mockRejectedValueOnce(axiosError)
 
     const store = useJobStore()
     await expect(store.publishJob('j1')).rejects.toBeInstanceOf(QuotaExceededError)
@@ -189,7 +190,7 @@ describe('useJobStore — closeJob', () => {
   it('updates the job status to CLOSED in the list', async () => {
     const publishedJob = makeMockJob({ id: 'j1', status: 'PUBLISHED' })
     const closedJob = makeMockJob({ id: 'j1', status: 'CLOSED' })
-    vi.mocked(jobService.updateJobStatus).mockResolvedValueOnce(closedJob)
+    vi.mocked(jobService.closeJob).mockResolvedValueOnce(closedJob)
 
     const store = useJobStore()
     store.jobs.push(publishedJob)

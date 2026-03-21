@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 import { ref } from 'vue'
 import { useCandidateStore } from '../stores/candidate.store'
 import { candidateService } from '../services/candidate.service'
@@ -12,7 +14,7 @@ const handleFileUpload = async (event: Event) => {
   if (!file) return
 
   if (file.size > 5 * 1024 * 1024) {
-    alert('Khối lượng CV tối đa là 5MB.')
+    toast.error('Khối lượng CV tối đa là 5MB.')
     return
   }
 
@@ -22,9 +24,9 @@ const handleFileUpload = async (event: Event) => {
     if (candidateStore.candidateProfile) {
       candidateStore.candidateProfile.defaultCvUrl = response.cvUrl
     }
-    alert('Upload CV thành công!')
+    toast.success('Upload CV thành công!')
   } catch (error) {
-    alert('Upload CV thất bại.')
+    toast.error('Upload CV thất bại.')
   } finally {
     isUploading.value = false
   }
@@ -39,7 +41,7 @@ const deleteCv = async () => {
       candidateStore.candidateProfile.defaultCvUrl = null
     }
   } catch (e) {
-    alert('Xóa CV thất bại.')
+    toast.error('Xóa CV thất bại.')
   }
 }
 </script>

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/core/utils/error'
 import { ref } from 'vue';
 import type { ApplicationWithDetails, JobWithDetails, InterviewWithDetails } from '../types';
 import { mockApplications, mockJobs, mockInterviews } from '../mocks/pipeline.mock';
@@ -22,7 +23,7 @@ export function useWorkspace() {
       jobs.value = mockJobs;
       interviews.value = mockInterviews;
     } catch (err) {
-      error.value = 'Failed to load workspace data';
+      error.value = getErrorMessage(err);
     } finally {
       loading.value = false;
     }
