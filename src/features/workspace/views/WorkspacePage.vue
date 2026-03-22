@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useWorkspaceStore } from "../../../stores/useWorkspaceStore";
+import { ROUTE_NAMES } from "@/core/constants/route-names";
 import { storeToRefs } from "pinia";
 import JobPostingRow from "../components/JobPostingRow.vue";
 import InterviewSlot from "../components/InterviewSlot.vue";
@@ -72,7 +73,7 @@ onMounted(() => {
               Lịch phỏng vấn
             </button>
             <button
-              @click="$router.push({ name: 'JobCreate' })"
+              @click="$router.push({ name: ROUTE_NAMES.JOB_CREATE })"
               class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold"
             >
               Tạo Job mới
@@ -247,7 +248,7 @@ onMounted(() => {
                   Tin tuyển dụng nổi bật
                 </h3>
                 <button
-                  @click.prevent="$router.push({ name: 'Pipeline' })"
+                  @click.prevent="$router.push({ name: ROUTE_NAMES.PIPELINE })"
                   class="text-sm text-brand font-semibold hover:underline"
                 >
                   Xem tất cả

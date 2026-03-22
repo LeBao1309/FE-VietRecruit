@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { ROUTE_NAMES } from "@/core/constants/route-names";
 import type { JobWithDetails } from "../types";
 
 defineProps<{
@@ -23,7 +24,7 @@ const statusLabels = {
 
 <template>
   <div
-    @click="router.push({ name: 'Pipeline' })"
+    @click="router.push({ name: ROUTE_NAMES.PIPELINE })"
     class="flex items-center justify-between p-4 bg-white border border-border rounded-xl hover:shadow-hover hover:border-brand-muted transition-all group cursor-pointer"
   >
     <div class="flex items-start gap-4">

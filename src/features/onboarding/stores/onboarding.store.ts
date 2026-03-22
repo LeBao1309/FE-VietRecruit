@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ROUTE_NAMES } from '@/core/constants/route-names'
 import { onboardingService } from '@/features/onboarding/services/onboarding.service'
 import { parseApiError } from '@/core/utils/error.utils'
 import type {
@@ -49,7 +50,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       companyProfile.value = await onboardingService.updateCompany(payload)
-      await router.push({ name: 'Workspace' })
+      await router.push({ name: ROUTE_NAMES.WORKSPACE })
       return true
     } catch (err) {
       handleApiError(err)
@@ -78,7 +79,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       candidateProfile.value = await onboardingService.updateCandidateProfile(payload)
-      await router.push({ name: 'Workspace' })
+      await router.push({ name: ROUTE_NAMES.WORKSPACE })
       return true
     } catch (err) {
       handleApiError(err)

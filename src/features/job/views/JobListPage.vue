@@ -5,6 +5,7 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ROUTE_NAMES } from '@/core/constants/route-names'
 import { storeToRefs } from 'pinia'
 import { Plus, Briefcase, AlertTriangle } from 'lucide-vue-next'
 import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue'
@@ -72,7 +73,7 @@ async function handleClose(id: string): Promise<void> {
 }
 
 function goToCreate(): void {
-  router.push({ name: 'JobCreate' })
+  router.push({ name: ROUTE_NAMES.JOB_CREATE })
 }
 </script>
 
@@ -90,7 +91,7 @@ function goToCreate(): void {
         >
           <div>
             <nav class="flex text-sm text-text-muted mb-2 font-medium">
-              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: 'Workspace' })">
+              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: ROUTE_NAMES.WORKSPACE })">
                 Workspace
               </span>
               <span class="mx-2">/</span>

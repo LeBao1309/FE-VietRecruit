@@ -2,6 +2,7 @@
 import { getErrorMessage } from '@/core/utils/error'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ROUTE_NAMES } from '@/core/constants/route-names'
 import { applicationService } from '../services/application.service'
 import ApplicationStatusBadge from '../components/ApplicationStatusBadge.vue'
 import StatusTimeline from '../components/StatusTimeline.vue'
@@ -12,6 +13,14 @@ import type { ApplicationResponse, ApplicationStatusHistoryResponse, InterviewRe
 const route = useRoute()
 const router = useRouter()
 const id = route.params.id as string
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.go(-1)
+  } else {
+    router.push({ name: ROUTE_NAMES.MY_APPLICATIONS })
+  }
+}
 
 const application = ref<ApplicationResponse | null>(null)
 const history = ref<ApplicationStatusHistoryResponse[]>([])
@@ -46,7 +55,7 @@ onMounted(() => loadData())
 <template>
   <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <button @click="router.back()" class="mb-6 flex items-center text-sm font-medium text-gray-500 hover:text-indigo-600 transition">
+      <button @click="goBack()" class="mb-6 flex items-center text-sm font-medium text-gray-500 hover:text-indigo-600 transition">
         <svg class="mr-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
         Trở về danh sách
       </button>
