@@ -16,7 +16,7 @@ const navItems = [
     id: "pipeline",
     label: "Kênh tuyển dụng",
     icon: Users,
-    to: "/workspace/applications",
+    to: "/workspace/pipeline",
   },
   { id: "analytics", label: "Phân tích", icon: BarChart3, to: "" },
   {
