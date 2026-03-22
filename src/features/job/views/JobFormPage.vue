@@ -5,6 +5,7 @@
 
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { ROUTE_NAMES } from '@/core/constants/route-names'
 import DOMPurify from 'dompurify'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-vue-next'
 import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue'
@@ -95,7 +96,7 @@ async function handleSubmit(): Promise<void> {
   try {
     await jobStore.createJob(result.data)
     toast.success('Job created successfully and saved as Draft.')
-    router.push({ name: 'JobList' })
+    router.push({ name: ROUTE_NAMES.JOB_LIST })
   } catch {
     submitError.value =
       jobStore.error ?? 'Failed to create the job. Please try again.'
@@ -103,7 +104,7 @@ async function handleSubmit(): Promise<void> {
 }
 
 function handleCancel(): void {
-  router.push({ name: 'JobList' })
+  router.push({ name: ROUTE_NAMES.JOB_LIST })
 }
 </script>
 
@@ -126,11 +127,11 @@ function handleCancel(): void {
           </button>
           <div>
             <nav class="flex text-sm text-text-muted mb-1 font-medium">
-              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: 'Workspace' })">
+              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: ROUTE_NAMES.WORKSPACE })">
                 Workspace
               </span>
               <span class="mx-2">/</span>
-              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: 'JobList' })">
+              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: ROUTE_NAMES.JOB_LIST })">
                 Job Management
               </span>
               <span class="mx-2">/</span>

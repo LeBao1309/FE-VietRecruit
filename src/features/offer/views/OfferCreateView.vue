@@ -3,6 +3,7 @@
 import { useToast } from 'vue-toastification';
 const toast = useToast();
 import { useRouter, useRoute } from 'vue-router';
+import { ROUTE_NAMES } from '@/core/constants/route-names';
 import { useOfferStore } from '../stores/offer.store';
 import OfferForm from '../components/OfferForm.vue';
 import type { CreateOfferDTO } from '../types/offer.schema';
@@ -18,7 +19,7 @@ const applicationId = route.query.applicationId as string;
 onMounted(() => {
   if (!applicationId) {
     toast.error("Application ID is missing. Returning to dashboard.");
-    router.push({ name: 'OfferDashboard' });
+    router.push({ name: ROUTE_NAMES.OFFER_DASHBOARD });
   }
 });
 
@@ -26,13 +27,13 @@ const handleCreate = async (data: CreateOfferDTO) => {
   if (!applicationId) return;
   try {
     await offerStore.createOffer(applicationId, data);
-    router.push({ name: 'OfferDashboard' });
+    router.push({ name: ROUTE_NAMES.OFFER_DASHBOARD });
   } catch (error) {
     }
 };
 
 const handleCancel = () => {
-  router.push({ name: 'OfferDashboard' });
+  router.push({ name: ROUTE_NAMES.OFFER_DASHBOARD });
 };
 </script>
 

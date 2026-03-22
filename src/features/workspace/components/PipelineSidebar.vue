@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LayoutDashboard, Users, BarChart3, Settings } from "lucide-vue-next";
 import { useToast } from "vue-toastification";
+import { ROUTE_NAMES } from "@/core/constants/route-names";
 
 const toast = useToast();
 const showAlert = (msg: string) => toast.info(msg);
@@ -10,20 +11,23 @@ const navItems = [
     id: "dashboard",
     label: "Tổng quan",
     icon: LayoutDashboard,
-    to: "/workspace",
+    to: { name: ROUTE_NAMES.WORKSPACE },
+    isDashboard: true,
   },
   {
     id: "pipeline",
     label: "Kênh tuyển dụng",
     icon: Users,
-    to: "/workspace/pipeline",
+    to: { name: ROUTE_NAMES.PIPELINE },
+    isDashboard: false,
   },
-  { id: "analytics", label: "Phân tích", icon: BarChart3, to: "" },
+  { id: "analytics", label: "Phân tích", icon: BarChart3, to: "", isDashboard: false },
   {
     id: "settings",
     label: "Cài đặt công việc",
     icon: Settings,
     to: "",
+    isDashboard: false,
   },
 ];
 
@@ -65,13 +69,13 @@ const stats = [
           "
           :class="[
             'flex items-center gap-3 px-4 py-2.5 text-sm transition-colors relative',
-            (item.to === '/workspace' ? isExactActive : isActive)
+            (item.isDashboard ? isExactActive : isActive)
               ? 'text-[#008C8C] font-medium bg-[#008C8C]/5'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
           ]"
         >
           <div
-            v-if="item.to === '/workspace' ? isExactActive : isActive"
+            v-if="item.isDashboard ? isExactActive : isActive"
             class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#008C8C]"
           ></div>
           <component :is="item.icon" class="w-4 h-4" />

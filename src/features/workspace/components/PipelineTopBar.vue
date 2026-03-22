@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { ROUTE_NAMES } from "@/core/constants/route-names";
 import { mockJobs } from "../mocks/pipeline.mock";
 import { useToast } from "vue-toastification";
 
@@ -16,7 +17,7 @@ const showAlert = (msg: string) => toast.info(msg);
     <!-- Left -->
     <div class="flex items-center gap-4">
       <button
-        @click="router.push({ name: 'Workspace' })"
+        @click="router.push({ name: ROUTE_NAMES.WORKSPACE })"
         class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
       >
         Quay lại
