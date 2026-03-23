@@ -144,17 +144,19 @@ export const useAuthStore = defineStore('auth', () => {
    *  Strips confirmPassword before sending — it's UI-only
    *  On success → store email → navigate to OTP verification page
    */
-  async function register(payload: RegisterApiPayload & { confirmPassword: string }): Promise<void> {
+  async function register(payload: RegisterApiPayload & { confirmPassword: string }): Promise<boolean> {
     clearError()
     isLoading.value = true
     const { confirmPassword: _, ...apiPayload } = payload
     try {
       await authService.register(apiPayload)
-      // Store email so VerifyOtpPage knows which email to verify
+      // Store email so OTP component knows which email to verify
       pendingVerificationEmail.value = payload.email
-      await router.push({ name: 'VerifyOtp' })
+      // Removed router.push, letting the component handle step transition
+      return true
     } catch (err) {
       handleApiError(err)
+      return false
     } finally {
       isLoading.value = false
     }

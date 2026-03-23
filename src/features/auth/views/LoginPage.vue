@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { RouterLink } from "vue-router";
+import { ref, watch, computed } from "vue";
+import { RouterLink, useRoute } from "vue-router";
 
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
 import { useAuth } from "@/features/auth/composables/useAuth";
@@ -12,6 +12,11 @@ const auth = useAuth();
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
+
+const route = useRoute();
+const showRegisteredBanner = computed(() =>
+  route.query.registered === '1' || route.query.verified === 'true' || route.query.invited === 'true'
+);
 
 // ── Validation ──
 const fieldErrors = ref<{ email?: string; password?: string }>({});
@@ -85,6 +90,15 @@ const valueProps = [
     <p class="text-text-secondary text-sm mb-8">
       Tiếp tục với tài khoản VietRecruit của bạn
     </p>
+
+    <!-- Success banner for new registrations -->
+    <div
+      v-if="showRegisteredBanner"
+      class="mb-6 p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm flex items-center gap-2 font-medium"
+      role="status"
+    >
+      <span class="text-emerald-500">✓</span> Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.
+    </div>
 
     <!-- API error alert -->
     <div

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { adminMockService } from '../services/admin-mock.service'
+import { adminService } from '../services/admin.service'
 import type { AdminCompany, AdminUser, GlobalTransaction } from '../types/admin.dto'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -15,7 +15,7 @@ export const useAdminStore = defineStore('admin', () => {
     isLoading.value = true
     error.value = null
     try {
-      companies.value = await adminMockService.getCompanies()
+      companies.value = await adminService.getCompanies()
     } catch (err: any) {
       error.value = err.message
     } finally {
@@ -27,7 +27,7 @@ export const useAdminStore = defineStore('admin', () => {
     isLoading.value = true
     error.value = null
     try {
-      users.value = await adminMockService.getUsers()
+      users.value = await adminService.getUsers()
     } catch (err: any) {
       error.value = err.message
     } finally {
@@ -39,7 +39,7 @@ export const useAdminStore = defineStore('admin', () => {
     isLoading.value = true
     error.value = null
     try {
-      const updatedUser = await adminMockService.toggleUserBan(userId, isBanned)
+      const updatedUser = await adminService.toggleUserBan(userId, isBanned)
       const index = users.value.findIndex(u => u.id === userId)
       if (index !== -1) {
         users.value[index] = updatedUser
@@ -55,7 +55,7 @@ export const useAdminStore = defineStore('admin', () => {
     isLoading.value = true
     error.value = null
     try {
-      transactions.value = await adminMockService.getTransactions()
+      transactions.value = await adminService.getTransactions()
     } catch (err: any) {
       error.value = err.message
     } finally {
