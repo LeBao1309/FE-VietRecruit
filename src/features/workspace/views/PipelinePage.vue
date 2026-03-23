@@ -13,6 +13,7 @@ import PipelineTopBar from '../components/PipelineTopBar.vue'
 import PipelineSidebar from '../components/PipelineSidebar.vue'
 import KanbanColumn from '@/features/pipeline/components/KanbanColumn.vue'
 import ApplicationDetailDrawer from '@/features/pipeline/components/ApplicationDetailDrawer.vue'
+import { ROUTE_NAMES } from '@/core/constants/route-names'
 
 // ── Store ────────────────────────────────────────────────────────────────────
 const store = usePipelineStore()
@@ -108,9 +109,17 @@ onMounted(() => {
         <!-- No job selected -->
         <div
           v-if="!jobId && !isLoading"
-          class="flex items-center justify-center h-64 text-text-muted text-sm"
+          class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-border rounded-xl bg-white"
         >
-          Select a job posting from the sidebar to view its pipeline.
+          <p class="text-text-muted text-sm mb-4">
+            Vui lòng chọn một công việc từ Danh sách Job để xem Kênh tuyển dụng (Pipeline).
+          </p>
+          <button
+            @click="$router.push({ name: ROUTE_NAMES.JOB_LIST })"
+            class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold"
+          >
+            Đi đến Danh sách Job
+          </button>
         </div>
 
         <!-- Loading skeletons -->

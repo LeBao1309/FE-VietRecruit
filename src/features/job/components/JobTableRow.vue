@@ -6,6 +6,10 @@
 import { CalendarDays } from 'lucide-vue-next'
 import JobStatusBadge from '@/features/job/components/JobStatusBadge.vue'
 import type { Job } from '@/features/workspace/types'
+import { useRouter } from 'vue-router'
+import { ROUTE_NAMES } from '@/core/constants/route-names'
+
+const router = useRouter()
 
 const props = defineProps<{
   job: Job
@@ -45,7 +49,8 @@ function formatDate(dateStr?: string | null): string {
 
 <template>
   <tr
-    class="border-b border-border last:border-0 hover:bg-surface-soft transition-colors group"
+    @click="router.push({ name: ROUTE_NAMES.PIPELINE, query: { jobId: props.job.id } })"
+    class="border-b border-border last:border-0 hover:bg-surface-soft transition-colors group cursor-pointer"
   >
     <!-- Title + description preview -->
     <td class="px-4 py-3">
@@ -86,7 +91,7 @@ function formatDate(dateStr?: string | null): string {
         <!-- Publish: only for DRAFT -->
         <button
           v-if="props.job.status === 'DRAFT'"
-          @click="emit('publish', props.job.id)"
+          @click.stop="emit('publish', props.job.id)"
           class="px-3 py-1 text-xs font-semibold bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm"
         >
           Publish
@@ -95,7 +100,7 @@ function formatDate(dateStr?: string | null): string {
         <!-- Close: only for PUBLISHED -->
         <button
           v-if="props.job.status === 'PUBLISHED'"
-          @click="emit('close', props.job.id)"
+          @click.stop="emit('close', props.job.id)"
           class="px-3 py-1 text-xs font-semibold bg-white text-danger border border-danger/30 rounded-lg hover:bg-danger-light transition-colors"
         >
           Close

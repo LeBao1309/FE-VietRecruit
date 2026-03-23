@@ -248,7 +248,7 @@ onMounted(() => {
                   Tin tuyển dụng nổi bật
                 </h3>
                 <button
-                  @click.prevent="$router.push({ name: ROUTE_NAMES.PIPELINE })"
+                  @click.prevent="$router.push({ name: ROUTE_NAMES.JOB_LIST })"
                   class="text-sm text-brand font-semibold hover:underline"
                 >
                   Xem tất cả
