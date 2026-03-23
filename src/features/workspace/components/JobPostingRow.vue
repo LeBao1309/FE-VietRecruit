@@ -24,7 +24,7 @@ const statusLabels = {
 
 <template>
   <div
-    @click="router.push({ name: ROUTE_NAMES.PIPELINE })"
+    @click="router.push({ name: ROUTE_NAMES.PIPELINE, query: { jobId: job.id } })"
     class="flex items-center justify-between p-4 bg-white border border-border rounded-xl hover:shadow-hover hover:border-brand-muted transition-all group cursor-pointer"
   >
     <div class="flex items-start gap-4">
