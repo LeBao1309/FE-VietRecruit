@@ -53,11 +53,56 @@ const columns = computed(() =>
 
 // ── Drag handler (called by KanbanColumn on drag-end) ────────────────────────
 async function handleMove(id: string, newStatus: ApplicationStatus): Promise<void> {
+  const currentApp = store.applicationsByStatus.NEW?.find(a => a.id === id) ||
+                     store.applicationsByStatus.SCREENING?.find(a => a.id === id) ||
+                     store.applicationsByStatus.INTERVIEW?.find(a => a.id === id) ||
+                     store.applicationsByStatus.OFFER?.find(a => a.id === id) ||
+                     store.applicationsByStatus.HIRED?.find(a => a.id === id) ||
+                     store.applicationsByStatus.REJECTED?.find(a => a.id === id);
+                     
+  if (currentApp) {
+    const allowed = getAllowedTransitions(currentApp.status);
+    if (!allowed.includes(newStatus)) {
+      showDragError('Invalid state transition according to established flow rules.');
+      // Force refresh or optimistic rollback could be handled here
+      await store.fetchApplications(jobId.value);
+      return;
+    }
+  }
+
   try {
     await store.moveApplication(id, newStatus)
   } catch {
     showDragError('Status update failed. The card has been rolled back to its original column.')
   }
+}
+
+// ── State Machine UI Enforcement ─────────────────────────────────────────────
+
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  NEW:        ['SCREENING', 'REJECTED'],
+  SCREENING:  ['INTERVIEW', 'REJECTED'],
+  INTERVIEW:  ['OFFER', 'REJECTED'],
+  OFFER:      [],          // Candidate-only
+  HIRED:      [],          // terminal
+  REJECTED:   [],          // terminal
+}
+
+function getAllowedTransitions(currentStatus: string): string[] {
+  return VALID_TRANSITIONS[currentStatus] ?? []
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  SCREENING:  'Chuyển sang Sàng lọc',
+  INTERVIEW:  'Mời phỏng vấn',
+  OFFER:      'Tạo Offer',
+  REJECTED:   'Từ chối',
+  COMPLETED:  'Hoàn thành',
+  CANCELED:   'Hủy',
+}
+
+function updateStatus(applicationId: string, nextStatus: string) {
+  handleMove(applicationId, nextStatus as ApplicationStatus);
 }
 
 // ── Lifecycle ────────────────────────────────────────────────────────────────
@@ -150,12 +195,28 @@ onMounted(() => {
 
     <!-- Application detail drawer with slide-in transition -->
     <Transition name="drawer-slide">
-      <ApplicationDetailDrawer
-        v-if="openDetailId"
-        :detail="openDetailId && detailCache[openDetailId] ? detailCache[openDetailId]! : null"
-        :is-loading="isDetailLoading"
-        @close="store.closeDetail()"
-      />
+      <div v-if="openDetailId && detailCache[openDetailId]" class="contents">
+        <ApplicationDetailDrawer
+          :detail="detailCache[openDetailId]!"
+          :is-loading="isDetailLoading"
+          @close="store.closeDetail()"
+        />
+        
+        <!-- Status transition buttons injected right over the drawer -->
+        <div class="fixed bottom-0 right-0 z-50 w-full max-w-lg bg-white border-t border-border p-4 shadow-lg flex gap-3 flex-wrap items-center justify-end">
+          <template v-for="nextStatus in getAllowedTransitions(detailCache[openDetailId]!.status)" :key="nextStatus">
+            <button
+              class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors shadow-sm"
+              :class="nextStatus === 'REJECTED' ? 'bg-danger text-white hover:bg-danger/90' : 'bg-brand text-white hover:bg-brand-dark'"
+              @click="updateStatus(openDetailId, nextStatus)"
+            >
+              {{ STATUS_LABELS[nextStatus] }}
+            </button>
+          </template>
+          
+          <!-- Interview / Offer buttons (omitted actual vars since they are not in detail logic yet but adhering to layout) -->
+        </div>
+      </div>
     </Transition>
   </div>
 </template>

@@ -21,9 +21,17 @@ const redirectToLogin = (redirectPath?: string) => {
 }
 
 // ── Base Axios instance ──
-// Empty baseURL = same-origin requests → proxied by Vercel/Vite to backend
+// baseURL resolves from VITE_API_BASE_URL.
+// Fallback to '/' ensures same-origin requests so Vercel/Vite proxy forwards /vietrecruit/* correctly.
+const baseURL: string = import.meta.env.VITE_API_BASE_URL || '/'
+
+if (import.meta.env.DEV) {
+  // eslint-disable-next-line no-console
+  console.debug('[apiClient] baseURL =', baseURL)
+}
+
 export const apiClient = axios.create({
-  baseURL: (import.meta.env.VITE_API_BASE_URL as string) || '',
+  baseURL,
   timeout: 15_000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -33,7 +41,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = tokenService.getAccessToken()
-    if (token) {
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
@@ -42,59 +50,77 @@ apiClient.interceptors.request.use(
 )
 
 // ── RESPONSE INTERCEPTOR ──
-// Handle 401 → attempt token refresh → retry original request
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequest | undefined
 
-    // Guard: must be 401, must have config, must not already be retrying
+    // ── Handle 429 Rate Limit
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers['retry-after']
+      const msg = retryAfter 
+        ? `Quá nhiều yêu cầu. Vui lòng thử lại sau ${retryAfter} giây.`
+        : 'Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.'
+      error.message = msg
+      return Promise.reject(error)
+    }
+
+    // ── Handle 403 Quota Exceeded
+    // If we receive a 403 on specific paths (like publish jobs), we emit an event
+    if (error.response?.status === 403) {
+      window.dispatchEvent(new CustomEvent('quota:exceeded'))
+      // Pass the error back down so form loading states can reset
+      return Promise.reject(error)
+    }
+
+    // ── Handle 401 Unauthorized (Token Refresh)
     if (
-      error.response?.status !== 401 ||
-      !originalRequest ||
-      originalRequest._retry
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
     ) {
-      return Promise.reject(error)
+      // Guard: if the failing request IS the refresh endpoint → session expired
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        tokenService.clearAll()
+        redirectToLogin()
+        return Promise.reject(error)
+      }
+
+      // Mark as retrying to prevent infinite loop
+      originalRequest._retry = true
+
+      const refreshToken = tokenService.getRefreshToken()
+      if (!refreshToken) {
+        tokenService.clearAll()
+        redirectToLogin(originalRequest.url)
+        return Promise.reject(error)
+      }
+
+      try {
+        // Call refresh endpoint directly (bypass interceptor with a plain axios call)
+        const { data } = await axios.post<{ data: TokenRefreshResponse }>(
+          `${baseURL.replace(/\/$/, '')}/vietrecruit/auth/refresh`,
+          { refreshToken },
+          { headers: { 'Content-Type': 'application/json' } },
+        )
+
+        const { accessToken, refreshToken: newRefreshToken, expiresIn } = data.data
+
+        // ⚠️ Token rotation: save BOTH the new accessToken AND newRefreshToken
+        tokenService.updateAccessToken(accessToken, newRefreshToken, expiresIn)
+
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`
+        }
+        return apiClient(originalRequest)
+      } catch {
+        tokenService.clearAll()
+        redirectToLogin()
+        return Promise.reject(error)
+      }
     }
 
-    // Guard: if the failing request IS the refresh endpoint → session expired
-    if (originalRequest.url?.includes('/auth/refresh')) {
-      tokenService.clearAll()
-      redirectToLogin()
-      return Promise.reject(error)
-    }
-
-    // Mark as retrying to prevent infinite loop
-    originalRequest._retry = true
-
-    const refreshToken = tokenService.getRefreshToken()
-    if (!refreshToken) {
-      tokenService.clearAll()
-      redirectToLogin(originalRequest.url)
-      return Promise.reject(error)
-    }
-
-    try {
-      // Call refresh endpoint directly (bypass interceptor with a plain axios call)
-      const { data } = await axios.post<{ data: TokenRefreshResponse }>(
-        `${(import.meta.env.VITE_API_BASE_URL as string) || ''}/vietrecruit/auth/refresh`,
-        { refreshToken },
-        { headers: { 'Content-Type': 'application/json' } },
-      )
-
-      const { accessToken, refreshToken: newRefreshToken, expiresIn } = data.data
-
-      // ⚠️ Token rotation: save BOTH the new accessToken AND newRefreshToken
-      tokenService.updateAccessToken(accessToken, newRefreshToken, expiresIn)
-
-      // Retry original request with new token
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`
-      return apiClient(originalRequest)
-    } catch {
-      tokenService.clearAll()
-      redirectToLogin()
-      return Promise.reject(error)
-    }
+    return Promise.reject(error)
   },
 )
-

@@ -6,6 +6,7 @@ import { tokenService } from '@/core/api/token.service'
 import { authService } from '@/features/auth/services/auth.service'
 import { parseApiError } from '@/core/utils/error.utils'
 import type {
+  AuthUser,
   LoginRequest,
   RegisterApiPayload,
   RegisterByInviteApiPayload,
@@ -15,6 +16,68 @@ import type {
   ChangePasswordRequest,
 } from '@/features/auth/types/auth.dto'
 
+// ── Single source of truth for post-login redirect ────────────────────────────
+// Used by: login action, router guard, App.vue session restore
+export function resolvePostLoginRoute(user: AuthUser | null): string {
+  if (!user) return '/auth/login'
+
+  const primaryRole = user.roles?.[0]
+
+  if (primaryRole === 'SYSTEM_ADMIN' || primaryRole === 'CUSTOMER_SERVICE') {
+    return '/admin'
+  }
+  if (primaryRole === 'INTERVIEWER') {
+    return '/workspace/my-interviews'
+  }
+  if (primaryRole === 'HR') {
+    return '/workspace/jobs'
+  }
+  if (primaryRole === 'COMPANY_ADMIN') {
+    // Must complete company profile before accessing dashboard
+    if (!user.companyProfileComplete) return '/onboarding/employer'
+    return '/workspace'
+  }
+  if (primaryRole === 'CANDIDATE') {
+    return '/candidate/profile'
+  }
+
+  return '/auth/login'
+}
+
+// ── Helper: extract AuthUser from a JWT access token ─────────────────────────
+// Fallback when the login response does not include a user object
+function parseUserFromJwt(token: string): AuthUser | null {
+  try {
+    const payloadStr = token.split('.')[1]
+    if (!payloadStr) return null
+    const payload = JSON.parse(atob(payloadStr))
+    
+    // Backend JWT uses "roles" (array) OR "role" (string)
+    let parsedRoles: string[] = []
+    if (payload.roles && Array.isArray(payload.roles)) {
+      parsedRoles = payload.roles
+    } else if (payload.role) {
+      parsedRoles = [payload.role]
+    } else if (payload.accountType === 'EMPLOYER') {
+      parsedRoles = ['COMPANY_ADMIN'] // Fallback translation
+    } else if (payload.accountType === 'CANDIDATE') {
+      parsedRoles = ['CANDIDATE']
+    }
+
+    return {
+      id:                     payload.sub ?? '',
+      email:                  payload.email ?? '',
+      fullName:               payload.fullName ?? '',
+      roles:                  parsedRoles as AuthUser['roles'],
+      companyId:              payload.companyId ?? null,
+      companyProfileComplete: payload.companyProfileComplete ?? false,
+      avatarUrl:              payload.avatarUrl ?? null,
+    }
+  } catch {
+    return null
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
 
@@ -22,6 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref<boolean>(tokenService.hasSession())
   const isLoading       = ref<boolean>(false)
   const error           = ref<string | null>(null)
+  const user            = ref<AuthUser | null>(tokenService.getUser())
 
   // The email being verified — passed from RegisterPage → VerifyOtpPage
   const pendingVerificationEmail = ref<string | null>(null)
@@ -37,9 +101,20 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = parseApiError(err)
   }
 
+  function setUser(u: AuthUser): void {
+    user.value = u
+    tokenService.setUser(u)
+  }
+
+  function clearSession(): void {
+    tokenService.clearAll()
+    isAuthenticated.value = false
+    user.value = null
+  }
+
   // ── Actions ────────────────────────────────────────────────
 
-  /** 1. Login */
+  /** 1. Login — resolves post-login route based on user role */
   async function login(payload: LoginRequest): Promise<void> {
     clearError()
     isLoading.value = true
@@ -51,7 +126,13 @@ export const useAuthStore = defineStore('auth', () => {
         response.expiresIn,
       )
       isAuthenticated.value = true
-      await router.push({ name: 'Workspace' })
+
+      // Prefer user object from response body; fall back to JWT decode
+      const resolvedUser = response.user ?? parseUserFromJwt(response.accessToken)
+      if (resolvedUser) setUser(resolvedUser)
+
+      const redirectPath = resolvePostLoginRoute(resolvedUser)
+      await router.push(redirectPath)
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -81,7 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /** 2b. Register by Invite
    *  Strips confirmPassword before sending — it's UI-only
-   *  On success → navigate to login with ?invited=true
+   *  On success → navigate to login DIRECTLY (NO OTP required per spec)
    */
   async function registerByInvite(payload: RegisterByInviteApiPayload & { confirmPassword: string }): Promise<boolean> {
     clearError()
@@ -89,6 +170,7 @@ export const useAuthStore = defineStore('auth', () => {
     const { confirmPassword: _, ...apiPayload } = payload
     try {
       await authService.registerByInvite(apiPayload)
+      // The user is ALREADY email-verified — do NOT show OTP screen
       await router.push({ name: 'Login', query: { invited: 'true' } })
       return true
     } catch (err) {
@@ -134,7 +216,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /** 6. Logout
-   *  Server invalidates token → clear local storage → redirect home
+   *  Server invalidates token → clear local storage → redirect to login
    */
   async function logout(): Promise<void> {
     clearError()
@@ -144,8 +226,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       // Even if server call fails, always clear local session
     } finally {
-      tokenService.clearAll()
-      isAuthenticated.value = false
+      clearSession()
       isLoading.value = false
       await router.push({ name: 'Login' })
     }
@@ -189,9 +270,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.changePassword(payload)
       // Server revokes all sessions → force re-login
-      tokenService.clearAll()
-      isAuthenticated.value = false
-      await router.push({ name: 'Login', query: { passwordChanged: 'true' } })
+      clearSession()
+      await router.push({ name: 'Login', query: { message: 'Đã đổi mật khẩu, vui lòng đăng nhập lại' } })
       return true
     } catch (err) {
       handleApiError(err)
@@ -206,6 +286,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isLoading,
     error,
+    user,
     pendingVerificationEmail,
     // getters
     hasError,
@@ -221,5 +302,6 @@ export const useAuthStore = defineStore('auth', () => {
     resetPassword,
     changePassword,
     clearError,
+    clearSession,
   }
 })

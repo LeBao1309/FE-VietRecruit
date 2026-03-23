@@ -13,6 +13,7 @@ import type { CreateJobRequest, JobListParams } from '@/features/job/types/job.d
 export const useJobStore = defineStore('job', () => {
   // ── State ────────────────────────────────────────────────────────────────
   const jobs = ref<Job[]>([])
+  const currentJob = ref<Job | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const totalPages = ref(0)
@@ -128,6 +129,7 @@ export const useJobStore = defineStore('job', () => {
   return {
     // State
     jobs,
+    currentJob,
     isLoading,
     error,
     totalPages,
