@@ -21,9 +21,17 @@ const redirectToLogin = (redirectPath?: string) => {
 }
 
 // ── Base Axios instance ──
-// Empty baseURL = same-origin requests → proxied by Vercel/Vite to backend
+// baseURL resolves from VITE_API_BASE_URL.
+// Fallback to '/' ensures same-origin requests so Vercel/Vite proxy forwards /vietrecruit/* correctly.
+const baseURL: string = (import.meta.env.VITE_API_BASE_URL as string) || '/'
+
+if (import.meta.env.DEV) {
+  // eslint-disable-next-line no-console
+  console.debug('[apiClient] baseURL =', baseURL)
+}
+
 export const apiClient = axios.create({
-  baseURL: (import.meta.env.VITE_API_BASE_URL as string) || '',
+  baseURL,
   timeout: 15_000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -77,7 +85,7 @@ apiClient.interceptors.response.use(
     try {
       // Call refresh endpoint directly (bypass interceptor with a plain axios call)
       const { data } = await axios.post<{ data: TokenRefreshResponse }>(
-        `${(import.meta.env.VITE_API_BASE_URL as string) || ''}/vietrecruit/auth/refresh`,
+        `${baseURL.replace(/\/$/, '')}/vietrecruit/auth/refresh`,
         { refreshToken },
         { headers: { 'Content-Type': 'application/json' } },
       )

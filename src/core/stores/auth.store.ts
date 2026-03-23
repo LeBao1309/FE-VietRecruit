@@ -6,6 +6,7 @@ import { tokenService } from '@/core/api/token.service'
 import { authService } from '@/features/auth/services/auth.service'
 import { parseApiError } from '@/core/utils/error.utils'
 import type {
+  AuthUser,
   LoginRequest,
   RegisterApiPayload,
   RegisterByInviteApiPayload,
@@ -15,6 +16,50 @@ import type {
   ChangePasswordRequest,
 } from '@/features/auth/types/auth.dto'
 
+// ── Single source of truth for post-login redirect ────────────────────────────
+// Used by: login action, router guard, App.vue session restore
+export function resolvePostLoginRoute(user: AuthUser | null): string {
+  if (!user) return '/auth/login'
+
+  // Invited staff — role takes priority over accountType
+  if (user.role === 'HR' || user.role === 'INTERVIEWER') {
+    return '/workspace/pipeline'
+  }
+
+  // Employer — check if company profile is complete
+  if (user.accountType === 'EMPLOYER') {
+    if (!user.companyProfileComplete) return '/onboarding/employer'
+    return '/workspace'
+  }
+
+  // Candidate
+  if (user.accountType === 'CANDIDATE') {
+    return '/candidate/profile'
+  }
+
+  return '/auth/login'
+}
+
+// ── Helper: extract AuthUser from a JWT access token ─────────────────────────
+// Fallback when the login response does not include a user object
+function parseUserFromJwt(token: string): AuthUser | null {
+  try {
+    const payloadStr = token.split('.')[1]
+    if (!payloadStr) return null
+    const payload = JSON.parse(atob(payloadStr))
+    return {
+      id:                     payload.sub ?? '',
+      email:                  payload.email ?? '',
+      fullName:               payload.fullName ?? '',
+      accountType:            payload.accountType ?? 'EMPLOYER',
+      role:                   payload.role ?? null,
+      companyProfileComplete: payload.companyProfileComplete ?? false,
+    } satisfies AuthUser
+  } catch {
+    return null
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
 
@@ -22,6 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref<boolean>(tokenService.hasSession())
   const isLoading       = ref<boolean>(false)
   const error           = ref<string | null>(null)
+  const user            = ref<AuthUser | null>(tokenService.getUser())
 
   // The email being verified — passed from RegisterPage → VerifyOtpPage
   const pendingVerificationEmail = ref<string | null>(null)
@@ -37,9 +83,20 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = parseApiError(err)
   }
 
+  function setUser(u: AuthUser): void {
+    user.value = u
+    tokenService.setUser(u)
+  }
+
+  function clearSession(): void {
+    tokenService.clearAll()
+    isAuthenticated.value = false
+    user.value = null
+  }
+
   // ── Actions ────────────────────────────────────────────────
 
-  /** 1. Login */
+  /** 1. Login — resolves post-login route based on user role */
   async function login(payload: LoginRequest): Promise<void> {
     clearError()
     isLoading.value = true
@@ -51,7 +108,13 @@ export const useAuthStore = defineStore('auth', () => {
         response.expiresIn,
       )
       isAuthenticated.value = true
-      await router.push({ name: 'Workspace' })
+
+      // Prefer user object from response body; fall back to JWT decode
+      const resolvedUser = response.user ?? parseUserFromJwt(response.accessToken)
+      if (resolvedUser) setUser(resolvedUser)
+
+      const redirectPath = resolvePostLoginRoute(resolvedUser)
+      await router.push(redirectPath)
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -134,7 +197,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /** 6. Logout
-   *  Server invalidates token → clear local storage → redirect home
+   *  Server invalidates token → clear local storage → redirect to login
    */
   async function logout(): Promise<void> {
     clearError()
@@ -144,8 +207,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       // Even if server call fails, always clear local session
     } finally {
-      tokenService.clearAll()
-      isAuthenticated.value = false
+      clearSession()
       isLoading.value = false
       await router.push({ name: 'Login' })
     }
@@ -189,8 +251,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.changePassword(payload)
       // Server revokes all sessions → force re-login
-      tokenService.clearAll()
-      isAuthenticated.value = false
+      clearSession()
       await router.push({ name: 'Login', query: { passwordChanged: 'true' } })
       return true
     } catch (err) {
@@ -206,6 +267,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isLoading,
     error,
+    user,
     pendingVerificationEmail,
     // getters
     hasError,
@@ -221,5 +283,6 @@ export const useAuthStore = defineStore('auth', () => {
     resetPassword,
     changePassword,
     clearError,
+    clearSession,
   }
 })

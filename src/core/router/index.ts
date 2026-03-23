@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from '@/core/router/routes'
 import { tokenService } from '@/core/api/token.service'
+import { resolvePostLoginRoute } from '@/core/stores/auth.store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,43 +13,55 @@ const router = createRouter({
 router.beforeEach((to, _from) => {
   const hasSession = tokenService.hasSession()
 
-  // Protected route → redirect to login
+  // ── 1. Guest-only pages — redirect logged-in users to their workspace ──
+  if (to.meta.guestOnly && hasSession) {
+    const user = tokenService.getUser()
+    return resolvePostLoginRoute(user)
+  }
+
+  // ── 2. Protected pages — redirect guests to login ──
   if (to.meta.requiresAuth && !hasSession) {
     return { name: 'Login', query: { redirect: to.fullPath } }
   }
 
-  // Guest-only route (login/register) → redirect to workspace if already logged in
-  if (to.meta.guestOnly && hasSession) {
-    return { name: 'Workspace' }
-  }
-
-  // RBAC checks
+  // ── 3. RBAC via JWT (for protected pages) ──
   if (to.meta.requiresAuth && hasSession) {
     const token = tokenService.getAccessToken()
-    let permissions: string[] = []
 
     if (token) {
       try {
         const payloadStr = token.split('.')[1]
         if (payloadStr) {
           const payload = JSON.parse(atob(payloadStr))
-          // Backend JWT uses "roles" (array), not "role" (string)
+          // Backend JWT uses "roles" (array) OR "role" (string)
           const userRoles: string[] = payload.roles || (payload.role ? [payload.role] : [])
-          permissions = payload.permissions || []
+          const permissions: string[] = payload.permissions || []
 
-          // Check Role — user must have at least one of the required roles
+          // Role check — user must have at least one of the required roles
           if (to.meta.roles && Array.isArray(to.meta.roles)) {
             const hasRole = to.meta.roles.some((r) => userRoles.includes(r))
             if (!hasRole) {
-              return { name: 'Workspace' }
+              // Redirect to correct workspace, not always employer
+              const user = tokenService.getUser()
+              return resolvePostLoginRoute(user)
             }
           }
 
-          // Check Permissions
+          // accountType check — e.g. candidate-only routes
+          if (to.meta.accountType && Array.isArray(to.meta.accountType)) {
+            const user = tokenService.getUser()
+            const type = user?.accountType ?? payload.accountType
+            if (!to.meta.accountType.includes(type)) {
+              return resolvePostLoginRoute(user)
+            }
+          }
+
+          // Permissions check
           if (to.meta.permissions && Array.isArray(to.meta.permissions)) {
-            const hasPermission = to.meta.permissions.every(p => permissions.includes(p))
+            const hasPermission = to.meta.permissions.every((p) => permissions.includes(p))
             if (!hasPermission) {
-              return { name: 'Workspace' }
+              const user = tokenService.getUser()
+              return resolvePostLoginRoute(user)
             }
           }
         }
@@ -58,7 +71,6 @@ router.beforeEach((to, _from) => {
     }
   }
 
-  // Explicit return true = allow navigation (Vue Router 4 style)
   return true
 })
 

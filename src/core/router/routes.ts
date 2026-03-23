@@ -83,7 +83,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/workspace/pipeline',
     name: 'Pipeline',
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN', 'INTERVIEWER'] },
   },
   // Interview & Scorecard (Module 6)
   {
@@ -153,7 +153,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/candidate/profile',
     name: 'CandidateProfile',
     component: () => import('@/features/candidate/views/CandidateProfilePage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, accountType: ['CANDIDATE'] },
   },
   {
     path: '/jobs',
@@ -171,13 +171,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/applications/mine',
     name: 'MyApplications',
     component: () => import('@/features/candidate/views/MyApplicationsPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, accountType: ['CANDIDATE'] },
   },
   {
     path: '/applications/:id',
     name: 'ApplicationDetail',
     component: () => import('@/features/candidate/views/ApplicationDetailPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, accountType: ['CANDIDATE'] },
   },
   // ── Admin routes ───────────────────────────────────────────
   {

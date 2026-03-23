@@ -3,6 +3,7 @@
 // All other files import from here — never access localStorage directly.
 
 import { STORAGE_KEYS } from '@/core/constants/storage-keys'
+import type { AuthUser } from '@/features/auth/types/auth.dto'
 
 export const tokenService = {
   /** Save both tokens after login or token rotation */
@@ -40,6 +41,19 @@ export const tokenService = {
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
     localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
     localStorage.removeItem(STORAGE_KEYS.EXPIRES_IN)
+    localStorage.removeItem(STORAGE_KEYS.USER)
+  },
+
+  /** Persist authenticated user to storage */
+  setUser(user: AuthUser): void {
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user))
+  },
+
+  /** Retrieve persisted user, or null if not stored */
+  getUser(): AuthUser | null {
+    const raw = localStorage.getItem(STORAGE_KEYS.USER)
+    if (!raw) return null
+    try { return JSON.parse(raw) as AuthUser } catch { return null }
   },
 
   /** Returns true if any token exists (user was logged in) */

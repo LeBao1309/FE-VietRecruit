@@ -36,11 +36,36 @@ export const LoginRequestSchema = z.object({
 })
 export type LoginRequest = z.infer<typeof LoginRequestSchema>
 
+// ─────────────────────────────────────────────────────────────
+// Account & Role enums (shared across auth flows)
+// ─────────────────────────────────────────────────────────────
+
+export const AccountTypeEnum = z.enum(['CANDIDATE', 'EMPLOYER'])
+export type AccountType = z.infer<typeof AccountTypeEnum>
+
+// Invited staff roles (accountType stays EMPLOYER but role narrows access)
+export const InvitedRoleEnum = z.enum(['HR', 'INTERVIEWER'])
+export type InvitedRole = z.infer<typeof InvitedRoleEnum>
+
+// Authenticated user shape returned in the login response
+export const AuthUserSchema = z.object({
+  id:                     z.string(),
+  email:                  z.string(),
+  fullName:               z.string(),
+  accountType:            AccountTypeEnum,
+  // null for EMPLOYER owner; 'HR' | 'INTERVIEWER' for invited staff
+  role:                   InvitedRoleEnum.nullable().optional(),
+  // true when employer has completed PUT /companies/me
+  companyProfileComplete: z.boolean().optional(),
+})
+export type AuthUser = z.infer<typeof AuthUserSchema>
+
 export const LoginResponseSchema = z.object({
   accessToken:  z.string(),
   refreshToken: z.string(),
   expiresIn:    z.number(),
   tokenType:    z.string().default('Bearer'),
+  user:         AuthUserSchema.optional(),
 })
 export type LoginResponse = z.infer<typeof LoginResponseSchema>
 
@@ -52,8 +77,6 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>
 // ⚠️ NO confirmPassword in the API payload
 // ─────────────────────────────────────────────────────────────
 
-export const AccountTypeEnum = z.enum(['CANDIDATE', 'EMPLOYER'])
-export type AccountType = z.infer<typeof AccountTypeEnum>
 
 export const RegisterRequestSchema = z
   .object({
