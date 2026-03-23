@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { ROUTE_NAMES } from "@/core/constants/route-names";
-import type { JobWithDetails } from "../types";
+import type { Job } from "@/features/job/types/job.dto";
 
 defineProps<{
-  job: JobWithDetails;
+  job: Job;
 }>();
 
 const router = useRouter();
@@ -36,8 +36,8 @@ const statusLabels = {
         </h3>
         <div class="flex items-center gap-3 mt-1 text-sm text-text-secondary">
           <span class="flex items-center">
-            <!-- TODO(api-ready): replace mock field job.headcount -> jobs.headcount -->
-            {{ job.department?.name || "Chưa xếp ban" }} • 3 tuyển
+            <!-- TODO(api-ready): department name is not in Job DTO currently -->
+            {{ job.department_id ? 'Đã xếp ban' : 'Chưa xếp ban' }} •
           </span>
           <span class="w-1 h-1 rounded-full bg-border-strong"></span>
           <span class="flex items-center">
@@ -53,7 +53,8 @@ const statusLabels = {
     <div class="flex items-center gap-6">
       <div class="text-right">
         <div class="text-2xl font-bold text-text-primary">
-          {{ job.applicationCount || 0 }}
+          <!-- TODO(api-ready): applicationCount not in Job DTO -->
+          --
         </div>
         <div class="text-xs text-text-muted">Ứng viên</div>
       </div>

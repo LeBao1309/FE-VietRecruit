@@ -12,7 +12,7 @@ const props = defineProps<{ app: Application }>()
 const emit = defineEmits<{ (e: 'click'): void }>()
 
 const store = usePipelineStore()
-const aiPending = computed(() => store.isAiPending(props.app.id))
+const aiPending = computed(() => store.isAiPending(props.app.jobId))
 
 // AI score colour coding: >=80 green, >=50 amber, <50 red
 const aiScoreClass = computed(() => {
@@ -25,7 +25,7 @@ const aiScoreClass = computed(() => {
 
 async function handleAiScreen(e: MouseEvent): Promise<void> {
   e.stopPropagation()
-  await store.triggerAiScreening(props.app.id)
+  await store.triggerAiScreening(props.app.jobId)
 }
 </script>
 

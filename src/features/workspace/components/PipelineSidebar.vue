@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { LayoutDashboard, Users, BarChart3, Settings } from "lucide-vue-next";
 import { useToast } from "vue-toastification";
 import { ROUTE_NAMES } from "@/core/constants/route-names";
+import { usePipelineStore } from '@/features/pipeline/stores/usePipelineStore';
+import { PIPELINE_STAGE_CONFIG } from '@/core/constants/pipeline-stages';
 
 const toast = useToast();
 const showAlert = (msg: string) => toast.info(msg);
@@ -31,13 +34,21 @@ const navItems = [
   },
 ];
 
-const stats = [
-  { label: "Đã nộp", count: 12, percent: 100, color: "#008C8C" },
-  { label: "Sàng lọc", count: 4, percent: 33, color: "#008C8C" },
-  { label: "Phỏng vấn", count: 2, percent: 17, color: "#008C8C" },
-  { label: "Đề nghị", count: 1, percent: 8, color: "#008C8C" },
-  { label: "Đã tuyển", count: 1, percent: 8, color: "#059669" },
-];
+const pipelineStore = usePipelineStore()
+
+const stats = computed(() => {
+  const byStatus = pipelineStore.applicationsByStatus
+  const total = pipelineStore.totalApplications || 1
+
+  return PIPELINE_STAGE_CONFIG.map((stage) => ({
+    label:   stage.label,
+    color:   stage.color,
+    count:   byStatus[stage.status as keyof typeof byStatus]?.length ?? 0,
+    percent: Math.round(((byStatus[stage.status as keyof typeof byStatus]?.length ?? 0) / total) * 100),
+  }))
+})
+
+const conversionRate = computed(() => pipelineStore.conversionRate)
 </script>
 
 <template>
@@ -97,33 +108,46 @@ const stats = [
       </h3>
 
       <div class="space-y-4">
-        <div v-for="stat in stats" :key="stat.label" class="space-y-1.5">
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-700">{{ stat.label }}</span>
-            <span class="text-gray-900 font-medium">{{ stat.count }}</span>
+        <template v-if="pipelineStore.isLoading">
+          <div v-for="_ in 5" :key="_" class="space-y-1.5">
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+            <div class="h-1.5 bg-gray-200 rounded animate-pulse"></div>
           </div>
-          <div class="flex items-center gap-3">
-            <div
-              class="h-1.5 rounded-full bg-gray-200 bg-opacity-70 flex-1 overflow-hidden"
-            >
-              <div
-                class="h-full rounded-full transition-all duration-1000 ease-out"
-                :style="{
-                  width: `${stat.percent}%`,
-                  backgroundColor: stat.color,
-                }"
-              ></div>
+        </template>
+        
+        <template v-else>
+          <div v-for="stat in stats" :key="stat.label" class="space-y-1.5">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-700">{{ stat.label }}</span>
+              <span class="text-gray-900 font-medium">{{ stat.count }}</span>
             </div>
-            <span class="text-[10px] text-gray-500 w-7 text-right"
-              >{{ stat.percent }}%</span
-            >
+            <div class="flex items-center gap-3">
+              <div
+                class="h-1.5 rounded-full bg-gray-200 bg-opacity-70 flex-1 overflow-hidden"
+              >
+                <div
+                  class="h-full rounded-full transition-all duration-1000 ease-out"
+                  :style="{
+                    width: `${stat.percent}%`,
+                    backgroundColor: stat.color,
+                  }"
+                ></div>
+              </div>
+              <span class="text-[10px] text-gray-500 w-7 text-right"
+                >{{ stat.percent }}%</span
+              >
+            </div>
           </div>
-        </div>
+        </template>
+
+        <template v-if="!pipelineStore.isLoading && pipelineStore.totalApplications === 0">
+          <p class="text-xs text-gray-400 text-center py-2">Chưa có ứng viên nào</p>
+        </template>
       </div>
 
       <div class="mt-6 pt-4 border-t border-gray-200 border-dashed">
         <p class="text-xs text-gray-500">
-          <strong class="text-gray-900 font-medium">8.3%</strong> tỷ lệ chuyển
+          <strong class="text-gray-900 font-medium">{{ conversionRate }}%</strong> tỷ lệ chuyển
           đổi
         </p>
       </div>

@@ -27,11 +27,12 @@ export const JOB_STATUS = {
 export type JobStatus = typeof JOB_STATUS[keyof typeof JOB_STATUS]
 
 export const APPLICATION_STATUS = {
-  PENDING:    'PENDING',
-  REVIEWING:  'REVIEWING',
-  SHORTLISTED:'SHORTLISTED',
-  REJECTED:   'REJECTED',
-  ACCEPTED:   'ACCEPTED',
+  NEW: 'NEW',
+  SCREENING: 'SCREENING',
+  INTERVIEW: 'INTERVIEW',
+  OFFER: 'OFFER',
+  HIRED: 'HIRED',
+  REJECTED: 'REJECTED',
 } as const
 export type ApplicationStatus = typeof APPLICATION_STATUS[keyof typeof APPLICATION_STATUS]
 
@@ -45,7 +46,7 @@ export type InterviewStatus = typeof INTERVIEW_STATUS[keyof typeof INTERVIEW_STA
 
 export const OFFER_STATUS = {
   DRAFT:    'DRAFT',
-  PENDING:  'PENDING',
+  SENT:     'SENT',
   ACCEPTED: 'ACCEPTED',
   DECLINED: 'DECLINED',
   EXPIRED:  'EXPIRED',

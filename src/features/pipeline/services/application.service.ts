@@ -46,6 +46,14 @@ export const applicationService = {
   },
 
   /**
+   * GET /vietrecruit/applications/jobs/{jobId}/screening
+   */
+  async getScreeningResults(jobId: string) {
+    const { data } = await apiClient.get<ApiResponse<any>>(`${BASE}/jobs/${jobId}/screening`)
+    return data.data
+  },
+
+  /**
    * GET /vietrecruit/applications/{id}
    * Returns full detail: coverLetter, cvUrl, statusHistory ordered by changedAt DESC.
    */

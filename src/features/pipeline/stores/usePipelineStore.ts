@@ -63,6 +63,13 @@ export const usePipelineStore = defineStore('pipeline-v2', () => {
     APPLICATION_STATUSES.reduce((sum, s) => sum + applicationsByStatus.value[s].length, 0),
   )
 
+  const conversionRate = computed(() => {
+    const total = totalApplications.value
+    if (total === 0) return 0
+    const hired = applicationsByStatus.value['HIRED']?.length ?? 0
+    return Math.round((hired / total) * 100 * 10) / 10
+  })
+
   function isAiPending(id: string): boolean {
     return aiPendingIds.value.has(id)
   }
@@ -155,10 +162,10 @@ export const usePipelineStore = defineStore('pipeline-v2', () => {
    * Trigger async AI screening for a card.
    * Marks the card as AI-pending immediately (badge shown until page refresh).
    */
-  async function triggerAiScreening(id: string): Promise<void> {
+  async function triggerAiScreening(jobId: string): Promise<void> {
     try {
-      await applicationService.triggerAiScreening(id)
-      aiPendingIds.value.add(id)
+      await applicationService.triggerAiScreening(jobId)
+      aiPendingIds.value.add(jobId)
       saveAiPending(aiPendingIds.value)
     } catch (e) {
       setError(e)
@@ -201,6 +208,7 @@ export const usePipelineStore = defineStore('pipeline-v2', () => {
     isDetailLoading,
     // Computed
     totalApplications,
+    conversionRate,
     isAiPending,
     // Actions
     fetchApplications,

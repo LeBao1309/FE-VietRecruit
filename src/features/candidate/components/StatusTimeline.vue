@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import type { ApplicationStatusHistoryResponse } from '../types/application.schema'
+import { getStageConfig } from '@/core/constants/pipeline-stages'
+import type { ApplicationStatus } from '@/core/constants/enums'
 
 defineProps<{ history: ApplicationStatusHistoryResponse[] }>()
 
 const formatStatus = (s: string) => {
-  const map: Record<string, string> = {
-    PENDING: 'Chờ xử lý', REVIEWING: 'Đang xem xét', INTERVIEWING: 'Tham gia phỏng vấn', 
-    OFFERED: 'Nhận Offer', HIRED: 'Trúng tuyển', REJECTED: 'Từ chối', WITHDRAWN: 'Rút đơn'
-  }
-  return map[s] || s
+  return getStageConfig(s as ApplicationStatus).label;
 }
 
 const formatDate = (dateString: string) => {
