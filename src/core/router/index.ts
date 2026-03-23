@@ -2,7 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from '@/core/router/routes'
 import { tokenService } from '@/core/api/token.service'
-import { resolvePostLoginRoute } from '@/core/stores/auth.store'
+import { useAuthStore, resolvePostLoginRoute } from '@/core/stores/auth.store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,68 +10,59 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 })
 
-router.beforeEach((to, _from) => {
-  const hasSession = tokenService.hasSession()
+router.beforeEach(async (to, _from, next) => {
+  const auth = useAuthStore()
 
-  // ── 1. Guest-only pages — redirect logged-in users to their workspace ──
-  if (to.meta.guestOnly && hasSession) {
-    const user = tokenService.getUser()
-    return resolvePostLoginRoute(user)
+  // (1) Guest-only: logged-in users go to their workspace
+  if (to.meta.guestOnly && auth.isAuthenticated && auth.user) {
+    return next(resolvePostLoginRoute(auth.user))
   }
 
-  // ── 2. Protected pages — redirect guests to login ──
-  if (to.meta.requiresAuth && !hasSession) {
-    return { name: 'Login', query: { redirect: to.fullPath } }
+  // (2) Protected: unauthenticated users go to login
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return next({ name: 'Login', query: { redirect: to.fullPath } })
   }
 
-  // ── 3. RBAC via JWT (for protected pages) ──
-  if (to.meta.requiresAuth && hasSession) {
+  // (3) COMPANY_ADMIN without company profile cannot skip onboarding
+  if (
+    to.meta.requiresAuth &&
+    to.path !== '/onboarding/employer' &&
+    auth.user?.roles?.includes('COMPANY_ADMIN') &&
+    !auth.user?.companyProfileComplete
+  ) {
+    return next({ path: '/onboarding/employer' })
+  }
+
+  // (4) Role mismatch: silently redirect to correct workspace
+  const routeRoles = to.meta.allowedRoles as string[] | undefined
+  const userRole = auth.user?.roles?.[0]
+  if (routeRoles && userRole && !routeRoles.includes(userRole)) {
+    return next(resolvePostLoginRoute(auth.user))
+  }
+
+  // Specific permission strings required — user must have ALL of them
+  const routePermissions = to.meta.permissions as string[] | undefined
+  if (routePermissions && auth.isAuthenticated) {
     const token = tokenService.getAccessToken()
-
     if (token) {
       try {
         const payloadStr = token.split('.')[1]
-        if (payloadStr) {
-          const payload = JSON.parse(atob(payloadStr))
-          // Backend JWT uses "roles" (array) OR "role" (string)
-          const userRoles: string[] = payload.roles || (payload.role ? [payload.role] : [])
-          const permissions: string[] = payload.permissions || []
-
-          // Role check — user must have at least one of the required roles
-          if (to.meta.roles && Array.isArray(to.meta.roles)) {
-            const hasRole = to.meta.roles.some((r) => userRoles.includes(r))
-            if (!hasRole) {
-              // Redirect to correct workspace, not always employer
-              const user = tokenService.getUser()
-              return resolvePostLoginRoute(user)
-            }
-          }
-
-          // accountType check — e.g. candidate-only routes
-          if (to.meta.accountType && Array.isArray(to.meta.accountType)) {
-            const user = tokenService.getUser()
-            const type = user?.accountType ?? payload.accountType
-            if (!to.meta.accountType.includes(type)) {
-              return resolvePostLoginRoute(user)
-            }
-          }
-
-          // Permissions check
-          if (to.meta.permissions && Array.isArray(to.meta.permissions)) {
-            const hasPermission = to.meta.permissions.every((p) => permissions.includes(p))
-            if (!hasPermission) {
-              const user = tokenService.getUser()
-              return resolvePostLoginRoute(user)
-            }
-          }
+        if (!payloadStr) {
+          return next(resolvePostLoginRoute(auth.user))
+        }
+        const payload = JSON.parse(atob(payloadStr))
+        const permissions: string[] = payload.permissions || []
+        const hasPermission = routePermissions.every((p) => permissions.includes(p))
+        if (!hasPermission) {
+          return next(resolvePostLoginRoute(auth.user))
         }
       } catch {
-        // Ignored, defaults apply
+        return next(resolvePostLoginRoute(auth.user))
       }
     }
   }
 
-  return true
+  next()
 })
 
 export default router

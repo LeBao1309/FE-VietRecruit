@@ -57,103 +57,103 @@ export const routes: RouteRecordRaw[] = [
     path: '/onboarding/employer',
     name: 'EmployerOnboarding',
     component: () => import('@/features/onboarding/views/EmployerOnboardingPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, allowedRoles: ['COMPANY_ADMIN'] },
   },
   {
     path: '/onboarding/candidate',
     name: 'CandidateOnboarding',
     component: () => import('@/features/onboarding/views/CandidateOnboardingPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, allowedRoles: ['CANDIDATE'] },
   },
   // Company Settings
   {
     path: '/company/settings',
     name: 'CompanySettings',
     component: () => import('@/features/company/views/CompanySettingsPage.vue'),
-    meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'HR'] },
+    meta: { requiresAuth: true, allowedRoles: ['COMPANY_ADMIN', 'HR'] },
   },
   // Workspace
   {
     path: '/workspace',
     name: 'Workspace',
     component: () => import('@/features/workspace/views/WorkspacePage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, allowedRoles: ['COMPANY_ADMIN'] },
   },
   {
     path: '/workspace/pipeline',
     name: 'Pipeline',
     component: () => import('@/features/workspace/views/PipelinePage.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN', 'INTERVIEWER'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN', 'INTERVIEWER'] },
   },
   // Interview & Scorecard (Module 6)
   {
     path: '/workspace/interviews',
     name: 'InterviewList',
     component: () => import('@/features/interview/views/InterviewListPage.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   {
     path: '/workspace/my-interviews',
     name: 'InterviewerDashboard',
     component: () => import('@/features/interview/views/InterviewerDashboard.vue'),
-    meta: { requiresAuth: true, roles: ['INTERVIEWER'] },
+    meta: { requiresAuth: true, allowedRoles: ['INTERVIEWER'] },
   },
   {
     path: '/workspace/scorecards',
     name: 'ScorecardDashboard',
     component: () => import('@/features/interview/views/ScorecardDashboard.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   // Job Management (Module 4)
   {
     path: '/workspace/jobs',
     name: 'JobList',
     component: () => import('@/features/job/views/JobListPage.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   {
     path: '/workspace/jobs/create',
     name: 'JobCreate',
     component: () => import('@/features/job/views/JobFormPage.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   // Subscription & Payment
   {
     path: '/subscriptions/current',
     name: 'SubscriptionDashboard',
     component: () => import('@/features/subscription/pages/SubscriptionDashboard.vue'),
-    meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['COMPANY_ADMIN'] },
   },
   {
     path: '/payment/status',
     name: 'PaymentStatus',
     component: () => import('@/features/payment/pages/PaymentStatusPage.vue'),
-    meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['COMPANY_ADMIN'] },
   },
   {
     path: '/workspace/jobs/:id/edit',
     name: 'JobEdit',
     component: () => import('@/features/job/views/JobFormPage.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   {
     path: '/offers',
     name: 'OfferDashboard',
     component: () => import('@/features/offer/views/OfferDashboardView.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   {
     path: '/offers/create',
     name: 'OfferCreate',
     component: () => import('@/features/offer/views/OfferCreateView.vue'),
-    meta: { requiresAuth: true, roles: ['HR', 'COMPANY_ADMIN'] },
+    meta: { requiresAuth: true, allowedRoles: ['HR', 'COMPANY_ADMIN'] },
   },
   // ── Candidate Portal ───────────────────────────────────────
   {
     path: '/candidate/profile',
     name: 'CandidateProfile',
     component: () => import('@/features/candidate/views/CandidateProfilePage.vue'),
-    meta: { requiresAuth: true, accountType: ['CANDIDATE'] },
+    meta: { requiresAuth: true, allowedRoles: ['CANDIDATE'] },
   },
   {
     path: '/jobs',
@@ -171,20 +171,20 @@ export const routes: RouteRecordRaw[] = [
     path: '/applications/mine',
     name: 'MyApplications',
     component: () => import('@/features/candidate/views/MyApplicationsPage.vue'),
-    meta: { requiresAuth: true, accountType: ['CANDIDATE'] },
+    meta: { requiresAuth: true, allowedRoles: ['CANDIDATE'] },
   },
   {
     path: '/applications/:id',
     name: 'ApplicationDetail',
     component: () => import('@/features/candidate/views/ApplicationDetailPage.vue'),
-    meta: { requiresAuth: true, accountType: ['CANDIDATE'] },
+    meta: { requiresAuth: true, allowedRoles: ['CANDIDATE'] },
   },
   // ── Admin routes ───────────────────────────────────────────
   {
     path: '/admin',
     name: 'AdminLayout',
     component: () => import('@/features/admin/components/AdminLayout.vue'),
-    meta: { requiresAuth: true, roles: ['SYSTEM_ADMIN', 'CUSTOMER_SERVICE'] },
+    meta: { requiresAuth: true, allowedRoles: ['SYSTEM_ADMIN', 'CUSTOMER_SERVICE'] },
     children: [
       {
         path: '',

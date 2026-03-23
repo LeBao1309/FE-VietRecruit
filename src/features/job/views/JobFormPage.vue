@@ -62,7 +62,41 @@ const safeDescriptionHtml = computed(() =>
 
 const isSubmitting = computed(() => jobStore.isLoading)
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+const isEditable = computed(() => {
+  // If no job is loaded (creation mode), it evaluates to true (draft by default)
+  if (!jobStore.currentJob) return true;
+  return jobStore.currentJob.status === 'DRAFT';
+});
+const canPublish = computed(() => jobStore.currentJob?.status === 'DRAFT');
+const canClose   = computed(() => jobStore.currentJob?.status === 'PUBLISHED');
+
+const publishing = ref(false)
+const closing = ref(false)
+
+// ── Handlers ────────────────────────────────────────────────────────────────
+async function handlePublish() {
+  if (!canPublish.value || !jobStore.currentJob) return
+  publishing.value = true
+  try {
+    await jobStore.publishJob(jobStore.currentJob.id)
+  } catch (err: any) {
+    if (err.response?.status === 403) {
+      window.dispatchEvent(new CustomEvent('quota:exceeded'))
+    }
+  } finally {
+    publishing.value = false
+  }
+}
+
+async function handleClose() {
+  if (!canClose.value || !jobStore.currentJob) return
+  closing.value = true
+  try {
+    await jobStore.closeJob(jobStore.currentJob.id)
+  } finally {
+    closing.value = false
+  }
+}
 function clearErrors(): void {
   fieldErrors.value = {}
   submitError.value = null
@@ -150,6 +184,7 @@ function handleCancel(): void {
         </div>
 
         <form @submit.prevent="handleSubmit" novalidate class="space-y-6 max-w-3xl">
+          <fieldset :disabled="!isEditable" class="space-y-6">
           <!-- Card: Basic Info -->
           <div class="bg-white border border-border rounded-xl shadow-xs p-6 space-y-5">
             <h2 class="text-base font-bold text-text-primary pb-3 border-b border-border">
@@ -438,6 +473,36 @@ function handleCancel(): void {
               Cancel
             </button>
             <button
+              v-if="!isEditable"
+              type="button"
+              disabled
+              title="Chỉ có thể chỉnh sửa khi công việc ở trạng thái Bản nháp"
+              class="px-6 py-2.5 text-sm font-semibold bg-surface-muted text-text-muted rounded-lg shadow-sm border border-border cursor-not-allowed opacity-50"
+            >
+              Chỉnh sửa
+            </button>
+            <button
+              v-if="canPublish"
+              type="button"
+              @click="handlePublish"
+              :disabled="publishing"
+              class="px-6 py-2.5 text-sm font-semibold bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span v-if="publishing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 inline-block align-middle" />
+              Đăng tuyển
+            </button>
+            <button
+              v-if="canClose"
+              type="button"
+              @click="handleClose"
+              :disabled="closing"
+              class="px-6 py-2.5 text-sm font-semibold bg-danger text-white rounded-lg hover:bg-danger/90 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span v-if="closing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2 inline-block align-middle" />
+              Đóng tuyển
+            </button>
+            <button
+              v-if="isEditable"
               id="btn-submit-job"
               type="submit"
               :disabled="isSubmitting"

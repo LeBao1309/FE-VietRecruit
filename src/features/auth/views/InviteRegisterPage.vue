@@ -85,26 +85,25 @@ watch([fullName, password, confirmPassword], () => {
       Hoàn tất thông tin để kích hoạt tài khoản
     </p>
 
-    <!-- Token missing warning -->
+    <!-- Token missing/error warning -->
     <div
-      v-if="!token"
-      role="alert"
-      class="mb-6 p-3 rounded-lg bg-warning/10 text-warning-dark text-sm"
+      v-if="!token || auth.error.value?.includes('hết hạn')"
+      class="mb-6 p-4 rounded-lg bg-warning/10 text-warning-dark text-sm border border-warning/20 text-center"
     >
-      Liên kết mời không hợp lệ hoặc đã hết hạn. Vui lòng liên hệ quản trị
-      viên công ty để nhận lại lời mời.
+      <p class="mb-4">Liên kết mời không hợp lệ hoặc đã hết hạn.</p>
+      <p>Vui lòng yêu cầu quản trị viên gửi lại lời mời mới.</p>
     </div>
 
     <!-- API error alert -->
     <div
-      v-if="auth.error.value"
+      v-else-if="auth.error.value"
       role="alert"
       class="mb-6 p-3 rounded-lg bg-danger/10 text-danger text-sm"
     >
       {{ auth.error.value }}
     </div>
 
-    <form class="space-y-4" novalidate @submit.prevent="handleSubmit">
+    <form v-if="token && !auth.error.value?.includes('hết hạn')" class="space-y-4" novalidate @submit.prevent="handleSubmit">
       <!-- Full Name -->
       <div>
         <label

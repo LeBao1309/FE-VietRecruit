@@ -5,12 +5,23 @@ import { usePaymentStore } from "@/core/stores/payment.store";
 import PricingSection from "@/features/landing/components/PricingSection.vue";
 import type { PlanResponse } from "@/features/plan/types/plan.dto";
 import { AlertCircle, Calendar, Briefcase, XCircle, CheckCircle } from "lucide-vue-next";
+import { useRoute } from 'vue-router'
+import { useSubscriptionPolling } from '@/features/subscription/composables/useSubscriptionPolling';
 
 const subStore = useSubscriptionStore();
 const paymentStore = usePaymentStore();
 const showCancelModal = ref(false);
 
-onMounted(() => {
+const route = useRoute()
+const { isPolling, isPollingSuccess, isPollingTimeout, startPolling } = useSubscriptionPolling()
+
+onMounted(async () => {
+  // Return from PayOS gateway
+  if (route.query.success === 'true') {
+    const targetPlanId = route.query.planId as string
+    await startPolling(targetPlanId)
+  }
+  
   subStore.fetchCurrent();
 });
 
@@ -113,7 +124,27 @@ const isUnlimited = computed(() => subStore.quota?.maxActiveJobs === -1);
       </section>
     </div>
 
-    <div class="mt-12">
+    <div v-if="isPolling" class="mt-12 p-8 border border-border rounded-xl bg-surface-soft text-center py-16">
+      <!-- Waiting for PayOS webhook to activate subscription -->
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-brand mb-4"></div>
+      <h3 class="text-xl font-bold text-text-primary mb-2">Đang xử lý thanh toán thanh toán...</h3>
+      <p class="text-text-secondary">Vui lòng chờ trong giây lát. Hệ thống đang xác nhận thanh toán với PayOS và kích hoạt gói cước.</p>
+    </div>
+    
+    <div v-else-if="isPollingSuccess" class="mt-12 p-8 border border-success/20 rounded-xl bg-success-light/20 text-center py-16">
+      <CheckCircle class="w-12 h-12 text-success mx-auto mb-4" />
+      <h3 class="text-xl font-bold text-success-dark mb-2">Thanh toán Thành công!</h3>
+      <p class="text-text-secondary">Gói cước của bạn đã được kích hoạt. Hãy tận hưởng các tính năng Premium của VietRecruit.</p>
+    </div>
+    
+    <div v-else-if="isPollingTimeout" class="mt-12 p-8 border border-warning/20 rounded-xl bg-warning-light/20 text-center py-16">
+      <AlertCircle class="w-12 h-12 text-warning mx-auto mb-4" />
+      <h3 class="text-xl font-bold text-warning-dark mb-2">Xác nhận thanh toán đang bị chậm</h3>
+      <p class="text-text-secondary">Chúng tôi đã nhận được thanh toán nhưng hệ thống kích hoạt đang phản hồi chậm. Vui lòng tải lại trang sau 1-2 phút.</p>
+      <button @click="subStore.fetchCurrent(); isPollingTimeout = false;" class="px-4 py-2 mt-4 bg-surface font-semibold text-text-primary border border-border rounded-lg shadow-sm hover:bg-surface-muted transition-colors">Tải lại</button>
+    </div>
+
+    <div v-else class="mt-12">
       <PricingSection 
         is-dashboard 
         :active-plan-code="subStore.activePlanCode" 

@@ -21,19 +21,23 @@ import type {
 export function resolvePostLoginRoute(user: AuthUser | null): string {
   if (!user) return '/auth/login'
 
-  // Invited staff — role takes priority over accountType
-  if (user.role === 'HR' || user.role === 'INTERVIEWER') {
-    return '/workspace/pipeline'
-  }
+  const primaryRole = user.roles?.[0]
 
-  // Employer — check if company profile is complete
-  if (user.accountType === 'EMPLOYER') {
+  if (primaryRole === 'SYSTEM_ADMIN' || primaryRole === 'CUSTOMER_SERVICE') {
+    return '/admin'
+  }
+  if (primaryRole === 'INTERVIEWER') {
+    return '/workspace/my-interviews'
+  }
+  if (primaryRole === 'HR') {
+    return '/workspace/jobs'
+  }
+  if (primaryRole === 'COMPANY_ADMIN') {
+    // Must complete company profile before accessing dashboard
     if (!user.companyProfileComplete) return '/onboarding/employer'
     return '/workspace'
   }
-
-  // Candidate
-  if (user.accountType === 'CANDIDATE') {
+  if (primaryRole === 'CANDIDATE') {
     return '/candidate/profile'
   }
 
@@ -47,14 +51,28 @@ function parseUserFromJwt(token: string): AuthUser | null {
     const payloadStr = token.split('.')[1]
     if (!payloadStr) return null
     const payload = JSON.parse(atob(payloadStr))
+    
+    // Backend JWT uses "roles" (array) OR "role" (string)
+    let parsedRoles: string[] = []
+    if (payload.roles && Array.isArray(payload.roles)) {
+      parsedRoles = payload.roles
+    } else if (payload.role) {
+      parsedRoles = [payload.role]
+    } else if (payload.accountType === 'EMPLOYER') {
+      parsedRoles = ['COMPANY_ADMIN'] // Fallback translation
+    } else if (payload.accountType === 'CANDIDATE') {
+      parsedRoles = ['CANDIDATE']
+    }
+
     return {
       id:                     payload.sub ?? '',
       email:                  payload.email ?? '',
       fullName:               payload.fullName ?? '',
-      accountType:            payload.accountType ?? 'EMPLOYER',
-      role:                   payload.role ?? null,
+      roles:                  parsedRoles as AuthUser['roles'],
+      companyId:              payload.companyId ?? null,
       companyProfileComplete: payload.companyProfileComplete ?? false,
-    } satisfies AuthUser
+      avatarUrl:              payload.avatarUrl ?? null,
+    }
   } catch {
     return null
   }
@@ -144,7 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /** 2b. Register by Invite
    *  Strips confirmPassword before sending — it's UI-only
-   *  On success → navigate to login with ?invited=true
+   *  On success → navigate to login DIRECTLY (NO OTP required per spec)
    */
   async function registerByInvite(payload: RegisterByInviteApiPayload & { confirmPassword: string }): Promise<boolean> {
     clearError()
@@ -152,6 +170,7 @@ export const useAuthStore = defineStore('auth', () => {
     const { confirmPassword: _, ...apiPayload } = payload
     try {
       await authService.registerByInvite(apiPayload)
+      // The user is ALREADY email-verified — do NOT show OTP screen
       await router.push({ name: 'Login', query: { invited: 'true' } })
       return true
     } catch (err) {
@@ -252,7 +271,7 @@ export const useAuthStore = defineStore('auth', () => {
       await authService.changePassword(payload)
       // Server revokes all sessions → force re-login
       clearSession()
-      await router.push({ name: 'Login', query: { passwordChanged: 'true' } })
+      await router.push({ name: 'Login', query: { message: 'Đã đổi mật khẩu, vui lòng đăng nhập lại' } })
       return true
     } catch (err) {
       handleApiError(err)

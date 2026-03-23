@@ -48,15 +48,24 @@ export const InvitedRoleEnum = z.enum(['HR', 'INTERVIEWER'])
 export type InvitedRole = z.infer<typeof InvitedRoleEnum>
 
 // Authenticated user shape returned in the login response
+export const RoleEnum = z.enum([
+  'CANDIDATE',
+  'COMPANY_ADMIN',
+  'HR',
+  'INTERVIEWER',
+  'SYSTEM_ADMIN',
+  'CUSTOMER_SERVICE'
+])
+export type Role = z.infer<typeof RoleEnum>
+
 export const AuthUserSchema = z.object({
   id:                     z.string(),
   email:                  z.string(),
   fullName:               z.string(),
-  accountType:            AccountTypeEnum,
-  // null for EMPLOYER owner; 'HR' | 'INTERVIEWER' for invited staff
-  role:                   InvitedRoleEnum.nullable().optional(),
-  // true when employer has completed PUT /companies/me
-  companyProfileComplete: z.boolean().optional(),
+  roles:                  z.array(RoleEnum),
+  companyId:              z.string().nullable(),
+  companyProfileComplete: z.boolean(),
+  avatarUrl:              z.string().nullable(),
 })
 export type AuthUser = z.infer<typeof AuthUserSchema>
 

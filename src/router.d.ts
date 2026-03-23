@@ -10,9 +10,7 @@ declare module 'vue-router' {
     /** If true, redirect authenticated users away (login/register pages) */
     guestOnly?: boolean
     /** JWT role(s) required — user must have at least one */
-    roles?: string[]
-    /** accountType(s) allowed — e.g. ['CANDIDATE'] for candidate-only routes */
-    accountType?: string[]
+    allowedRoles?: string[]
     /** Specific permission strings required — user must have ALL of them */
     permissions?: string[]
   }
