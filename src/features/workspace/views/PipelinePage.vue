@@ -7,10 +7,8 @@ import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { usePipelineStore } from '@/features/pipeline/stores/usePipelineStore'
 import { APP_CONFIG } from '@/core/constants/app-config'
-import {
-  APPLICATION_STATUSES,
-  type ApplicationStatus,
-} from '@/features/pipeline/types/application.dto'
+import { type ApplicationStatus } from '@/features/pipeline/types/application.dto'
+import { PIPELINE_STAGES_ORDERED } from '@/core/constants/pipeline-stages'
 import PipelineTopBar from '../components/PipelineTopBar.vue'
 import PipelineSidebar from '../components/PipelineSidebar.vue'
 import KanbanColumn from '@/features/pipeline/components/KanbanColumn.vue'
@@ -42,21 +40,13 @@ function showDragError(msg: string): void {
 }
 
 // ── Column display config ────────────────────────────────────────────────────
-const COLUMN_CONFIG: Record<ApplicationStatus, { label: string; color: string }> = {
-  NEW:       { label: 'New',       color: '#64748B' },
-  SCREENING: { label: 'Screening', color: '#F59E0B' },
-  INTERVIEW: { label: 'Interview', color: '#3B82F6' },
-  OFFER:     { label: 'Offer',     color: '#8B5CF6' },
-  HIRED:     { label: 'Hired',     color: '#10B981' },
-  REJECTED:  { label: 'Rejected',  color: '#EF4444' },
-}
 
 const columns = computed(() =>
-  APPLICATION_STATUSES.map((s) => ({
-    status: s,
-    label: COLUMN_CONFIG[s].label,
-    color: COLUMN_CONFIG[s].color,
-    apps: applicationsByStatus.value[s],
+  PIPELINE_STAGES_ORDERED.map((s) => ({
+    status: s.status,
+    label: s.label,
+    color: s.color,
+    apps: applicationsByStatus.value[s.status],
   })),
 )
 

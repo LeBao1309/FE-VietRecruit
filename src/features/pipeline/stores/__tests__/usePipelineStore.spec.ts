@@ -195,7 +195,7 @@ describe('usePipelineStore — triggerAiScreening', () => {
     vi.mocked(applicationService.triggerAiScreening).mockRejectedValueOnce(new Error('AI down'))
     const store = usePipelineStore()
 
-    await expect(store.triggerAiScreening('app-1')).rejects.toThrow('AI down')
+    await expect(store.triggerAiScreening('job-1')).rejects.toThrow('AI down')
     expect(store.error).toBe('AI down')
     expect(store.isAiPending('app-1')).toBe(false)
   })

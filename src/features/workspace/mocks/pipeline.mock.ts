@@ -1,4 +1,4 @@
-import type { ApplicationWithDetails, JobWithDetails, InterviewWithDetails, User, Candidate, ApplicationStatus } from '../types';
+import type { ApplicationWithDetails, JobWithDetails, InterviewWithDetails, User, Candidate } from '../types';
 
 const companyId = 'comp-1234';
 
@@ -50,11 +50,3 @@ export const mockInterviews: InterviewWithDetails[] = [
   }
 ];
 
-export const pipelineStages: { id: ApplicationStatus, label: string, color: string }[] = [
-  { id: 'NEW', label: 'New', color: '#6B7280' },
-  { id: 'SCREENING', label: 'Screening', color: '#009898' }, // Brand Teal
-  { id: 'INTERVIEW', label: 'Interview', color: '#7C3AED' },
-  { id: 'OFFER', label: 'Offer', color: '#D97706' },
-  { id: 'HIRED', label: 'Hired', color: '#059669' },
-  { id: 'REJECTED', label: 'Rejected', color: '#DC2626' },
-];

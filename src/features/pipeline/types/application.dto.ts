@@ -2,9 +2,9 @@
 // DTOs for the ATS Pipeline module (Module 5).
 // ApplicationStatus is aliased from the shared workspace types to keep one source of truth.
 
-import type { ApplicationStatus } from '@/features/workspace/types'
+import { APPLICATION_STATUS, type ApplicationStatus } from '@/core/constants/enums'
 
-export type { ApplicationStatus }
+export { APPLICATION_STATUS, type ApplicationStatus }
 
 export const APPLICATION_STATUSES: ApplicationStatus[] = [
   'NEW',

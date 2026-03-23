@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { InterviewWithDetails } from "../types";
+import type { Interview } from "@/features/interview/types/interview.dto";
 
 const props = defineProps<{
-  interview: InterviewWithDetails;
+  interview: Interview;
 }>();
 
 const interviewTime = computed(() => {
-  const date = new Date(props.interview.scheduled_at);
+  if (!props.interview.scheduledAt) return '--:--';
+  const date = new Date(props.interview.scheduledAt);
   return date.toLocaleTimeString("vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
@@ -15,7 +16,8 @@ const interviewTime = computed(() => {
 });
 
 const interviewDate = computed(() => {
-  const date = new Date(props.interview.scheduled_at);
+  if (!props.interview.scheduledAt) return '--/--/----';
+  const date = new Date(props.interview.scheduledAt);
   return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
@@ -43,33 +45,33 @@ const interviewDate = computed(() => {
     <!-- Info Column -->
     <div class="flex-1 min-w-0">
       <h4 class="font-semibold text-text-primary truncate">
-        {{ interview.title }}
+        Phỏng vấn #{{ interview.id.slice(-4) }}
       </h4>
       <p class="text-sm text-text-secondary truncate mt-0.5">
-        Ứng viên:
+        Ứng viên ID:
         <span class="font-medium">{{
-          interview.application.candidate.user.full_name
+          interview.applicationId
         }}</span>
       </p>
 
       <div class="flex items-center gap-4 mt-2 mb-3">
         <div
-          v-if="interview.location_or_link"
+          v-if="interview.location || interview.meetingLink"
           class="flex items-center gap-1.5 text-xs text-text-muted"
         >
           <a
-            v-if="interview.location_or_link.includes('http')"
-            :href="interview.location_or_link"
+            v-if="interview.meetingLink"
+            :href="interview.meetingLink"
             target="_blank"
             class="text-brand hover:underline truncate max-w-[150px]"
             >Link tham gia</a
           >
           <span v-else class="truncate max-w-[150px]">{{
-            interview.location_or_link
+            interview.location
           }}</span>
         </div>
         <div class="flex items-center gap-1.5 text-xs text-text-muted">
-          <span>Thời lượng: {{ interview.duration_minutes }} phút</span>
+          <span>ID: {{ interview.id.slice(-6) }}</span>
         </div>
       </div>
 
@@ -77,18 +79,13 @@ const interviewDate = computed(() => {
       <div class="flex items-center justify-between">
         <div class="flex -space-x-2">
           <div
-            v-for="user in interview.interviewers"
-            :key="user.id"
+            v-for="interviewerId in interview.interviewerIds || []"
+            :key="interviewerId"
             class="w-6 h-6 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center overflow-hidden z-10"
-            :title="user.full_name"
+            :title="interviewerId"
           >
-            <img
-              v-if="user.avatar_url"
-              :src="user.avatar_url"
-              class="w-full h-full object-cover"
-            />
-            <span v-else class="text-[10px] font-medium text-gray-600">{{
-              user.full_name.charAt(0)
+            <span class="text-[10px] font-medium text-gray-600">{{
+              interviewerId.charAt(0).toUpperCase()
             }}</span>
           </div>
         </div>

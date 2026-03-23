@@ -4,11 +4,11 @@ import KanbanBoard from '../KanbanBoard.vue'
 import StageTransitionModal from '../StageTransitionModal.vue'
 import { usePipelineStore } from '@/stores/usePipelineStore'
 import { buildMockCandidate } from '@/test/helpers'
-import { pipelineStages } from '@/features/workspace/mocks/pipeline.mock'
+import { PIPELINE_STAGES_ACTIVE } from '@/core/constants/pipeline-stages'
 
 // The provided mock candidate helper doesn't quite match the app's types. 
 // We build compatible mock props for KanbanBoard matching its expect props.
-const stages = pipelineStages;
+const stages = PIPELINE_STAGES_ACTIVE.map(s => ({ id: s.status, ...s }));
 const createMockAppDetails = (id = 'c1') => {
   const cd = buildMockCandidate({ id });
   return {

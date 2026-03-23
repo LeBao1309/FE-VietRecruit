@@ -117,18 +117,18 @@ describe('applicationService.updateStatus', () => {
 // ── triggerAiScreening ────────────────────────────────────────────────────────
 
 describe('applicationService.triggerAiScreening', () => {
-  it('calls POST /vietrecruit/applications/{id}/ai-screening and resolves void', async () => {
+  it('calls POST /vietrecruit/applications/jobs/{jobId}/screening/trigger and resolves void', async () => {
     vi.mocked(apiClient.post).mockResolvedValueOnce({ status: 202 })
 
-    await expect(applicationService.triggerAiScreening('app-1')).resolves.toBeUndefined()
+    await expect(applicationService.triggerAiScreening('job-1')).resolves.toBeUndefined()
 
-    expect(apiClient.post).toHaveBeenCalledWith('/vietrecruit/applications/app-1/ai-screening')
+    expect(apiClient.post).toHaveBeenCalledWith('/vietrecruit/applications/jobs/job-1/screening/trigger')
   })
 
   it('propagates error when POST fails', async () => {
     vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('AI unavailable'))
 
-    await expect(applicationService.triggerAiScreening('app-1')).rejects.toThrow('AI unavailable')
+    await expect(applicationService.triggerAiScreening('job-1')).rejects.toThrow('AI unavailable')
   })
 })
 
