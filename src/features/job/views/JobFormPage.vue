@@ -462,6 +462,7 @@ function handleCancel(): void {
               class="w-full px-3 py-2 rounded-lg border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-dark focus:shadow-focus transition-shadow resize-y"
             />
           </div>
+          </fieldset>
 
           <!-- Form Actions -->
           <div class="flex items-center justify-end gap-3 pt-2 pb-8">
