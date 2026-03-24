@@ -1,196 +1,237 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useOrgStore } from '@/core/stores/org.store'
-import { LocationRequestSchema } from '@/features/company/types/org.dto'
+import { ref } from 'vue'
 
-const store = useOrgStore()
+interface Location {
+  id: string
+  name: string
+  address?: string
+}
 
-onMounted(() => {
-  store.fetchLocations(0)
+defineProps<{
+  locations: Location[]
+  page: number
+  totalPages: number
+  totalElements: number
+  isLoading: boolean
+  isSaving: boolean
+  error: string | null
+}>()
+
+const emit = defineEmits<{
+  create: [payload: { name: string; address?: string }]
+  update: [id: string, payload: { name: string; address?: string }]
+  delete: [id: string]
+  pageChange: [page: number]
+}>()
+
+const isModalOpen = ref(false)
+const isDeleteConfirmOpen = ref(false)
+const currentLocation = ref<Location | null>(null)
+const formData = ref({
+  name: '',
+  address: '',
 })
 
-const showModal = ref(false)
-const isEdit = ref(false)
-const currentId = ref('')
-const name = ref('')
-const address = ref('')
-const fieldErrors = ref<{ name?: string }>({})
-
-function openCreate() {
-  isEdit.value = false
-  currentId.value = ''
-  name.value = ''
-  address.value = ''
-  fieldErrors.value = {}
-  store.clearError()
-  showModal.value = true
-}
-
-function openEdit(loc: any) {
-  isEdit.value = true
-  currentId.value = loc.id
-  name.value = loc.name
-  address.value = loc.address || ''
-  fieldErrors.value = {}
-  store.clearError()
-  showModal.value = true
-}
-
-async function handleSave() {
-  const result = LocationRequestSchema.safeParse({
-    name: name.value,
-    address: address.value || undefined
-  })
-  
-  if (!result.success) {
-    const errs: any = {}
-    for (const issue of result.error.issues) {
-       if (issue.path[0]) {
-         errs[String(issue.path[0])] = issue.message
-       }
+const openModal = (loc?: Location) => {
+  if (loc) {
+    currentLocation.value = loc
+    formData.value = {
+      name: loc.name,
+      address: loc.address ?? '',
     }
-    fieldErrors.value = errs
-    return
-  }
-  
-  fieldErrors.value = {}
-  let ok = false
-  if (isEdit.value) {
-    ok = await store.updateLocation(currentId.value, result.data)
   } else {
-    ok = await store.createLocation(result.data)
+    currentLocation.value = null
+    formData.value = {
+      name: '',
+      address: '',
+    }
   }
-  
-  if (ok) {
-    showModal.value = false
-  }
+  isModalOpen.value = true
 }
 
-async function handleDelete(id: string) {
-  if (confirm('Bạn có chắc chắn muốn xóa địa điểm này?')) {
-    await store.deleteLocation(id)
-  }
+const closeModal = () => {
+  isModalOpen.value = false
+  currentLocation.value = null
 }
 
-function nextPage() {
-  if (store.locPage < store.locTotalPages - 1) {
-    store.fetchLocations(store.locPage + 1)
+const handleSubmit = () => {
+  if (currentLocation.value) {
+    emit('update', currentLocation.value.id, { ...formData.value })
+  } else {
+    emit('create', { ...formData.value })
   }
+  closeModal()
 }
 
-function prevPage() {
-  if (store.locPage > 0) {
-    store.fetchLocations(store.locPage - 1)
+const openDeleteConfirm = (loc: Location) => {
+  currentLocation.value = loc
+  isDeleteConfirmOpen.value = true
+}
+
+const confirmDelete = () => {
+  if (currentLocation.value) {
+    emit('delete', currentLocation.value.id)
+    isDeleteConfirmOpen.value = false
+    currentLocation.value = null
   }
 }
 </script>
 
 <template>
-  <div class="card space-y-4">
-    <div v-if="store.error" class="p-3 rounded-lg bg-danger/10 text-danger text-sm">
-      {{ store.error }}
-    </div>
-    
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold text-text-primary">Địa điểm</h2>
-      <button class="btn-primary px-4 py-2 text-sm" @click="openCreate" :disabled="store.isLoading || store.isSaving || store.isDeleting">
-        Add
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-bold text-gray-800">Danh sách Địa điểm</h3>
+      <button
+        @click="openModal()"
+        class="px-4 py-2 bg-[#009898] hover:bg-[#007a7a] text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Thêm địa điểm
       </button>
     </div>
 
+    <!-- Error Message -->
+    <div v-if="error" class="p-4 rounded-lg bg-red-50 border border-red-100 text-red-700 text-sm">
+      {{ error }}
+    </div>
+
     <!-- Table -->
-    <div class="overflow-x-auto border border-surface-muted rounded-lg">
-      <table class="w-full text-left text-sm text-text-secondary">
-        <thead class="bg-surface-soft text-text-primary border-b border-surface-muted">
-          <tr>
-            <th class="px-4 py-3 font-medium">Tên địa điểm</th>
-            <th class="px-4 py-3 font-medium">Địa chỉ</th>
-            <th class="px-4 py-3 font-medium text-right">Hành động</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-surface-muted">
-          <tr v-if="store.isLoading" class="animate-pulse">
-            <td colspan="3" class="px-4 py-4 text-center">Đang tải...</td>
-          </tr>
-          <tr v-else-if="store.locations.length === 0">
-            <td colspan="3" class="px-4 py-4 text-center">Không có dữ liệu</td>
-          </tr>
-          <tr v-else v-for="loc in store.locations" :key="loc.id" class="hover:bg-surface-soft/50">
-            <td class="px-4 py-3">{{ loc.name }}</td>
-            <td class="px-4 py-3">{{ loc.address || '-' }}</td>
-            <td class="px-4 py-3 text-right space-x-2">
-              <button 
-                class="text-brand-primary hover:underline text-sm font-medium mr-2" 
-                @click="openEdit(loc)"
-                :disabled="store.isLoading || store.isSaving || store.isDeleting"
-              >
-                Edit
-              </button>
-              <button 
-                class="text-danger hover:underline text-sm font-medium" 
-                @click="handleDelete(loc.id)"
-                :disabled="store.isLoading || store.isSaving || store.isDeleting"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên địa điểm</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Địa chỉ</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Hành động</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-if="isLoading" v-for="i in 3" :key="i" class="animate-pulse">
+              <td class="px-6 py-4"><div class="h-4 bg-gray-100 rounded w-1/2"></div></td>
+              <td class="px-6 py-4"><div class="h-4 bg-gray-100 rounded w-3/4"></div></td>
+              <td class="px-6 py-4 text-right"><div class="h-8 bg-gray-100 rounded w-20 ml-auto"></div></td>
+            </tr>
+            <tr v-else-if="locations.length === 0">
+              <td colspan="3" class="px-6 py-10 text-center text-gray-500 italic">
+                Chưa có địa điểm nào được tạo.
+              </td>
+            </tr>
+            <tr v-for="loc in locations" :key="loc.id" class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ loc.name }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ loc.address || '-' }}</td>
+              <td class="px-6 py-4 text-right space-x-2">
+                <button
+                  @click="openModal(loc)"
+                  class="p-2 text-gray-400 hover:text-[#009898] transition-colors"
+                  title="Chỉnh sửa"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  @click="openDeleteConfirm(loc)"
+                  class="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  title="Xóa"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+          Trang {{ page + 1 }} / {{ totalPages }} (Tổng: {{ totalElements }})
+        </div>
+        <div class="flex space-x-2">
+          <button
+            :disabled="page === 0"
+            @click="emit('pageChange', page - 1)"
+            class="px-3 py-1 bg-white border border-gray-300 rounded text-sm disabled:opacity-50 hover:bg-gray-50"
+          >
+            Trước
+          </button>
+          <button
+            :disabled="page >= totalPages - 1"
+            @click="emit('pageChange', page + 1)"
+            class="px-3 py-1 bg-white border border-gray-300 rounded text-sm disabled:opacity-50 hover:bg-gray-50"
+          >
+            Sau
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex items-center justify-between pt-4">
-      <div class="text-sm text-text-secondary">
-        Page {{ store.locTotalPages > 0 ? store.locPage + 1 : 0 }} / {{ store.locTotalPages }} (Tổng: {{ store.locTotalElements }})
-      </div>
-      <div class="space-x-2 flex">
-        <button 
-          class="px-3 py-1.5 border border-surface-muted rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-soft transition-colors"
-          @click="prevPage" 
-          :disabled="store.locPage === 0 || store.isLoading"
-        >
-          Prev
-        </button>
-        <button 
-          class="px-3 py-1.5 border border-surface-muted rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-soft transition-colors"
-          @click="nextPage" 
-          :disabled="store.locPage >= store.locTotalPages - 1 || store.isLoading"
-        >
-          Next
-        </button>
-      </div>
-    </div>
-
-    <!-- Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50">
-      <div class="bg-surface-base w-full max-w-md rounded-xl p-6 shadow-xl mx-4 my-8">
-        <h3 class="text-lg font-semibold text-text-primary mb-4">{{ isEdit ? 'Sửa Địa điểm' : 'Thêm Địa điểm' }}</h3>
-        
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5">
-              Tên địa điểm <span class="text-danger">*</span>
-            </label>
-            <input v-model="name" type="text" class="input" :class="{'!border-danger': fieldErrors.name}" maxlength="255" />
-            <p v-if="fieldErrors.name" class="text-danger text-xs mt-1.5">{{ fieldErrors.name }}</p>
+    <!-- Create/Edit Modal -->
+    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <h4 class="text-lg font-bold text-gray-800">
+            {{ currentLocation ? 'Chỉnh sửa Địa điểm' : 'Thêm Địa điểm mới' }}
+          </h4>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-sm font-semibold text-gray-700">Tên địa điểm <span class="text-red-500">*</span></label>
+            <input
+              v-model="formData.name"
+              type="text"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009898]/20 focus:border-[#009898] outline-none"
+              placeholder="Ví dụ: Văn phòng chính, Chi nhánh..."
+            />
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5">
-              Địa chỉ
-            </label>
-            <textarea v-model="address" class="input w-full min-h-[80px]" rows="3"></textarea>
+          <div class="space-y-1.5">
+            <label class="text-sm font-semibold text-gray-700">Địa chỉ (Tùy chọn)</label>
+            <input
+              v-model="formData.address"
+              type="text"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009898]/20 focus:border-[#009898] outline-none"
+              placeholder="Số nhà, tên đường, quận/huyện..."
+            />
           </div>
         </div>
+        <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+          <button @click="closeModal" class="px-4 py-2 text-gray-600 font-semibold hover:text-gray-800">Hủy</button>
+          <button
+            @click="handleSubmit"
+            :disabled="!formData.name || isSaving"
+            class="px-6 py-2 bg-[#009898] hover:bg-[#007a7a] text-white font-semibold rounded-lg disabled:opacity-50"
+          >
+            {{ isSaving ? 'Đang lưu...' : 'Lưu' }}
+          </button>
+        </div>
+      </div>
+    </div>
 
-        <div class="mt-6 flex justify-end space-x-3">
-          <button class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary" @click="showModal = false" :disabled="store.isSaving">
-            Cancel
-          </button>
-          <button class="btn-primary px-4 py-2 text-sm" @click="handleSave" :disabled="store.isSaving">
-            <span v-if="store.isSaving">Đang lưu...</span>
-            <span v-else>Save</span>
-          </button>
+    <!-- Delete Confirmation -->
+    <div v-if="isDeleteConfirmOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h4 class="text-xl font-bold text-gray-800 mb-2">Xác nhận xóa</h4>
+        <p class="text-gray-600 mb-6">
+          Bạn có chắc chắn muốn xóa địa điểm <strong>{{ currentLocation?.name }}</strong>? Hành động này không thể hoàn tác.
+        </p>
+        <div class="flex gap-3">
+          <button @click="isDeleteConfirmOpen = false" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-semibold text-gray-600 hover:bg-gray-50">Hủy</button>
+          <button @click="confirmDelete" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">Xóa</button>
         </div>
       </div>
     </div>
