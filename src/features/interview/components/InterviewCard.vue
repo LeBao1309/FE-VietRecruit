@@ -1,16 +1,24 @@
-// src/features/interview/components/InterviewCard.vue
-// Displays a single interview with status badge, schedule, and action buttons.
-// Used in both InterviewListPage (HR) and InterviewerDashboard (INTERVIEWER).
+<!-- src/features/interview/components/InterviewCard.vue -->
+<!-- Card displaying interview details. Pure UI. -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Calendar, MapPin, Link2, Users, CheckCircle, XCircle } from 'lucide-vue-next'
-import type { Interview } from '@/features/interview/types/interview.dto'
+import { Calendar, Clock, MapPin, Link, Users, CheckCircle, XCircle, Star } from 'lucide-vue-next'
+
+interface Interview {
+  id: string
+  applicationId: string
+  jobId: string
+  scheduledAt: string
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELED'
+  location?: string
+  meetingLink?: string
+  notes?: string
+  interviewerIds: string[]
+}
 
 const props = defineProps<{
   interview: Interview
-  /** Show management actions (Complete / Cancel) — HR/COMPANY_ADMIN only */
   canManage?: boolean
-  /** Show "Submit Scorecard" action — INTERVIEWER only, status must be COMPLETED */
   canScore?: boolean
 }>()
 
@@ -20,108 +28,101 @@ const emit = defineEmits<{
   (e: 'score', id: string): void
 }>()
 
-const STATUS_CONFIG = {
-  SCHEDULED:  { label: 'Scheduled',  class: 'bg-blue-50 text-blue-700 border border-blue-200' },
-  COMPLETED:  { label: 'Completed',  class: 'bg-green-50 text-green-700 border border-green-200' },
-  CANCELED:   { label: 'Canceled',   class: 'bg-red-50 text-red-700 border border-red-200' },
-} as const
-
-const statusCfg = computed(() => STATUS_CONFIG[props.interview.status])
-
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-    year: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
+const statusConfig = {
+  SCHEDULED: { label: 'Đã lên lịch', class: 'bg-blue-50 text-blue-700 border-blue-200' },
+  COMPLETED: { label: 'Hoàn thành', class: 'bg-green-50 text-green-700 border-green-200' },
+  CANCELED: { label: 'Đã hủy', class: 'bg-red-50 text-red-700 border-red-200' }
 }
+
+const formattedDate = computed(() => {
+  return new Date(props.interview.scheduledAt).toLocaleDateString('vi-VN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
+
+const formattedTime = computed(() => {
+  return new Date(props.interview.scheduledAt).toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+})
 </script>
 
 <template>
-  <div
-    class="bg-white border border-border rounded-xl p-4 hover:shadow-hover transition-shadow"
-    :data-testid="`interview-card-${interview.id}`"
-  >
-    <!-- Header: status + date -->
-    <div class="flex items-start justify-between gap-3 mb-3">
+  <div class="bg-white border border-border rounded-2xl p-5 hover:shadow-hover transition-all group">
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-4">
       <div>
-        <p class="text-xs text-text-muted mb-1">Application ID</p>
-        <p class="text-sm font-mono font-semibold text-text-primary">
-          {{ interview.applicationId.slice(0, 8) }}
-        </p>
+        <span 
+          :class="['px-2 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider', statusConfig[interview.status].class]"
+        >
+          {{ statusConfig[interview.status].label }}
+        </span>
+        <h3 class="mt-2 text-sm font-black text-text-primary uppercase tracking-tight">
+          Phỏng vấn #{{ interview.id.slice(0, 8) }}
+        </h3>
       </div>
-      <span :class="['text-xs font-semibold px-2.5 py-1 rounded-full shrink-0', statusCfg.class]">
-        {{ statusCfg.label }}
-      </span>
+      <div class="p-2 rounded-xl bg-surface-soft text-text-muted">
+        <Calendar class="w-5 h-5" />
+      </div>
     </div>
 
-    <!-- Scheduled time -->
-    <div class="flex items-center gap-2 text-sm text-text-muted mb-2">
-      <Calendar class="w-4 h-4 shrink-0" />
-      <span>{{ formatDateTime(interview.scheduledAt) }}</span>
-    </div>
+    <!-- Details -->
+    <div class="space-y-3 mb-6">
+      <div class="flex items-center gap-2 text-xs text-text-primary font-bold">
+        <Clock class="w-4 h-4 text-brand" />
+        {{ formattedDate }} lúc {{ formattedTime }}
+      </div>
+      
+      <div v-if="interview.location" class="flex items-center gap-2 text-xs text-text-muted">
+        <MapPin class="w-4 h-4" />
+        {{ interview.location }}
+      </div>
 
-    <!-- Location or meeting link -->
-    <div v-if="interview.location" class="flex items-center gap-2 text-sm text-text-muted mb-2">
-      <MapPin class="w-4 h-4 shrink-0" />
-      <span>{{ interview.location }}</span>
-    </div>
-    <div v-if="interview.meetingLink" class="flex items-center gap-2 text-sm text-brand mb-2">
-      <Link2 class="w-4 h-4 shrink-0" />
-      <a
-        :href="interview.meetingLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="hover:underline truncate"
-        @click.stop
-      >
-        Join meeting
-      </a>
-    </div>
+      <div v-if="interview.meetingLink" class="flex items-center gap-2 text-xs text-brand font-bold">
+        <Link class="w-4 h-4" />
+        <a :href="interview.meetingLink" target="_blank" class="hover:underline">Link cuộc họp</a>
+      </div>
 
-    <!-- Interviewers count -->
-    <div class="flex items-center gap-2 text-sm text-text-muted mb-3">
-      <Users class="w-4 h-4 shrink-0" />
-      <span>{{ interview.interviewerIds.length }} interviewer(s)</span>
+      <div class="flex items-center gap-2 text-xs text-text-muted">
+        <Users class="w-4 h-4" />
+        {{ interview.interviewerIds.length }} người phỏng vấn
+      </div>
     </div>
 
     <!-- Notes -->
-    <p v-if="interview.notes" class="text-xs text-text-muted italic border-t border-border pt-2 mb-3">
-      {{ interview.notes }}
-    </p>
-
-    <!-- Action buttons -->
-    <div
-      v-if="interview.status === 'SCHEDULED' && canManage"
-      class="flex gap-2 pt-2 border-t border-border"
-    >
-      <button
-        class="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-semibold
-               px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-        @click.stop="emit('complete', interview.id)"
-      >
-        <CheckCircle class="w-3.5 h-3.5" />
-        Complete
-      </button>
-      <button
-        class="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-semibold
-               px-3 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
-        @click.stop="emit('cancel', interview.id)"
-      >
-        <XCircle class="w-3.5 h-3.5" />
-        Cancel
-      </button>
+    <div v-if="interview.notes" class="mb-6 p-3 bg-surface-soft rounded-xl italic text-[11px] text-text-muted border-l-2 border-border">
+      "{{ interview.notes }}"
     </div>
 
-    <div
-      v-if="interview.status === 'COMPLETED' && canScore"
-      class="pt-2 border-t border-border"
-    >
-      <button
-        class="w-full text-xs font-semibold px-3 py-1.5 rounded-lg
-               bg-brand text-white hover:bg-brand-dark transition-colors"
-        @click.stop="emit('score', interview.id)"
+    <!-- Actions -->
+    <div class="pt-4 border-t border-border flex items-center justify-end gap-2">
+      <template v-if="interview.status === 'SCHEDULED'">
+        <button 
+          v-if="canManage"
+          @click="emit('cancel', interview.id)"
+          class="flex-1 px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5"
+        >
+          <XCircle class="w-3.5 h-3.5" /> Hủy
+        </button>
+        <button 
+          v-if="canManage"
+          @click="emit('complete', interview.id)"
+          class="flex-1 px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all flex items-center justify-center gap-1.5"
+        >
+          <CheckCircle class="w-3.5 h-3.5" /> Xong
+        </button>
+      </template>
+      
+      <button 
+        v-if="canScore && interview.status === 'COMPLETED'"
+        @click="emit('score', interview.id)"
+        class="w-full px-4 py-2.5 bg-brand text-white rounded-xl hover:bg-brand-dark text-xs font-black uppercase tracking-[0.1em] shadow-brand-sm transition-all flex items-center justify-center gap-2"
       >
-        Submit Scorecard
+        <Star class="w-4 h-4 fill-current" /> Chấm điểm Scorecard
       </button>
     </div>
   </div>

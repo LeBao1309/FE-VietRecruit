@@ -1,216 +1,205 @@
-// src/features/interview/components/ScorecardForm.vue
-// Form for INTERVIEWER to submit a scorecard for a COMPLETED interview.
-// Includes real-time live average preview as scores are typed.
-// Validated with Zod submitScorecardSchema (safeParse only, never parse()).
+<!-- src/features/interview/components/ScorecardForm.vue -->
+<!-- Modal form to submit an interview scorecard. Pure UI. -->
 <script setup lang="ts">
 import { reactive, computed } from 'vue'
-import { z } from 'zod'
-import { Star, X } from 'lucide-vue-next'
-import { useScorecardStore } from '@/features/interview/stores/useScorecardStore'
-import type { ScorecardResult } from '@/features/interview/types/interview.dto'
+import { Star, X, CheckCircle, XCircle, AlertCircle, HelpCircle } from 'lucide-vue-next'
 
-const props = defineProps<{ interviewId: string }>()
-const emit = defineEmits<{ (e: 'close'): void; (e: 'submitted'): void }>()
+const props = defineProps<{
+  interviewId: string
+  isSubmitting?: boolean
+  error?: string | null
+}>()
 
-const store = useScorecardStore()
+const emit = defineEmits<{
+  (e: 'submit', payload: any): void
+  (e: 'cancel'): void
+}>()
 
-// ── Zod schema ────────────────────────────────────────────────────────────────
-const submitScorecardSchema = z.object({
-  skillScore:    z.number().min(0, 'Min 0').max(10, 'Max 10'),
-  attitudeScore: z.number().min(0, 'Min 0').max(10, 'Max 10'),
-  englishScore:  z.number().min(0, 'Min 0').max(10, 'Max 10'),
-  overallNote:   z.string().optional(),
-  result:        z.enum(['PASS', 'FAIL', 'CONSIDERING']),
-})
-
-// ── Form state ────────────────────────────────────────────────────────────────
 const form = reactive({
-  skillScore:    '' as string | number,
-  attitudeScore: '' as string | number,
-  englishScore:  '' as string | number,
-  overallNote:   '',
-  result:        '' as ScorecardResult | '',
+  skillScore: 5,
+  attitudeScore: 5,
+  englishScore: 5,
+  overallNote: '',
+  result: 'CONSIDERING' as 'PASS' | 'FAIL' | 'CONSIDERING'
 })
 
-const fieldErrors = reactive<Record<string, string | undefined>>({})
-
-// ── Live average preview (real-time, no validation triggered) ─────────────────
-const liveAverage = computed(() => {
-  const s = Number(form.skillScore)
-  const a = Number(form.attitudeScore)
-  const e = Number(form.englishScore)
-  if (isNaN(s) || isNaN(a) || isNaN(e)) return null
-  if (form.skillScore === '' || form.attitudeScore === '' || form.englishScore === '') return null
-  return ((s + a + e) / 3).toFixed(2)
+const averageScore = computed(() => {
+  return ((form.skillScore + form.attitudeScore + form.englishScore) / 3).toFixed(1)
 })
 
-const liveAverageClass = computed(() => {
-  if (liveAverage.value === null) return 'text-text-muted'
-  const n = Number(liveAverage.value)
-  if (n >= 7) return 'text-green-600'
-  if (n >= 5) return 'text-yellow-600'
-  return 'text-red-600'
+const averageColorClass = computed(() => {
+  const avg = parseFloat(averageScore.value)
+  if (avg >= 7) return 'text-green-600 bg-green-50 border-green-200'
+  if (avg >= 5) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
+  return 'text-red-600 bg-red-50 border-red-200'
 })
 
-// ── Submit ────────────────────────────────────────────────────────────────────
-async function onSubmit(): Promise<void> {
-  Object.keys(fieldErrors).forEach((k) => delete fieldErrors[k])
-
-  const payload = {
-    skillScore:    Number(form.skillScore),
-    attitudeScore: Number(form.attitudeScore),
-    englishScore:  Number(form.englishScore),
-    overallNote:   form.overallNote || undefined,
-    result:        form.result as ScorecardResult,
-  }
-
-  const result = submitScorecardSchema.safeParse(payload)
-  if (!result.success) {
-    for (const issue of result.error.issues) {
-      const key = String(issue.path[0])
-      fieldErrors[key] = issue.message
-    }
-    return
-  }
-
-  try {
-    await store.submitScorecard(props.interviewId, result.data)
-    emit('submitted')
-    emit('close')
-  } catch {
-    // error is set in the store
-  }
+function handleSubmit() {
+  emit('submit', { ...form })
 }
-
-const RESULT_OPTIONS: { value: ScorecardResult; label: string; class: string }[] = [
-  { value: 'PASS',        label: 'Pass',        class: 'border-green-400 bg-green-50 text-green-700' },
-  { value: 'FAIL',        label: 'Fail',        class: 'border-red-400 bg-red-50 text-red-700' },
-  { value: 'CONSIDERING', label: 'Considering', class: 'border-yellow-400 bg-yellow-50 text-yellow-700' },
-]
 </script>
 
 <template>
-  <div
-    class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
-    @click.self="emit('close')"
-  >
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="emit('cancel')"></div>
+
+    <!-- Modal Content -->
+    <div class="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       <!-- Header -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-border">
-        <div class="flex items-center gap-2">
-          <Star class="w-5 h-5 text-brand" />
-          <h2 class="text-lg font-bold text-text-primary">Submit Scorecard</h2>
+      <header class="p-6 border-b border-border flex items-center justify-between shrink-0 bg-surface-soft/30">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
+            <Star class="w-5 h-5 fill-current" />
+          </div>
+          <div>
+            <h2 class="text-lg font-black text-text-primary uppercase tracking-tight">Chấm điểm Scorecard</h2>
+            <p class="text-[10px] text-text-muted font-bold uppercase tracking-widest">Phỏng vấn #{{ interviewId.slice(0, 8) }}</p>
+          </div>
         </div>
-        <button
-          class="p-1.5 hover:bg-surface-muted rounded-lg transition-colors text-text-muted"
-          @click="emit('close')"
+        <button 
+          class="p-2 rounded-xl hover:bg-surface-soft text-text-muted transition-colors"
+          @click="emit('cancel')"
         >
-          <X class="w-5 h-5" />
+          <X class="w-6 h-6" />
         </button>
-      </div>
+      </header>
 
-      <!-- Live average preview banner -->
-      <div
-        class="px-6 py-3 bg-surface-soft border-b border-border flex items-center justify-between"
-      >
-        <span class="text-sm text-text-muted font-medium">Live Average Score</span>
-        <span :class="['text-2xl font-bold tabular-nums', liveAverageClass]">
-          {{ liveAverage ?? '—' }}
-          <span class="text-sm font-normal text-text-muted">/ 10</span>
-        </span>
-      </div>
+      <!-- Form Body -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-8">
+        <!-- Error Banner -->
+        <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 text-red-700 text-sm font-bold">
+          <AlertCircle class="w-5 h-5 shrink-0" />
+          {{ error }}
+        </div>
 
-      <!-- Form body -->
-      <form class="p-6 space-y-4" @submit.prevent="onSubmit">
-
-        <!-- Score fields -->
-        <div class="grid grid-cols-3 gap-3">
-          <div v-for="field in [
-            { key: 'skillScore',    label: 'Skill' },
-            { key: 'attitudeScore', label: 'Attitude' },
-            { key: 'englishScore',  label: 'English' },
-          ]" :key="field.key">
-            <label class="block text-xs font-semibold text-text-primary mb-1">
-              {{ field.label }} <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model.number="(form as any)[field.key]"
-              type="number"
-              min="0"
-              max="10"
-              step="0.5"
-              placeholder="0–10"
-              class="w-full border border-border rounded-lg px-3 py-2 text-sm text-center
-                     focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand
-                     font-mono font-bold"
-            />
-            <p v-if="fieldErrors[field.key]" class="text-xs text-red-500 mt-0.5">
-              {{ fieldErrors[field.key] }}
-            </p>
+        <!-- Aggregate Score Circle -->
+        <div class="flex flex-col items-center justify-center p-8 bg-surface-soft rounded-3xl border border-border/50">
+          <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4">Điểm trung bình</p>
+          <div 
+            :class="['w-24 h-24 rounded-full border-4 flex items-center justify-center text-3xl font-black font-display shadow-inner transition-colors duration-500', averageColorClass]"
+          >
+            {{ averageScore }}
           </div>
         </div>
 
-        <!-- Result selection -->
-        <div>
-          <label class="block text-sm font-medium text-text-primary mb-2">
-            Overall Result <span class="text-red-500">*</span>
-          </label>
-          <div class="flex gap-2">
-            <button
-              v-for="opt in RESULT_OPTIONS"
-              :key="opt.value"
-              type="button"
-              :class="[
-                'flex-1 px-3 py-2 rounded-lg text-sm font-semibold border-2 transition-all',
-                form.result === opt.value ? opt.class + ' border-2' : 'border-border text-text-muted hover:border-brand/30',
-              ]"
-              @click="form.result = opt.value"
+        <!-- Sliders -->
+        <div class="space-y-6">
+          <!-- Skill Score -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] font-black text-text-primary uppercase tracking-widest">Kỹ năng chuyên môn</label>
+              <span class="text-lg font-black text-brand">{{ form.skillScore }}/10</span>
+            </div>
+            <input 
+              v-model.number="form.skillScore"
+              type="range" min="0" max="10" step="1"
+              class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand"
+            />
+          </div>
+
+          <!-- Attitude Score -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] font-black text-text-primary uppercase tracking-widest">Thái độ & Văn hóa</label>
+              <span class="text-lg font-black text-brand">{{ form.attitudeScore }}/10</span>
+            </div>
+            <input 
+              v-model.number="form.attitudeScore"
+              type="range" min="0" max="10" step="1"
+              class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand"
+            />
+          </div>
+
+          <!-- English Score -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="text-[11px] font-black text-text-primary uppercase tracking-widest">Kỹ năng Tiếng Anh</label>
+              <span class="text-lg font-black text-brand">{{ form.englishScore }}/10</span>
+            </div>
+            <input 
+              v-model.number="form.englishScore"
+              type="range" min="0" max="10" step="1"
+              class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-brand"
+            />
+          </div>
+        </div>
+
+        <!-- Result Selection -->
+        <div class="space-y-4 pt-6 border-t border-border">
+          <label class="text-[11px] font-black text-text-primary uppercase tracking-widest">Kết quả đề xuất</label>
+          <div class="grid grid-cols-3 gap-3">
+            <button 
+              @click="form.result = 'PASS'"
+              class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+              :class="form.result === 'PASS' ? 'border-green-600 bg-green-50 text-green-700' : 'border-border text-text-muted hover:border-green-200'"
             >
-              {{ opt.label }}
+              <CheckCircle class="w-6 h-6" />
+              <span class="text-[10px] font-black uppercase tracking-widest">Vượt qua</span>
+            </button>
+            <button 
+              @click="form.result = 'CONSIDERING'"
+              class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+              :class="form.result === 'CONSIDERING' ? 'border-yellow-600 bg-yellow-50 text-yellow-700' : 'border-border text-text-muted hover:border-yellow-200'"
+            >
+              <HelpCircle class="w-6 h-6" />
+              <span class="text-[10px] font-black uppercase tracking-widest">Cân nhắc</span>
+            </button>
+            <button 
+              @click="form.result = 'FAIL'"
+              class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
+              :class="form.result === 'FAIL' ? 'border-red-600 bg-red-50 text-red-700' : 'border-border text-text-muted hover:border-red-200'"
+            >
+              <XCircle class="w-6 h-6" />
+              <span class="text-[10px] font-black uppercase tracking-widest">Loại bỏ</span>
             </button>
           </div>
-          <p v-if="fieldErrors['result']" class="text-xs text-red-500 mt-1">
-            {{ fieldErrors['result'] }}
-          </p>
         </div>
 
-        <!-- Overall note -->
-        <div>
-          <label class="block text-sm font-medium text-text-primary mb-1">Overall Note</label>
-          <textarea
+        <!-- Notes -->
+        <div class="space-y-2">
+          <label class="text-[11px] font-black text-text-primary uppercase tracking-widest">Ghi chú tổng quát</label>
+          <textarea 
             v-model="form.overallNote"
-            rows="3"
-            placeholder="Strengths, areas for improvement, any observations..."
-            class="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none
-                   focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"
-          />
+            rows="4"
+            placeholder="Nhận xét chi tiết về ứng viên..."
+            class="w-full px-4 py-3 bg-surface-soft border-border rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand focus:border-brand outline-none transition-all resize-none"
+          ></textarea>
         </div>
+      </div>
 
-        <!-- Store error -->
-        <p v-if="store.error" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-2">
-          {{ store.error }}
-        </p>
-
-        <!-- Actions -->
-        <div class="flex gap-3 pt-2">
-          <button
-            type="button"
-            class="flex-1 px-4 py-2 border border-border text-sm font-medium rounded-lg
-                   hover:bg-surface-muted transition-colors"
-            @click="emit('close')"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            :disabled="store.isSubmitting"
-            class="flex-1 px-4 py-2 bg-brand text-white text-sm font-semibold rounded-lg
-                   hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ store.isSubmitting ? 'Submitting...' : 'Submit Scorecard' }}
-          </button>
-        </div>
-      </form>
+      <!-- Footer -->
+      <footer class="p-6 border-t border-border bg-surface-soft/30 flex items-center justify-end gap-4 shrink-0">
+        <button 
+          @click="emit('cancel')"
+          class="px-8 py-3 text-sm font-black text-text-muted uppercase tracking-widest hover:text-text-primary transition-colors"
+        >
+          Hủy
+        </button>
+        <button 
+          @click="handleSubmit"
+          :disabled="isSubmitting"
+          class="px-10 py-3 bg-brand text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-brand-lg hover:bg-brand-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <CheckCircle v-if="!isSubmitting" class="w-4 h-4" />
+          <span v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          {{ isSubmitting ? 'ĐANG GỬI...' : 'GỬI ĐÁNH GIÁ' }}
+        </button>
+      </footer>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Custom range styling for Tailwind */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #009898;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 152, 152, 0.3);
+  margin-top: -6px;
+}
+</style>
