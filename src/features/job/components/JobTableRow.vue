@@ -1,15 +1,11 @@
 <script setup lang="ts">
 // src/features/job/components/JobTableRow.vue
 // Renders a single row in the Job list table.
-// Emits 'publish' and 'close' events — parent decides store action + confirmation.
+// Emits 'publish', 'close', and 'edit' events.
 
-import { CalendarDays } from 'lucide-vue-next'
+import { CalendarDays, Edit2, ExternalLink } from 'lucide-vue-next'
 import JobStatusBadge from '@/features/job/components/JobStatusBadge.vue'
 import type { Job } from '@/features/workspace/types'
-import { useRouter } from 'vue-router'
-import { ROUTE_NAMES } from '@/core/constants/route-names'
-
-const router = useRouter()
 
 const props = defineProps<{
   job: Job
@@ -18,6 +14,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   publish: [id: string]
   close: [id: string]
+  edit: [id: string]
 }>()
 
 function compactNumber(n: number): string {
@@ -27,19 +24,19 @@ function compactNumber(n: number): string {
 }
 
 function formatSalary(job: Job): string {
-  if (job.is_negotiable) return 'Negotiable'
-  if (!job.min_salary && !job.max_salary) return 'Not specified'
+  if (job.is_negotiable) return 'Thỏa thuận'
+  if (!job.min_salary && !job.max_salary) return 'Không tiết lộ'
   const currency = job.currency ?? 'VND'
   if (job.min_salary && job.max_salary) {
     return `${compactNumber(job.min_salary)}–${compactNumber(job.max_salary)} ${currency}`
   }
-  if (job.min_salary) return `From ${compactNumber(job.min_salary)} ${currency}`
-  return `Up to ${compactNumber(job.max_salary!)} ${currency}`
+  if (job.min_salary) return `Từ ${compactNumber(job.min_salary)} ${currency}`
+  return `Lên đến ${compactNumber(job.max_salary!)} ${currency}`
 }
 
 function formatDate(dateStr?: string | null): string {
   if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return new Date(dateStr).toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -49,70 +46,84 @@ function formatDate(dateStr?: string | null): string {
 
 <template>
   <tr
-    @click="router.push({ name: ROUTE_NAMES.PIPELINE, query: { jobId: props.job.id } })"
-    class="border-b border-border last:border-0 hover:bg-surface-soft transition-colors group cursor-pointer"
+    @click="emit('edit', props.job.id)"
+    class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors group cursor-pointer"
   >
     <!-- Title + description preview -->
-    <td class="px-4 py-3">
-      <p class="font-semibold text-sm text-text-primary group-hover:text-brand transition-colors line-clamp-1">
-        {{ props.job.title }}
-      </p>
-      <p class="text-xs text-text-muted mt-0.5 line-clamp-1 max-w-xs">
-        {{ props.job.description }}
-      </p>
+    <td class="px-4 py-4">
+      <div class="flex flex-col">
+        <span class="font-semibold text-sm text-gray-900 group-hover:text-[#009898] transition-colors line-clamp-1">
+          {{ props.job.title }}
+        </span>
+        <span class="text-xs text-gray-500 mt-0.5 line-clamp-1 max-w-xs">
+          {{ props.job.description }}
+        </span>
+      </div>
     </td>
 
     <!-- Status badge -->
-    <td class="px-4 py-3 whitespace-nowrap">
+    <td class="px-4 py-4 whitespace-nowrap">
       <JobStatusBadge :status="props.job.status" />
     </td>
 
     <!-- Salary -->
-    <td class="px-4 py-3 whitespace-nowrap text-sm text-text-secondary">
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
       {{ formatSalary(props.job) }}
     </td>
 
     <!-- Deadline -->
-    <td class="px-4 py-3 whitespace-nowrap">
-      <span class="flex items-center gap-1 text-sm text-text-secondary">
-        <CalendarDays class="w-3.5 h-3.5 text-text-muted" />
+    <td class="px-4 py-4 whitespace-nowrap">
+      <span class="flex items-center gap-1.5 text-sm text-gray-600">
+        <CalendarDays class="w-3.5 h-3.5 text-gray-400" />
         {{ formatDate(props.job.deadline) }}
       </span>
     </td>
 
     <!-- Created at -->
-    <td class="px-4 py-3 whitespace-nowrap text-sm text-text-muted">
+    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
       {{ formatDate(props.job.created_at) }}
     </td>
 
     <!-- Actions -->
-    <td class="px-4 py-3 whitespace-nowrap">
+    <td class="px-4 py-4 whitespace-nowrap" @click.stop>
       <div class="flex items-center gap-2">
+        <!-- Edit -->
+        <button
+          @click="emit('edit', props.job.id)"
+          class="p-1.5 text-gray-400 hover:text-[#009898] hover:bg-[#009898]/10 rounded-lg transition-colors"
+          title="Chỉnh sửa"
+        >
+          <Edit2 class="w-4 h-4" />
+        </button>
+
         <!-- Publish: only for DRAFT -->
         <button
           v-if="props.job.status === 'DRAFT'"
-          @click.stop="emit('publish', props.job.id)"
-          class="px-3 py-1 text-xs font-semibold bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm"
+          @click="emit('publish', props.job.id)"
+          class="px-3 py-1.5 text-xs font-semibold bg-[#009898] text-white rounded-lg hover:bg-[#007a7a] transition-colors shadow-sm"
         >
-          Publish
+          Đăng tin
         </button>
 
         <!-- Close: only for PUBLISHED -->
         <button
           v-if="props.job.status === 'PUBLISHED'"
-          @click.stop="emit('close', props.job.id)"
-          class="px-3 py-1 text-xs font-semibold bg-white text-danger border border-danger/30 rounded-lg hover:bg-danger-light transition-colors"
+          @click="emit('close', props.job.id)"
+          class="px-3 py-1.5 text-xs font-semibold bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
         >
-          Close
+          Đóng tin
         </button>
 
-        <!-- Closed state label -->
-        <span
-          v-if="props.job.status === 'CLOSED'"
-          class="text-xs text-text-muted italic"
+        <!-- Link to public view (optional but nice) -->
+        <a
+          v-if="props.job.status === 'PUBLISHED'"
+          :href="`/jobs/${props.job.id}`"
+          target="_blank"
+          class="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+          title="Xem tin tuyển dụng"
         >
-          Archived
-        </span>
+          <ExternalLink class="w-4 h-4" />
+        </a>
       </div>
     </td>
   </tr>
