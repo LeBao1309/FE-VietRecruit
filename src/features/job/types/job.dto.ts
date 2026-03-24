@@ -4,19 +4,31 @@
 
 import type { z } from 'zod'
 import type { Job, JobStatus } from '@/features/workspace/types'
-import type { createJobSchema } from '@/features/job/schemas/job.schema'
+import type { createJobSchema, updateJobSchema } from '@/features/job/schemas/job.schema'
 
 // ── Re-exports for convenience ────────────────────────────────────────────────
 export type { Job, JobStatus }
 
 // ── Request DTOs ──────────────────────────────────────────────────────────────
 
-/** Inferred from the Zod schema — single source of truth for form +  service */
+/** Inferred from the Zod schema — single source of truth for form + service */
 export type CreateJobRequest = z.infer<typeof createJobSchema>
 
-/** Query parameters for GET /vietrecruit/jobs */
+/** All fields optional — used for PUT /vietrecruit/jobs/:id */
+export type UpdateJobRequest = z.infer<typeof updateJobSchema>
+
+/** Query parameters for GET /vietrecruit/jobs (employer list) */
 export interface JobListParams {
   status?: JobStatus
+  page?: number
+  size?: number
+}
+
+/** Query parameters for GET /vietrecruit/jobs/search (Elasticsearch) */
+export interface JobEsSearchParams {
+  q?: string
+  category?: string
+  location?: string
   page?: number
   size?: number
 }
@@ -30,6 +42,32 @@ export interface JobListResponse {
   totalPages: number
   number: number   // current page index (0-based)
   size: number
+}
+
+// ── AI DTOs ───────────────────────────────────────────────────────────────────
+
+export interface JdGenerateRequest {
+  title: string
+  department?: string
+  requirements?: string
+}
+
+export interface JdGenerateResponse {
+  description: string
+}
+
+export interface SalaryBenchmarkRequest {
+  title: string
+  location?: string
+  experienceLevel?: string
+}
+
+export interface SalaryBenchmark {
+  min: number
+  max: number
+  median: number
+  currency: string
+  sampleSize: number
 }
 
 // ── Error Types ───────────────────────────────────────────────────────────────
