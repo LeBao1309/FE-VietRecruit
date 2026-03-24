@@ -1,226 +1,247 @@
-// src/features/pipeline/components/ApplicationDetailDrawer.vue
-// Slide-in drawer that opens when clicking an application card.
-// CRITICAL: cover letter is sanitized with DOMPurify before v-html to prevent XSS.
+<!-- src/features/pipeline/components/ApplicationDetailDrawer.vue -->
+<!-- Detailed view of an application. Slide-in panel. Pure UI. -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import DOMPurify from 'dompurify'
-import { X, ExternalLink, Clock, Bot, ArrowRight } from 'lucide-vue-next'
-import type { ApplicationDetail, ApplicationStatus } from '@/features/pipeline/types/application.dto'
+import { 
+  X, ExternalLink, Calendar, User, Briefcase, 
+  ArrowRight, FileText, Clock, Trash2, CheckCircle
+} from 'lucide-vue-next'
+import AiScreeningResultCard from './AiScreeningResultCard.vue'
+
+interface StatusHistory {
+  fromStatus: string | null
+  toStatus: string
+  changedBy?: string
+  changedAt: string
+  note?: string
+}
+
+interface ApplicationDetail {
+  id: string
+  candidateId: string
+  jobId: string
+  status: string
+  aiScore: number | null
+  coverLetter?: string
+  cvUrl: string
+  createdAt: string
+  statusHistory: StatusHistory[]
+}
+
+interface ScreeningResult {
+  score: number
+  summary: string
+  strengths: string[]
+  weaknesses: string[]
+  recommendations: string[]
+}
 
 const props = defineProps<{
   detail: ApplicationDetail | null
-  isLoading: boolean
+  isLoading?: boolean
+  allowedTransitions: Array<{ status: string; label: string }>
+  screeningResult?: ScreeningResult | null
 }>()
 
-const emit = defineEmits<{ (e: 'close'): void }>()
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'transition', newStatus: string): void
+  (e: 'viewCv', url: string): void
+}>()
 
-// XSS-safe cover letter HTML
-const sanitizedCoverLetter = computed(() => {
-  if (!props.detail?.coverLetter) return ''
-  return DOMPurify.sanitize(props.detail.coverLetter)
+const sortedHistory = computed(() => {
+  if (!props.detail) return []
+  return [...props.detail.statusHistory].sort((a, b) => 
+    new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime()
+  )
 })
 
-// AI score badge colours
-const aiScoreClass = computed(() => {
-  const s = props.detail?.aiScore
-  if (s === null || s === undefined) return 'bg-surface-muted text-text-muted border border-border'
-  if (s >= 80) return 'bg-green-50 text-green-700 border border-green-200'
-  if (s >= 50) return 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-  return 'bg-red-50 text-red-700 border border-red-200'
-})
-
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  NEW: 'New',
-  SCREENING: 'Screening',
-  INTERVIEW: 'Interview',
-  OFFER: 'Offer',
-  HIRED: 'Hired',
-  REJECTED: 'Rejected',
-}
-
-const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  NEW: '#64748B',
-  SCREENING: '#F59E0B',
-  INTERVIEW: '#3B82F6',
-  OFFER: '#8B5CF6',
-  HIRED: '#10B981',
-  REJECTED: '#EF4444',
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function getStatusBadgeClass(status: string) {
+  switch (status) {
+    case 'NEW': return 'bg-blue-50 text-blue-700 border-blue-200'
+    case 'SCREENING': return 'bg-yellow-50 text-yellow-700 border-yellow-200'
+    case 'INTERVIEW': return 'bg-purple-50 text-purple-700 border-purple-200'
+    case 'OFFER': return 'bg-brand-light text-brand border-brand/20'
+    case 'HIRED': return 'bg-green-50 text-green-700 border-green-200'
+    case 'REJECTED': return 'bg-red-50 text-red-700 border-red-200'
+    default: return 'bg-gray-50 text-gray-700 border-gray-200'
+  }
 }
 </script>
 
 <template>
-  <!-- Scrim overlay -->
-  <div
-    class="fixed inset-0 z-40 bg-black/25 backdrop-blur-sm"
-    aria-hidden="true"
-    @click="emit('close')"
-  />
+  <div class="fixed inset-0 z-50 overflow-hidden pointer-events-none">
+    <!-- Overlay backdrop -->
+    <div 
+      class="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto transition-opacity"
+      @click="emit('close')"
+    ></div>
 
-  <!-- Drawer panel -->
-  <aside
-    class="fixed right-0 top-0 z-50 h-full w-full max-w-lg bg-white shadow-2xl flex flex-col"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Application Detail"
-  >
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-      <h2 class="text-lg font-bold text-text-primary">Application Detail</h2>
-      <button
-        class="p-1.5 rounded-lg hover:bg-surface-muted transition-colors text-text-muted"
-        aria-label="Close drawer"
-        @click="emit('close')"
-      >
-        <X class="w-5 h-5" />
-      </button>
-    </div>
-
-    <!-- Loading skeleton -->
-    <div v-if="isLoading" class="flex-1 p-6 space-y-5 animate-pulse">
-      <div class="h-5 w-48 bg-surface-muted rounded" />
-      <div class="h-4 w-32 bg-surface-muted rounded" />
-      <div class="h-8 w-20 bg-surface-muted rounded-full" />
-      <div class="h-28 bg-surface-muted rounded-xl" />
-      <div class="space-y-3">
-        <div class="h-4 w-36 bg-surface-muted rounded" />
-        <div class="h-4 w-full bg-surface-muted rounded" />
-        <div class="h-4 w-3/4 bg-surface-muted rounded" />
-      </div>
-    </div>
-
-    <!-- No data fallback -->
-    <div
-      v-else-if="!detail"
-      class="flex-1 flex items-center justify-center text-text-muted text-sm"
-    >
-      Loading application details...
-    </div>
-
-    <!-- Main content -->
-    <div v-else class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
-
-      <!-- IDs -->
-      <section class="space-y-3">
-        <div>
-          <p class="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-0.5">
-            Candidate ID
-          </p>
-          <p class="text-sm font-mono text-text-primary">{{ detail.candidateId }}</p>
-        </div>
-        <div>
-          <p class="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-0.5">
-            Job ID
-          </p>
-          <p class="text-sm font-mono text-text-primary">{{ detail.jobId }}</p>
-        </div>
-      </section>
-
-      <!-- AI Score -->
-      <section class="flex items-center gap-3">
-        <Bot class="w-5 h-5 text-brand shrink-0" />
-        <span class="text-sm font-medium text-text-primary">AI Score</span>
-        <span
-          v-if="detail.aiScore !== null"
-          :class="['text-sm font-bold px-3 py-1 rounded-full', aiScoreClass]"
-        >
-          {{ detail.aiScore }}%
-        </span>
-        <span v-else class="text-sm text-text-muted italic">Not yet screened</span>
-      </section>
-
-      <!-- CV Link -->
-      <section>
-        <p class="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
-          CV / Resume
-        </p>
-        <a
-          :href="detail.cvUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 text-sm text-brand hover:text-brand-dark
-                 font-medium transition-colors"
-        >
-          <ExternalLink class="w-4 h-4" />
-          View CV
-        </a>
-      </section>
-
-      <!-- Cover Letter (DOMPurify sanitized) -->
-      <section v-if="detail.coverLetter">
-        <p class="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
-          Cover Letter
-        </p>
-        <div
-          class="prose prose-sm max-w-none p-4 bg-surface-soft rounded-xl border border-border
-                 text-text-primary text-sm leading-relaxed"
-          v-html="sanitizedCoverLetter"
-        />
-      </section>
-
-      <!-- Status History Timeline (newest first) -->
-      <section>
-        <p class="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-3">
-          Status History
-        </p>
-
-        <p v-if="detail.statusHistory.length === 0" class="text-sm text-text-muted italic">
-          No status changes recorded yet.
-        </p>
-
-        <ol v-else class="relative border-l border-border ml-3 space-y-5">
-          <li
-            v-for="entry in detail.statusHistory"
-            :key="entry.id"
-            class="ml-5"
-          >
-            <!-- Timeline dot -->
-            <span
-              class="absolute -left-1.5 w-3 h-3 rounded-full ring-2 ring-white"
-              :style="{ backgroundColor: STATUS_COLORS[entry.toStatus] }"
-            />
-
-            <!-- Transition label -->
-            <div class="flex items-center gap-1.5 flex-wrap text-sm">
-              <span class="font-medium text-text-muted">
-                {{ entry.fromStatus ? STATUS_LABELS[entry.fromStatus] : 'Start' }}
-              </span>
-              <ArrowRight class="w-3.5 h-3.5 text-text-muted shrink-0" />
-              <span
-                class="font-bold"
-                :style="{ color: STATUS_COLORS[entry.toStatus] }"
+    <!-- Panel -->
+    <aside class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl pointer-events-auto flex flex-col">
+      <!-- Header -->
+      <header class="p-6 border-b border-border flex items-center justify-between bg-white shrink-0">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center">
+            <User class="w-6 h-6 text-brand" />
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-text-primary">
+              CAND-{{ detail?.candidateId.slice(0, 8).toUpperCase() }}
+            </h2>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span 
+                v-if="detail"
+                class="px-2 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider"
+                :class="getStatusBadgeClass(detail.status)"
               >
-                {{ STATUS_LABELS[entry.toStatus] }}
+                {{ detail.status }}
+              </span>
+              <span class="text-xs text-text-muted">
+                Applied on {{ detail ? new Date(detail.createdAt).toLocaleDateString('vi-VN') : '...' }}
               </span>
             </div>
+          </div>
+        </div>
+        <button 
+          class="p-2 rounded-lg hover:bg-surface-soft text-text-muted transition-colors"
+          @click="emit('close')"
+        >
+          <X class="w-6 h-6" />
+        </button>
+      </header>
 
-            <!-- Note -->
-            <p v-if="entry.note" class="mt-0.5 text-xs text-text-muted italic">
-              "{{ entry.note }}"
-            </p>
+      <!-- Content -->
+      <main class="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth">
+        <div v-if="isLoading" class="space-y-6 animate-pulse">
+          <div class="h-32 bg-surface-soft rounded-xl"></div>
+          <div class="h-64 bg-surface-soft rounded-xl"></div>
+        </div>
 
-            <!-- Timestamp -->
-            <p class="mt-1 flex items-center gap-1 text-xs text-text-muted">
-              <Clock class="w-3 h-3 shrink-0" />
-              {{ formatDate(entry.changedAt) }}
-            </p>
-          </li>
-        </ol>
-      </section>
-    </div>
-  </aside>
+        <div v-else-if="detail" class="space-y-8">
+          <!-- Quick Info Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl border border-border bg-surface-soft">
+              <h4 class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                <Briefcase class="w-3 h-3" /> Job ID
+              </h4>
+              <p class="text-sm font-bold text-text-primary">JOB-{{ detail.jobId.slice(0, 8).toUpperCase() }}</p>
+            </div>
+            <div class="p-4 rounded-xl border border-border bg-surface-soft">
+              <h4 class="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                <FileText class="w-3 h-3" /> Resume
+              </h4>
+              <button 
+                class="text-sm font-bold text-brand hover:underline flex items-center gap-1"
+                @click="emit('viewCv', detail.cvUrl)"
+              >
+                Download CV <ExternalLink class="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Cover Letter -->
+          <section v-if="detail.coverLetter">
+            <h3 class="text-sm font-black text-text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+              <FileText class="w-4 h-4 text-brand" /> Thư giới thiệu
+            </h3>
+            <div class="p-6 bg-white border border-border rounded-xl shadow-sm italic text-text-primary leading-relaxed whitespace-pre-wrap">
+              {{ detail.coverLetter }}
+            </div>
+          </section>
+
+          <!-- AI Screening Section -->
+          <section>
+            <AiScreeningResultCard 
+              :result="screeningResult" 
+              :is-loading="false" 
+            />
+          </section>
+
+          <!-- Status History Timeline -->
+          <section>
+            <h3 class="text-sm font-black text-text-primary uppercase tracking-widest mb-6 flex items-center gap-2">
+              <Clock class="w-4 h-4 text-brand" /> Lịch sử thay đổi trạng thái
+            </h3>
+            <div class="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+              <div 
+                v-for="(event, idx) in sortedHistory" 
+                :key="idx"
+                class="relative pl-8"
+              >
+                <div 
+                  class="absolute left-0 top-1.5 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center"
+                  :class="idx === 0 ? 'bg-brand' : 'bg-border'"
+                >
+                  <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                </div>
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-text-primary uppercase" v-if="event.fromStatus">
+                        {{ event.fromStatus }}
+                      </span>
+                      <ArrowRight class="w-3 h-3 text-text-muted" v-if="event.fromStatus" />
+                      <span 
+                        class="px-2 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider"
+                        :class="getStatusBadgeClass(event.toStatus)"
+                      >
+                        {{ event.toStatus }}
+                      </span>
+                    </div>
+                    <p class="text-xs text-text-muted mt-1 italic" v-if="event.note">
+                      "{{ event.note }}"
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-text-primary uppercase">{{ event.changedBy || 'SYSTEM' }}</p>
+                    <p class="text-[10px] text-text-muted">{{ new Date(event.changedAt).toLocaleString('vi-VN') }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Footer Action Bar -->
+      <footer 
+        v-if="detail && allowedTransitions.length > 0" 
+        class="p-6 border-t border-border bg-surface-soft shrink-0 flex items-center justify-end gap-3 flex-wrap"
+      >
+        <button
+          v-for="btn in allowedTransitions"
+          :key="btn.status"
+          class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm hover:-translate-y-0.5 flex items-center gap-2"
+          :class="[
+            btn.status === 'REJECTED' 
+              ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100' 
+              : 'bg-brand text-white border border-brand hover:bg-brand-dark'
+          ]"
+          @click="emit('transition', btn.status)"
+        >
+          <X v-if="btn.status === 'REJECTED'" class="w-4 h-4" />
+          <CheckCircle v-else class="w-4 h-4" />
+          {{ btn.label }}
+        </button>
+      </footer>
+    </aside>
+  </div>
 </template>
 
 <style scoped>
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
 </style>
