@@ -38,7 +38,7 @@ export function resolvePostLoginRoute(user: AuthUser | null): string {
     return '/workspace'
   }
   if (primaryRole === 'CANDIDATE') {
-    return '/candidate/profile'
+    return '/jobs'
   }
 
   return '/auth/login'
