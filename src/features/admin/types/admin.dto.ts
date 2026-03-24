@@ -1,5 +1,16 @@
 import { z } from 'zod'
 
+export const KnowledgeDocumentSchema = z.object({
+  id: z.string().uuid(),
+  filename: z.string(),
+  contentType: z.string(),
+  fileSize: z.number(),
+  status: z.enum(['PROCESSING', 'INDEXED', 'FAILED']),
+  uploadedAt: z.string(),
+  chunkCount: z.number().optional(),
+})
+export type KnowledgeDocument = z.infer<typeof KnowledgeDocumentSchema>
+
 export const AdminCompanySchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
