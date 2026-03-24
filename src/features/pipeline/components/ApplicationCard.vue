@@ -1,18 +1,31 @@
-// src/features/pipeline/components/ApplicationCard.vue
-// Kanban card for a single application.
-// Emits "click" to open the detail drawer.
-// Shows AI score badge, AI-pending spinner badge, and Trigger AI Screening button.
+<!-- src/features/pipeline/components/ApplicationCard.vue -->
+<!-- Kanban card for a single application. Pure UI. -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Cpu, ExternalLink, FileText } from 'lucide-vue-next'
-import { usePipelineStore } from '@/features/pipeline/stores/usePipelineStore'
-import type { Application } from '@/features/pipeline/types/application.dto'
+import { Cpu, ExternalLink, FileText, User } from 'lucide-vue-next'
 
-const props = defineProps<{ app: Application }>()
-const emit = defineEmits<{ (e: 'click'): void }>()
+interface Application {
+  id: string
+  candidateId: string
+  jobId: string
+  status: string
+  aiScore: number | null
+  coverLetter: string | null
+  cvUrl: string
+  createdAt: string
+}
 
-const store = usePipelineStore()
-const aiPending = computed(() => store.isAiPending(props.app.jobId))
+const props = defineProps<{
+  app: Application
+  isAiPending?: boolean
+  isSelected?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'click'): void
+  (e: 'triggerScreening', jobId: string): void
+  (e: 'viewCv', url: string): void
+}>()
 
 // AI score colour coding: >=80 green, >=50 amber, <50 red
 const aiScoreClass = computed(() => {
@@ -23,84 +36,104 @@ const aiScoreClass = computed(() => {
   return 'bg-red-50 text-red-700 border border-red-200'
 })
 
-async function handleAiScreen(e: MouseEvent): Promise<void> {
+function handleAiScreen(e: MouseEvent): void {
   e.stopPropagation()
-  await store.triggerAiScreening(props.app.jobId)
+  emit('triggerScreening', props.app.jobId)
+}
+
+function handleViewCv(e: MouseEvent): void {
+  e.stopPropagation()
+  emit('viewCv', props.app.cvUrl)
 }
 </script>
 
 <template>
   <div
-    class="group bg-white border border-border rounded-xl p-3 cursor-grab active:cursor-grabbing
+    class="group bg-white border rounded-xl p-3 cursor-grab active:cursor-grabbing
            hover:shadow-hover hover:-translate-y-0.5 transition-all duration-150 select-none"
+    :class="[
+      isSelected ? 'border-brand ring-1 ring-brand shadow-brand-sm' : 'border-border'
+    ]"
     role="button"
-    :aria-label="`Application card for candidate ${app.candidateId.slice(0, 8)}`"
     @click="emit('click')"
   >
-    <!-- Candidate identifier -->
-    <p class="text-sm font-semibold text-text-primary truncate">
-      Candidate <span class="font-mono text-xs">{{ app.candidateId.slice(0, 8) }}</span>
-    </p>
-    <p class="text-xs text-text-muted truncate mt-0.5">
-      Job <span class="font-mono">{{ app.jobId.slice(0, 8) }}</span>
-    </p>
+    <!-- Candidate Info -->
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-1.5 mb-1">
+          <div class="p-1 rounded bg-surface-soft">
+            <User class="w-3.5 h-3.5 text-text-muted" />
+          </div>
+          <p class="text-sm font-bold text-text-primary truncate">
+            CAND-{{ app.candidateId.slice(0, 8).toUpperCase() }}
+          </p>
+        </div>
+        <p class="text-[10px] text-text-muted font-mono tracking-tighter">
+          JOB-{{ app.jobId.slice(0, 8).toUpperCase() }}
+        </p>
+      </div>
 
-    <!-- Badges row -->
-    <div class="flex items-center gap-2 flex-wrap mt-2">
-      <!-- AI score (only when available and not pending) -->
-      <span
-        v-if="app.aiScore !== null && !aiPending"
-        :class="['text-xs font-semibold px-2 py-0.5 rounded-full', aiScoreClass]"
+      <!-- AI Score Badge -->
+      <div
+        v-if="app.aiScore !== null && !isAiPending"
+        :class="['text-[10px] font-black px-1.5 py-0.5 rounded border leading-none', aiScoreClass]"
       >
-        AI {{ app.aiScore }}%
-      </span>
+        {{ app.aiScore }}%
+      </div>
+    </div>
 
+    <!-- Status/Indicators -->
+    <div class="flex items-center gap-2 mt-3">
       <!-- AI pending animation -->
       <span
-        v-if="aiPending"
-        class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5
-               rounded-full bg-brand-light text-brand border border-brand/20 animate-pulse"
+        v-if="isAiPending"
+        class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5
+               rounded bg-brand-light text-brand border border-brand/20 animate-pulse"
       >
-        <Cpu class="w-3 h-3" />
-        Screening...
+        <Cpu class="w-2.5 h-2.5" />
+        SÀNG LỌC...
       </span>
 
       <!-- Cover-letter indicator -->
-      <span
+      <div
         v-if="app.coverLetter"
-        class="text-text-muted"
-        title="Has cover letter"
+        class="flex items-center gap-1 text-[10px] font-medium text-text-muted bg-surface px-1.5 py-0.5 rounded border border-border"
+        title="Đã đính kèm thư giới thiệu"
       >
-        <FileText class="w-3.5 h-3.5" />
+        <FileText class="w-2.5 h-2.5" />
+        CL
+      </div>
+      
+      <div class="flex-1"></div>
+      
+      <span class="text-[10px] text-text-muted font-medium">
+        {{ new Date(app.createdAt).toLocaleDateString('vi-VN') }}
       </span>
     </div>
 
-    <!-- Footer: actions -->
-    <div class="mt-3 pt-2 border-t border-border flex items-center justify-end gap-3">
-      <!-- Trigger AI Screening -->
+    <!-- Footer: actions (hidden by default, shown on hover or if selected) -->
+    <div 
+      class="mt-3 pt-2 border-t border-border flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity"
+      :class="{ 'opacity-100': isSelected }"
+    >
       <button
-        v-if="!aiPending"
-        class="inline-flex items-center gap-1 text-xs text-brand hover:text-brand-dark
-               font-medium transition-colors"
-        title="Trigger AI Screening"
-        @click.stop="handleAiScreen"
+        v-if="!isAiPending"
+        class="inline-flex items-center gap-1 text-[10px] text-brand hover:text-brand-dark
+               font-bold transition-colors uppercase"
+        @click="handleAiScreen"
       >
-        <Cpu class="w-3 h-3" />
+        <Cpu class="w-2.5 h-2.5" />
         AI Screen
       </button>
+      <div v-else></div>
 
-      <!-- View CV -->
-      <a
-        :href="app.cvUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-1 text-xs text-text-muted hover:text-brand transition-colors"
-        title="Open CV in new tab"
-        @click.stop
+      <button
+        class="inline-flex items-center gap-1 text-[10px] text-text-muted hover:text-brand transition-colors font-bold uppercase"
+        @click="handleViewCv"
       >
-        <ExternalLink class="w-3 h-3" />
-        CV
-      </a>
+        <ExternalLink class="w-2.5 h-2.5" />
+        Xem CV
+      </button>
     </div>
   </div>
 </template>
