@@ -1,240 +1,272 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useTeamStore } from '@/core/stores/team.store'
-import { CreateInvitationRequestSchema, type Role } from '@/features/company/types/team.dto'
+import { ref } from 'vue'
 
-const store = useTeamStore()
+type Role = 'COMPANY_ADMIN' | 'HR' | 'INTERVIEWER'
 
-// Strict RBAC UI guard
-const isCompanyAdmin = computed(() => {
-  return true // MOCK: Assume true since no auth profile store exposes it yet
+interface Member {
+  id: string
+  userId: string
+  email: string
+  fullName: string
+  role: Role
+  joinedAt: string
+}
+
+interface Invitation {
+  id: string
+  email: string
+  role: Role
+  invitedAt: string
+  expiresAt: string
+}
+
+defineProps<{
+  members: Member[]
+  invitations: Invitation[]
+  isLoading: boolean
+  isSaving: boolean
+  error: string | null
+  successMessage: string | null
+  currentUserRole: Role
+}>()
+
+const emit = defineEmits<{
+  invite: [payload: { email: string; role: 'HR' | 'INTERVIEWER' }]
+  updateRole: [memberId: string, role: Role]
+  removeMember: [memberId: string]
+  revokeInvitation: [invitationId: string]
+}>()
+
+const isInviteModalOpen = ref(false)
+const inviteForm = ref({
+  email: '',
+  role: 'HR' as 'HR' | 'INTERVIEWER',
 })
 
-onMounted(() => {
-  store.fetchAll()
-})
-
-const showInviteModal = ref(false)
-const inviteEmail = ref('')
-const inviteRole = ref<'HR' | 'INTERVIEWER'>('INTERVIEWER')
-const fieldErrors = ref<{ email?: string; role?: string }>({})
-const successMsg = ref('')
-
-function openInvite() {
-  inviteEmail.value = ''
-  inviteRole.value = 'INTERVIEWER'
-  fieldErrors.value = {}
-  store.clearError()
-  successMsg.value = ''
-  showInviteModal.value = true
+const openInviteModal = () => {
+  inviteForm.value = { email: '', role: 'HR' }
+  isInviteModalOpen.value = true
 }
 
-async function handleInvite() {
-  successMsg.value = ''
-  const result = CreateInvitationRequestSchema.safeParse({
-    email: inviteEmail.value,
-    role: inviteRole.value
-  })
+const handleInvite = () => {
+  emit('invite', { ...inviteForm.value })
+  isInviteModalOpen.value = false
+}
 
-  if (!result.success) {
-    const errs: any = {}
-    for (const issue of result.error.issues) {
-      if (issue.path[0]) {
-        errs[String(issue.path[0])] = issue.message
-      }
-    }
-    fieldErrors.value = errs
-    return
-  }
-
-  fieldErrors.value = {}
-  
-  // Real endpoint returns InvitationResponse, we assume it's sent.
-  // Add a fake one to Mock for UI if needed natively, but the store calls fetchAll()
-  const ok = await store.sendInvitation(result.data)
-  if (ok) {
-    showInviteModal.value = false
-    successMsg.value = `Đã gửi lời mời tới ${result.data.email}`
+const getRoleBadgeClass = (role: Role) => {
+  switch (role) {
+    case 'COMPANY_ADMIN':
+      return 'bg-purple-100 text-purple-700'
+    case 'HR':
+      return 'bg-blue-100 text-blue-700'
+    case 'INTERVIEWER':
+      return 'bg-orange-100 text-orange-700'
+    default:
+      return 'bg-gray-100 text-gray-700'
   }
 }
 
-async function handleUpdateRole(memberId: string, currentRole: Role, newRole: Role) {
-  if (currentRole === newRole) return
-  if (confirm(`Bạn muốn đổi quyền thành ${newRole}?`)) {
-    await store.updateRole(memberId, newRole)
-  }
-}
-
-async function handleRemoveMember(memberId: string) {
-  if (confirm('Xóa thành viên này khỏi tổ chức?')) {
-    await store.removeMember(memberId)
-  }
-}
-
-async function handleRevokeInvitation(inviteId: string) {
-  if (confirm('Thu hồi lời mời này?')) {
-    await store.revokeInvitation(inviteId)
+const getRoleLabel = (role: Role) => {
+  switch (role) {
+    case 'COMPANY_ADMIN':
+      return 'Quản trị viên'
+    case 'HR':
+      return 'Nhân sự (HR)'
+    case 'INTERVIEWER':
+      return 'Người phỏng vấn'
+    default:
+      return role
   }
 }
 </script>
 
 <template>
-  <div class="card space-y-6">
-    <div v-if="successMsg" class="p-3 rounded-lg bg-brand-light text-brand-dark text-sm">
-      {{ successMsg }}
-    </div>
-    <div v-if="store.error" class="p-3 rounded-lg bg-danger/10 text-danger text-sm">
-      {{ store.error }}
-    </div>
-
-    <!-- MEMBERS SECTION -->
-    <div>
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-text-primary">Thành viên hiện tại</h2>
-        <button 
-          v-if="isCompanyAdmin" 
-          class="btn-primary px-4 py-2 text-sm" 
-          @click="openInvite" 
-          :disabled="store.isLoading || store.isSaving"
-        >
-          Mời thành viên
-        </button>
-      </div>
-
-      <div class="overflow-x-auto border border-surface-muted rounded-lg">
-        <table class="w-full text-left text-sm text-text-secondary">
-          <thead class="bg-surface-soft text-text-primary border-b border-surface-muted">
-            <tr>
-              <th class="px-4 py-3 font-medium">Họ tên</th>
-              <th class="px-4 py-3 font-medium">Email</th>
-              <th class="px-4 py-3 font-medium">Vai trò</th>
-              <th v-if="isCompanyAdmin" class="px-4 py-3 font-medium text-right">Hành động</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-surface-muted">
-            <tr v-if="store.isLoading" class="animate-pulse">
-              <td :colspan="isCompanyAdmin ? 4 : 3" class="px-4 py-4 text-center">Đang tải...</td>
-            </tr>
-            <tr v-else-if="store.members.length === 0">
-              <td :colspan="isCompanyAdmin ? 4 : 3" class="px-4 py-4 text-center">Không có dữ liệu</td>
-            </tr>
-            <tr v-else v-for="member in store.members" :key="member.id" class="hover:bg-surface-soft/50">
-              <td class="px-4 py-3">{{ member.fullName }}</td>
-              <td class="px-4 py-3">{{ member.email }}</td>
-              <td class="px-4 py-3">
-                <select 
-                  v-if="isCompanyAdmin" 
-                  :value="member.role" 
-                  @change="e => handleUpdateRole(member.id, member.role, (e.target as HTMLSelectElement).value as Role)"
-                  class="bg-transparent border border-surface-muted rounded text-sm p-1 focus:ring-1 focus:ring-brand-primary"
-                  :disabled="store.isSaving"
-                >
-                  <option value="COMPANY_ADMIN">COMPANY_ADMIN</option>
-                  <option value="HR">HR</option>
-                  <option value="INTERVIEWER">INTERVIEWER</option>
-                </select>
-                <span v-else class="px-2 py-1 bg-surface-muted rounded text-xs font-semibold">{{ member.role }}</span>
-              </td>
-              <td v-if="isCompanyAdmin" class="px-4 py-3 text-right">
-                <button 
-                  class="text-danger hover:underline text-sm font-medium" 
-                  @click="handleRemoveMember(member.id)"
-                  :disabled="store.isLoading || store.isSaving"
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="space-y-8">
+    <!-- Success Message -->
+    <div v-if="successMessage" class="p-4 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm flex items-center">
+      <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      {{ successMessage }}
     </div>
 
-    <!-- PENDING INVITATIONS SECTION -->
-    <div v-if="isCompanyAdmin">
-      <h2 class="text-lg font-semibold text-text-primary mb-4 mt-8">Lời mời đang chờ</h2>
-      <div class="overflow-x-auto border border-surface-muted rounded-lg">
-        <table class="w-full text-left text-sm text-text-secondary">
-          <thead class="bg-surface-soft text-text-primary border-b border-surface-muted">
-            <tr>
-              <th class="px-4 py-3 font-medium">Email</th>
-              <th class="px-4 py-3 font-medium">Vai trò</th>
-              <th class="px-4 py-3 font-medium">Ngày mời</th>
-              <th class="px-4 py-3 font-medium text-right">Hành động</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-surface-muted">
-            <tr v-if="store.isLoading" class="animate-pulse">
-              <td colspan="4" class="px-4 py-4 text-center">Đang tải...</td>
-            </tr>
-            <tr v-else-if="store.invitations.length === 0">
-              <td colspan="4" class="px-4 py-4 text-center">Không có lời mời nào</td>
-            </tr>
-            <tr v-else v-for="inv in store.invitations" :key="inv.id" class="hover:bg-surface-soft/50">
-              <td class="px-4 py-3">{{ inv.email }}</td>
-              <td class="px-4 py-3"><span class="px-2 py-1 bg-surface-muted rounded text-xs font-semibold">{{ inv.role }}</span></td>
-              <td class="px-4 py-3">{{ new Date(inv.invitedAt).toLocaleDateString('vi-VN') }}</td>
-              <td class="px-4 py-3 text-right">
-                <button 
-                  class="text-danger hover:underline text-sm font-medium" 
-                  @click="handleRevokeInvitation(inv.id)"
-                  :disabled="store.isLoading || store.isSaving"
-                >
-                  Thu hồi
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Error Message -->
+    <div v-if="error" class="p-4 rounded-lg bg-red-50 border border-red-100 text-red-700 text-sm">
+      {{ error }}
     </div>
 
-    <!-- INVITE MODAL -->
-    <div v-if="showInviteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div class="bg-surface-base w-full max-w-md rounded-xl p-6 shadow-xl mx-4">
-        <h3 class="text-lg font-semibold text-text-primary mb-4">Gửi lời mời</h3>
-        
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5">
-              Email <span class="text-danger">*</span>
-            </label>
-            <input 
-              v-model="inviteEmail" 
-              type="email" 
-              class="input w-full" 
-              :class="{'!border-danger': fieldErrors.email}" 
-              placeholder="nhanvien@company.com" 
-            />
-            <p v-if="fieldErrors.email" class="text-danger text-xs mt-1.5">{{ fieldErrors.email }}</p>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5">
-              Vai trò <span class="text-danger">*</span>
-            </label>
-            <select v-model="inviteRole" class="input w-full" :class="{'!border-danger': fieldErrors.role}">
-              <option value="HR">HR</option>
-              <option value="INTERVIEWER">INTERVIEWER</option>
-            </select>
-            <p v-if="fieldErrors.role" class="text-danger text-xs mt-1.5">{{ fieldErrors.role }}</p>
-          </div>
+    <!-- Header Actions -->
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-bold text-gray-800">Quản lý Thành viên</h3>
+      <button
+        v-if="currentUserRole === 'COMPANY_ADMIN'"
+        @click="openInviteModal"
+        class="px-4 py-2 bg-[#009898] hover:bg-[#007a7a] text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+        Mời thành viên
+      </button>
+    </div>
+
+    <!-- Section 1: Members -->
+    <div class="space-y-4">
+      <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Thành viên hiện tại ({{ members.length }})</h4>
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Họ tên</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vai trò</th>
+                <th v-if="currentUserRole === 'COMPANY_ADMIN'" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Hành động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-if="isLoading" v-for="i in 3" :key="i" class="animate-pulse">
+                <td class="px-6 py-4"><div class="h-4 bg-gray-100 rounded w-1/2"></div></td>
+                <td class="px-6 py-4"><div class="h-4 bg-gray-100 rounded w-3/4"></div></td>
+                <td class="px-6 py-4"><div class="h-6 bg-gray-100 rounded w-24"></div></td>
+                <td v-if="currentUserRole === 'COMPANY_ADMIN'" class="px-6 py-4 text-right"><div class="h-8 bg-gray-100 rounded w-20 ml-auto"></div></td>
+              </tr>
+              <tr v-for="member in members" :key="member.id" class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-[#009898] font-bold mr-3">
+                      {{ member.fullName.charAt(0) }}
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">{{ member.fullName }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ member.email }}</td>
+                <td class="px-6 py-4">
+                  <select
+                    v-if="currentUserRole === 'COMPANY_ADMIN' && member.role !== 'COMPANY_ADMIN'"
+                    :value="member.role"
+                    @change="e => emit('updateRole', member.id, (e.target as HTMLSelectElement).value as Role)"
+                    class="text-xs font-semibold px-2 py-1 rounded border border-gray-300 focus:ring-1 focus:ring-[#009898] outline-none"
+                  >
+                    <option value="HR">Nhân sự (HR)</option>
+                    <option value="INTERVIEWER">Người phỏng vấn</option>
+                  </select>
+                  <span v-else :class="['text-xs font-semibold px-2.5 py-1 rounded-full', getRoleBadgeClass(member.role)]">
+                    {{ getRoleLabel(member.role) }}
+                  </span>
+                </td>
+                <td v-if="currentUserRole === 'COMPANY_ADMIN'" class="px-6 py-4 text-right">
+                  <button
+                    v-if="member.role !== 'COMPANY_ADMIN'"
+                    @click="emit('removeMember', member.id)"
+                    class="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    title="Gỡ thành viên"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+    </div>
 
-        <div class="mt-6 flex justify-end space-x-3">
-          <button 
-            class="px-4 py-2 text-sm text-text-secondary hover:text-text-primary" 
-            @click="showInviteModal = false" 
-            :disabled="store.isSaving"
-          >
-            Hủy
+    <!-- Section 2: Invitations -->
+    <div v-if="invitations.length > 0" class="space-y-4 pt-4">
+      <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Lời mời đang chờ ({{ invitations.length }})</h4>
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden border-dashed">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50/50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vai trò</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày mời</th>
+                <th v-if="currentUserRole === 'COMPANY_ADMIN'" class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Hành động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 divide-dashed">
+              <tr v-for="invite in invitations" :key="invite.id" class="hover:bg-gray-50/50 transition-colors italic">
+                <td class="px-6 py-4 text-sm text-gray-600">{{ invite.email }}</td>
+                <td class="px-6 py-4">
+                  <span :class="['text-xs font-semibold px-2.5 py-1 rounded-full opacity-60', getRoleBadgeClass(invite.role)]">
+                    {{ getRoleLabel(invite.role) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500">
+                  {{ new Date(invite.invitedAt).toLocaleDateString('vi-VN') }}
+                </td>
+                <td v-if="currentUserRole === 'COMPANY_ADMIN'" class="px-6 py-4 text-right">
+                  <button
+                    @click="emit('revokeInvitation', invite.id)"
+                    class="text-xs font-bold text-red-500 hover:text-red-700 underline transition-colors"
+                  >
+                    Thu hồi
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invite Modal -->
+    <div v-if="isInviteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <h4 class="text-lg font-bold text-gray-800">Mời thành viên mới</h4>
+          <button @click="isInviteModalOpen = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
-          <button 
-            class="btn-primary px-4 py-2 text-sm" 
-            @click="handleInvite" 
-            :disabled="store.isSaving"
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-sm font-semibold text-gray-700">Email người nhận <span class="text-red-500">*</span></label>
+            <input
+              v-model="inviteForm.email"
+              type="email"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#009898]/20 focus:border-[#009898] outline-none"
+              placeholder="nhan-vien@congty.com"
+            />
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-sm font-semibold text-gray-700">Vai trò trong hệ thống <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                @click="inviteForm.role = 'HR'"
+                :class="['p-3 rounded-lg border text-sm font-semibold transition-all text-center', inviteForm.role === 'HR' ? 'border-[#009898] bg-[#009898]/5 text-[#009898]' : 'border-gray-200 text-gray-600 hover:border-gray-300']"
+              >
+                Nhân sự (HR)
+              </button>
+              <button
+                type="button"
+                @click="inviteForm.role = 'INTERVIEWER'"
+                :class="['p-3 rounded-lg border text-sm font-semibold transition-all text-center', inviteForm.role === 'INTERVIEWER' ? 'border-[#009898] bg-[#009898]/5 text-[#009898]' : 'border-gray-200 text-gray-600 hover:border-gray-300']"
+              >
+                Phỏng vấn
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 italic">
+            * Lời mời sẽ được gửi qua email. Thành viên cần đăng ký tài khoản để tham gia.
+          </p>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+          <button @click="isInviteModalOpen = false" class="px-4 py-2 text-gray-600 font-semibold hover:text-gray-800">Hủy</button>
+          <button
+            @click="handleInvite"
+            :disabled="!inviteForm.email || isSaving"
+            class="px-6 py-2 bg-[#009898] hover:bg-[#007a7a] text-white font-semibold rounded-lg shadow-sm disabled:opacity-50"
           >
-            <span v-if="store.isSaving">Đang xử lý...</span>
-            <span v-else>Gửi lời mời</span>
+            {{ isSaving ? 'Đang gửi...' : 'Gửi lời mời' }}
           </button>
         </div>
       </div>
