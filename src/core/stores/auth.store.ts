@@ -90,6 +90,9 @@ export const useAuthStore = defineStore('auth', () => {
   // The email being verified — passed from RegisterPage → VerifyOtpPage
   const pendingVerificationEmail = ref<string | null>(null)
 
+  // Tracks which OAuth provider is mid-redirect (null when idle)
+  const loadingProvider = ref<'google' | 'github' | null>(null)
+
   // ── Getters ────────────────────────────────────────────────
   const hasError      = computed(() => error.value !== null)
   const hasPendingOtp = computed(() => pendingVerificationEmail.value !== null)
@@ -265,6 +268,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /** 10. Social Login — direct browser redirect, no Axios */
+  function socialLogin(provider: 'google' | 'github'): void {
+    loadingProvider.value = provider
+    const baseUrl = import.meta.env.VITE_API_BASE_URL ?? ''
+    window.location.href = `${baseUrl}/vietrecruit/auth/oauth2/authorize/${provider}`
+  }
+
+  /** 11. Handle OAuth2 Callback — called by OAuthCallbackPage after browser returns with code+state
+   *  View layer is responsible for navigation via resolvePostLoginRoute(store.user.value)
+   */
+  async function handleOAuthCallback(provider: string, code: string, state: string): Promise<void> {
+    clearError()
+    isLoading.value = true
+    try {
+      const response = await authService.oauthCallback(provider, code, state)
+      tokenService.setTokens(response.accessToken, response.refreshToken, response.expiresIn)
+      const resolvedUser = response.user ?? parseUserFromJwt(response.accessToken)
+      if (resolvedUser) setUser(resolvedUser)
+      isAuthenticated.value = true
+    } catch (err) {
+      handleApiError(err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   /** 9. Change Password — revokes all sessions, forces re-login */
   async function changePassword(payload: ChangePasswordRequest): Promise<boolean> {
     clearError()
@@ -290,6 +319,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     user,
     pendingVerificationEmail,
+    loadingProvider,
     // getters
     hasError,
     hasPendingOtp,
@@ -303,6 +333,8 @@ export const useAuthStore = defineStore('auth', () => {
     forgotPassword,
     resetPassword,
     changePassword,
+    socialLogin,
+    handleOAuthCallback,
     clearError,
     clearSession,
   }
