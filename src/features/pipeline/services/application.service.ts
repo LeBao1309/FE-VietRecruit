@@ -11,6 +11,7 @@ import type {
   ApplicationListResponse,
   UpdateStatusRequest,
 } from '@/features/pipeline/types/application.dto'
+import type { ScreeningResult } from '@/features/pipeline/types/screening.dto'
 
 const BASE = '/vietrecruit/applications'
 
@@ -48,8 +49,10 @@ export const applicationService = {
   /**
    * GET /vietrecruit/applications/jobs/{jobId}/screening
    */
-  async getScreeningResults(jobId: string) {
-    const { data } = await apiClient.get<ApiResponse<any>>(`${BASE}/jobs/${jobId}/screening`)
+  async getScreeningResults(jobId: string): Promise<ScreeningResult> {
+    const { data } = await apiClient.get<ApiResponse<ScreeningResult>>(
+      `${BASE}/jobs/${jobId}/screening`,
+    )
     return data.data
   },
 
