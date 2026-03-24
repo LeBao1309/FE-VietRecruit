@@ -73,4 +73,13 @@ export const authService = {
   async changePassword(payload: ChangePasswordRequest): Promise<void> {
     await apiClient.post(`${BASE}/change-password`, payload)
   },
+
+  /** 10. OAuth2 callback — exchange code+state for tokens (called by OAuthCallbackPage) */
+  async oauthCallback(provider: string, code: string, state: string): Promise<LoginResponse> {
+    const { data } = await apiClient.get<{ data: LoginResponse }>(
+      `${BASE}/oauth2/callback/${provider}`,
+      { params: { code, state } },
+    )
+    return data.data
+  },
 }
