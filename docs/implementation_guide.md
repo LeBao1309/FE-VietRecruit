@@ -1364,11 +1364,11 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 15 — Polish
 
-- [ ] **F-15.1** Loading skeletons for all list/detail pages
-- [ ] **F-15.2** Empty state components
-- [ ] **F-15.3** Error boundary component
-- [ ] **F-15.4** Responsive design (mobile-first)
-- [ ] **F-15.5** Dark mode support
-- [ ] **F-15.6** Notification toast system
-- [ ] **F-15.7** Breadcrumb navigation
-- [ ] **F-15.8** Accessibility audit (ARIA, keyboard nav)
+- [x] **F-15.1** Loading skeletons for all list/detail pages
+- [x] **F-15.2** Empty state components
+- [x] **F-15.3** Error boundary component
+- [x] **F-15.4** Responsive design (mobile-first)
+- [x] **F-15.5** Dark mode support
+- [x] **F-15.6** Notification toast system
+- [x] **F-15.7** Breadcrumb navigation
+- [x] **F-15.8** Accessibility audit (ARIA, keyboard nav)

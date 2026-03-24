@@ -4,6 +4,9 @@ import { useRouter } from 'vue-router'
 import { useJobStore } from '@/stores/jobStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import type { JobStatus } from '@/types/enums'
+import BaseBreadcrumbs from '@/components/common/BaseBreadcrumbs.vue'
+import BaseSkeleton from '@/components/common/BaseSkeleton.vue'
+import BaseEmptyState from '@/components/common/BaseEmptyState.vue'
 
 const router = useRouter()
 const jobStore = useJobStore()
@@ -92,11 +95,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto px-6 py-8">
+  <div class="max-w-6xl mx-auto px-6 py-8 md:px-8">
+    <BaseBreadcrumbs />
+    
     <!-- Header -->
     <div class="flex items-start justify-between mb-6">
       <div>
-        <h1 class="text-xl font-bold text-gray-900">Job Listings</h1>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Job Listings</h1>
         <p class="text-sm text-gray-500 mt-1">
           Manage your company's job postings, publish new roles, and track statuses.
         </p>
@@ -139,23 +144,17 @@ onMounted(() => {
     </div>
 
     <!-- Loading skeleton -->
-    <div v-if="jobStore.loading" class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
-      <div class="animate-pulse">
-        <div class="h-10 bg-gray-50 border-b border-border" />
-        <div v-for="i in 5" :key="i" class="flex items-center gap-4 px-4 py-4 border-b border-border last:border-0">
-          <div class="h-4 bg-gray-100 rounded w-48" />
-          <div class="h-5 bg-gray-100 rounded-full w-20" />
-          <div class="h-4 bg-gray-100 rounded w-32 ml-auto" />
-          <div class="h-4 bg-gray-100 rounded w-24" />
-        </div>
-      </div>
+    <div v-if="jobStore.loading" class="bg-surface border border-border rounded-lg shadow-sm p-4">
+      <BaseSkeleton height="40px" class="mb-4" />
+      <BaseSkeleton v-for="i in 5" :key="i" height="50px" class="mb-2 last:mb-0" />
     </div>
 
     <!-- Table -->
     <div v-else class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-border bg-gray-50/50">
+      <div class="overflow-x-auto w-full">
+        <table class="w-full whitespace-nowrap">
+          <thead>
+            <tr class="border-b border-border bg-gray-50/50 dark:bg-gray-800/50">
             <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Title</th>
             <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-28">Status</th>
             <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Salary</th>
@@ -165,14 +164,18 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr v-if="jobStore.jobList.length === 0">
-            <td colspan="5" class="text-center py-16">
-              <div class="text-gray-400 text-sm">
-                <p class="font-medium mb-1">No jobs yet</p>
-                <p class="text-xs">Create your first job posting to start receiving applications.</p>
-                <button @click="goToCreate" class="mt-3 text-primary hover:text-primary-hover text-xs font-medium transition">
-                  + Create a Job
-                </button>
-              </div>
+            <td colspan="5" class="p-4">
+              <BaseEmptyState 
+                title="No jobs yet" 
+                description="Create your first job posting to start receiving applications." 
+                icon="📝"
+              >
+                <template #action>
+                  <button @click="goToCreate" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition focus-visible:ring-2">
+                    + Create a Job
+                  </button>
+                </template>
+              </BaseEmptyState>
             </td>
           </tr>
           <tr
@@ -204,6 +207,7 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Pagination -->
       <div v-if="jobStore.totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-border bg-gray-50/30">

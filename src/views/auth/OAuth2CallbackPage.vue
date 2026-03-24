@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
-import type { RoleCode } from '@/types/enums'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -26,9 +26,7 @@ onMounted(async () => {
     return
   }
 
-  const loginData = result.data!
-  auth.accessToken = loginData.accessToken
-  auth.roles = loginData.roles as RoleCode[]
+  auth.hydrate()
 
   const profile = await authService.getProfile()
   if (profile.data) {

@@ -42,9 +42,9 @@ async function loadAll(): Promise<void> {
       locationService.list(),
       categoryService.list(),
     ])
-    if (depts.data) departments.value = depts.data
-    if (locs.data) locations.value = locs.data
-    if (cats.data) categories.value = cats.data
+    if (depts.data) departments.value = depts.data.content
+    if (locs.data) locations.value = locs.data.content
+    if (cats.data) categories.value = cats.data.content
   } finally {
     loading.value = false
   }

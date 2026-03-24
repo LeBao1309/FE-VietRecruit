@@ -9,6 +9,7 @@ const router = useRouter()
 const ui = useUiStore()
 
 const token = route.query.token as string || ''
+const email = route.query.email as string || ''
 const form = ref({ newPassword: '', confirmPassword: '' })
 const showPassword = ref(false)
 const loading = ref(false)
@@ -32,6 +33,9 @@ function validate(): boolean {
   if (!token) {
     errors.value.token = 'Invalid or missing reset token.'
   }
+  if (!email) {
+    errors.value.token = 'Invalid or missing email in reset link.'
+  }
   return Object.keys(errors.value).length === 0
 }
 
@@ -40,9 +44,9 @@ async function handleSubmit(): Promise<void> {
   loading.value = true
   try {
     const result = await authService.resetPassword({
+      email,
       token,
       newPassword: form.value.newPassword,
-      confirmPassword: form.value.confirmPassword,
     })
     if (result.error) {
       ui.toastError('Reset failed', result.error.message)

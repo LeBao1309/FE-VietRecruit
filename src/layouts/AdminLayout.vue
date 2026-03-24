@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useTheme } from '@/composables/useTheme'
 
 const auth = useAuthStore()
+const { isDark, toggleTheme } = useTheme()
+const menuOpen = ref(false)
 
 const navItems = [
   { to: '/admin/users', label: 'Users', icon: '👥' },
@@ -10,39 +14,65 @@ const navItems = [
 </script>
 
 <template>
-  <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="sidebar-brand">
-        <router-link to="/admin/users" class="brand-link">
-          <span class="brand-icon">⚙</span>
-          <span class="brand-text">VietRecruit Admin</span>
+  <div class="flex flex-col md:flex-row min-h-screen">
+    <!-- Mobile Header -->
+    <header class="md:hidden flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
+      <div class="flex items-center gap-2 text-white">
+        <span class="text-xl">⚙</span>
+        <span class="text-sm font-bold tracking-tight">VietRecruit Admin</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button @click="toggleTheme" class="text-gray-400 hover:text-white transition" aria-label="Toggle dark mode">
+          <span v-if="isDark">☀️</span>
+          <span v-else>🌙</span>
+        </button>
+        <button @click="menuOpen = !menuOpen" class="text-gray-400 hover:text-white transition p-1" aria-label="Toggle menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside 
+      :class="menuOpen ? 'flex' : 'hidden md:flex'"
+      class="w-full md:w-[240px] bg-gray-900 flex-col shrink-0"
+    >
+      <div class="hidden md:flex items-center justify-between p-5 border-b border-white/5">
+        <router-link to="/admin/users" class="flex items-center gap-2 hover:opacity-80 transition text-white">
+          <span class="text-xl">⚙</span>
+          <span class="text-sm font-bold tracking-tight">VietRecruit Admin</span>
         </router-link>
+        <button @click="toggleTheme" class="text-gray-400 hover:text-white transition" aria-label="Toggle dark mode">
+          <span v-if="isDark">☀️</span>
+          <span v-else>🌙</span>
+        </button>
       </div>
 
-      <nav class="sidebar-nav">
+      <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
         <router-link
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
-          class="nav-link"
-          active-class="nav-link-active"
+          @click="menuOpen = false"
+          class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-slate-200 transition"
+          active-class="!bg-teal-500/15 !text-teal-300 font-semibold"
         >
-          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="text-base">{{ item.icon }}</span>
           {{ item.label }}
         </router-link>
       </nav>
 
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar-small">
+      <div class="flex items-center justify-between p-4 border-t border-white/5">
+        <div class="flex items-center gap-2.5 truncate">
+          <div class="w-7 h-7 rounded-full bg-teal-500/30 text-teal-300 flex items-center justify-center text-xs font-bold shrink-0">
             {{ auth.user?.fullName?.charAt(0)?.toUpperCase() ?? 'A' }}
           </div>
-          <div class="user-meta">
-            <span class="user-name-text">{{ auth.user?.fullName ?? 'Admin' }}</span>
-            <span class="user-role-text">System Admin</span>
+          <div class="flex flex-col truncate">
+            <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Admin' }}</span>
+            <span class="text-[10px] text-slate-500">System Admin</span>
           </div>
         </div>
-        <button @click="auth.logout()" class="logout-btn" title="Log out">
+        <button @click="auth.logout()" class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition shrink-0" title="Log out">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
@@ -52,152 +82,10 @@ const navItems = [
       </div>
     </aside>
 
-    <main class="admin-main">
+    <main class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900 border-l border-border md:border-none">
       <router-view />
     </main>
   </div>
 </template>
 
-<style scoped>
-.admin-layout {
-  display: flex;
-  min-height: 100vh;
-}
 
-/* ═══ Sidebar ═══ */
-.admin-sidebar {
-  width: 240px;
-  background: #0f172a;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.sidebar-brand {
-  padding: 20px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.brand-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: #fff;
-}
-
-.brand-icon {
-  font-size: 1.25rem;
-}
-
-.brand-text {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-/* ═══ Nav ═══ */
-.sidebar-nav {
-  flex: 1;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #94a3b8;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.nav-link:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e2e8f0;
-}
-
-.nav-link-active {
-  background: rgba(0, 140, 140, 0.15) !important;
-  color: #5eead4 !important;
-  font-weight: 600;
-}
-
-.nav-icon { font-size: 1rem; }
-
-/* ═══ Footer ═══ */
-.sidebar-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.user-avatar-small {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(0, 140, 140, 0.3);
-  color: #5eead4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.user-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.user-name-text {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  line-height: 1.2;
-}
-
-.user-role-text {
-  font-size: 0.625rem;
-  color: #64748b;
-}
-
-.logout-btn {
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-}
-
-.logout-btn:hover {
-  color: #f87171;
-  background: rgba(248, 113, 113, 0.1);
-}
-
-/* ═══ Main ═══ */
-.admin-main {
-  flex: 1;
-  overflow-y: auto;
-  background: #f8fafc;
-}
-</style>

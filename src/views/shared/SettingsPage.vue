@@ -62,7 +62,6 @@ async function handleChangePassword(): Promise<void> {
     const result = await authService.changePassword({
       currentPassword: pwForm.value.currentPassword,
       newPassword: pwForm.value.newPassword,
-      confirmPassword: pwForm.value.confirmPassword,
     })
     if (result.error) {
       ui.toastError('Password change failed', result.error.message)

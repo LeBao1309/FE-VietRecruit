@@ -77,4 +77,23 @@
   a:hover {
     @apply text-primary-hover;
   }
+  
+  /* Dark mode overrides */
+  :root.dark {
+    --color-surface: #1f2937; /* gray-800 */
+    --color-page: #111827; /* gray-900 */
+    --color-border: #374151; /* gray-700 */
+    
+    /* Slight adjustments to interactive elements */
+    --color-primary-light: #134e4a; /* teal-900 */
+    --color-primary-bg: #042f2e; /* teal-950 */
+    --color-error-bg: #450a0a; /* red-950 */
+    --color-success-bg: #052e16; /* green-950 */
+    --color-warning-bg: #451a03; /* amber-950 */
+    --color-info-bg: #172554; /* blue-950 */
+  }
+
+  :root.dark body {
+    @apply text-gray-200;
+  }
 }

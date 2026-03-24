@@ -3,6 +3,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { useJobStore } from '@/stores/jobStore'
+import BaseSkeleton from '@/components/common/BaseSkeleton.vue'
+import BaseBreadcrumbs from '@/components/common/BaseBreadcrumbs.vue'
 
 const router = useRouter()
 const subStore = useSubscriptionStore()
@@ -36,26 +38,28 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto px-6 py-8">
+  <div class="max-w-6xl mx-auto px-6 py-8 md:px-8">
+    <BaseBreadcrumbs />
+    
     <div class="mb-6">
-      <h1 class="text-xl font-bold text-gray-900">Employer Dashboard</h1>
+      <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Employer Dashboard</h1>
       <p class="text-sm text-gray-500 mt-1">Hiring pipeline overview and key metrics.</p>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="grid grid-cols-4 gap-4 mb-6">
-      <div v-for="i in 4" :key="i" class="bg-surface border border-border rounded-lg p-5 shadow-sm animate-pulse">
-        <div class="h-3 bg-gray-100 rounded w-20 mb-3" />
-        <div class="h-6 bg-gray-100 rounded w-12" />
+    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div v-for="i in 4" :key="i" class="bg-surface border border-border rounded-lg p-5 shadow-sm">
+        <BaseSkeleton width="80px" height="12px" class="mb-3" />
+        <BaseSkeleton width="48px" height="24px" />
       </div>
     </div>
 
     <template v-else>
       <!-- Stats Cards -->
-      <div class="grid grid-cols-4 gap-4 mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Total Jobs</span>
-          <p class="text-2xl font-bold text-gray-900 mt-1">{{ stats.total }}</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{{ stats.total }}</p>
         </div>
         <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Published</span>
