@@ -24,7 +24,6 @@ const statusColor = (status: string) => {
     case 'SENT': return 'bg-blue-100 text-blue-800 border-blue-200'
     case 'ACCEPTED': return 'bg-green-100 text-green-800 border-green-200'
     case 'DECLINED': return 'bg-red-100 text-red-800 border-red-200'
-    case 'EXPIRED': return 'bg-gray-100 text-gray-800 border-gray-200'
     default: return 'bg-gray-100 text-gray-800 border-gray-200'
   }
 }
@@ -90,10 +89,6 @@ const respond = async (action: 'ACCEPT' | 'DECLINE') => {
         <button @click="respond('ACCEPT')" :disabled="isResponding" class="flex-1 sm:flex-none px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none shadow-sm transition font-medium disabled:opacity-50">
           Chấp nhận nhận việc
         </button>
-      </div>
-      <div v-if="offer.status === 'EXPIRED'" class="text-gray-500 text-sm font-medium flex items-center">
-        <svg class="w-4 h-4 mr-1 pb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        Offer này đã hết hạn.
       </div>
     </div>
   </div>
