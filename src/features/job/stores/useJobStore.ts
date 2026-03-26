@@ -8,7 +8,7 @@ import { isAxiosError } from 'axios'
 import { jobService } from '@/features/job/services/job.service'
 import { QuotaExceededError } from '@/features/job/types/job.dto'
 import type { Job, JobStatus } from '@/features/workspace/types'
-import type { CreateJobRequest, JobListParams } from '@/features/job/types/job.dto'
+import type { CreateJobRequest, UpdateJobRequest, JobListParams } from '@/features/job/types/job.dto'
 
 export const useJobStore = defineStore('job', () => {
   // ── State ────────────────────────────────────────────────────────────────
@@ -126,6 +126,48 @@ export const useJobStore = defineStore('job', () => {
     }
   }
 
+  /**
+   * Load a single job by ID into currentJob.
+   * Used by the edit form to pre-populate fields.
+   */
+  async function loadJob(id: string): Promise<void> {
+    isLoading.value = true
+    error.value = null
+    try {
+      currentJob.value = await jobService.getJob(id)
+    } catch (e) {
+      if (isAxiosError(e) && e.response?.status === 404) {
+        error.value = 'Không tìm thấy tin tuyển dụng'
+      } else {
+        setError(e)
+      }
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Update an existing job.
+   * Replaces the entry in the jobs list and updates currentJob if it matches.
+   */
+  async function updateJob(id: string, payload: UpdateJobRequest): Promise<void> {
+    isLoading.value = true
+    error.value = null
+    try {
+      const updated = await jobService.updateJob(id, payload)
+      updateJobInList(updated)
+      if (currentJob.value?.id === id) {
+        currentJob.value = updated
+      }
+    } catch (e) {
+      setError(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // State
     jobs,
@@ -144,5 +186,7 @@ export const useJobStore = defineStore('job', () => {
     createJob,
     publishJob,
     closeJob,
+    loadJob,
+    updateJob,
   }
 })

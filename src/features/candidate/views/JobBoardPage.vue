@@ -1,102 +1,182 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useJobBoardStore } from '../stores/job-board.store'
-import { jobService } from '../services/job.service'
-import JobSearchBar from '../components/JobSearchBar.vue'
+// src/features/candidate/views/JobBoardPage.vue
+// Public job board view with search, filtering, and pagination.
+
+import { MapPin, Briefcase, Search, Sparkles } from 'lucide-vue-next'
 import JobCard from '../components/JobCard.vue'
+import JobSearchBar from '../components/JobSearchBar.vue'
+import CandidateNavbar from '../components/CandidateNavbar.vue'
+import { useAuthStore } from '@/core/stores/auth.store'
 
-const store = useJobBoardStore()
+const authStore = useAuthStore()
+import type { JobSummaryResponse } from '../types/job.schema'
 
-const fetchJobs = async () => {
-  store.isLoading = true
-  store.error = null
-  try {
-    const res = await jobService.listPublicJobs(store.searchParams)
-    store.jobs = res.content
-    store.totalElements = res.totalElements
-    store.totalPages = res.totalPages
-  } catch (err) {
-    store.error = 'Không thể tải danh sách việc làm.'
-  } finally {
-    store.isLoading = false
-  }
-}
+const props = defineProps<{
+  jobs: JobSummaryResponse[]
+  isLoading: boolean
+  error: string | null
+  totalPages: number
+  currentPage: number
+  totalElements: number
+  categories: Array<{ id: string; name: string }>
+  locations: Array<{ id: string; name: string }>
+}>()
 
-const handleSearch = (params: { keyword: string; categoryId?: string; locationId?: string }) => {
-  store.searchParams = { 
-    ...store.searchParams, 
-    keyword: params.keyword,
-    categoryId: params.categoryId,
-    locationId: params.locationId,
-    page: 0
-  }
-  fetchJobs()
-}
+const emit = defineEmits<{
+  search: [params: { keyword?: string; categoryId?: string; locationId?: string }]
+  pageChange: [page: number]
+  selectJob: [id: string]
+  autocomplete: [query: string]
+}>()
 
-const changePage = (newPage: number) => {
-  if (newPage < 0 || newPage >= store.totalPages) return
-  store.searchParams.page = newPage
-  fetchJobs()
-}
-
-onMounted(() => {
-  fetchJobs()
-})
+const suggestions: string[] = [] // In real app, this comes from store/props
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center mb-12">
-        <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">Tìm kiếm việc làm mơ ước</h1>
-        <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-500">Hàng ngàn cơ hội nghề nghiệp đang chờ đón bạn.</p>
-      </div>
+  <div class="min-h-screen bg-surface-soft">
+    <CandidateNavbar v-if="authStore.isAuthenticated" />
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-gray-900 via-slate-800 to-slate-900 pt-20 pb-40 px-4">
+      <div class="max-w-7xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-[#009898]/10 text-[#009898] rounded-full text-xs font-bold uppercase tracking-widest mb-6 animate-bounce">
+          <Sparkles class="w-4 h-4" />
+          Nâng tầm sự nghiệp cùng VietRecruit
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+          Tìm kiếm <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#009898] to-emerald-400">việc làm mơ ước</span> của bạn
+        </h1>
+        <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+          Kết nối với hàng ngàn cơ hội việc làm hấp dẫn từ các công ty hàng đầu tại Việt Nam. 
+          Bắt đầu hành trình mới ngay hôm nay!
+        </p>
 
-      <JobSearchBar @search="handleSearch" />
-
-      <div v-if="store.error" class="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 text-center mb-8 font-medium">
-        {{ store.error }}
-      </div>
-
-      <div v-if="store.isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="i in 6" :key="i" class="bg-white border rounded-lg p-5 shadow-sm h-48 animate-pulse">
-          <div class="flex gap-4 mb-4">
-            <div class="w-16 h-16 bg-gray-200 rounded"></div>
-            <div class="flex-1 space-y-2">
-              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <div class="h-3 bg-gray-200 rounded w-5/6"></div>
-            <div class="h-3 bg-gray-200 rounded w-4/6"></div>
-          </div>
+        <!-- Enhanced Search Bar Overlay -->
+        <div class="relative z-10 -mb-12">
+          <JobSearchBar 
+            :categories="categories"
+            :locations="locations"
+            :suggestions="suggestions"
+            :isSearching="isLoading"
+            @search="emit('search', $event)"
+            @autocomplete="emit('autocomplete', $event)"
+          />
         </div>
       </div>
+    </div>
 
-      <div v-else-if="store.jobs.length === 0" class="text-center py-20 bg-white rounded-lg border border-gray-200 shadow-sm">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">Không tìm thấy việc làm</h3>
-        <p class="mt-1 text-sm text-gray-500">Vui lòng thử lại với từ khóa khác.</p>
-      </div>
-
-      <div v-else class="space-y-8">
-        <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <p class="text-gray-600">Tìm thấy <span class="font-bold text-indigo-600">{{ store.totalElements }}</span> việc làm phù hợp</p>
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 pt-24 pb-20">
+      <!-- Results Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">
+            {{ totalElements > 0 ? `Tìm thấy ${totalElements} việc làm phù hợp` : 'Tất cả việc làm' }}
+          </h2>
+          <p class="text-slate-500 text-sm mt-1">Cập nhật mới nhất hôm nay</p>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <JobCard v-for="job in store.jobs" :key="job.id" :job="job" />
-        </div>
-
-        <div v-if="store.totalPages > 1" class="flex justify-center items-center gap-2 mt-12 bg-white py-4 rounded-lg border border-gray-100 shadow-sm">
-          <button @click="changePage((store.searchParams.page || 0) - 1)" :disabled="(store.searchParams.page || 0) === 0" class="px-4 py-2 border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 font-medium shadow-sm transition">Trang trước</button>
-          <span class="text-gray-600 px-4 font-medium">Trang {{ (store.searchParams.page || 0) + 1 }} / {{ store.totalPages }}</span>
-          <button @click="changePage((store.searchParams.page || 0) + 1)" :disabled="(store.searchParams.page || 0) >= store.totalPages - 1" class="px-4 py-2 border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 font-medium shadow-sm transition">Trang sau</button>
+        <div class="flex items-center gap-3">
+          <!-- Sort/Filter placeholder -->
+          <span class="text-sm text-slate-500">Sắp xếp theo:</span>
+          <select class="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#009898]/20 focus:border-[#009898] outline-none transition-all">
+            <option>Mới nhất</option>
+            <option>Lương cao nhất</option>
+            <option>Hạn nộp gần nhất</option>
+          </select>
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-for="i in 6" :key="i" class="h-64 bg-slate-200 rounded-2xl animate-pulse"></div>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="bg-red-50 border border-red-100 rounded-2xl p-12 text-center max-w-2xl mx-auto">
+        <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Search class="w-8 h-8" />
+        </div>
+        <h3 class="text-xl font-bold text-red-900 mb-2">Đã xảy ra lỗi</h3>
+        <p class="text-red-700 mb-6">{{ error }}</p>
+        <button @click="emit('pageChange', 1)" class="px-6 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors">
+          Thử lại
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="jobs.length === 0" class="bg-white border border-slate-100 rounded-2xl p-20 text-center shadow-sm">
+        <div class="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Search class="w-10 h-10" />
+        </div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-2">Không tìm thấy việc làm</h3>
+        <p class="text-slate-500 max-w-md mx-auto mb-8">
+          Chúng tôi không tìm thấy kết quả nào phù hợp với tìm kiếm của bạn. Hãy thử thay đổi từ khóa hoặc bộ lọc khác.
+        </p>
+        <button @click="emit('search', {})" class="px-8 py-3 bg-[#009898] text-white rounded-xl font-bold hover:bg-[#007a7a] transition-all shadow-lg shadow-[#009898]/20">
+          Xem tất cả việc làm
+        </button>
+      </div>
+
+      <!-- Job Grid -->
+      <div v-else class="space-y-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <JobCard 
+            v-for="job in jobs" 
+            :key="job.id" 
+            :job="job" 
+            @click="emit('selectJob', $event)"
+          />
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="flex justify-center pt-8 border-t border-slate-100">
+          <nav class="flex items-center gap-2">
+            <button 
+              @click="emit('pageChange', currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            
+            <div class="flex items-center gap-1">
+              <button 
+                v-for="p in totalPages" 
+                :key="p"
+                @click="emit('pageChange', p)"
+                :class="[
+                  'w-10 h-10 rounded-lg font-bold text-sm transition-all',
+                  currentPage === p 
+                    ? 'bg-[#009898] text-white shadow-lg shadow-[#009898]/20' 
+                    : 'text-slate-600 hover:bg-slate-50'
+                ]"
+              >
+                {{ p }}
+              </button>
+            </div>
+
+            <button 
+              @click="emit('pageChange', currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Newsletter / CTA -->
+    <div class="bg-white border-t border-slate-100 py-20">
+      <div class="max-w-5xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Bạn vẫn chưa tìm thấy việc làm ưng ý?</h2>
+        <p class="text-slate-500 text-lg mb-10">Đừng bỏ lỡ những cơ hội mới nhất. Hãy để chúng tôi gửi thông báo ngay khi có việc làm phù hợp với bạn.</p>
+        <div class="flex flex-col sm:flex-row items-stretch gap-3 max-w-md mx-auto">
+          <input type="email" placeholder="Địa chỉ email của bạn" class="flex-1 px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#009898]/20 focus:border-[#009898] outline-none transition-all" />
+          <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all">Đăng ký ngay</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -1,159 +1,140 @@
+<!-- src/features/interview/views/InterviewListPage.vue -->
+<!-- Page listing all interviews with filtering and scheduling. Pure UI. -->
 <script setup lang="ts">
-// src/features/interview/views/InterviewListPage.vue
-// HR / COMPANY_ADMIN view: list all interviews for an application,
-// schedule new interviews, complete or cancel existing ones.
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { Plus, ClipboardList } from 'lucide-vue-next'
-import { useInterviewStore } from '@/features/interview/stores/useInterviewStore'
-import InterviewCard from '@/features/interview/components/InterviewCard.vue'
-import InterviewScheduleForm from '@/features/interview/components/InterviewScheduleForm.vue'
-import PipelineTopBar from '@/features/workspace/components/PipelineTopBar.vue'
-import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue'
+import { Calendar, Search, Filter, Plus, AlertCircle } from 'lucide-vue-next'
+import InterviewCard from '../components/InterviewCard.vue'
+import InterviewScheduleForm from '../components/InterviewScheduleForm.vue'
 
-const route = useRoute()
-const store = useInterviewStore()
-const { interviews, isLoading, error } = storeToRefs(store)
-
-const applicationId = computed(() => (route.query['applicationId'] as string) ?? '')
-const jobId         = computed(() => (route.query['jobId'] as string) ?? '')
-
-const showScheduleForm = ref(false)
-const statusFilter = ref<'ALL' | 'SCHEDULED' | 'COMPLETED' | 'CANCELED'>('ALL')
-
-const filtered = computed(() =>
-  statusFilter.value === 'ALL'
-    ? interviews.value
-    : interviews.value.filter((i) => i.status === statusFilter.value),
-)
-
-async function handleComplete(id: string): Promise<void> {
-  await store.updateStatus(id, { status: 'COMPLETED' })
+interface Interview {
+  id: string
+  applicationId: string
+  jobId: string
+  scheduledAt: string
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELED'
+  location?: string
+  meetingLink?: string
+  notes?: string
+  interviewerIds: string[]
 }
 
-async function handleCancel(id: string): Promise<void> {
-  await store.updateStatus(id, { status: 'CANCELED' })
-}
+const props = defineProps<{
+  interviews: Interview[]
+  isLoading: boolean
+  error: string | null
+  activeFilter: 'ALL' | 'SCHEDULED' | 'COMPLETED' | 'CANCELED'
+  showScheduleForm: boolean
+  applicationId: string
+  jobId: string
+}>()
 
-onMounted(() => {
-  if (applicationId.value) store.fetchInterviews({ applicationId: applicationId.value })
-})
+const emit = defineEmits<{
+  (e: 'filterChange', status: string): void
+  (e: 'complete', id: string): void
+  (e: 'cancel', id: string): void
+  (e: 'openScheduleForm'): void
+  (e: 'closeScheduleForm'): void
+  (e: 'scheduleCreated', interview: Interview): void
+  (e: 'generateQuestions', context: any): void
+}>()
+
+const filters = [
+  { id: 'ALL', label: 'Tất cả' },
+  { id: 'SCHEDULED', label: 'Đã lên lịch' },
+  { id: 'COMPLETED', label: 'Đã xong' },
+  { id: 'CANCELED', label: 'Đã hủy' },
+]
 </script>
 
 <template>
-  <div class="h-screen w-full flex flex-col bg-surface overflow-hidden text-text-primary font-sans">
-    <PipelineTopBar />
+  <div class="p-8 max-w-7xl mx-auto space-y-8">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div>
+        <h1 class="text-3xl font-black text-text-primary uppercase tracking-tight">Quản lý Phỏng vấn</h1>
+        <p class="text-sm text-text-muted mt-1 font-medium">Theo dõi và điều phối các buổi phỏng vấn của bạn.</p>
+      </div>
+      <button 
+        @click="emit('openScheduleForm')"
+        class="flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-brand-lg hover:bg-brand-dark transition-all"
+      >
+        <Plus class="w-5 h-5" /> Lên lịch mới
+      </button>
+    </header>
 
-    <div class="flex-1 flex overflow-hidden">
-      <PipelineSidebar />
-
-      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-surface-soft scrollbar-hide">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-border">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <ClipboardList class="w-5 h-5 text-brand" />
-              <h1 class="text-2xl font-bold text-text-primary">Interviews</h1>
-            </div>
-            <p class="text-sm text-text-muted">
-              Application <span class="font-mono">{{ applicationId.slice(0, 8) }}</span>
-            </p>
-          </div>
-          <button
-            v-if="applicationId"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm
-                   font-semibold rounded-lg hover:bg-brand-dark transition-colors"
-            @click="showScheduleForm = true"
-          >
-            <Plus class="w-4 h-4" />
-            Schedule Interview
-          </button>
-        </div>
-
-        <!-- No application selected -->
-        <div
-          v-if="!applicationId"
-          class="flex items-center justify-center h-64 text-text-muted text-sm"
+    <!-- Filters & Search -->
+    <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-2 rounded-2xl border border-border">
+      <div class="flex items-center gap-1 p-1 bg-surface-soft rounded-xl w-full md:w-auto">
+        <button 
+          v-for="f in filters" 
+          :key="f.id"
+          @click="emit('filterChange', f.id)"
+          class="flex-1 md:flex-none px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+          :class="activeFilter === f.id ? 'bg-white text-brand shadow-sm' : 'text-text-muted hover:text-text-primary'"
         >
-          Add <code class="mx-1 px-1 bg-surface-muted rounded">?applicationId=...</code> to the URL to view interviews.
-        </div>
+          {{ f.label }}
+        </button>
+      </div>
 
-        <template v-else>
-          <!-- Filter tabs -->
-          <div class="flex gap-2 mb-5">
-            <button
-              v-for="tab in ['ALL', 'SCHEDULED', 'COMPLETED', 'CANCELED']"
-              :key="tab"
-              :class="[
-                'px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors',
-                statusFilter === tab
-                  ? 'bg-brand text-white border-brand'
-                  : 'border-border text-text-muted hover:border-brand hover:text-brand',
-              ]"
-              @click="statusFilter = tab as any"
-            >
-              {{ tab }}
-            </button>
-          </div>
-
-          <!-- Error -->
-          <div
-            v-if="error"
-            class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"
-          >
-            {{ error }}
-          </div>
-
-          <!-- Loading -->
-          <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <div
-              v-for="n in 3"
-              :key="n"
-              class="h-40 bg-white border border-border rounded-xl animate-pulse"
-            />
-          </div>
-
-          <!-- Empty state -->
-          <div
-            v-else-if="!filtered.length"
-            class="flex flex-col items-center justify-center h-48 text-text-muted text-sm gap-2"
-          >
-            <ClipboardList class="w-10 h-10 opacity-30" />
-            No interviews found.
-          </div>
-
-          <!-- Interview grid -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <InterviewCard
-              v-for="interview in filtered"
-              :key="interview.id"
-              :interview="interview"
-              :can-manage="true"
-              @complete="handleComplete"
-              @cancel="handleCancel"
-            />
-          </div>
-        </template>
-      </main>
+      <div class="relative w-full md:w-72 px-2">
+        <Search class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+        <input 
+          type="text" 
+          placeholder="Tìm kiếm phỏng vấn..."
+          class="w-full pl-10 pr-4 py-2.5 bg-surface-soft border-transparent rounded-xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand/30 transition-all outline-none"
+        />
+      </div>
     </div>
 
-    <!-- Schedule form modal -->
-    <Transition name="fade">
-      <InterviewScheduleForm
+    <!-- Error State -->
+    <div v-if="error" class="p-12 bg-red-50 border border-red-200 rounded-3xl text-center space-y-4">
+      <AlertCircle class="w-12 h-12 text-red-500 mx-auto" />
+      <h3 class="text-lg font-black text-red-700 uppercase">Đã có lỗi xảy ra</h3>
+      <p class="text-sm text-red-600 font-medium">{{ error }}</p>
+    </div>
+
+    <!-- Loading State -->
+    <div v-else-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="n in 6" :key="n" class="h-64 bg-white border border-border rounded-2xl animate-pulse"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="interviews.length === 0" class="py-24 text-center space-y-4 bg-white border border-dashed border-border rounded-3xl">
+      <div class="w-20 h-20 bg-surface-soft rounded-full flex items-center justify-center mx-auto text-text-muted/30">
+        <Calendar class="w-10 h-10" />
+      </div>
+      <h3 class="text-xl font-black text-text-primary uppercase tracking-tight">Không có buổi phỏng vấn nào</h3>
+      <p class="text-sm text-text-muted font-medium">Thay đổi bộ lọc hoặc lên lịch buổi phỏng vấn mới.</p>
+    </div>
+
+    <!-- Grid -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <InterviewCard 
+        v-for="interview in interviews" 
+        :key="interview.id"
+        :interview="interview"
+        :can-manage="true"
+        @complete="emit('complete', $event)"
+        @cancel="emit('cancel', $event)"
+      />
+    </div>
+
+    <!-- Schedule Form Modal -->
+    <Transition 
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <InterviewScheduleForm 
         v-if="showScheduleForm"
         :application-id="applicationId"
         :job-id="jobId"
-        @close="showScheduleForm = false"
-        @created="store.fetchInterviews({ applicationId })"
+        @cancel="emit('closeScheduleForm')"
+        @submit="(p) => emit('scheduleCreated', p)"
+        @generate-questions="emit('generateQuestions', $event)"
       />
     </Transition>
   </div>
 </template>
-
-<style scoped>
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-</style>

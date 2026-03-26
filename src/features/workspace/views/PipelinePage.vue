@@ -1,222 +1,177 @@
+<!-- src/features/workspace/views/PipelinePage.vue -->
+<!-- Full Kanban board view for the ATS Pipeline. Pure UI. -->
 <script setup lang="ts">
-// src/features/workspace/views/PipelinePage.vue
-// Full Kanban board view for the ATS Pipeline (Module 5).
-// Layout shell matches WorkspacePage.vue exactly.
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { usePipelineStore } from '@/features/pipeline/stores/usePipelineStore'
-import { APP_CONFIG } from '@/core/constants/app-config'
-import { type ApplicationStatus } from '@/features/pipeline/types/application.dto'
-import { PIPELINE_STAGES_ORDERED } from '@/core/constants/pipeline-stages'
-import PipelineTopBar from '../components/PipelineTopBar.vue'
-import PipelineSidebar from '../components/PipelineSidebar.vue'
+import { ref } from 'vue'
+import { AlertCircle, ChevronRight, Search } from 'lucide-vue-next'
+import PipelineTopBar from '../../pipeline/components/PipelineTopBar.vue'
+import PipelineSidebar from '../../pipeline/components/PipelineSidebar.vue'
 import KanbanColumn from '@/features/pipeline/components/KanbanColumn.vue'
 import ApplicationDetailDrawer from '@/features/pipeline/components/ApplicationDetailDrawer.vue'
-import { ROUTE_NAMES } from '@/core/constants/route-names'
 
-// ── Store ────────────────────────────────────────────────────────────────────
-const store = usePipelineStore()
-const {
-  applicationsByStatus,
-  isLoading,
-  error,
-  openDetailId,
-  detailCache,
-  isDetailLoading,
-} = storeToRefs(store)
-
-// ── Job ID from query: /workspace/pipeline?jobId=xxx ────────────────────────
-const route = useRoute()
-const jobId = computed(() => (route.query['jobId'] as string) ?? '')
-
-// ── Drag error toast ─────────────────────────────────────────────────────────
-const dragError = ref<string | null>(null)
-let errorTimer: ReturnType<typeof setTimeout> | null = null
-
-function showDragError(msg: string): void {
-  dragError.value = msg
-  if (errorTimer) clearTimeout(errorTimer)
-  errorTimer = setTimeout(() => { dragError.value = null }, APP_CONFIG.TOAST_DURATION_MS)
+interface Application {
+  id: string
+  candidateId: string
+  jobId: string
+  status: string
+  aiScore: number | null
+  coverLetter: string | null
+  cvUrl: string
+  createdAt: string
 }
 
-// ── Column display config ────────────────────────────────────────────────────
-
-const columns = computed(() =>
-  PIPELINE_STAGES_ORDERED.map((s) => ({
-    status: s.status,
-    label: s.label,
-    color: s.color,
-    apps: applicationsByStatus.value[s.status],
-  })),
-)
-
-// ── Drag handler (called by KanbanColumn on drag-end) ────────────────────────
-async function handleMove(id: string, newStatus: ApplicationStatus): Promise<void> {
-  const currentApp = store.applicationsByStatus.NEW?.find(a => a.id === id) ||
-                     store.applicationsByStatus.SCREENING?.find(a => a.id === id) ||
-                     store.applicationsByStatus.INTERVIEW?.find(a => a.id === id) ||
-                     store.applicationsByStatus.OFFER?.find(a => a.id === id) ||
-                     store.applicationsByStatus.HIRED?.find(a => a.id === id) ||
-                     store.applicationsByStatus.REJECTED?.find(a => a.id === id);
-                     
-  if (currentApp) {
-    const allowed = getAllowedTransitions(currentApp.status);
-    if (!allowed.includes(newStatus)) {
-      showDragError('Invalid state transition according to established flow rules.');
-      // Force refresh or optimistic rollback could be handled here
-      await store.fetchApplications(jobId.value);
-      return;
-    }
-  }
-
-  try {
-    await store.moveApplication(id, newStatus)
-  } catch {
-    showDragError('Status update failed. The card has been rolled back to its original column.')
-  }
+interface Column {
+  status: string
+  label: string
+  color: string
+  apps: Application[]
 }
 
-// ── State Machine UI Enforcement ─────────────────────────────────────────────
-
-const VALID_TRANSITIONS: Record<string, string[]> = {
-  NEW:        ['SCREENING', 'REJECTED'],
-  SCREENING:  ['INTERVIEW', 'REJECTED'],
-  INTERVIEW:  ['OFFER', 'REJECTED'],
-  OFFER:      [],          // Candidate-only
-  HIRED:      [],          // terminal
-  REJECTED:   [],          // terminal
+interface ApplicationDetail extends Application {
+  statusHistory: any[]
 }
 
-function getAllowedTransitions(currentStatus: string): string[] {
-  return VALID_TRANSITIONS[currentStatus] ?? []
-}
+const props = defineProps<{
+  columns: Column[]
+  selectedJob: { id: string; title: string; status: any; department?: string } | null
+  isLoading: boolean
+  dragError: string | null
+  selectedDetail: ApplicationDetail | null
+  isDetailLoading: boolean
+  screeningResult?: any
+  allowedTransitions: Array<{ status: string; label: string }>
+}>()
 
-const STATUS_LABELS: Record<string, string> = {
-  SCREENING:  'Chuyển sang Sàng lọc',
-  INTERVIEW:  'Mời phỏng vấn',
-  OFFER:      'Tạo Offer',
-  REJECTED:   'Từ chối',
-  COMPLETED:  'Hoàn thành',
-  CANCELED:   'Hủy',
-}
+const emit = defineEmits<{
+  (e: 'moveCard', id: string, newStatus: string): void
+  (e: 'openCard', id: string): void
+  (e: 'closeDetail'): void
+  (e: 'triggerAiScreening', jobId: string): void
+  (e: 'transitionStatus', id: string, newStatus: string): void
+  (e: 'navigate', route: string): void
+}>()
 
-function updateStatus(applicationId: string, nextStatus: string) {
-  handleMove(applicationId, nextStatus as ApplicationStatus);
-}
+const activeSidebarRoute = ref('pipeline')
 
-// ── Lifecycle ────────────────────────────────────────────────────────────────
-onMounted(() => {
-  if (jobId.value) store.fetchApplications(jobId.value)
-})
+// Mock stats for sidebar (could also be props, but spec says Sidebar takes stats)
+const sidebarStats = [
+  { status: 'NEW', label: 'Mới', count: 12, color: '#3b82f6' },
+  { status: 'SCREENING', label: 'Sàng lọc', count: 8, color: '#f59e0b' },
+  { status: 'INTERVIEW', label: 'Phỏng vấn', count: 5, color: '#8b5cf6' },
+]
 </script>
 
 <template>
-  <div class="h-screen w-full flex flex-col bg-surface overflow-hidden text-text-primary font-sans">
-    <PipelineTopBar />
+  <div class="h-screen w-full flex flex-col bg-surface overflow-hidden font-sans">
+    <!-- Top Bar -->
+    <PipelineTopBar 
+      :job-title="selectedJob?.title || null"
+      :job-status="selectedJob?.status || null"
+      :department="selectedJob?.department || null"
+      @share="() => {}"
+      @settings="() => {}"
+      @add-candidate="() => {}"
+    />
 
     <div class="flex-1 flex overflow-hidden">
-      <PipelineSidebar />
+      <!-- Sidebar -->
+      <PipelineSidebar 
+        :stats="sidebarStats"
+        :conversion-rate="32"
+        :active-route="activeSidebarRoute"
+        @navigate="(r) => { activeSidebarRoute = r; emit('navigate', r) }"
+      />
 
-      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-surface-soft scrollbar-hide">
-
-        <!-- Page header -->
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 pb-4 border-b border-border">
-          <div>
-            <nav class="flex text-sm text-text-muted mb-1 font-medium">
-              <span class="hover:text-brand cursor-pointer">VietRecruit</span>
-              <span class="mx-2">/</span>
-              <span class="text-text-primary">Pipeline</span>
-            </nav>
-            <h1 class="text-2xl font-display font-bold text-text-primary">ATS Pipeline</h1>
-          </div>
-        </div>
-
-        <!-- Drag error banner -->
-        <Transition name="fade">
-          <div
-            v-if="dragError"
-            class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2"
-            role="alert"
+      <!-- Main Kanban Area -->
+      <main class="flex-1 flex flex-col min-w-0 bg-surface-soft overflow-hidden relative">
+        
+        <!-- Drag Error Banner -->
+        <Transition 
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="-translate-y-full opacity-0"
+          enter-to-class="translate-y-0 opacity-100"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="translate-y-0 opacity-100"
+          leave-to-class="-translate-y-full opacity-0"
+        >
+          <div 
+            v-if="dragError" 
+            class="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-red-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-500/50 backdrop-blur-md"
           >
-            <span class="font-semibold">Error:</span> {{ dragError }}
+            <AlertCircle class="w-5 h-5" />
+            <p class="text-sm font-black uppercase tracking-widest">{{ dragError }}</p>
           </div>
         </Transition>
 
-        <!-- General fetch error -->
-        <div
-          v-if="error && !isLoading && !dragError"
-          class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"
+        <!-- No Job Selected State -->
+        <div 
+          v-if="!selectedJob && !isLoading" 
+          class="flex-1 flex flex-col items-center justify-center p-12 text-center"
         >
-          {{ error }}
-        </div>
-
-        <!-- No job selected -->
-        <div
-          v-if="!jobId && !isLoading"
-          class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-border rounded-xl bg-white"
-        >
-          <p class="text-text-muted text-sm mb-4">
-            Vui lòng chọn một công việc từ Danh sách Job để xem Kênh tuyển dụng (Pipeline).
+          <div class="w-24 h-24 bg-brand/5 rounded-full flex items-center justify-center mb-8 animate-bounce-slow">
+            <Search class="w-10 h-10 text-brand/40" />
+          </div>
+          <h2 class="text-2xl font-black text-text-primary mb-2 uppercase tracking-tight">Vui lòng chọn công việc</h2>
+          <p class="text-text-muted max-w-sm mb-8">
+            Chọn một công việc từ danh sách để xem quy trình tuyển dụng và quản lý ứng viên của bạn.
           </p>
-          <button
-            @click="$router.push({ name: ROUTE_NAMES.JOB_LIST })"
-            class="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold"
+          <button 
+            class="px-8 py-3 bg-brand text-white rounded-xl font-bold uppercase tracking-widest shadow-brand-lg hover:bg-brand-dark transition-all"
+            @click="emit('navigate', 'jobs')"
           >
-            Đi đến Danh sách Job
+            Danh sách Job
           </button>
         </div>
 
-        <!-- Loading skeletons -->
-        <div v-else-if="isLoading" class="flex gap-4 overflow-x-auto pb-4">
-          <div
-            v-for="n in 6"
-            :key="n"
-            class="min-w-[272px] h-80 bg-white border border-border rounded-xl animate-pulse shrink-0"
-          />
+        <!-- Loading State -->
+        <div v-else-if="isLoading" class="flex-1 flex gap-4 p-6 overflow-x-auto">
+          <div 
+            v-for="n in 6" 
+            :key="n" 
+            class="min-w-[300px] w-[300px] bg-white/50 border border-border/50 rounded-xl animate-pulse flex flex-col p-4 space-y-4"
+          >
+            <div class="h-6 w-1/2 bg-gray-200 rounded"></div>
+            <div class="space-y-3">
+              <div v-for="i in 3" :key="i" class="h-24 bg-gray-200 rounded-xl"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Kanban board -->
-        <div v-else class="flex gap-4 overflow-x-auto h-full pb-6">
-          <KanbanColumn
+        <!-- Kanban Board -->
+        <div v-else class="flex-1 flex gap-6 p-6 overflow-x-auto scrollbar-hide">
+          <KanbanColumn 
             v-for="col in columns"
             :key="col.status"
             :status="col.status"
             :label="col.label"
             :color="col.color"
             :apps="col.apps"
-            @move="handleMove"
-            @open-card="store.openDetail($event)"
+            :selected-card-id="selectedDetail?.id"
+            @move="emit('moveCard', $event.id, $event.newStatus)"
+            @open-card="emit('openCard', $event)"
+            @trigger-screening="emit('triggerAiScreening', $event)"
           />
         </div>
-
       </main>
     </div>
 
-    <!-- Application detail drawer with slide-in transition -->
-    <Transition name="drawer-slide">
-      <div v-if="openDetailId && detailCache[openDetailId]" class="contents">
-        <ApplicationDetailDrawer
-          :detail="detailCache[openDetailId]!"
-          :is-loading="isDetailLoading"
-          @close="store.closeDetail()"
-        />
-        
-        <!-- Status transition buttons injected right over the drawer -->
-        <div class="fixed bottom-0 right-0 z-50 w-full max-w-lg bg-white border-t border-border p-4 shadow-lg flex gap-3 flex-wrap items-center justify-end">
-          <template v-for="nextStatus in getAllowedTransitions(detailCache[openDetailId]!.status)" :key="nextStatus">
-            <button
-              class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors shadow-sm"
-              :class="nextStatus === 'REJECTED' ? 'bg-danger text-white hover:bg-danger/90' : 'bg-brand text-white hover:bg-brand-dark'"
-              @click="updateStatus(openDetailId, nextStatus)"
-            >
-              {{ STATUS_LABELS[nextStatus] }}
-            </button>
-          </template>
-          
-          <!-- Interview / Offer buttons (omitted actual vars since they are not in detail logic yet but adhering to layout) -->
-        </div>
-      </div>
+    <!-- Application Detail Drawer -->
+    <Transition 
+      enter-active-class="transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)"
+      enter-from-class="translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition-transform duration-300 ease-in"
+      leave-from-class="translate-x-0"
+      leave-to-class="translate-x-full"
+    >
+      <ApplicationDetailDrawer 
+        v-if="selectedDetail"
+        :detail="selectedDetail"
+        :is-loading="isDetailLoading"
+        :allowed-transitions="allowedTransitions"
+        :screening-result="screeningResult"
+        @close="emit('closeDetail')"
+        @transition="emit('transitionStatus', selectedDetail.id, $event)"
+      />
     </Transition>
   </div>
 </template>
@@ -225,15 +180,11 @@ onMounted(() => {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-
-.drawer-slide-enter-active,
-.drawer-slide-leave-active {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
-.drawer-slide-enter-from,
-.drawer-slide-leave-to {
-  transform: translateX(100%);
+.animate-bounce-slow {
+  animation: bounce-slow 3s infinite ease-in-out;
 }
 </style>

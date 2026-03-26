@@ -21,6 +21,15 @@ export const onboardingService = {
     return data.data
   },
 
+  /** POST /vietrecruit/companies — create a new company (for self-registered employers) */
+  async createCompany(payload: CompanyUpdateRequest): Promise<CompanyResponse> {
+    const { data } = await apiClient.post<ApiResponse<CompanyResponse>>(
+      '/vietrecruit/companies',
+      payload,
+    )
+    return data.data
+  },
+
   /** PUT /vietrecruit/companies/me */
   async updateCompany(payload: CompanyUpdateRequest): Promise<CompanyResponse> {
     const { data } = await apiClient.put<ApiResponse<CompanyResponse>>(

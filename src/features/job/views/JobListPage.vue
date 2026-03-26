@@ -1,263 +1,183 @@
 <script setup lang="ts">
 // src/features/job/views/JobListPage.vue
-// Job list page for HR / COMPANY_ADMIN roles.
-// Layout: uses PipelineSidebar + PipelineTopBar (same shell as WorkspacePage.vue).
+// Employer workspace view listing all job postings.
 
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ROUTE_NAMES } from '@/core/constants/route-names'
-import { storeToRefs } from 'pinia'
-import { Plus, Briefcase, AlertTriangle } from 'lucide-vue-next'
-import PipelineSidebar from '@/features/workspace/components/PipelineSidebar.vue'
-import PipelineTopBar from '@/features/workspace/components/PipelineTopBar.vue'
-import JobTableRow from '@/features/job/components/JobTableRow.vue'
+import { 
+  Plus, 
+  Search, 
+  AlertCircle, 
+  ChevronRight, 
+  Briefcase,
+  LayoutGrid,
+  List as ListIcon
+} from 'lucide-vue-next'
+import JobTableRow from '../components/JobTableRow.vue'
+import type { Job } from '@/features/workspace/types'
 
-import { useJobStore } from '@/features/job/stores/useJobStore'
-import { QuotaExceededError } from '@/features/job/types/job.dto'
-import type { JobStatus } from '@/features/workspace/types'
-import { useToast } from 'vue-toastification'
+const props = defineProps<{
+  jobs: Job[]
+  isLoading: boolean
+  error: string | null
+  totalPages: number
+  currentPage: number
+  activeFilter: 'ALL' | 'DRAFT' | 'PUBLISHED' | 'CLOSED'
+  quotaExceeded: boolean
+}>()
 
-const router = useRouter()
-const jobStore = useJobStore()
-const toast = useToast()
-const { jobs, isLoading, error, draftJobs, publishedJobs, closedJobs } = storeToRefs(jobStore)
+const emit = defineEmits<{
+  filterChange: [status: string]
+  publish: [id: string]
+  close: [id: string]
+  create: []
+  edit: [id: string]
+  pageChange: [page: number]
+}>()
 
-// ── Local UI state ────────────────────────────────────────────────────────────
-const selectedTab = ref<'ALL' | JobStatus>('ALL')
-const quotaError = ref<string | null>(null)
-
-const tabs: { key: 'ALL' | JobStatus; label: string }[] = [
-  { key: 'ALL', label: 'All Jobs' },
-  { key: 'DRAFT', label: 'Draft' },
-  { key: 'PUBLISHED', label: 'Published' },
-  { key: 'CLOSED', label: 'Closed' },
-]
-
-const filteredJobs = computed(() => {
-  if (selectedTab.value === 'ALL') return jobs.value
-  if (selectedTab.value === 'DRAFT') return draftJobs.value
-  if (selectedTab.value === 'PUBLISHED') return publishedJobs.value
-  return closedJobs.value
-})
-
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
-onMounted(() => {
-  jobStore.fetchJobs()
-})
-
-// ── Actions ───────────────────────────────────────────────────────────────────
-async function handlePublish(id: string): Promise<void> {
-  const confirmed = window.confirm(
-    'Are you sure you want to publish this job? It will be visible to candidates.',
-  )
-  if (!confirmed) return
-
-  quotaError.value = null
-  try {
-    await jobStore.publishJob(id)
-    toast.success('Job published successfully')
-  } catch (e) {
-    if (e instanceof QuotaExceededError) {
-      quotaError.value = e.message
-    }
-  }
-}
-
-async function handleClose(id: string): Promise<void> {
-  const confirmed = window.confirm(
-    'Are you sure you want to close this job? It will no longer accept new applications.',
-  )
-  if (!confirmed) return
-  await jobStore.closeJob(id)
-  toast.success('Job closed successfully')
-}
-
-function goToCreate(): void {
-  router.push({ name: ROUTE_NAMES.JOB_CREATE })
-}
+const tabs = [
+  { label: 'Tất cả', value: 'ALL' },
+  { label: 'Bản nháp', value: 'DRAFT' },
+  { label: 'Đang đăng', value: 'PUBLISHED' },
+  { label: 'Đã đóng', value: 'CLOSED' },
+] as const
 </script>
 
 <template>
-  <div class="h-screen w-full flex flex-col bg-surface overflow-hidden text-text-primary font-sans">
-    <PipelineTopBar />
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Quản lý tin tuyển dụng</h1>
+        <p class="text-gray-500 text-sm mt-1">Quản lý và theo dõi trạng thái các vị trí đang tuyển dụng.</p>
+      </div>
+      
+      <button 
+        @click="emit('create')"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#009898] text-white rounded-xl font-bold hover:bg-[#007a7a] transition-all shadow-lg shadow-[#009898]/20"
+      >
+        <Plus class="w-5 h-5" />
+        Đăng tin mới
+      </button>
+    </div>
 
-    <div class="flex-1 flex overflow-hidden">
-      <PipelineSidebar />
+    <!-- Quota Warning -->
+    <div 
+      v-if="quotaExceeded" 
+      class="flex items-start gap-4 p-4 bg-amber-50 border border-amber-100 rounded-xl animate-in fade-in slide-in-from-top-2"
+    >
+      <div class="p-2 bg-amber-100 rounded-lg text-amber-600">
+        <AlertCircle class="w-5 h-5" />
+      </div>
+      <div class="flex-1">
+        <h3 class="text-sm font-bold text-amber-900">Đã hết hạn mức đăng tin</h3>
+        <p class="text-sm text-amber-700 mt-1">
+          Gói hiện tại của bạn đã đạt giới hạn số tin tuyển dụng tối đa. Hãy nâng cấp gói để tiếp tục tuyển dụng.
+        </p>
+        <button class="mt-3 text-sm font-bold text-amber-900 flex items-center gap-1 hover:underline">
+          Nâng cấp ngay <ChevronRight class="w-4 h-4" />
+        </button>
+      </div>
+    </div>
 
-      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-surface-soft scrollbar-hide">
-        <!-- Header -->
-        <div
-          class="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-border"
-        >
-          <div>
-            <nav class="flex text-sm text-text-muted mb-2 font-medium">
-              <span class="hover:text-brand cursor-pointer" @click="$router.push({ name: ROUTE_NAMES.WORKSPACE })">
-                Workspace
-              </span>
-              <span class="mx-2">/</span>
-              <span class="text-text-primary">Job Management</span>
-            </nav>
-            <h1 class="text-3xl font-display font-bold text-text-primary">Job Management</h1>
-            <p class="text-sm text-text-muted mt-1">
-              Manage job postings, publish openings, and monitor recruitment pipeline.
-            </p>
-          </div>
-          <div class="mt-4 md:mt-0">
-            <button
-              id="btn-create-job"
-              @click="goToCreate"
-              class="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors shadow-brand-sm text-sm font-semibold"
-            >
-              <Plus class="w-4 h-4" />
-              Create Job
-            </button>
-          </div>
-        </div>
-
-        <!-- Quota Exceeded Banner -->
-        <div
-          v-if="quotaError"
-          class="mb-6 p-4 bg-warning-light border border-warning/30 rounded-xl flex items-start gap-3"
-        >
-          <AlertTriangle class="w-5 h-5 text-warning-dark shrink-0 mt-0.5" />
-          <div>
-            <p class="text-sm font-semibold text-warning-dark">Job Quota Exceeded</p>
-            <p class="text-sm text-warning-dark/80 mt-0.5">{{ quotaError }}</p>
-          </div>
-          <button
-            @click="quotaError = null"
-            class="ml-auto text-warning-dark/60 hover:text-warning-dark font-bold text-lg leading-none"
-            aria-label="Dismiss"
-          >
-            &times;
-          </button>
-        </div>
-
-        <!-- Generic Error Banner -->
-        <div
-          v-if="error"
-          class="mb-6 p-4 bg-danger-light border border-danger/20 rounded-xl text-sm text-danger-dark font-medium"
-        >
-          {{ error }}
-        </div>
-
-        <!-- Stats Row -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div
-            v-for="tab in tabs"
-            :key="tab.key"
-            class="p-4 bg-white border border-border rounded-xl shadow-xs"
-          >
-            <p class="text-xs text-text-muted font-medium mb-1">{{ tab.label }}</p>
-            <p class="text-2xl font-bold text-text-primary">
-              {{
-                tab.key === 'ALL'
-                  ? jobs.length
-                  : tab.key === 'DRAFT'
-                    ? draftJobs.length
-                    : tab.key === 'PUBLISHED'
-                      ? publishedJobs.length
-                      : closedJobs.length
-              }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Status Filter Tabs -->
-        <div class="flex gap-1 mb-4 p-1 bg-surface-muted rounded-lg w-fit">
+    <!-- Filters & Tabs -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="flex flex-col md:flex-row border-b border-gray-100">
+        <div class="flex flex-1 p-1">
           <button
             v-for="tab in tabs"
-            :key="tab.key"
-            @click="selectedTab = tab.key"
+            :key="tab.value"
+            @click="emit('filterChange', tab.value)"
             :class="[
-              'px-4 py-1.5 text-sm font-semibold rounded-md transition-all',
-              selectedTab === tab.key
-                ? 'bg-white text-brand shadow-xs border border-border'
-                : 'text-text-muted hover:text-text-secondary',
+              'flex-1 px-4 py-3 text-sm font-bold transition-all rounded-xl',
+              activeFilter === tab.value 
+                ? 'bg-[#009898]/10 text-[#009898]' 
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
             ]"
           >
             {{ tab.label }}
           </button>
         </div>
-
-        <!-- Loading Skeleton -->
-        <div v-if="isLoading" class="space-y-3 animate-pulse">
-          <div
-            v-for="n in 4"
-            :key="n"
-            class="h-16 bg-white border border-border rounded-xl shadow-xs"
-          />
-        </div>
-
-        <!-- Jobs Table -->
-        <div v-else class="bg-white border border-border rounded-xl shadow-xs overflow-hidden">
-          <table v-if="filteredJobs.length > 0" class="w-full">
-            <thead>
-              <tr class="bg-surface-muted border-b border-border">
-                <th class="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  Job Title
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  Salary
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  Deadline
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  Created
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <JobTableRow
-                v-for="job in filteredJobs"
-                :key="job.id"
-                :job="job"
-                @publish="handlePublish"
-                @close="handleClose"
-              />
-            </tbody>
-          </table>
-
-          <!-- Empty State -->
-          <div v-else class="flex flex-col items-center justify-center py-16 text-center">
-            <div class="w-14 h-14 rounded-full bg-brand-light flex items-center justify-center mb-4">
-              <Briefcase class="w-7 h-7 text-brand" />
-            </div>
-            <p class="text-base font-semibold text-text-primary">No jobs found</p>
-            <p class="text-sm text-text-muted mt-1">
-              {{
-                selectedTab === 'ALL'
-                  ? 'Create your first job posting to start recruiting.'
-                  : `No jobs with status "${selectedTab}" found.`
-              }}
-            </p>
-            <button
-              v-if="selectedTab === 'ALL'"
-              @click="goToCreate"
-              class="mt-5 px-4 py-2 bg-brand text-white text-sm font-semibold rounded-lg hover:bg-brand-dark transition-colors"
-            >
-              Create First Job
-            </button>
+        
+        <div class="p-2 flex items-center gap-2">
+          <div class="relative group">
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#009898] transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm tin..." 
+              class="pl-9 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-[#009898]/20 w-full md:w-64 transition-all"
+            />
           </div>
         </div>
-      </main>
+      </div>
+
+      <!-- Table Content -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-gray-50/50 text-[11px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+              <th class="px-4 py-4 font-bold">Tin tuyển dụng</th>
+              <th class="px-4 py-4 font-bold">Trạng thái</th>
+              <th class="px-4 py-4 font-bold">Mức lương</th>
+              <th class="px-4 py-4 font-bold">Hạn nộp</th>
+              <th class="px-4 py-4 font-bold">Ngày tạo</th>
+              <th class="px-4 py-4 font-bold text-right">Thao tác</th>
+            </tr>
+          </thead>
+          
+          <tbody v-if="!isLoading && jobs.length > 0">
+            <JobTableRow 
+              v-for="job in jobs" 
+              :key="job.id" 
+              :job="job"
+              @publish="emit('publish', $event)"
+              @close="emit('close', $event)"
+              @edit="emit('edit', $event)"
+            />
+          </tbody>
+        </table>
+
+        <!-- Loading Skeleton -->
+        <div v-if="isLoading" class="p-8 space-y-4">
+          <div v-for="i in 5" :key="i" class="h-16 bg-gray-50 rounded-xl animate-pulse"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="jobs.length === 0" class="py-20 text-center">
+          <div class="w-20 h-20 bg-gray-50 text-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 border border-dashed border-gray-200">
+            <Briefcase class="w-10 h-10" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Chưa có tin tuyển dụng nào</h3>
+          <p class="text-gray-500 max-w-sm mx-auto mb-8">
+            Bắt đầu thu hút ứng viên tài năng bằng cách tạo tin tuyển dụng đầu tiên của bạn.
+          </p>
+          <button 
+            @click="emit('create')"
+            class="px-8 py-3 bg-[#009898] text-white rounded-xl font-bold hover:bg-[#007a7a] transition-all shadow-lg shadow-[#009898]/20"
+          >
+            Đăng tin ngay
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer / Pagination -->
+      <div v-if="totalPages > 1" class="px-4 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+        <span class="text-xs text-gray-500">Trang {{ currentPage }} / {{ totalPages }}</span>
+        <div class="flex items-center gap-1">
+          <button 
+            @click="emit('pageChange', currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight class="w-4 h-4 rotate-180" />
+          </button>
+          <button 
+            @click="emit('pageChange', currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>

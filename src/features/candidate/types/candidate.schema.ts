@@ -55,14 +55,18 @@ export const UserProfileResponseSchema = z.object({
   email: z.string(),
   fullName: z.string(),
   phone: z.string().nullable().optional(),
+  roles: z.array(z.string()).optional(),
+  companyId: z.string().nullable().optional(),
   avatarUrl: z.string().nullable().optional(),
   bannerUrl: z.string().nullable().optional(),
+  emailVerified: z.boolean().optional(),
   location: z.string().nullable().optional(),
   dob: z.string().nullable().optional(),
   gender: z.string().nullable().optional(),
   linkedinUrl: z.string().nullable().optional(),
   githubUrl: z.string().nullable().optional(),
   portfolioUrl: z.string().nullable().optional(),
+  createdAt: z.string().optional(),
 })
 
 export const CvUploadResponseSchema = z.object({

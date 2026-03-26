@@ -49,11 +49,17 @@ async function handleSubmit(): Promise<void> {
   submitted.value = true;
   if (!validate()) return;
 
-  await onboarding.updateCompany({
+  const payload = {
     name: name.value,
     domain: domain.value || undefined,
     website: website.value || undefined,
-  });
+  };
+
+  if (onboarding.companyProfile.value) {
+    await onboarding.updateCompany(payload);
+  } else {
+    await onboarding.createCompany(payload);
+  }
 }
 
 // Clear API error on input change

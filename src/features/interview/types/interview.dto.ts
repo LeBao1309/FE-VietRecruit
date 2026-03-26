@@ -40,12 +40,12 @@ export interface Scorecard {
 
 export interface ScheduleInterviewRequest {
   applicationId: string
-  jobId: string
+  title: string
   scheduledAt: string
+  durationMinutes?: number
+  locationOrLink?: string
+  interviewType?: string
   interviewerIds: string[]
-  location?: string
-  meetingLink?: string
-  notes?: string
 }
 
 export interface UpdateInterviewStatusRequest {
@@ -74,6 +74,6 @@ export interface ScorecardSummaryResponse {
 }
 
 export interface InterviewListParams {
-  applicationId?: string
+  applicationId: string
   status?: InterviewStatus
 }

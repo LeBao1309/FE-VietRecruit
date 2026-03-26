@@ -150,10 +150,16 @@ export const routes: RouteRecordRaw[] = [
   },
   // ── Candidate Portal ───────────────────────────────────────
   {
-    path: '/candidate/profile',
-    name: 'CandidateProfile',
-    component: () => import('@/features/candidate/views/CandidateProfilePage.vue'),
+    path: '/candidate',
+    component: () => import('@/features/candidate/components/CandidateLayout.vue'),
     meta: { requiresAuth: true, allowedRoles: ['CANDIDATE'] },
+    children: [
+      {
+        path: 'profile',
+        name: 'CandidateProfile',
+        component: () => import('@/features/candidate/views/CandidateProfilePage.vue'),
+      },
+    ],
   },
   {
     path: '/jobs',
