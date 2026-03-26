@@ -64,7 +64,6 @@ export const AuthUserSchema = z.object({
   fullName:               z.string(),
   roles:                  z.array(RoleEnum),
   companyId:              z.string().nullable(),
-  companyProfileComplete: z.boolean(),
   avatarUrl:              z.string().nullable(),
 })
 export type AuthUser = z.infer<typeof AuthUserSchema>

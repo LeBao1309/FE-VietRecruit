@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onUnmounted } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
 import AuthLayout from "@/features/auth/components/AuthLayout.vue";
@@ -84,7 +84,7 @@ async function handleRegister(): Promise<void> {
   submitted.value = true;
   if (!validate()) return;
 
-  await auth.register({
+  const success = await auth.register({
     fullName: fullName.value,
     email: email.value,
     password: password.value,
@@ -93,17 +93,40 @@ async function handleRegister(): Promise<void> {
     accountType: accountType.value, // Account type is set from Step 1
   });
 
-  if (!auth.hasError.value) {
+  if (success) {
     step.value = 'otp';
+    startCooldown();
   }
 }
 
-async function handleOtpSuccess() {
-  await router.push({
-    path: '/auth/login',
-    query: { registered: '1' }
-  });
+// ── OTP handlers ──
+const resendCooldown = ref(0);
+let resendTimer: ReturnType<typeof setInterval> | null = null;
+
+function startCooldown(): void {
+  if (resendTimer) clearInterval(resendTimer);
+  resendCooldown.value = 60;
+  resendTimer = setInterval(() => {
+    resendCooldown.value--;
+    if (resendCooldown.value <= 0) {
+      if (resendTimer) clearInterval(resendTimer);
+      resendTimer = null;
+    }
+  }, 1000);
 }
+
+async function handleOtpSubmit(code: string) {
+  await auth.verifyOtp({ email: email.value, code });
+}
+
+async function handleOtpResend() {
+  const success = await auth.resendOtp(email.value);
+  if (success) startCooldown();
+}
+
+onUnmounted(() => {
+  if (resendTimer) clearInterval(resendTimer);
+});
 
 // Clear API error on any input change
 watch([fullName, email, password, confirmPassword, phone], () => {
@@ -480,7 +503,11 @@ const valueProps = [
 
       <OtpVerifyForm
         :email="email"
-        @success="handleOtpSuccess"
+        :is-loading="auth.isLoading.value"
+        :error="auth.error.value"
+        :resend-cooldown="resendCooldown"
+        @submit="handleOtpSubmit"
+        @resend="handleOtpResend"
       />
     </div>
   </AuthLayout>
