@@ -8,6 +8,7 @@ import ApplicationStatusBadge from '../components/ApplicationStatusBadge.vue'
 import StatusTimeline from '../components/StatusTimeline.vue'
 import InterviewCard from '../components/InterviewCard.vue'
 import OfferCard from '../components/OfferCard.vue'
+import CandidateNavbar from '../components/CandidateNavbar.vue'
 import type { ApplicationResponse, ApplicationStatusHistoryResponse, InterviewResponse, OfferResponse } from '../types/application.schema'
 
 const route = useRoute()
@@ -53,8 +54,9 @@ onMounted(() => loadData())
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-surface-soft">
+    <CandidateNavbar />
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <button @click="goBack()" class="mb-6 flex items-center text-sm font-medium text-gray-500 hover:text-indigo-600 transition">
         <svg class="mr-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
         Trở về danh sách

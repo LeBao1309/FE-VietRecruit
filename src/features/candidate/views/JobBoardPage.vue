@@ -5,6 +5,10 @@
 import { MapPin, Briefcase, Search, Sparkles } from 'lucide-vue-next'
 import JobCard from '../components/JobCard.vue'
 import JobSearchBar from '../components/JobSearchBar.vue'
+import CandidateNavbar from '../components/CandidateNavbar.vue'
+import { useAuthStore } from '@/core/stores/auth.store'
+
+const authStore = useAuthStore()
 import type { JobSummaryResponse } from '../types/job.schema'
 
 const props = defineProps<{
@@ -29,7 +33,8 @@ const suggestions: string[] = [] // In real app, this comes from store/props
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F8FAFC]">
+  <div class="min-h-screen bg-surface-soft">
+    <CandidateNavbar v-if="authStore.isAuthenticated" />
     <!-- Hero Section -->
     <div class="bg-gradient-to-br from-gray-900 via-slate-800 to-slate-900 pt-20 pb-40 px-4">
       <div class="max-w-7xl mx-auto text-center">
