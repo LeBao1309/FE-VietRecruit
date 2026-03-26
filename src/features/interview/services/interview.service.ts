@@ -10,35 +10,42 @@ import type {
   UpdateInterviewStatusRequest,
 } from '@/features/interview/types/interview.dto'
 
-const BASE = '/vietrecruit/interviews'
+const APPLICATIONS_BASE = '/vietrecruit/applications'
+const INTERVIEWS_BASE = '/vietrecruit/interviews'
 
 export const interviewService = {
   /**
-   * GET /vietrecruit/interviews
-   * applicationId is required for HR/COMPANY_ADMIN view.
+   * GET /vietrecruit/applications/{applicationId}/interviews
+   * applicationId is required. Returns all interviews for the given application.
    */
   async getInterviews(params: InterviewListParams): Promise<Interview[]> {
-    const { data } = await apiClient.get<ApiResponse<Interview[]>>(BASE, { params })
+    const { applicationId, ...rest } = params
+    const { data } = await apiClient.get<ApiResponse<Interview[]>>(
+      `${APPLICATIONS_BASE}/${applicationId}/interviews`,
+      { params: rest },
+    )
     return data.data
   },
 
   /**
-   * GET /vietrecruit/interviews/my-interviews
-   * Returns interviews where the current user is in interviewerIds.
+   * GET /vietrecruit/interviews/{id}
+   * Returns a single interview by its own ID.
    */
-  async getMyInterviews(params?: Pick<InterviewListParams, 'status'>): Promise<Interview[]> {
-    const { data } = await apiClient.get<ApiResponse<Interview[]>>(`${BASE}/my-interviews`, {
-      params,
-    })
+  async getInterview(id: string): Promise<Interview> {
+    const { data } = await apiClient.get<ApiResponse<Interview>>(`${INTERVIEWS_BASE}/${id}`)
     return data.data
   },
 
   /**
-   * POST /vietrecruit/interviews
+   * POST /vietrecruit/applications/{applicationId}/interviews
    * Schedule a new interview. Returns HTTP 201 with the created Interview.
    */
   async scheduleInterview(payload: ScheduleInterviewRequest): Promise<Interview> {
-    const { data } = await apiClient.post<ApiResponse<Interview>>(BASE, payload)
+    const { applicationId, ...body } = payload
+    const { data } = await apiClient.post<ApiResponse<Interview>>(
+      `${APPLICATIONS_BASE}/${applicationId}/interviews`,
+      body,
+    )
     return data.data
   },
 
@@ -48,7 +55,7 @@ export const interviewService = {
    */
   async updateStatus(id: string, payload: UpdateInterviewStatusRequest): Promise<Interview> {
     const { data } = await apiClient.put<ApiResponse<Interview>>(
-      `${BASE}/${id}/status`,
+      `${INTERVIEWS_BASE}/${id}/status`,
       payload,
     )
     return data.data
