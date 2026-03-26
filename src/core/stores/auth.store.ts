@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { tokenService } from '@/core/api/token.service'
 import { authService } from '@/features/auth/services/auth.service'
+import { userService } from '@/features/candidate/services/user.service'
 import { parseApiError } from '@/core/utils/error.utils'
 import type {
   AuthUser,
@@ -33,8 +34,8 @@ export function resolvePostLoginRoute(user: AuthUser | null): string {
     return '/workspace/jobs'
   }
   if (primaryRole === 'COMPANY_ADMIN') {
-    // Must complete company profile before accessing dashboard
-    if (!user.companyProfileComplete) return '/onboarding/employer'
+    // Must have a company association before accessing dashboard
+    if (!user.companyId) return '/onboarding/employer'
     return '/workspace'
   }
   if (primaryRole === 'CANDIDATE') {
@@ -44,34 +45,27 @@ export function resolvePostLoginRoute(user: AuthUser | null): string {
   return '/auth/login'
 }
 
-// ── Helper: extract AuthUser from a JWT access token ─────────────────────────
-// Fallback when the login response does not include a user object
+// ── Helper: extract minimal AuthUser from a JWT access token ─────────────────
+// JWT only contains: sub, roles, email_verified, jti — nothing else
 function parseUserFromJwt(token: string): AuthUser | null {
   try {
     const payloadStr = token.split('.')[1]
     if (!payloadStr) return null
     const payload = JSON.parse(atob(payloadStr))
-    
-    // Backend JWT uses "roles" (array) OR "role" (string)
+
+    // Backend JWT uses "roles" (array)
     let parsedRoles: string[] = []
     if (payload.roles && Array.isArray(payload.roles)) {
       parsedRoles = payload.roles
-    } else if (payload.role) {
-      parsedRoles = [payload.role]
-    } else if (payload.accountType === 'EMPLOYER') {
-      parsedRoles = ['COMPANY_ADMIN'] // Fallback translation
-    } else if (payload.accountType === 'CANDIDATE') {
-      parsedRoles = ['CANDIDATE']
     }
 
     return {
-      id:                     payload.sub ?? '',
-      email:                  payload.email ?? '',
-      fullName:               payload.fullName ?? '',
-      roles:                  parsedRoles as AuthUser['roles'],
-      companyId:              payload.companyId ?? null,
-      companyProfileComplete: payload.companyProfileComplete ?? false,
-      avatarUrl:              payload.avatarUrl ?? null,
+      id:        payload.sub ?? '',
+      email:     '',
+      fullName:  '',
+      roles:     parsedRoles as AuthUser['roles'],
+      companyId: null,
+      avatarUrl: null,
     }
   } catch {
     return null
@@ -115,6 +109,27 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
+  // ── Fetch full user profile from GET /users/me ─────────────
+  async function fetchUserProfile(): Promise<AuthUser | null> {
+    try {
+      const profile = await userService.getUserProfile()
+      const currentUser = user.value
+      const resolvedUser: AuthUser = {
+        id:        profile.id ?? currentUser?.id ?? '',
+        email:     profile.email ?? '',
+        fullName:  profile.fullName ?? '',
+        roles:     (profile.roles as AuthUser['roles']) ?? currentUser?.roles ?? [],
+        companyId: profile.companyId ?? null,
+        avatarUrl: profile.avatarUrl ?? null,
+      }
+      setUser(resolvedUser)
+      return resolvedUser
+    } catch {
+      // If /users/me fails, keep whatever we parsed from JWT
+      return user.value
+    }
+  }
+
   // ── Actions ────────────────────────────────────────────────
 
   /** 1. Login — resolves post-login route based on user role */
@@ -130,9 +145,12 @@ export const useAuthStore = defineStore('auth', () => {
       )
       isAuthenticated.value = true
 
-      // Prefer user object from response body; fall back to JWT decode
-      const resolvedUser = response.user ?? parseUserFromJwt(response.accessToken)
-      if (resolvedUser) setUser(resolvedUser)
+      // Parse JWT for roles first (immediate)
+      const jwtUser = parseUserFromJwt(response.accessToken)
+      if (jwtUser) setUser(jwtUser)
+
+      // Fetch full profile from GET /users/me
+      const resolvedUser = await fetchUserProfile()
 
       const redirectPath = resolvePostLoginRoute(resolvedUser)
       await router.push(redirectPath)
@@ -284,9 +302,15 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authService.oauthCallback(provider, code, state)
       tokenService.setTokens(response.accessToken, response.refreshToken, response.expiresIn)
-      const resolvedUser = response.user ?? parseUserFromJwt(response.accessToken)
-      if (resolvedUser) setUser(resolvedUser)
+
+      // Parse JWT for roles first (immediate)
+      const jwtUser = parseUserFromJwt(response.accessToken)
+      if (jwtUser) setUser(jwtUser)
+
       isAuthenticated.value = true
+
+      // Fetch full profile from GET /users/me
+      await fetchUserProfile()
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -335,6 +359,7 @@ export const useAuthStore = defineStore('auth', () => {
     changePassword,
     socialLogin,
     handleOAuthCallback,
+    fetchUserProfile,
     clearError,
     clearSession,
   }
