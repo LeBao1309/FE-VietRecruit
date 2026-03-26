@@ -22,7 +22,7 @@
       </div>
 
       <!-- 8-digit OTP input boxes -->
-      <div class="flex gap-2 mb-6 justify-center">
+      <div class="flex gap-1 md:gap-2 mb-6 justify-center">
         <input
           v-for="(_, index) in 8"
           :key="index"
@@ -31,7 +31,7 @@
           inputmode="numeric"
           maxlength="1"
           :value="otpInputs[index]"
-          class="w-10 h-12 md:w-12 md:h-14 text-center text-xl font-bold text-gray-900 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:border-[#009898] focus:ring-4 focus:ring-[#009898]/10"
+          class="w-7 h-10 md:w-10 md:h-12 text-center text-lg md:text-xl font-bold text-gray-900 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:border-[#009898] focus:ring-4 focus:ring-[#009898]/10"
           :class="[
             error ? 'border-red-200 bg-red-50/30' : 'border-gray-200 bg-white hover:border-gray-300',
           ]"
@@ -69,7 +69,7 @@
           Gửi lại mã
         </button>
         <span v-else class="text-gray-400 font-medium ml-1">
-          Gửi lại sau <span class="text-gray-900">{{ resendCooldown }}s</span>
+          Gửi lại sau <span class="text-gray-900">{{ resendCooldown }} giây</span>
         </span>
       </p>
     </div>
