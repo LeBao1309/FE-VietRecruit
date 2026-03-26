@@ -2,9 +2,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ROUTE_NAMES } from '@/core/constants/route-names'
 import { onboardingService } from '@/features/onboarding/services/onboarding.service'
+import { useAuthStore } from '@/core/stores/auth.store'
 import { parseApiError } from '@/core/utils/error.utils'
+import type { AxiosError } from 'axios'
 import type {
   CompanyUpdateRequest,
   CompanyResponse,
@@ -20,6 +21,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   const error             = ref<string | null>(null)
   const companyProfile    = ref<CompanyResponse | null>(null)
   const candidateProfile  = ref<CandidateProfileResponse | null>(null)
+  const companyExists     = ref(true)
 
   // ── Getters ──
   const hasError = computed(() => error.value !== null)
@@ -38,8 +40,50 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       companyProfile.value = await onboardingService.getCompany()
+      companyExists.value = true
+
+      // 🔴 TEMPORARY FE FIX: Missing companyId from BE token/profile
+      const authStore = useAuthStore()
+      if (authStore.user && companyProfile.value?.id) {
+        authStore.user.companyId = companyProfile.value.id
+      }
+    } catch (err) {
+      const axiosErr = err as AxiosError
+      // 403 means user has no company yet — show creation form
+      if (axiosErr.response?.status === 403) {
+        companyExists.value = false
+        companyProfile.value = null
+      } else {
+        handleApiError(err)
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function createCompany(payload: CompanyUpdateRequest): Promise<boolean> {
+    clearError()
+    isLoading.value = true
+    try {
+      companyProfile.value = await onboardingService.createCompany(payload)
+      companyExists.value = true
+
+      // Refresh auth user profile
+      const authStore = useAuthStore()
+      await authStore.fetchUserProfile()
+
+      // 🔴 TEMPORARY FE FIX: BE does not yet return companyId in GET /users/me
+      // or JWT. We manually inject the created company ID into the auth store 
+      // so the router guard allows access to /workspace.
+      if (authStore.user && companyProfile.value?.id) {
+        authStore.user.companyId = companyProfile.value.id
+      }
+
+      await router.push('/workspace')
+      return true
     } catch (err) {
       handleApiError(err)
+      return false
     } finally {
       isLoading.value = false
     }
@@ -50,7 +94,8 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       companyProfile.value = await onboardingService.updateCompany(payload)
-      await router.push({ name: ROUTE_NAMES.WORKSPACE })
+      companyExists.value = true
+      await router.push('/workspace')
       return true
     } catch (err) {
       handleApiError(err)
@@ -79,7 +124,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     isLoading.value = true
     try {
       candidateProfile.value = await onboardingService.updateCandidateProfile(payload)
-      await router.push({ name: ROUTE_NAMES.WORKSPACE })
+      await router.push('/jobs')
       return true
     } catch (err) {
       handleApiError(err)
@@ -95,10 +140,12 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     error,
     companyProfile,
     candidateProfile,
+    companyExists,
     // getters
     hasError,
     // actions
     loadCompany,
+    createCompany,
     updateCompany,
     loadCandidateProfile,
     updateCandidateProfile,

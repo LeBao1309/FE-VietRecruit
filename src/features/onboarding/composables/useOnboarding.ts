@@ -22,6 +22,7 @@ export function useOnboarding() {
     candidateProfile,
     // actions
     loadCompany:            ()                            => store.loadCompany(),
+    createCompany:          (p: CompanyUpdateRequest)     => store.createCompany(p),
     updateCompany:          (p: CompanyUpdateRequest)     => store.updateCompany(p),
     loadCandidateProfile:   ()                            => store.loadCandidateProfile(),
     updateCandidateProfile: (p: CandidateUpdateRequest)   => store.updateCandidateProfile(p),
