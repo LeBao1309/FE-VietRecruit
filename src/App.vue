@@ -34,7 +34,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-surface text-white">
+  <main class="min-h-screen bg-surface-soft text-text-primary">
     <RouterView />
   </main>
 </template>
