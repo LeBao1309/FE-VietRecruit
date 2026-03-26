@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const OfferStatusSchema = z.enum(["DRAFT", "SENT", "ACCEPTED", "DECLINED", "EXPIRED"]);
+export const OfferStatusSchema = z.enum(["DRAFT", "SENT", "ACCEPTED", "DECLINED"]);
 export type OfferStatus = z.infer<typeof OfferStatusSchema>;
 
 export const OfferSchema = z.object({
