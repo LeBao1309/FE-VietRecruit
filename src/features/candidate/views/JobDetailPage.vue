@@ -8,6 +8,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useJobBoardStore } from '../stores/job-board.store'
 import { jobService } from '../services/job.service'
 import ApplyDialog from '../components/ApplyDialog.vue'
+import CandidateNavbar from '../components/CandidateNavbar.vue'
+import { useAuthStore } from '@/core/stores/auth.store'
+
+const authStore = useAuthStore()
 import { 
   MapPin, 
   Banknote, 
@@ -68,8 +72,9 @@ const goBack = () => router.back()
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 py-12">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-surface-soft">
+    <CandidateNavbar v-if="authStore.isAuthenticated" />
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Navigation -->
       <button @click="goBack" class="mb-8 flex items-center text-sm font-bold text-slate-500 hover:text-[#009898] transition-colors group">
         <div class="p-1.5 rounded-lg bg-white shadow-sm border border-slate-200 mr-3 group-hover:border-[#009898]/30 transition-all">
