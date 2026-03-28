@@ -10,6 +10,7 @@ export interface RegisterRequest {
   email: string
   password: string
   fullName: string
+  phone?: string
   accountType?: AccountType
 }
 
@@ -28,15 +29,14 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
+  email: string
   token: string
   newPassword: string
-  confirmPassword: string
 }
 
 export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
-  confirmPassword: string
 }
 
 export interface VerifyOtpRequest {
@@ -58,12 +58,10 @@ export interface LoginResponse {
   refreshToken: string
   expiresIn: number
   tokenType: string
-  roles: string[]
 }
 
 export interface TokenRefreshResponse {
   accessToken: string
   refreshToken: string
   expiresIn: number
-  tokenType: string
 }

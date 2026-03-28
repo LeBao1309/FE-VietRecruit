@@ -151,6 +151,30 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/shared/SettingsPage.vue'),
         meta: { title: 'Settings' },
       },
+      {
+        path: 'pricing',
+        name: 'EmployerPricing',
+        component: () => import('@/views/employer/PricingPage.vue'),
+        meta: { title: 'Plans & Pricing', roles: ['COMPANY_ADMIN'] },
+      },
+      {
+        path: 'payment-status',
+        name: 'PaymentStatus',
+        component: () => import('@/views/employer/PaymentStatusPage.vue'),
+        meta: { title: 'Payment Status', roles: ['COMPANY_ADMIN'] },
+      },
+      {
+        path: 'subscription',
+        name: 'EmployerSubscription',
+        component: () => import('@/views/employer/SubscriptionPage.vue'),
+        meta: { title: 'Subscription', roles: ['COMPANY_ADMIN'] },
+      },
+      {
+        path: 'billing',
+        name: 'EmployerBilling',
+        component: () => import('@/views/employer/BillingPage.vue'),
+        meta: { title: 'Billing History', roles: ['COMPANY_ADMIN'] },
+      },
     ],
   },
 

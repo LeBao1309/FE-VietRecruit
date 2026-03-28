@@ -82,6 +82,7 @@ Apply these type conversion rules without exception:
 BE-VietRecruit-main/
   src/main/java/.../feature/
     */controller/    ← read ALL controller files under every feature package
+And verify is docs/api.json
 ```
 
 **Goal:** For every controller method, extract:
@@ -473,7 +474,7 @@ Track overall project progress here. Check off items as they are completed.
 - [ ] `JobListView.vue` — `/jobs` — paginated, filter by status and department
 - [ ] `JobDetailView.vue` — `/jobs/:id` — description, stats, applicant list
 - [ ] `JobForm.vue` — create and edit, rich text for job description
-- [ ] Job status transitions — Draft → Open → Closed, confirm on close
+- [ ] Job status transitions — Draft → Published → Closed, confirm on close
 - [ ] Publish / unpublish action — role-restricted
 
 ---

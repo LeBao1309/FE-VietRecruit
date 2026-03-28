@@ -11,10 +11,9 @@ export type ApplicationStatus =
 export type InterviewStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELED'
 
 export type ScorecardResult =
-  | 'STRONG_HIRE'
-  | 'HIRE'
-  | 'NO_HIRE'
-  | 'STRONG_NO_HIRE'
+  | 'PASS'
+  | 'FAIL'
+  | 'CONSIDERING'
 
 export type OfferStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED'
 

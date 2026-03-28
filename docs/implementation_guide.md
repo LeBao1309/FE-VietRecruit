@@ -41,7 +41,7 @@
 | `job_status` | `DRAFT`, `PUBLISHED`, `CLOSED` |
 | `application_status` | `NEW`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`, `REJECTED` |
 | `interview_status` | `SCHEDULED`, `COMPLETED`, `CANCELED` |
-| `scorecard_result` | `STRONG_HIRE`, `HIRE`, `NO_HIRE`, `STRONG_NO_HIRE` |
+| `scorecard_result` | `PASS`, `FAIL`, `CONSIDERING` |
 | `offer_status` | `DRAFT`, `SENT`, `ACCEPTED`, `DECLINED` |
 | `subscription_status` | `ACTIVE`, `CANCELLED`, `EXPIRED` |
 | `payment_status` | `PENDING`, `PAID`, `CANCELLED`, `FAILED`, `EXPIRED` |
@@ -104,10 +104,9 @@ export type ApplicationStatus =
 export type InterviewStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELED'
 
 export type ScorecardResult =
-  | 'STRONG_HIRE'
-  | 'HIRE'
-  | 'NO_HIRE'
-  | 'STRONG_NO_HIRE'
+  | 'PASS'
+  | 'FAIL'
+  | 'CONSIDERING'
 
 export type OfferStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED'
 
@@ -148,6 +147,7 @@ export interface RegisterRequest {
   email: string       // @Email
   password: string    // @Pattern: ≥8 chars, upper+lower+digit+special
   fullName: string    // @NotBlank
+  phone?: string
   accountType?: AccountType
 }
 
@@ -166,15 +166,14 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
+  email: string       // @Email
   token: string       // @NotBlank
   newPassword: string // @Pattern
-  confirmPassword: string
 }
 
 export interface ChangePasswordRequest {
   currentPassword: string // @NotBlank
   newPassword: string     // @Pattern
-  confirmPassword: string
 }
 
 export interface VerifyOtpRequest {
@@ -196,14 +195,12 @@ export interface LoginResponse {
   refreshToken: string
   expiresIn: number
   tokenType: string
-  roles: string[]
 }
 
 export interface TokenRefreshResponse {
   accessToken: string
   refreshToken: string
   expiresIn: number
-  tokenType: string
 }
 ```
 
@@ -286,14 +283,17 @@ export interface BannerUploadResponse {
 export interface CandidateUpdateRequest {
   headline?: string
   summary?: string
-  skills?: string[]
-  experienceYears?: number
-  educationLevel?: string
   desiredPosition?: string
+  desiredPositionLevel?: string
+  yearsOfExperience?: number
+  skills?: string[]
+  primaryLanguage?: string
+  workType?: string
   desiredSalaryMin?: number
   desiredSalaryMax?: number
-  desiredSalaryCurrency?: string
-  workType?: string
+  availableFrom?: string
+  educationLevel?: string
+  educationMajor?: string
   isOpenToWork?: boolean
 }
 
@@ -314,38 +314,42 @@ export interface CandidateProfileResponse {
   userId: string
   headline: string | null
   summary: string | null
-  skills: string[] | null
-  experienceYears: number | null
-  educationLevel: string | null
+  defaultCvUrl: string | null
+  cvOriginalFilename: string | null
+  cvContentType: string | null
+  cvFileSizeBytes: number | null
+  cvUploadedAt: string | null
   desiredPosition: string | null
+  desiredPositionLevel: string | null
+  yearsOfExperience: number | null
+  skills: string[] | null
+  primaryLanguage: string | null
+  workType: string | null
   desiredSalaryMin: number | null
   desiredSalaryMax: number | null
-  desiredSalaryCurrency: string | null
-  workType: string | null
+  availableFrom: string | null
+  educationLevel: string | null
+  educationMajor: string | null
   isOpenToWork: boolean
-  cvUrl: string | null
-  cvOriginalFilename: string | null
-  cvFileSize: number | null
-  cvContentType: string | null
-  fullName: string
-  email: string
-  avatarUrl: string | null
   createdAt: string
   updatedAt: string
 }
 
 export interface CandidateSearchResponse {
   id: string
-  fullName: string
-  email: string
   headline: string | null
+  summary: string | null
+  desiredPosition: string | null
+  desiredPositionLevel: string | null
+  yearsOfExperience: number | null
   skills: string[] | null
-  experienceYears: number | null
-  educationLevel: string | null
   workType: string | null
+  desiredSalaryMin: number | null
+  desiredSalaryMax: number | null
+  educationLevel: string | null
+  educationMajor: string | null
   isOpenToWork: boolean
-  avatarUrl: string | null
-  createdAt: string
+  updatedAt: string
   highlights: Record<string, string[]> | null
   score: number | null
 }
@@ -353,15 +357,14 @@ export interface CandidateSearchResponse {
 export interface CvUploadResponse {
   cvUrl: string
   cvOriginalFilename: string
-  cvFileSize: number
   cvContentType: string
-  uploadedAt: string
+  cvFileSizeBytes: number
+  cvUploadedAt: string
 }
 ```
 
 ### `src/types/company.ts`
 
-```typescript
 // ── Requests ─────────────────────────────────────────────────────────
 export interface CompanyCreateRequest {
   name: string        // @NotBlank, max 255
@@ -574,14 +577,12 @@ export interface ApplicationStatusUpdateRequest {
 export interface ApplicationResponse {
   id: string
   jobId: string
+  jobTitle: string
   candidateId: string
+  candidateName: string
+  appliedCvUrl: string | null
   coverLetter: string | null
   status: ApplicationStatus
-  aiScore: number | null
-  candidateFullName: string
-  candidateEmail: string
-  candidateAvatarUrl: string | null
-  cvUrl: string | null
   createdAt: string
   updatedAt: string
 }
@@ -590,30 +591,32 @@ export interface ApplicationSummaryResponse {
   id: string
   jobId: string
   jobTitle: string
-  candidateFullName: string
-  candidateEmail: string
+  candidateName: string
   status: ApplicationStatus
-  aiScore: number | null
   createdAt: string
-  updatedAt: string
 }
 
 export interface ApplicationScreeningResponse {
   applicationId: string
-  candidateFullName: string
+  candidateId: string
+  candidateName: string
+  candidateEmail: string
+  similarityScore: number | null
   aiScore: number | null
-  aiStrengths: string | null
-  aiGaps: string | null
-  aiSummary: string | null
+  scoreBreakdown: Record<string, number> | null
+  strengths: string[]
+  gaps: string[]
+  summary: string | null
+  applicationStatus: string
 }
 
 export interface ApplicationStatusHistoryResponse {
   id: string
-  fromStatus: ApplicationStatus | null
-  toStatus: ApplicationStatus
+  oldStatus: ApplicationStatus | null
+  newStatus: ApplicationStatus
   notes: string | null
   changedByName: string
-  createdAt: string
+  changedAt: string
 }
 
 // ── Interview ────────────────────────────────────────────────────────
@@ -637,19 +640,16 @@ export interface InterviewResponse {
   scheduledAt: string
   durationMinutes: number | null
   locationOrLink: string | null
-  type: string | null
+  interviewType: string | null
   status: InterviewStatus
   interviewers: InterviewerResponse[]
-  createdBy: string
   createdAt: string
-  updatedAt: string
 }
 
 export interface InterviewerResponse {
   id: string
   fullName: string
   email: string
-  avatarUrl: string | null
 }
 
 // ── Scorecard ────────────────────────────────────────────────────────
@@ -680,7 +680,7 @@ export interface OfferCreateRequest {
   baseSalary: number           // @NotNull
   currency?: string
   startDate?: string           // ISO date
-  notes?: string
+  note?: string
   offerLetterUrl?: string
 }
 
@@ -691,17 +691,13 @@ export interface OfferRespondRequest {
 export interface OfferResponse {
   id: string
   applicationId: string
+  offerLetterUrl: string | null
   baseSalary: number
   currency: string | null
   startDate: string | null
-  notes: string | null
-  offerLetterUrl: string | null
+  note: string | null
   status: OfferStatus
-  createdBy: string
-  sentAt: string | null
-  respondedAt: string | null
   createdAt: string
-  updatedAt: string
 }
 ```
 
@@ -796,61 +792,82 @@ export interface TransactionHistoryResponse {
 
 ```typescript
 export interface CvImprovementResponse {
-  sections: CvImprovementSection[]
   overallScore: number
-  generatedAt: string
+  suggestions: CvSuggestion[]
+  strengths: string[]
+  analysedAt: string
 }
 
-export interface CvImprovementSection {
-  sectionName: string
-  currentScore: number
-  suggestions: string[]
+export interface CvSuggestion {
   priority: string
+  section: string
+  issue: string
+  suggestion: string
+  source: string
 }
 
 export interface InterviewQuestionResponse {
   interviewId: string
-  questions: InterviewQuestion[]
+  jobTitle: string
+  candidateName: string
   generatedAt: string
+  questions: InterviewQuestion[]
+  source: string
 }
 
 export interface InterviewQuestion {
   category: string
   question: string
-  expectedAnswer: string | null
+  intent: string
   difficulty: string
+}
+
+export interface GeneratedJobDescription {
+  overview: string
+  responsibilities: string[]
+  requirements: string[]
+  niceToHave: string[]
+  benefits: string
 }
 
 export interface JdGenerateRequest {
   title: string
-  department?: string
-  seniorityLevel?: string
-  employmentType?: string
-  keyResponsibilities?: string[]
-  requiredSkills?: string[]
-  additionalContext?: string
+  departmentId?: string
+  employmentType: string
+  keyResponsibilities: string[]
+  requiredSkills: string[]
+  niceToHaveSkills?: string[]
+  yearsOfExperience?: number
+  tone: 'PROFESSIONAL' | 'STARTUP' | 'CORPORATE'
 }
 
 export interface JdGenerateResponse {
-  description: string
-  requirements: string
+  title: string
+  generatedDescription: GeneratedJobDescription
+  biasFlags: string[]
+  generatedAt: string
 }
 
 export interface ApplyDescriptionRequest {
-  description: string
-  requirements?: string
+  generatedDescription: GeneratedJobDescription
+}
+
+export interface SalaryRange {
+  min: number
+  median: number
+  max: number
 }
 
 export interface SalaryBenchmarkResponse {
-  title: string
-  currency: string
-  minSalary: number
-  maxSalary: number
-  medianSalary: number
-  percentile25: number
-  percentile75: number
-  sampleSize: number
-  dataSource: string
+  jobTitle: string
+  location: string | null
+  experienceLevel: string | null
+  currency: string | null
+  range: SalaryRange
+  marketPosition: string | null
+  dataPoints: number | null
+  insights: string[]
+  disclaimer: string | null
   generatedAt: string
 }
 ```
@@ -915,7 +932,7 @@ export interface SalaryBenchmarkResponse {
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
 | POST | `/departments` | `DepartmentRequest` | `DepartmentResponse` | ✓ (employer) |
-| GET | `/departments` | — | `DepartmentResponse[]` | ✓ (employer) |
+| GET | `/departments` | Pageable | `PageResponse<DepartmentResponse>` | ✓ (employer) |
 | GET | `/departments/{id}` | — | `DepartmentResponse` | ✓ (employer) |
 | PUT | `/departments/{id}` | `DepartmentRequest` | `DepartmentResponse` | ✓ (employer) |
 | DELETE | `/departments/{id}` | — | `void` | ✓ (employer) — soft-delete |
@@ -925,7 +942,7 @@ export interface SalaryBenchmarkResponse {
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
 | POST | `/locations` | `LocationRequest` | `LocationResponse` | ✓ (employer) |
-| GET | `/locations` | — | `LocationResponse[]` | ✓ (employer) |
+| GET | `/locations` | Pageable | `PageResponse<LocationResponse>` | ✓ (employer) |
 | GET | `/locations/{id}` | — | `LocationResponse` | ✓ (employer) |
 | PUT | `/locations/{id}` | `LocationRequest` | `LocationResponse` | ✓ (employer) |
 | DELETE | `/locations/{id}` | — | `void` | ✓ (employer) — hard-delete, FK check |
@@ -935,7 +952,7 @@ export interface SalaryBenchmarkResponse {
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
 | POST | `/categories` | `CategoryRequest` | `CategoryResponse` | ✓ (employer) |
-| GET | `/categories` | — | `CategoryResponse[]` | ✓ (employer) |
+| GET | `/categories` | Pageable | `PageResponse<CategoryResponse>` | ✓ (employer) |
 | GET | `/categories/{id}` | — | `CategoryResponse` | ✓ (employer) |
 | PUT | `/categories/{id}` | `CategoryRequest` | `CategoryResponse` | ✓ (employer) |
 | DELETE | `/categories/{id}` | — | `void` | ✓ (employer) — hard-delete, FK check |
@@ -1034,7 +1051,13 @@ export interface SalaryBenchmarkResponse {
 |--------|------|---------|-----------------|------|
 | POST | `/payment/checkout` | `CheckoutRequest` | `CheckoutResponse` | ✓ (employer) |
 | GET | `/payment/payment-status/{orderCode}` | — | `PaymentStatusResponse` | ✓ (employer) |
-| GET | `/payment/transactions` | — | `TransactionHistoryResponse[]` | ✓ (employer) |
+| GET | `/admin/payment/transactions` | `?companyId=&page=&size=` | `PageResponse<TransactionHistoryResponse>` | ✓ (admin) |
+
+### Knowledge Admin Service (`/admin/knowledge`)
+
+| Method | Path | Request | Response `data` | Auth |
+|--------|------|---------|-----------------|------|
+| DELETE | `/admin/knowledge/{documentId}` | — | `void` | ✓ (admin) |
 
 ### AI Services
 
@@ -1213,14 +1236,14 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 4 — Subscription & Payment
 
-- [ ] **F-4.1** `planService.ts`: listPlans, getPlan
-- [ ] **F-4.2** `subscriptionService.ts`: getCurrentSubscription, getCurrentQuota, cancelSubscription
-- [ ] **F-4.3** `paymentService.ts`: checkout, getPaymentStatus, getTransactions
-- [ ] **F-4.4** Pricing page (plan cards, billing toggle monthly/yearly)
-- [ ] **F-4.5** Checkout flow (select plan → redirect to PayOS → return callback)
-- [ ] **F-4.6** Payment status polling page (after PayOS return)
-- [ ] **F-4.7** Subscription dashboard (current plan, quota bar, cancel)
-- [ ] **F-4.8** Billing history page (transaction list)
+- [x] **F-4.1** `planService.ts`: listPlans, getPlan
+- [x] **F-4.2** `subscriptionService.ts`: getCurrentSubscription, getCurrentQuota, cancelSubscription
+- [x] **F-4.3** `paymentService.ts`: checkout, getPaymentStatus, getTransactions
+- [x] **F-4.4** Pricing page (plan cards, billing toggle monthly/yearly)
+- [x] **F-4.5** Checkout flow (select plan → redirect to PayOS → return callback)
+- [x] **F-4.6** Payment status polling page (after PayOS return)
+- [x] **F-4.7** Subscription dashboard (current plan, quota bar, cancel)
+- [x] **F-4.8** Billing history page (transaction list)
 
 ### Phase 5 — Job Management (Employer)
 
