@@ -1,6 +1,0 @@
-# Normalize line endings to LF on checkout for all text files.
-# This prevents Windows CRLF vs Unix LF conflicts that break ESLint, Prettier, and shell scripts.
-* text=auto eol=lf
-
-# Windows batch files must use CRLF or they break on Windows CMD.
-*.bat text eol=crlf
