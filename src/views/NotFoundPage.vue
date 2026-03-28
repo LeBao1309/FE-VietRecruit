@@ -2,46 +2,14 @@
 </script>
 
 <template>
-  <div class="not-found-page">
-    <div class="not-found-content">
-      <h1 class="not-found-code">404</h1>
-      <h2 class="not-found-title">Page Not Found</h2>
-      <p class="not-found-description">
-        The page you're looking for doesn't exist or has been moved.
-      </p>
-      <router-link to="/" class="btn btn-primary">Go Home</router-link>
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="text-center">
+      <h1 class="text-7xl font-bold text-primary leading-none mb-2">404</h1>
+      <h2 class="text-xl font-semibold text-gray-900 mb-3">Page Not Found</h2>
+      <p class="text-gray-500 mb-6">The page you're looking for doesn't exist or has been moved.</p>
+      <router-link to="/" class="inline-flex px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition">
+        Go Home
+      </router-link>
     </div>
   </div>
 </template>
-
-<style scoped>
-.not-found-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.not-found-content {
-  text-align: center;
-}
-
-.not-found-code {
-  font-size: 72px;
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  line-height: 1;
-  margin-bottom: var(--space-2);
-}
-
-.not-found-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-3);
-}
-
-.not-found-description {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-6);
-}
-</style>

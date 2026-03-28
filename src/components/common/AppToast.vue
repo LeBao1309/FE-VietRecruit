@@ -6,19 +6,25 @@ const ui = useUiStore()
 
 <template>
   <Teleport to="body">
-    <div class="toast-container" v-if="ui.toasts.length > 0">
+    <div v-if="ui.toasts.length > 0" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
       <div
         v-for="toast in ui.toasts"
         :key="toast.id"
-        :class="['toast', `toast-${toast.type}`]"
+        class="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-md shadow-lg bg-surface border border-border min-w-[320px] max-w-[440px] animate-toast-in"
+        :class="{
+          'border-l-[3px] border-l-success': toast.type === 'success',
+          'border-l-[3px] border-l-error': toast.type === 'error',
+          'border-l-[3px] border-l-warning': toast.type === 'warning',
+          'border-l-[3px] border-l-info': toast.type === 'info',
+        }"
         role="alert"
       >
-        <div class="toast-content">
-          <p class="toast-title">{{ toast.title }}</p>
-          <p v-if="toast.message" class="toast-message">{{ toast.message }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-gray-900">{{ toast.title }}</p>
+          <p v-if="toast.message" class="text-sm text-gray-500 mt-0.5">{{ toast.message }}</p>
         </div>
         <button
-          class="toast-close"
+          class="shrink-0 w-5 h-5 flex items-center justify-center text-gray-400 text-xs rounded hover:text-gray-900 hover:bg-gray-100 transition"
           @click="ui.removeToast(toast.id)"
           aria-label="Dismiss notification"
         >
@@ -28,40 +34,3 @@ const ui = useUiStore()
     </div>
   </Teleport>
 </template>
-
-<style scoped>
-.toast-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.toast-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.toast-message {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-top: 2px;
-}
-
-.toast-close {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-disabled);
-  font-size: var(--font-size-xs);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.toast-close:hover {
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-page);
-}
-</style>

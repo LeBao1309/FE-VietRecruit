@@ -67,6 +67,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/auth/InviteRegisterPage.vue'),
     meta: { guestOnly: true, title: 'Accept Invitation' },
   },
+  {
+    path: '/oauth2/callback',
+    name: 'OAuth2Callback',
+    component: () => import('@/views/auth/OAuth2CallbackPage.vue'),
+    meta: { title: 'Signing in…' },
+  },
 
   // ── Candidate ──
   {
@@ -83,6 +89,18 @@ const routes: RouteRecordRaw[] = [
         name: 'CandidateDashboard',
         component: () => import('@/views/candidate/DashboardPage.vue'),
         meta: { title: 'Dashboard' },
+      },
+      {
+        path: 'profile',
+        name: 'CandidateProfile',
+        component: () => import('@/views/shared/ProfilePage.vue'),
+        meta: { title: 'My Profile' },
+      },
+      {
+        path: 'settings',
+        name: 'CandidateSettings',
+        component: () => import('@/views/shared/SettingsPage.vue'),
+        meta: { title: 'Settings' },
       },
     ],
   },
@@ -102,6 +120,18 @@ const routes: RouteRecordRaw[] = [
         name: 'EmployerDashboard',
         component: () => import('@/views/employer/DashboardPage.vue'),
         meta: { title: 'Dashboard' },
+      },
+      {
+        path: 'profile',
+        name: 'EmployerProfile',
+        component: () => import('@/views/shared/ProfilePage.vue'),
+        meta: { title: 'My Profile' },
+      },
+      {
+        path: 'settings',
+        name: 'EmployerSettings',
+        component: () => import('@/views/shared/SettingsPage.vue'),
+        meta: { title: 'Settings' },
       },
     ],
   },

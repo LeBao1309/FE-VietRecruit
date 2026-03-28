@@ -5,84 +5,43 @@ const auth = useAuthStore()
 </script>
 
 <template>
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <router-link to="/employer/dashboard" class="sidebar-logo">VietRecruit</router-link>
+  <div class="flex min-h-screen">
+    <aside class="w-60 bg-surface border-r border-border flex flex-col shrink-0">
+      <div class="px-4 py-4 border-b border-border">
+        <router-link to="/employer/dashboard" class="text-base font-bold text-primary">VietRecruit</router-link>
       </div>
-      <nav class="sidebar-nav">
-        <router-link to="/employer/dashboard" class="sidebar-link">Dashboard</router-link>
+      <nav class="flex-1 p-3 flex flex-col gap-0.5">
+        <router-link
+          to="/employer/dashboard"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Dashboard
+        </router-link>
+        <router-link
+          to="/employer/profile"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          My Profile
+        </router-link>
+        <router-link
+          to="/employer/settings"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Settings
+        </router-link>
       </nav>
-      <div class="sidebar-footer">
-        <span class="sidebar-user text-sm">{{ auth.user?.fullName ?? 'Employer' }}</span>
+      <div class="px-4 py-3 border-t border-border">
+        <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Employer' }}</span>
+        <button @click="auth.logout()" class="block text-xs text-gray-400 hover:text-error mt-1 transition">
+          Log out
+        </button>
       </div>
     </aside>
-    <main class="app-main">
+    <main class="flex-1 overflow-y-auto">
       <router-view />
     </main>
   </div>
 </template>
-
-<style scoped>
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 240px;
-  background-color: var(--color-bg-surface);
-  border-right: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.sidebar-header {
-  padding: var(--space-4) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.sidebar-logo {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.sidebar-link {
-  display: block;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  transition: all var(--transition-fast);
-}
-
-.sidebar-link:hover,
-.sidebar-link.router-link-active {
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
-}
-
-.sidebar-footer {
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
-}
-
-.sidebar-user {
-  color: var(--color-text-secondary);
-}
-
-.app-main {
-  flex: 1;
-  overflow-y: auto;
-}
-</style>

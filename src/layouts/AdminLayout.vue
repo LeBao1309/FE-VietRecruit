@@ -5,104 +5,29 @@ const auth = useAuthStore()
 </script>
 
 <template>
-  <div class="app-layout">
-    <aside class="sidebar sidebar-admin">
-      <div class="sidebar-header">
-        <router-link to="/admin/users" class="sidebar-logo">VietRecruit Admin</router-link>
+  <div class="flex min-h-screen">
+    <aside class="w-60 bg-[#1a1a2e] flex flex-col shrink-0">
+      <div class="px-4 py-4 border-b border-white/10">
+        <router-link to="/admin/users" class="text-base font-bold text-primary-light">VietRecruit Admin</router-link>
       </div>
-      <nav class="sidebar-nav">
-        <router-link to="/admin/users" class="sidebar-link">Users</router-link>
+      <nav class="flex-1 p-3 flex flex-col gap-0.5">
+        <router-link
+          to="/admin/users"
+          class="block px-3 py-2 rounded-md text-sm text-gray-400 hover:bg-primary/15 hover:text-primary-light transition"
+          active-class="!bg-primary/15 !text-primary-light"
+        >
+          Users
+        </router-link>
       </nav>
-      <div class="sidebar-footer">
-        <span class="sidebar-user text-sm">{{ auth.user?.fullName ?? 'Admin' }}</span>
+      <div class="px-4 py-3 border-t border-white/10">
+        <span class="text-sm text-gray-400">{{ auth.user?.fullName ?? 'Admin' }}</span>
+        <button @click="auth.logout()" class="block text-xs text-gray-500 hover:text-red-400 mt-1 transition">
+          Log out
+        </button>
       </div>
     </aside>
-    <main class="app-main">
+    <main class="flex-1 overflow-y-auto">
       <router-view />
     </main>
   </div>
 </template>
-
-<style scoped>
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 240px;
-  background-color: var(--color-bg-surface);
-  border-right: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.sidebar-admin {
-  background-color: #1a1a2e;
-}
-
-.sidebar-admin .sidebar-logo {
-  color: #e0f4f4;
-}
-
-.sidebar-admin .sidebar-link {
-  color: #adb5bd;
-}
-
-.sidebar-admin .sidebar-link:hover,
-.sidebar-admin .sidebar-link.router-link-active {
-  background-color: rgba(0, 140, 140, 0.15);
-  color: #e0f4f4;
-}
-
-.sidebar-admin .sidebar-footer {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-admin .sidebar-user {
-  color: #adb5bd;
-}
-
-.sidebar-header {
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.sidebar-logo {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.sidebar-link {
-  display: block;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  transition: all var(--transition-fast);
-}
-
-.sidebar-footer {
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
-}
-
-.sidebar-user {
-  color: var(--color-text-secondary);
-}
-
-.app-main {
-  flex: 1;
-  overflow-y: auto;
-}
-</style>
