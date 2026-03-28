@@ -122,6 +122,24 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Dashboard' },
       },
       {
+        path: 'company-setup',
+        name: 'CompanySetup',
+        component: () => import('@/views/employer/CompanySetupPage.vue'),
+        meta: { title: 'Company Setup' },
+      },
+      {
+        path: 'organization',
+        name: 'Organization',
+        component: () => import('@/views/employer/OrganizationPage.vue'),
+        meta: { title: 'Organization' },
+      },
+      {
+        path: 'team',
+        name: 'Team',
+        component: () => import('@/views/employer/TeamPage.vue'),
+        meta: { title: 'Team' },
+      },
+      {
         path: 'profile',
         name: 'EmployerProfile',
         component: () => import('@/views/shared/ProfilePage.vue'),

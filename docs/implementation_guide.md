@@ -1174,42 +1174,42 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 0 — Foundation
 
-- [ ] **F-0.1** Project scaffold (Vite + Vue 3 + TypeScript + Pinia + Vue Router)
-- [ ] **F-0.2** Design tokens CSS (`#008c8c` primary, 4px grid, Inter font)
-- [ ] **F-0.3** Axios instance + interceptors (base URL, JWT attach, 401 auto-refresh)
-- [ ] **F-0.4** `src/types/` — Paste all interfaces from Section B
-- [ ] **F-0.5** `ApiResponse<T>` unwrapper utility
-- [ ] **F-0.6** Global error handler (toast/notification)
-- [ ] **F-0.7** Route guards (auth gate, role gate)
+- [x] **F-0.1** Project scaffold (Vite + Vue 3 + TypeScript + Pinia + Vue Router)
+- [x] **F-0.2** Design tokens CSS (`#008c8c` primary, 4px grid, Inter font)
+- [x] **F-0.3** Axios instance + interceptors (base URL, JWT attach, 401 auto-refresh)
+- [x] **F-0.4** `src/types/` — Paste all interfaces from Section B
+- [x] **F-0.5** `ApiResponse<T>` unwrapper utility
+- [x] **F-0.6** Global error handler (toast/notification)
+- [x] **F-0.7** Route guards (auth gate, role gate)
 
 ### Phase 1 — Auth
 
-- [ ] **F-1.1** Auth store (Pinia): tokens, user profile, roles, `isAuthenticated` computed
-- [ ] **F-1.2** `authService.ts`: login, register, registerByInvite, refresh, logout, forgotPassword, resetPassword, changePassword, verifyOtp, resendOtp, oauth2Exchange
-- [ ] **F-1.3** LoginPage — email/password form, OAuth2 buttons (Google/GitHub)
-- [ ] **F-1.4** RegisterPage — multi-step: account type → form → submit
-- [ ] **F-1.5** OtpVerifyPage — 8-digit input, resend timer (3 req / 5 min)
-- [ ] **F-1.6** ForgotPasswordPage + ResetPasswordPage
-- [ ] **F-1.7** InviteRegisterPage — token from URL, password + fullName
-- [ ] **F-1.8** OAuth2CallbackPage — exchange code → store tokens → redirect
-- [ ] **F-1.9** Token refresh interceptor (automatic on 401)
-- [ ] **F-1.10** Logout (revoke + clear store + redirect)
+- [x] **F-1.1** Auth store (Pinia): tokens, user profile, roles, `isAuthenticated` computed
+- [x] **F-1.2** `authService.ts`: login, register, registerByInvite, refresh, logout, forgotPassword, resetPassword, changePassword, verifyOtp, resendOtp, oauth2Exchange
+- [x] **F-1.3** LoginPage — email/password form, OAuth2 buttons (Google/GitHub)
+- [x] **F-1.4** RegisterPage — multi-step: account type → form → submit
+- [x] **F-1.5** OtpVerifyPage — 8-digit input, resend timer (3 req / 5 min)
+- [x] **F-1.6** ForgotPasswordPage + ResetPasswordPage
+- [x] **F-1.7** InviteRegisterPage — token from URL, password + fullName
+- [x] **F-1.8** OAuth2CallbackPage — exchange code → store tokens → redirect
+- [x] **F-1.9** Token refresh interceptor (automatic on 401)
+- [x] **F-1.10** Logout (revoke + clear store + redirect)
 
 ### Phase 2 — User Profile & Media
 
-- [ ] **F-2.1** `userService.ts`: getProfile, updateProfile, uploadAvatar, setAvatarUrl, deleteAvatar, uploadBanner, setBannerUrl, deleteBanner
-- [ ] **F-2.2** Profile page with edit form (shared between candidate & employer)
-- [ ] **F-2.3** Avatar/Banner upload component (drag-drop, preview, crop)
-- [ ] **F-2.4** Settings page: change password, profile edits
+- [x] **F-2.1** `userService.ts`: getProfile, updateProfile, uploadAvatar, setAvatarUrl, deleteAvatar, uploadBanner, setBannerUrl, deleteBanner
+- [x] **F-2.2** Profile page with edit form (shared between candidate & employer)
+- [x] **F-2.3** Avatar/Banner upload component (drag-drop, preview, crop)
+- [x] **F-2.4** Settings page: change password, profile edits
 
 ### Phase 3 — Employer Onboarding
 
-- [ ] **F-3.1** `companyService.ts`: createCompany, getCompany, updateCompany, searchCompanies
-- [ ] **F-3.2** Company setup wizard (after first employer login, no company → create)
-- [ ] **F-3.3** `organizationService.ts`: CRUD departments, locations, categories
-- [ ] **F-3.4** Organization management pages (tables + modals for CRUD)
-- [ ] **F-3.5** `invitationService.ts`: createInvitation
-- [ ] **F-3.6** Team management page (invite HR/INTERVIEWER, list pending invites)
+- [x] **F-3.1** `companyService.ts`: createCompany, getCompany, updateCompany, searchCompanies
+- [x] **F-3.2** Company setup wizard (after first employer login, no company → create)
+- [x] **F-3.3** `organizationService.ts`: CRUD departments, locations, categories
+- [x] **F-3.4** Organization management pages (tables + modals for CRUD)
+- [x] **F-3.5** `invitationService.ts`: createInvitation
+- [x] **F-3.6** Team management page (invite HR/INTERVIEWER, list pending invites)
 
 ### Phase 4 — Subscription & Payment
 

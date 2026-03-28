@@ -18,6 +18,31 @@ const auth = useAuthStore()
         >
           Dashboard
         </router-link>
+
+        <!-- Employer Onboarding section -->
+        <div class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Company</span>
+        </div>
+        <router-link
+          to="/employer/organization"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Organization
+        </router-link>
+        <router-link
+          v-if="auth.isCompanyAdmin"
+          to="/employer/team"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Team
+        </router-link>
+
+        <!-- Account section -->
+        <div class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account</span>
+        </div>
         <router-link
           to="/employer/profile"
           class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
