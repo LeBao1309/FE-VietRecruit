@@ -48,8 +48,9 @@ test*.json
 *.log
 .agent
 api.json
-BE-Document
 .specify
 specs
 CLAUDE.md
 GEMINI.md
+BE-VietRecruit-main
+BE-Document-main
