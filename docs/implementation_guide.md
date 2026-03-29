@@ -1292,12 +1292,12 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 7 — Candidate Profile & CV
 
-- [ ] **F-7.1** `candidateService.ts`: getProfile, updateProfile, uploadCv, deleteCv, getRecommendations
-- [ ] **F-7.2** Candidate profile form (skills tags, salary expectations, work preferences)
-- [ ] **F-7.3** CV upload/replace/delete (PDF/DOCX/JPEG/PNG, max 5MB)
-- [ ] **F-7.4** AI CV improvement page (`POST /candidates/me/cv/improvement`)
-- [ ] **F-7.5** Job recommendations page (AI-matched jobs)
-- [ ] **F-7.6** Salary benchmark tool for candidates
+- [x] **F-7.1** `candidateService.ts`: getProfile, updateProfile, uploadCv, deleteCv, getRecommendations
+- [x] **F-7.2** Candidate profile form (skills tags, salary expectations, work preferences)
+- [x] **F-7.3** CV upload/replace/delete (PDF/DOCX/JPEG/PNG, max 5MB)
+- [x] **F-7.4** AI CV improvement page (`POST /candidates/me/cv/improvement`)
+- [x] **F-7.5** Job recommendations page (AI-matched jobs)
+- [x] **F-7.6** Salary benchmark tool for candidates
 
 ### Phase 8 — Application Pipeline (Employer)
 

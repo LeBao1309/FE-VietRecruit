@@ -105,6 +105,30 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Dashboard' },
       },
       {
+        path: 'candidate-profile',
+        name: 'CandidateProfileEdit',
+        component: () => import('@/views/candidate/CandidateProfilePage.vue'),
+        meta: { title: 'Candidate Profile' },
+      },
+      {
+        path: 'cv',
+        name: 'CvManagement',
+        component: () => import('@/views/candidate/CvManagementPage.vue'),
+        meta: { title: 'CV Management' },
+      },
+      {
+        path: 'recommendations',
+        name: 'JobRecommendations',
+        component: () => import('@/views/candidate/JobRecommendationsPage.vue'),
+        meta: { title: 'Job Recommendations' },
+      },
+      {
+        path: 'salary-benchmark',
+        name: 'CandidateSalaryBenchmark',
+        component: () => import('@/views/candidate/SalaryBenchmarkPage.vue'),
+        meta: { title: 'Salary Benchmark' },
+      },
+      {
         path: 'profile',
         name: 'CandidateProfile',
         component: () => import('@/views/shared/ProfilePage.vue'),
