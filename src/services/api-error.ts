@@ -25,6 +25,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   PAYMENT_ALREADY_PENDING: 'You already have a pending payment.',
   STORAGE_UNAVAILABLE: 'File upload service is temporarily unavailable.',
   INVALID_INVITATION_ROLE: 'Only HR and Interviewer roles can be invited.',
+  JOB_NOT_DRAFT: 'Only draft jobs can be edited.',
+  JOB_NOT_PUBLISHED: 'This job is not currently published.',
+  JOB_ALREADY_PUBLISHED: 'This job has already been published.',
+  JOB_NOT_FOUND: 'The requested job was not found.',
+  AI_SERVICE_UNAVAILABLE: 'AI service is temporarily unavailable. Please try again later.',
 }
 
 /**

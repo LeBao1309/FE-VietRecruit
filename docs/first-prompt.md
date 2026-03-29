@@ -474,8 +474,8 @@ Track overall project progress here. Check off items as they are completed.
 - [ ] `JobListView.vue` — `/jobs` — paginated, filter by status and department
 - [ ] `JobDetailView.vue` — `/jobs/:id` — description, stats, applicant list
 - [ ] `JobForm.vue` — create and edit, rich text for job description
-- [ ] Job status transitions — Draft → Published → Closed, confirm on close
-- [ ] Publish / unpublish action — role-restricted
+- [ ] Job status transitions — Draft → Published → Closed, confirm on transitions
+- [ ] Publish / close actions — role-restricted, quota enforcement
 
 ---
 
@@ -485,7 +485,7 @@ Track overall project progress here. Check off items as they are completed.
 - [ ] `CandidateDetailView.vue` — `/candidates/:id` — profile, documents, application history
 - [ ] `CandidateForm.vue` — create and edit with all DTO fields
 - [ ] CV file upload — multipart/form-data, type and size validation
-- [ ] Candidate merge or duplicate detection — if specified in feature spec
+- [ ] Candidate search (Elasticsearch, employer-only) — filter by skills, experience, education
 
 ---
 
@@ -495,17 +495,18 @@ Track overall project progress here. Check off items as they are completed.
 - [ ] `ApplicationDetailView.vue` — `/applications/:id` — full profile, stage history
 - [ ] `PipelineBoardView.vue` — `/jobs/:id/pipeline` — kanban board by stages
 - [ ] Stage transition — button-based with business rule enforcement and confirmation
-- [ ] Bulk actions — multi-select, bulk move stage, bulk reject
+- [ ] AI screening — trigger + results view (scores, strengths, gaps)
 - [ ] Application timeline — complete audit log of every state change
 
 ---
 
-### Pipeline Configuration
+### Subscription & Payment
 
-- [ ] `PipelineConfigView.vue` — `/settings/pipeline`
-- [ ] Stage list — add, remove, reorder stages
-- [ ] Stage type assignment — screening, interview, offer, hired, rejected
-- [ ] Default pipeline — applied to new jobs automatically
+- [ ] `PricingPage.vue` — `/pricing` — plan cards, billing toggle monthly/yearly
+- [ ] Checkout flow — select plan → redirect to PayOS → return callback
+- [ ] Payment status polling page — verify payment after PayOS return
+- [ ] Subscription dashboard — current plan, quota bar, cancel subscription
+- [ ] Billing history — transaction list
 
 ---
 
@@ -518,13 +519,12 @@ Track overall project progress here. Check off items as they are completed.
 
 ---
 
-### Reporting
+### Offers
 
-- [ ] `ReportView.vue` — `/reports`
-- [ ] Pipeline funnel — conversion rate per stage per job
-- [ ] Time-to-hire — average days from application to hire
-- [ ] Source report — which source produces the most hires
-- [ ] Export — CSV or Excel download if backend provides endpoint
+- [ ] Create offer form — salary, start date, notes, letter URL
+- [ ] Offer lifecycle — DRAFT → SENT → ACCEPTED/DECLINED
+- [ ] Candidate offer response UI — accept/decline with confirmation
+- [ ] Offer status tracking per application
 
 ---
 
@@ -532,8 +532,8 @@ Track overall project progress here. Check off items as they are completed.
 
 - [ ] `UserManagementView.vue` — `/settings/users` — invite, assign role, deactivate
 - [ ] `ProfileView.vue` — `/settings/profile` — update name, change password
-- [ ] Department or team management — if present in schema
-- [ ] Email template editor — if backend provides template endpoints
+- [ ] Department, location, category management — CRUD with soft/hard delete
+- [ ] Team management — invite HR/INTERVIEWER via invitation system
 
 ---
 
@@ -552,29 +552,45 @@ Track overall project progress here. Check off items as they are completed.
 src/
 ├── types/
 │   ├── index.ts              re-export all
-│   ├── common.ts             ApiResponse<T>, Page<T>, ErrorResponse
+│   ├── common.ts             ApiResponse<T>, PageResponse<T>, SearchPageResponse<T>
+│   ├── enums.ts              JobStatus, ApplicationStatus, etc.
 │   ├── auth.ts
+│   ├── user.ts
+│   ├── company.ts
+│   ├── organization.ts       Department, Location, Category
+│   ├── invitation.ts
 │   ├── candidate.ts
 │   ├── job.ts
-│   ├── application.ts
-│   ├── interview.ts
-│   └── pipeline.ts
+│   ├── application.ts        Application, Interview, Scorecard, Offer
+│   ├── subscription.ts       Plan, Subscription, Quota
+│   ├── payment.ts            Checkout, PaymentStatus, TransactionHistory
+│   └── ai.ts                 CV improvement, JD generation, salary benchmark
 │
 ├── services/
 │   ├── http.ts               axios instance, interceptors
+│   ├── api-error.ts          centralized error extraction
 │   ├── authService.ts
+│   ├── userService.ts
+│   ├── companyService.ts
+│   ├── organizationService.ts  departments, locations, categories
+│   ├── invitationService.ts
 │   ├── candidateService.ts
 │   ├── jobService.ts
 │   ├── applicationService.ts
 │   ├── interviewService.ts
-│   └── pipelineService.ts
+│   ├── scorecardService.ts
+│   ├── offerService.ts
+│   ├── planService.ts
+│   ├── subscriptionService.ts
+│   └── paymentService.ts
 │
 ├── stores/
 │   ├── authStore.ts
+│   ├── uiStore.ts            global loading, toast messages
+│   ├── subscriptionStore.ts  quota state, isQuotaFull computed
 │   ├── candidateStore.ts
 │   ├── jobStore.ts
-│   ├── applicationStore.ts
-│   └── uiStore.ts            global loading, toast messages
+│   └── applicationStore.ts
 │
 ├── composables/
 │   ├── useAuth.ts            login, logout, hasRole helper
@@ -588,22 +604,18 @@ src/
 │   ├── guards.ts
 │   └── routes/
 │       ├── auth.routes.ts
-│       ├── job.routes.ts
 │       ├── candidate.routes.ts
-│       ├── application.routes.ts
-│       └── settings.routes.ts
+│       ├── employer.routes.ts
+│       ├── admin.routes.ts
+│       └── public.routes.ts
 │
 ├── views/
-│   ├── auth/         LoginView.vue
-│   ├── dashboard/    DashboardView.vue
-│   ├── jobs/         JobListView.vue, JobDetailView.vue
-│   ├── candidates/   CandidateListView.vue, CandidateDetailView.vue
-│   ├── applications/ ApplicationListView.vue, ApplicationDetailView.vue,
-│   │                 PipelineBoardView.vue
-│   ├── interviews/   InterviewListView.vue
-│   ├── reports/      ReportView.vue
-│   └── settings/     PipelineConfigView.vue, UserManagementView.vue,
-│                     ProfileView.vue
+│   ├── auth/         LoginView, RegisterView, OtpVerifyView, etc.
+│   ├── public/       LandingPage, JobBoardPage, PricingPage
+│   ├── candidate/    Dashboard, Profile, CV, Applications, Recommendations
+│   ├── employer/     Dashboard, Company, Jobs, Applications, Interviews,
+│   │                 Offers, Subscription, Billing, Team, Settings
+│   └── admin/        UserManagement, Transactions
 │
 └── components/
     ├── common/       BaseTable, BaseModal, ConfirmDialog, BaseBadge,
@@ -611,7 +623,8 @@ src/
     ├── candidate/
     ├── job/
     ├── application/
-    └── interview/
+    ├── interview/
+    └── subscription/
 ```
 
 ---

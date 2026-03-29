@@ -175,6 +175,31 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/employer/BillingPage.vue'),
         meta: { title: 'Billing History', roles: ['COMPANY_ADMIN'] },
       },
+      // ── Job Management ──
+      {
+        path: 'jobs',
+        name: 'EmployerJobs',
+        component: () => import('@/views/employer/JobListPage.vue'),
+        meta: { title: 'Jobs', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'jobs/new',
+        name: 'EmployerJobCreate',
+        component: () => import('@/views/employer/JobFormPage.vue'),
+        meta: { title: 'Create Job', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'jobs/:id/edit',
+        name: 'EmployerJobEdit',
+        component: () => import('@/views/employer/JobFormPage.vue'),
+        meta: { title: 'Edit Job', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'jobs/:id',
+        name: 'EmployerJobDetail',
+        component: () => import('@/views/employer/JobDetailPage.vue'),
+        meta: { title: 'Job Details', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
     ],
   },
 

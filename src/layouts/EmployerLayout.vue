@@ -39,6 +39,40 @@ const auth = useAuthStore()
           Team
         </router-link>
 
+        <!-- Recruitment section -->
+        <div v-if="auth.isCompanyAdmin || auth.isHR" class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Recruitment</span>
+        </div>
+        <router-link
+          v-if="auth.isCompanyAdmin || auth.isHR"
+          to="/employer/jobs"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Jobs
+        </router-link>
+
+        <!-- Billing section -->
+        <div v-if="auth.isCompanyAdmin" class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Billing</span>
+        </div>
+        <router-link
+          v-if="auth.isCompanyAdmin"
+          to="/employer/subscription"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Subscription
+        </router-link>
+        <router-link
+          v-if="auth.isCompanyAdmin"
+          to="/employer/billing"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Billing History
+        </router-link>
+
         <!-- Account section -->
         <div class="mt-4 mb-1 px-3">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account</span>

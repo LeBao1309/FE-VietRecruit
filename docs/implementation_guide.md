@@ -365,6 +365,7 @@ export interface CvUploadResponse {
 
 ### `src/types/company.ts`
 
+```typescript
 // ── Requests ─────────────────────────────────────────────────────────
 export interface CompanyCreateRequest {
   name: string        // @NotBlank, max 255
@@ -625,7 +626,7 @@ export interface InterviewCreateRequest {
   scheduledAt: string          // ISO datetime
   durationMinutes?: number
   locationOrLink?: string
-  type?: string
+  interviewType?: string
   interviewerIds: string[]     // @NotEmpty
 }
 
@@ -872,6 +873,29 @@ export interface SalaryBenchmarkResponse {
 }
 ```
 
+### `src/types/knowledge.ts`
+
+```typescript
+export interface KnowledgeDocumentResponse {
+  id: string
+  title: string
+  category: string
+  fileName: string
+  chunkCount: number
+  status: string
+  uploadedBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface KnowledgeUploadResponse {
+  documentId: string
+  title: string
+  category: string
+  status: string
+}
+```
+
 ---
 
 ## C. API SERVICE MAP
@@ -1051,12 +1075,15 @@ export interface SalaryBenchmarkResponse {
 |--------|------|---------|-----------------|------|
 | POST | `/payment/checkout` | `CheckoutRequest` | `CheckoutResponse` | ✓ (employer) |
 | GET | `/payment/payment-status/{orderCode}` | — | `PaymentStatusResponse` | ✓ (employer) |
-| GET | `/admin/payment/transactions` | `?companyId=&page=&size=` | `PageResponse<TransactionHistoryResponse>` | ✓ (admin) |
+| GET | `/payment/transactions` | Pageable | `PageResponse<TransactionHistoryResponse>` | ✓ (employer) |
+| GET | `/admin/payment/transactions` | `?companyId=` + Pageable | `PageResponse<TransactionHistoryResponse>` | ✓ (admin) |
 
 ### Knowledge Admin Service (`/admin/knowledge`)
 
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
+| GET | `/admin/knowledge` | `?category=&page=&size=` | `PageResponse<KnowledgeDocumentResponse>` | ✓ (admin) |
+| POST | `/admin/knowledge` | `multipart/form-data` (`file`) + `?title=&category=` | `KnowledgeUploadResponse` | ✓ (admin) |
 | DELETE | `/admin/knowledge/{documentId}` | — | `void` | ✓ (admin) |
 
 ### AI Services
@@ -1134,6 +1161,7 @@ export interface SalaryBenchmarkResponse {
 | `/admin/users` | UserManagementPage | CRUD `/admin/users` |
 | `/admin/users/:id` | UserDetailPage | `GET /admin/users/:id` |
 | `/admin/transactions` | TransactionListPage | `GET /admin/payment/transactions` |
+| `/admin/knowledge` | KnowledgeManagementPage | `GET/POST/DELETE /admin/knowledge` |
 
 ---
 
@@ -1247,13 +1275,13 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 5 — Job Management (Employer)
 
-- [ ] **F-5.1** `jobService.ts`: createJob, updateJob, publishJob, closeJob, listJobs, getJob, searchJobs, autocomplete, listPublicJobs, getPublicJob
-- [ ] **F-5.2** Job list page (table with status badges, filter, pagination)
-- [ ] **F-5.3** Job form page (create/edit with rich text editor)
-- [ ] **F-5.4** AI JD generator integration (generate → preview → apply)
-- [ ] **F-5.5** Job detail page (view, publish/close buttons with state machine enforcement)
-- [ ] **F-5.6** Salary benchmark widget on job detail (`GET /jobs/{id}/salary-benchmark`)
-- [ ] **F-5.7** Quota guard UI (disable publish when quota full, show upgrade CTA)
+- [x] **F-5.1** `jobService.ts`: createJob, updateJob, publishJob, closeJob, listJobs, getJob, searchJobs, autocomplete, listPublicJobs, getPublicJob
+- [x] **F-5.2** Job list page (table with status badges, filter, pagination)
+- [x] **F-5.3** Job form page (create/edit with rich text editor)
+- [x] **F-5.4** AI JD generator integration (generate → preview → apply)
+- [x] **F-5.5** Job detail page (view, publish/close buttons with state machine enforcement)
+- [x] **F-5.6** Salary benchmark widget on job detail (`GET /jobs/{id}/salary-benchmark`)
+- [x] **F-5.7** Quota guard UI (disable publish when quota full, show upgrade CTA)
 
 ### Phase 6 — Public Job Board (Candidate)
 
@@ -1316,6 +1344,8 @@ CANCELLED → ACTIVE (re-subscribe)
 - [ ] **F-14.1** `adminUserService.ts`: createUser, listUsers, getUser, updateUser, deleteUser
 - [ ] **F-14.2** User management table (search, paginate, lock/unlock)
 - [ ] **F-14.3** Admin transaction history page
+- [ ] **F-14.4** `knowledgeService.ts`: listDocuments, uploadDocument, deleteDocument
+- [ ] **F-14.5** Knowledge management page (upload documents, list with category filter, delete)
 
 ### Phase 15 — Polish
 

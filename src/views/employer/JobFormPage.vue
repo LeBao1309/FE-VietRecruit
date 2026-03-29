@@ -1,0 +1,642 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUiStore } from '@/stores/uiStore'
+import { jobService } from '@/services/jobService'
+import { departmentService, locationService, categoryService } from '@/services/organizationService'
+import type { JobCreateRequest, JobUpdateRequest, JobResponse } from '@/types/job'
+import type { JdGenerateRequest, JdGenerateResponse } from '@/types/ai'
+import type { DepartmentResponse, LocationResponse, CategoryResponse } from '@/types/organization'
+
+const route = useRoute()
+const router = useRouter()
+const ui = useUiStore()
+
+// ── Mode ──
+const jobId = computed(() => route.params.id as string | undefined)
+const isEditMode = computed(() => !!jobId.value)
+const pageTitle = computed(() => isEditMode.value ? 'Edit Job' : 'Create New Job')
+
+// ── State ──
+const loading = ref(false)
+const saving = ref(false)
+const existingJob = ref<JobResponse | null>(null)
+
+// ── Organization data ──
+const departments = ref<DepartmentResponse[]>([])
+const locations = ref<LocationResponse[]>([])
+const categories = ref<CategoryResponse[]>([])
+
+// ── Form fields ──
+const form = ref<{
+  title: string
+  description: string
+  requirements: string
+  departmentId: string
+  locationId: string
+  categoryId: string
+  minSalary: string
+  maxSalary: string
+  currency: string
+  isNegotiable: boolean
+  deadline: string
+}>({
+  title: '',
+  description: '',
+  requirements: '',
+  departmentId: '',
+  locationId: '',
+  categoryId: '',
+  minSalary: '',
+  maxSalary: '',
+  currency: 'VND',
+  isNegotiable: false,
+  deadline: '',
+})
+
+const errors = ref<Record<string, string>>({})
+
+// ── AI JD Generator ──
+const showAiPanel = ref(false)
+const aiGenerating = ref(false)
+const aiApplying = ref(false)
+const aiResult = ref<JdGenerateResponse | null>(null)
+
+const aiForm = ref<{
+  employmentType: string
+  keyResponsibilities: string
+  requiredSkills: string
+  niceToHaveSkills: string
+  yearsOfExperience: string
+  tone: 'PROFESSIONAL' | 'STARTUP' | 'CORPORATE'
+}>({
+  employmentType: 'FULL_TIME',
+  keyResponsibilities: '',
+  requiredSkills: '',
+  niceToHaveSkills: '',
+  yearsOfExperience: '',
+  tone: 'PROFESSIONAL',
+})
+
+// ── Load organization data ──
+async function loadOrgData(): Promise<void> {
+  const [depts, locs, cats] = await Promise.all([
+    departmentService.list(),
+    locationService.list(),
+    categoryService.list(),
+  ])
+  if (depts.data) departments.value = depts.data.content
+  if (locs.data) locations.value = locs.data.content
+  if (cats.data) categories.value = cats.data.content
+}
+
+// ── Load existing job (edit mode) ──
+async function loadJob(): Promise<void> {
+  if (!jobId.value) return
+  loading.value = true
+  try {
+    const result = await jobService.getJob(jobId.value)
+    if (result.data) {
+      existingJob.value = result.data
+      const j = result.data
+
+      // Only DRAFT can be edited
+      if (j.status !== 'DRAFT') {
+        ui.toastWarning('Cannot edit', 'Only draft jobs can be edited.')
+        router.push(`/employer/jobs/${jobId.value}`)
+        return
+      }
+
+      form.value = {
+        title: j.title,
+        description: j.description,
+        requirements: j.requirements ?? '',
+        departmentId: j.departmentId ?? '',
+        locationId: j.locationId ?? '',
+        categoryId: j.categoryId ?? '',
+        minSalary: j.minSalary?.toString() ?? '',
+        maxSalary: j.maxSalary?.toString() ?? '',
+        currency: j.currency ?? 'VND',
+        isNegotiable: j.isNegotiable ?? false,
+        deadline: j.deadline?.split('T')[0] ?? '',
+      }
+    } else {
+      ui.toastError('Job not found', result.error?.message)
+      router.push('/employer/jobs')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// ── Validation ──
+function validate(): boolean {
+  errors.value = {}
+
+  if (!form.value.title.trim()) {
+    errors.value.title = 'Job title is required.'
+  } else if (form.value.title.length > 255) {
+    errors.value.title = 'Title must be 255 characters or fewer.'
+  }
+
+  if (!form.value.description.trim()) {
+    errors.value.description = 'Job description is required.'
+  } else if (form.value.description.length > 50000) {
+    errors.value.description = 'Description is too long (max 50,000 characters).'
+  }
+
+  if (form.value.requirements.length > 50000) {
+    errors.value.requirements = 'Requirements is too long (max 50,000 characters).'
+  }
+
+  const minSal = form.value.minSalary ? Number(form.value.minSalary) : null
+  const maxSal = form.value.maxSalary ? Number(form.value.maxSalary) : null
+  if (minSal !== null && isNaN(minSal)) errors.value.minSalary = 'Must be a number.'
+  if (maxSal !== null && isNaN(maxSal)) errors.value.maxSalary = 'Must be a number.'
+  if (minSal !== null && maxSal !== null && minSal > maxSal) {
+    errors.value.minSalary = 'Minimum salary cannot exceed maximum.'
+  }
+
+  return Object.keys(errors.value).length === 0
+}
+
+// ── Save ──
+async function handleSave(): Promise<void> {
+  if (!validate()) return
+
+  saving.value = true
+  try {
+    const payload: JobCreateRequest | JobUpdateRequest = {
+      title: form.value.title.trim(),
+      description: form.value.description.trim(),
+      requirements: form.value.requirements.trim() || undefined,
+      departmentId: form.value.departmentId || undefined,
+      locationId: form.value.locationId || undefined,
+      categoryId: form.value.categoryId || undefined,
+      minSalary: form.value.minSalary ? Number(form.value.minSalary) : undefined,
+      maxSalary: form.value.maxSalary ? Number(form.value.maxSalary) : undefined,
+      currency: form.value.currency || undefined,
+      isNegotiable: form.value.isNegotiable,
+      deadline: form.value.deadline || undefined,
+    }
+
+    if (isEditMode.value) {
+      const result = await jobService.updateJob(jobId.value!, payload)
+      if (result.error) {
+        ui.toastError('Update failed', result.error.message)
+        return
+      }
+      ui.toastSuccess('Job updated')
+      router.push(`/employer/jobs/${jobId.value}`)
+    } else {
+      const result = await jobService.createJob(payload as JobCreateRequest)
+      if (result.error) {
+        ui.toastError('Create failed', result.error.message)
+        return
+      }
+      ui.toastSuccess('Job created', 'Your job has been saved as a draft.')
+      router.push(`/employer/jobs/${result.data!.id}`)
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+// ── AI JD Generation ──
+function splitLines(text: string): string[] {
+  return text.split('\n').map((l) => l.trim()).filter(Boolean)
+}
+
+async function generateJd(): Promise<void> {
+  if (!form.value.title.trim()) {
+    ui.toastWarning('Title required', 'Enter a job title before generating a description.')
+    return
+  }
+
+  aiGenerating.value = true
+  try {
+    const body: JdGenerateRequest = {
+      title: form.value.title.trim(),
+      departmentId: form.value.departmentId || undefined,
+      employmentType: aiForm.value.employmentType,
+      keyResponsibilities: splitLines(aiForm.value.keyResponsibilities),
+      requiredSkills: splitLines(aiForm.value.requiredSkills),
+      niceToHaveSkills: splitLines(aiForm.value.niceToHaveSkills) ?? undefined,
+      yearsOfExperience: aiForm.value.yearsOfExperience ? Number(aiForm.value.yearsOfExperience) : undefined,
+      tone: aiForm.value.tone,
+    }
+    const result = await jobService.generateDescription(body)
+    if (result.data) {
+      aiResult.value = result.data
+      ui.toastSuccess('Description generated', 'Review the AI-generated content below.')
+    } else {
+      ui.toastError('Generation failed', result.error?.message)
+    }
+  } finally {
+    aiGenerating.value = false
+  }
+}
+
+function applyAiResult(): void {
+  if (!aiResult.value) return
+  const desc = aiResult.value.generatedDescription
+  const sections = [
+    `## Overview\n${desc.overview}`,
+    `## Responsibilities\n${desc.responsibilities.map((r) => `- ${r}`).join('\n')}`,
+    `## Requirements\n${desc.requirements.map((r) => `- ${r}`).join('\n')}`,
+    desc.niceToHave.length > 0 ? `## Nice to Have\n${desc.niceToHave.map((r) => `- ${r}`).join('\n')}` : '',
+    desc.benefits ? `## Benefits\n${desc.benefits}` : '',
+  ].filter(Boolean)
+
+  form.value.description = sections.join('\n\n')
+
+  // Also apply to the backend if editing
+  if (isEditMode.value && jobId.value) {
+    aiApplying.value = true
+    jobService.applyDescription(jobId.value, { generatedDescription: desc }).then((res) => {
+      if (res.error) ui.toastWarning('Apply sync failed', 'Description updated locally but sync to server failed.')
+    }).finally(() => { aiApplying.value = false })
+  }
+
+  aiResult.value = null
+  showAiPanel.value = false
+  ui.toastSuccess('Applied', 'AI-generated description has been applied to the form.')
+}
+
+onMounted(async () => {
+  await loadOrgData()
+  if (isEditMode.value) {
+    await loadJob()
+  }
+})
+</script>
+
+<template>
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
+        ‹ Back
+      </button>
+      <h1 class="text-xl font-bold text-gray-900">{{ pageTitle }}</h1>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="bg-surface border border-border rounded-lg p-6 shadow-sm animate-pulse space-y-4">
+      <div class="h-10 bg-gray-100 rounded" />
+      <div class="h-40 bg-gray-100 rounded" />
+      <div class="h-10 bg-gray-100 rounded" />
+    </div>
+
+    <!-- Form -->
+    <form v-else @submit.prevent="handleSave" class="space-y-6">
+      <!-- Title -->
+      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm space-y-5">
+        <h2 class="text-sm font-semibold text-gray-900 mb-4">Basic Information</h2>
+
+        <div>
+          <label for="job-title" class="block text-sm font-medium text-gray-700 mb-1">
+            Job Title <span class="text-error">*</span>
+          </label>
+          <input
+            id="job-title"
+            v-model="form.title"
+            type="text"
+            placeholder="e.g. Senior Frontend Developer"
+            class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
+            :class="errors.title ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+          />
+          <p v-if="errors.title" class="text-xs text-error mt-1">{{ errors.title }}</p>
+        </div>
+
+        <!-- Organization selects -->
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label for="job-dept" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <select
+              id="job-dept"
+              v-model="form.departmentId"
+              class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+            >
+              <option value="">— None —</option>
+              <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="job-loc" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <select
+              id="job-loc"
+              v-model="form.locationId"
+              class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+            >
+              <option value="">— None —</option>
+              <option v-for="l in locations" :key="l.id" :value="l.id">{{ l.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="job-cat" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select
+              id="job-cat"
+              v-model="form.categoryId"
+              class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+            >
+              <option value="">— None —</option>
+              <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="job-deadline" class="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+          <input
+            id="job-deadline"
+            v-model="form.deadline"
+            type="date"
+            class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+          />
+        </div>
+      </div>
+
+      <!-- Salary -->
+      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm space-y-5">
+        <h2 class="text-sm font-semibold text-gray-900 mb-4">Compensation</h2>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label for="job-min-sal" class="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
+            <input
+              id="job-min-sal"
+              v-model="form.minSalary"
+              type="text"
+              inputmode="numeric"
+              placeholder="e.g. 15000000"
+              class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
+              :class="errors.minSalary ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+            />
+            <p v-if="errors.minSalary" class="text-xs text-error mt-1">{{ errors.minSalary }}</p>
+          </div>
+          <div>
+            <label for="job-max-sal" class="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
+            <input
+              id="job-max-sal"
+              v-model="form.maxSalary"
+              type="text"
+              inputmode="numeric"
+              placeholder="e.g. 30000000"
+              class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
+              :class="errors.maxSalary ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+            />
+            <p v-if="errors.maxSalary" class="text-xs text-error mt-1">{{ errors.maxSalary }}</p>
+          </div>
+          <div>
+            <label for="job-currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+            <select
+              id="job-currency"
+              v-model="form.currency"
+              class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+            >
+              <option value="VND">VND</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            v-model="form.isNegotiable"
+            type="checkbox"
+            class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <span class="text-sm text-gray-700">Salary is negotiable</span>
+        </label>
+      </div>
+
+      <!-- Description -->
+      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm space-y-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-semibold text-gray-900">Job Description</h2>
+          <button
+            type="button"
+            @click="showAiPanel = !showAiPanel"
+            class="px-3 py-1.5 text-xs font-medium rounded-md transition flex items-center gap-1.5"
+            :class="showAiPanel
+              ? 'bg-primary text-white'
+              : 'bg-primary-bg text-primary hover:bg-primary-light border border-primary/20'"
+          >
+            ✦ AI Generate
+          </button>
+        </div>
+
+        <!-- AI Panel (collapsible) -->
+        <div v-if="showAiPanel" class="bg-primary-bg/50 border border-primary/10 rounded-lg p-4 space-y-4 animate-slide-up">
+          <p class="text-xs text-gray-500">
+            Provide some context and let AI generate a professional job description.
+            The job title from above will be used automatically.
+          </p>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Employment Type</label>
+              <select v-model="aiForm.employmentType" class="w-full px-2.5 py-2 text-xs border border-border rounded-md bg-surface outline-none focus:border-primary transition">
+                <option value="FULL_TIME">Full-time</option>
+                <option value="PART_TIME">Part-time</option>
+                <option value="CONTRACT">Contract</option>
+                <option value="INTERNSHIP">Internship</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Tone</label>
+              <select v-model="aiForm.tone" class="w-full px-2.5 py-2 text-xs border border-border rounded-md bg-surface outline-none focus:border-primary transition">
+                <option value="PROFESSIONAL">Professional</option>
+                <option value="STARTUP">Startup</option>
+                <option value="CORPORATE">Corporate</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Key Responsibilities (one per line)</label>
+            <textarea
+              v-model="aiForm.keyResponsibilities"
+              rows="3"
+              placeholder="Design and develop frontend components&#10;Collaborate with backend team&#10;Write unit tests"
+              class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition resize-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Required Skills (one per line)</label>
+            <textarea
+              v-model="aiForm.requiredSkills"
+              rows="3"
+              placeholder="Vue.js / React&#10;TypeScript&#10;REST API integration"
+              class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition resize-none"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Nice-to-Have Skills (one per line)</label>
+              <textarea
+                v-model="aiForm.niceToHaveSkills"
+                rows="2"
+                placeholder="Docker&#10;CI/CD"
+                class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition resize-none"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Years of Experience</label>
+              <input
+                v-model="aiForm.yearsOfExperience"
+                type="text"
+                inputmode="numeric"
+                placeholder="e.g. 3"
+                class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              @click="generateJd"
+              :disabled="aiGenerating"
+              class="px-4 py-2 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+            >
+              <span v-if="aiGenerating" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {{ aiGenerating ? 'Generating…' : '✦ Generate Description' }}
+            </button>
+            <button
+              type="button"
+              @click="showAiPanel = false"
+              class="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 transition"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <!-- AI Result Preview -->
+          <div v-if="aiResult" class="mt-4 bg-surface border border-border rounded-lg p-4 space-y-3 animate-fade-in">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-semibold text-gray-900">Generated Preview</h3>
+              <span class="text-[10px] text-gray-400">{{ aiResult.generatedAt }}</span>
+            </div>
+
+            <div class="text-xs text-gray-700 space-y-2 max-h-64 overflow-y-auto">
+              <div>
+                <strong class="text-gray-900">Overview:</strong>
+                <p class="mt-0.5">{{ aiResult.generatedDescription.overview }}</p>
+              </div>
+              <div>
+                <strong class="text-gray-900">Responsibilities:</strong>
+                <ul class="mt-0.5 list-disc list-inside space-y-0.5">
+                  <li v-for="(r, i) in aiResult.generatedDescription.responsibilities" :key="i">{{ r }}</li>
+                </ul>
+              </div>
+              <div>
+                <strong class="text-gray-900">Requirements:</strong>
+                <ul class="mt-0.5 list-disc list-inside space-y-0.5">
+                  <li v-for="(r, i) in aiResult.generatedDescription.requirements" :key="i">{{ r }}</li>
+                </ul>
+              </div>
+              <div v-if="aiResult.generatedDescription.niceToHave.length">
+                <strong class="text-gray-900">Nice to Have:</strong>
+                <ul class="mt-0.5 list-disc list-inside space-y-0.5">
+                  <li v-for="(r, i) in aiResult.generatedDescription.niceToHave" :key="i">{{ r }}</li>
+                </ul>
+              </div>
+              <div v-if="aiResult.generatedDescription.benefits">
+                <strong class="text-gray-900">Benefits:</strong>
+                <p class="mt-0.5">{{ aiResult.generatedDescription.benefits }}</p>
+              </div>
+            </div>
+
+            <!-- Bias flags -->
+            <div v-if="aiResult.biasFlags.length" class="flex flex-wrap gap-1.5 mt-2">
+              <span
+                v-for="(flag, i) in aiResult.biasFlags"
+                :key="i"
+                class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-warning-bg text-warning"
+              >
+                ⚠ {{ flag }}
+              </span>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button
+                type="button"
+                @click="applyAiResult"
+                class="px-4 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+              >
+                Apply to Form
+              </button>
+              <button
+                type="button"
+                @click="aiResult = null"
+                class="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 transition"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description textarea -->
+        <div>
+          <label for="job-desc" class="block text-sm font-medium text-gray-700 mb-1">
+            Description <span class="text-error">*</span>
+          </label>
+          <textarea
+            id="job-desc"
+            v-model="form.description"
+            rows="12"
+            placeholder="Describe the role, team, and what the candidate will be doing…"
+            class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition resize-y font-mono"
+            :class="errors.description ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+          />
+          <div class="flex items-center justify-between mt-1">
+            <p v-if="errors.description" class="text-xs text-error">{{ errors.description }}</p>
+            <span class="text-[10px] text-gray-400 ml-auto">{{ form.description.length.toLocaleString() }} / 50,000</span>
+          </div>
+        </div>
+
+        <!-- Requirements textarea -->
+        <div>
+          <label for="job-req" class="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
+          <textarea
+            id="job-req"
+            v-model="form.requirements"
+            rows="6"
+            placeholder="List the qualifications, experience, and skills required…"
+            class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition resize-y font-mono"
+            :class="errors.requirements ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+          />
+          <div class="flex items-center justify-between mt-1">
+            <p v-if="errors.requirements" class="text-xs text-error">{{ errors.requirements }}</p>
+            <span class="text-[10px] text-gray-400 ml-auto">{{ form.requirements.length.toLocaleString() }} / 50,000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between">
+        <button
+          type="button"
+          @click="router.push('/employer/jobs')"
+          class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          :disabled="saving"
+          class="px-6 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+        >
+          <span v-if="saving" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          {{ saving ? 'Saving…' : isEditMode ? 'Save Changes' : 'Create Draft' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</template>
