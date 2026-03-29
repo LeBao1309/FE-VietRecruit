@@ -74,6 +74,20 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Signing in…' },
   },
 
+  // ── Public Job Board ──
+  {
+    path: '/jobs',
+    name: 'JobBoard',
+    component: () => import('@/views/public/JobBoardPage.vue'),
+    meta: { title: 'Browse Jobs' },
+  },
+  {
+    path: '/jobs/:id',
+    name: 'PublicJobDetail',
+    component: () => import('@/views/public/PublicJobDetailPage.vue'),
+    meta: { title: 'Job Details' },
+  },
+
   // ── Candidate ──
   {
     path: '/candidate',

@@ -1285,10 +1285,10 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 6 — Public Job Board (Candidate)
 
-- [ ] **F-6.1** Job board page (search, filters: location, category, salary range)
-- [ ] **F-6.2** Type-ahead search (autocomplete API)
-- [ ] **F-6.3** Job detail public page
-- [ ] **F-6.4** Apply flow (cover letter form → `POST /applications`)
+- [x] **F-6.1** Job board page (search, filters: location, category, salary range)
+- [x] **F-6.2** Type-ahead search (autocomplete API)
+- [x] **F-6.3** Job detail public page
+- [x] **F-6.4** Apply flow (cover letter form → `POST /applications`)
 
 ### Phase 7 — Candidate Profile & CV
 

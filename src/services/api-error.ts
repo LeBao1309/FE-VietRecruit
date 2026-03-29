@@ -30,6 +30,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   JOB_ALREADY_PUBLISHED: 'This job has already been published.',
   JOB_NOT_FOUND: 'The requested job was not found.',
   AI_SERVICE_UNAVAILABLE: 'AI service is temporarily unavailable. Please try again later.',
+  APPLICATION_ALREADY_EXISTS: 'You have already applied to this job.',
+  APPLICATION_NO_CV: 'Please upload your CV before applying.',
+  APPLICATION_NOT_FOUND: 'Application not found.',
 }
 
 /**
