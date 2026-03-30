@@ -1323,10 +1323,10 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 11 — Offers
 
-- [ ] **F-11.1** `offerService.ts`: createOffer, listOffers, getOffer, sendOffer, respondToOffer, deleteOffer
-- [ ] **F-11.2** Create offer form (salary, start date, notes, letter URL)
-- [ ] **F-11.3** Offer lifecycle view (DRAFT → SENT → ACCEPTED/DECLINED)
-- [ ] **F-11.4** Candidate offer response UI (accept/decline with confirmation)
+- [x] **F-11.1** `offerService.ts`: createOffer, listOffers, getOffer, sendOffer, respondToOffer, deleteOffer
+- [x] **F-11.2** Create offer form (salary, start date, notes, letter URL)
+- [x] **F-11.3** Offer lifecycle view (DRAFT → SENT → ACCEPTED/DECLINED)
+- [x] **F-11.4** Candidate offer response UI (accept/decline with confirmation)
 
 ### Phase 12 — Candidate Application Tracking
 

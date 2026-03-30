@@ -129,6 +129,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Salary Benchmark' },
       },
       {
+        path: 'applications',
+        name: 'CandidateApplications',
+        component: () => import('@/views/candidate/MyApplicationsPage.vue'),
+        meta: { title: 'My Applications' },
+      },
+      {
+        path: 'applications/:id',
+        name: 'CandidateApplicationDetail',
+        component: () => import('@/views/candidate/ApplicationDetailPage.vue'),
+        meta: { title: 'Application Details' },
+      },
+      {
         path: 'profile',
         name: 'CandidateProfile',
         component: () => import('@/views/shared/ProfilePage.vue'),
@@ -276,6 +288,13 @@ const routes: RouteRecordRaw[] = [
         name: 'EmployerScorecardSummary',
         component: () => import('@/views/employer/ScorecardSummaryPage.vue'),
         meta: { title: 'Scorecard Summary', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
+      },
+      // ── Offers ──
+      {
+        path: 'offers/:id',
+        name: 'EmployerOfferDetail',
+        component: () => import('@/views/employer/OfferDetailPage.vue'),
+        meta: { title: 'Offer Management', roles: ['COMPANY_ADMIN', 'HR'] },
       },
     ],
   },

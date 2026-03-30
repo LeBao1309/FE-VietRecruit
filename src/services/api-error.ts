@@ -33,6 +33,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   APPLICATION_ALREADY_EXISTS: 'You have already applied to this job.',
   APPLICATION_NO_CV: 'Please upload your CV before applying.',
   APPLICATION_NOT_FOUND: 'Application not found.',
+  OFFER_NOT_FOUND: 'The requested offer was not found.',
+  OFFER_NOT_DRAFT: 'Only draft offers can be modified or deleted.',
+  OFFER_ALREADY_SENT: 'This offer has already been sent.',
+  OFFER_ALREADY_RESPONDED: 'This offer has already been responded to.',
+  OFFER_NOT_SENT: 'This offer has not been sent yet.',
 }
 
 /**
