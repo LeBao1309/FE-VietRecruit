@@ -1323,21 +1323,21 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 11 — Offers
 
-- [ ] **F-11.1** `offerService.ts`: createOffer, listOffers, getOffer, sendOffer, respondToOffer, deleteOffer
-- [ ] **F-11.2** Create offer form (salary, start date, notes, letter URL)
-- [ ] **F-11.3** Offer lifecycle view (DRAFT → SENT → ACCEPTED/DECLINED)
-- [ ] **F-11.4** Candidate offer response UI (accept/decline with confirmation)
+- [x] **F-11.1** `offerService.ts`: createOffer, listOffers, getOffer, sendOffer, respondToOffer, deleteOffer
+- [x] **F-11.2** Create offer form (salary, start date, notes, letter URL)
+- [x] **F-11.3** Offer lifecycle view (DRAFT → SENT → ACCEPTED/DECLINED)
+- [x] **F-11.4** Candidate offer response UI (accept/decline with confirmation)
 
 ### Phase 12 — Candidate Application Tracking
 
-- [ ] **F-12.1** My applications page (list with status badges, pagination)
-- [ ] **F-12.2** Application detail view (status timeline, interview details, offer view)
+- [x] **F-12.1** My applications page (list with status badges, pagination)
+- [x] **F-12.2** Application detail view (status timeline, interview details, offer view)
 
 ### Phase 13 — Interviewer Portal
 
-- [ ] **F-13.1** Interviewer dashboard (assigned interviews list)
-- [ ] **F-13.2** Interview detail view + scorecard submission
-- [ ] **F-13.3** AI-generated interview questions viewer
+- [x] **F-13.1** Interviewer dashboard (assigned interviews list)
+- [x] **F-13.2** Interview detail view + scorecard submission
+- [x] **F-13.3** AI-generated interview questions viewer
 
 ### Phase 14 — Admin Panel
 

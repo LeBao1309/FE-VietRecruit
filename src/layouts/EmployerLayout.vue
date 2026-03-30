@@ -52,6 +52,19 @@ const auth = useAuthStore()
           Jobs
         </router-link>
 
+        <!-- Interviews section (Interviewer) -->
+        <div v-if="auth.isInterviewer" class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Interviews</span>
+        </div>
+        <router-link
+          v-if="auth.isInterviewer"
+          to="/employer/my-interviews"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          My Interviews
+        </router-link>
+
         <!-- Billing section -->
         <div v-if="auth.isCompanyAdmin" class="mt-4 mb-1 px-3">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Billing</span>
