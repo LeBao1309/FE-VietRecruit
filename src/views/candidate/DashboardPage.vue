@@ -153,7 +153,8 @@ onMounted(async () => {
             <div
               v-for="app in applications"
               :key="app.id"
-              class="px-5 py-3 border-b border-border last:border-0 hover:bg-gray-50/50 transition"
+              @click="router.push(`/candidate/applications/${app.id}`)"
+              class="px-5 py-3 border-b border-border last:border-0 hover:bg-gray-50/50 transition cursor-pointer"
             >
               <div class="flex items-center justify-between">
                 <div class="min-w-0">

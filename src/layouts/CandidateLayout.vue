@@ -44,6 +44,18 @@ const auth = useAuthStore()
           Browse Jobs ↗
         </router-link>
 
+        <!-- Applications section -->
+        <div class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Applications</span>
+        </div>
+        <router-link
+          to="/candidate/applications"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          My Applications
+        </router-link>
+
         <!-- Profile section -->
         <div class="mt-4 mb-1 px-3">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Profile</span>

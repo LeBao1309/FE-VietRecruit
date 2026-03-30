@@ -1330,8 +1330,8 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 12 — Candidate Application Tracking
 
-- [ ] **F-12.1** My applications page (list with status badges, pagination)
-- [ ] **F-12.2** Application detail view (status timeline, interview details, offer view)
+- [x] **F-12.1** My applications page (list with status badges, pagination)
+- [x] **F-12.2** Application detail view (status timeline, interview details, offer view)
 
 ### Phase 13 — Interviewer Portal
 

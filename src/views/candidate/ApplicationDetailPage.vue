@@ -2,9 +2,10 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { applicationService } from '@/services/applicationService'
+import { interviewService } from '@/services/interviewService'
 import { useOfferStore } from '@/stores/offerStore'
-import type { ApplicationResponse, ApplicationStatusHistoryResponse } from '@/types/application'
-import type { ApplicationStatus, OfferStatus } from '@/types/enums'
+import type { ApplicationResponse, ApplicationStatusHistoryResponse, InterviewResponse } from '@/types/application'
+import type { ApplicationStatus, InterviewStatus, OfferStatus } from '@/types/enums'
 
 const route = useRoute()
 const router = useRouter()
@@ -15,7 +16,9 @@ const applicationId = computed(() => route.params.id as string)
 // ── Local state ──
 const application = ref<ApplicationResponse | null>(null)
 const statusHistory = ref<ApplicationStatusHistoryResponse[]>([])
+const interviews = ref<InterviewResponse[]>([])
 const loading = ref(true)
+const interviewsLoading = ref(false)
 
 // ── Status config ──
 const statusConfig: Record<ApplicationStatus, { label: string; class: string; dotClass: string }> = {
@@ -33,6 +36,27 @@ const OFFER_STATUS_CONFIG: Record<OfferStatus, { label: string; class: string; d
   ACCEPTED: { label: 'Accepted', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
   DECLINED: { label: 'Declined', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
+
+const INTERVIEW_STATUS_CONFIG: Record<InterviewStatus, { label: string; class: string; dotClass: string }> = {
+  SCHEDULED: { label: 'Scheduled', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+  COMPLETED: { label: 'Completed', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+  CANCELED: { label: 'Canceled', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
+}
+
+/** Whether candidate can see interviews (application has reached INTERVIEW stage or later) */
+const showInterviewSection = computed(() => {
+  if (!application.value) return false
+  const idx = STAGE_ORDER.indexOf(application.value.status)
+  const interviewIdx = STAGE_ORDER.indexOf('INTERVIEW')
+  return idx >= interviewIdx || application.value.status === 'REJECTED' && interviews.value.length > 0
+})
+
+const scheduledInterviews = computed(() =>
+  interviews.value.filter((i) => i.status === 'SCHEDULED'),
+)
+const completedInterviews = computed(() =>
+  interviews.value.filter((i) => i.status === 'COMPLETED'),
+)
 
 // ── Pipeline steps ──
 const PIPELINE_STEPS: { status: ApplicationStatus; label: string }[] = [
@@ -155,8 +179,20 @@ onMounted(async () => {
     if (appResult.data) application.value = appResult.data
     if (historyResult.data) statusHistory.value = historyResult.data
 
-    // Also fetch offers for this application
+    // Fetch offers for this application
     await offerStore.fetchOffers(applicationId.value)
+
+    // Attempt to fetch interviews (candidate may have access to their own)
+    interviewsLoading.value = true
+    try {
+      const intResult = await interviewService.listInterviews(applicationId.value)
+      if (intResult.data) interviews.value = intResult.data
+    } catch {
+      // Silently ignore if candidate doesn't have access
+      interviews.value = []
+    } finally {
+      interviewsLoading.value = false
+    }
   } finally {
     loading.value = false
   }
@@ -398,6 +434,110 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </template>
+      </div>
+
+      <!-- ─── Interview Details (F-12.2) ─── -->
+      <div v-if="showInterviewSection" class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-gray-900">Interviews</h2>
+          <span v-if="interviews.length > 0" class="text-xs text-gray-400">
+            {{ interviews.length }} interview{{ interviews.length !== 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="interviewsLoading" class="p-6 animate-pulse space-y-3">
+          <div class="h-4 bg-gray-100 rounded w-48" />
+          <div class="h-4 bg-gray-100 rounded w-32" />
+        </div>
+
+        <!-- No interviews -->
+        <div v-else-if="interviews.length === 0" class="p-6 text-center">
+          <p class="text-sm text-gray-400">No interviews scheduled yet.</p>
+        </div>
+
+        <!-- Interview cards -->
+        <div v-else class="divide-y divide-border">
+          <div
+            v-for="interview in interviews"
+            :key="interview.id"
+            class="px-6 py-4"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-semibold text-gray-900">{{ interview.title }}</h3>
+                <div class="flex items-center gap-3 mt-1 flex-wrap">
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium rounded-full"
+                    :class="INTERVIEW_STATUS_CONFIG[interview.status].class"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="INTERVIEW_STATUS_CONFIG[interview.status].dotClass" />
+                    {{ INTERVIEW_STATUS_CONFIG[interview.status].label }}
+                  </span>
+                  <span v-if="interview.interviewType" class="text-[10px] text-gray-400 uppercase tracking-wider font-medium">
+                    {{ interview.interviewType }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Date/Time -->
+              <div>
+                <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Scheduled</span>
+                <span class="text-sm text-gray-700">{{ formatDateTime(interview.scheduledAt) }}</span>
+              </div>
+              <!-- Duration -->
+              <div v-if="interview.durationMinutes">
+                <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Duration</span>
+                <span class="text-sm text-gray-700">{{ interview.durationMinutes }} min</span>
+              </div>
+              <!-- Location -->
+              <div v-if="interview.locationOrLink" class="col-span-2">
+                <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Location / Link</span>
+                <a
+                  v-if="interview.locationOrLink.startsWith('http')"
+                  :href="interview.locationOrLink"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-sm text-primary hover:text-primary-hover transition"
+                >
+                  {{ interview.locationOrLink }} ↗
+                </a>
+                <span v-else class="text-sm text-gray-700">{{ interview.locationOrLink }}</span>
+              </div>
+            </div>
+
+            <!-- Interviewers -->
+            <div v-if="interview.interviewers && interview.interviewers.length > 0" class="mt-3 pt-3 border-t border-border">
+              <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Interviewers</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <div
+                  v-for="interviewer in interview.interviewers"
+                  :key="interviewer.id"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 border border-border rounded-full"
+                >
+                  <div class="w-5 h-5 rounded-full bg-primary-bg text-primary flex items-center justify-center text-[9px] font-bold">
+                    {{ interviewer.fullName?.charAt(0)?.toUpperCase() ?? '?' }}
+                  </div>
+                  <span class="text-xs text-gray-700">{{ interviewer.fullName }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary bar for multiple interviews -->
+        <div v-if="interviews.length > 1" class="px-6 py-3 bg-gray-50/50 border-t border-border flex items-center gap-4">
+          <div v-if="scheduledInterviews.length > 0" class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-400" />
+            <span class="text-[10px] text-gray-500">{{ scheduledInterviews.length }} upcoming</span>
+          </div>
+          <div v-if="completedInterviews.length > 0" class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-green-500" />
+            <span class="text-[10px] text-gray-500">{{ completedInterviews.length }} completed</span>
+          </div>
+        </div>
       </div>
 
       <!-- ─── Application Info ─── -->

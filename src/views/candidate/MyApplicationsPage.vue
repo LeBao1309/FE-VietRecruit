@@ -44,11 +44,15 @@ const totalPages = computed(() => applications.value?.totalPages ?? 0)
 async function loadApplications(): Promise<void> {
   loading.value = true
   try {
-    const result = await applicationService.listMyApplications({
+    const params: Record<string, unknown> = {
       page: page.value,
       size: pageSize.value,
       sort: 'createdAt,desc',
-    })
+    }
+    if (statusFilter.value) {
+      params.status = statusFilter.value
+    }
+    const result = await applicationService.listMyApplications(params)
     if (result.data) {
       applications.value = result.data
     }
