@@ -1301,25 +1301,25 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 8 — Application Pipeline (Employer)
 
-- [ ] **F-8.1** `applicationService.ts`: apply, listApplications, listMyApplications, getApplication, updateStatus, getStatusHistory, getScreeningResults, triggerScreening
-- [ ] **F-8.2** Application pipeline view (Kanban-style per job)
-- [ ] **F-8.3** Application detail page (candidate info, CV viewer, status history)
-- [ ] **F-8.4** Status transition buttons (enforce valid transitions per state machine)
-- [ ] **F-8.5** AI screening: trigger button + results table (scores, strengths, gaps)
+- [x] **F-8.1** `applicationService.ts`: apply, listApplications, listMyApplications, getApplication, updateStatus, getStatusHistory, getScreeningResults, triggerScreening
+- [x] **F-8.2** Application pipeline view (Kanban-style per job)
+- [x] **F-8.3** Application detail page (candidate info, CV viewer, status history)
+- [x] **F-8.4** Status transition buttons (enforce valid transitions per state machine)
+- [x] **F-8.5** AI screening: trigger button + results table (scores, strengths, gaps)
 
 ### Phase 9 — Interviews
 
-- [ ] **F-9.1** `interviewService.ts`: scheduleInterview, listInterviews, getInterview, updateInterviewStatus
-- [ ] **F-9.2** Schedule interview dialog (datetime picker, interviewer multi-select)
-- [ ] **F-9.3** Interview list per application
-- [ ] **F-9.4** Interview detail page (status, interviewer list, scorecards)
-- [ ] **F-9.5** AI interview questions (generate + display)
+- [x] **F-9.1** `interviewService.ts`: scheduleInterview, listInterviews, getInterview, updateInterviewStatus
+- [x] **F-9.2** Schedule interview dialog (datetime picker, interviewer multi-select)
+- [x] **F-9.3** Interview list per application
+- [x] **F-9.4** Interview detail page (status, interviewer list, scorecards)
+- [x] **F-9.5** AI interview questions (generate + display)
 
 ### Phase 10 — Scorecards
 
-- [ ] **F-10.1** `scorecardService.ts`: submitScorecard, listScorecards
-- [ ] **F-10.2** Scorecard form (1-10 sliders for skill/attitude/english, result select, comments)
-- [ ] **F-10.3** Scorecard summary view (radar chart, average scores)
+- [x] **F-10.1** `scorecardService.ts`: submitScorecard, listScorecards
+- [x] **F-10.2** Scorecard form (1-10 sliders for skill/attitude/english, result select, comments)
+- [x] **F-10.3** Scorecard summary view (radar chart, average scores)
 
 ### Phase 11 — Offers
 

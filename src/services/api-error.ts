@@ -81,3 +81,19 @@ export function unwrapResponse<T>(response: ApiResponse<T>): T {
   }
   return response.data
 }
+
+// ── Service Result Wrapper ───────────────────────────────────────────
+// Shared across all service files to avoid duplicating this pattern.
+
+export interface ServiceResult<T> {
+  data: T | null
+  error: AppError | null
+}
+
+export function ok<T>(data: T): ServiceResult<T> {
+  return { data, error: null }
+}
+
+export function fail<T>(error: unknown): ServiceResult<T> {
+  return { data: null, error: extractError(error) }
+}

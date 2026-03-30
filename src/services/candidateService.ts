@@ -1,5 +1,5 @@
 import http from './http'
-import { extractError, type AppError } from './api-error'
+import { ok, fail, type ServiceResult } from './api-error'
 import type { ApiResponse, SearchPageResponse } from '@/types/common'
 import type {
   CandidateUpdateRequest,
@@ -10,20 +10,6 @@ import type {
 } from '@/types/candidate'
 import type { JobRecommendationResponse } from '@/types/job'
 import type { CvImprovementResponse, SalaryBenchmarkResponse } from '@/types/ai'
-
-// ── Result wrapper ───────────────────────────────────────────────────
-interface ServiceResult<T> {
-  data: T | null
-  error: AppError | null
-}
-
-function ok<T>(data: T): ServiceResult<T> {
-  return { data, error: null }
-}
-
-function fail<T>(error: unknown): ServiceResult<T> {
-  return { data: null, error: extractError(error) }
-}
 
 // ── Candidate Service ────────────────────────────────────────────────
 export const candidateService = {

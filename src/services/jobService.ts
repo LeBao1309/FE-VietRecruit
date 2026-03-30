@@ -1,5 +1,5 @@
 import http from './http'
-import { extractError, type AppError } from './api-error'
+import { ok, fail, type ServiceResult } from './api-error'
 import type { ApiResponse, PageResponse, SearchPageResponse, PaginationParams, SpringPageResponse } from '@/types/common'
 import { normalizeSpringPage } from '@/types/common'
 import type {
@@ -16,20 +16,6 @@ import type {
   ApplyDescriptionRequest,
   SalaryBenchmarkResponse,
 } from '@/types/ai'
-
-// ── Result wrapper ───────────────────────────────────────────────────
-interface ServiceResult<T> {
-  data: T | null
-  error: AppError | null
-}
-
-function ok<T>(data: T): ServiceResult<T> {
-  return { data, error: null }
-}
-
-function fail<T>(error: unknown): ServiceResult<T> {
-  return { data: null, error: extractError(error) }
-}
 
 // ── Job Service ──────────────────────────────────────────────────────
 export const jobService = {

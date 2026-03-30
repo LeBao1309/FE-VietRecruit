@@ -238,6 +238,45 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/employer/JobDetailPage.vue'),
         meta: { title: 'Job Details', roles: ['COMPANY_ADMIN', 'HR'] },
       },
+      // ── Application Pipeline ──
+      {
+        path: 'jobs/:id/applications',
+        name: 'EmployerApplicationPipeline',
+        component: () => import('@/views/employer/ApplicationPipelinePage.vue'),
+        meta: { title: 'Application Pipeline', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'applications/:id',
+        name: 'EmployerApplicationDetail',
+        component: () => import('@/views/employer/ApplicationDetailPage.vue'),
+        meta: { title: 'Application Details', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      // ── Interviews ──
+      {
+        path: 'applications/:id/interviews',
+        name: 'EmployerInterviewList',
+        component: () => import('@/views/employer/InterviewListPage.vue'),
+        meta: { title: 'Interviews', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'interviews/:id',
+        name: 'EmployerInterviewDetail',
+        component: () => import('@/views/employer/InterviewDetailPage.vue'),
+        meta: { title: 'Interview Details', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
+      },
+      // ── Scorecards ──
+      {
+        path: 'interviews/:id/scorecard',
+        name: 'EmployerScorecardForm',
+        component: () => import('@/views/employer/ScorecardFormPage.vue'),
+        meta: { title: 'Submit Scorecard', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
+      },
+      {
+        path: 'interviews/:id/scorecards',
+        name: 'EmployerScorecardSummary',
+        component: () => import('@/views/employer/ScorecardSummaryPage.vue'),
+        meta: { title: 'Scorecard Summary', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
+      },
     ],
   },
 
