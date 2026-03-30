@@ -1,5 +1,5 @@
 import http from './http'
-import { extractError, type AppError } from './api-error'
+import { ok, fail, type ServiceResult } from './api-error'
 import type { ApiResponse } from '@/types/common'
 import type {
   UserProfileResponse,
@@ -8,20 +8,6 @@ import type {
   BannerUploadResponse,
   ExternalUrlRequest,
 } from '@/types/user'
-
-// ── Result wrapper ───────────────────────────────────────────────────
-interface ServiceResult<T> {
-  data: T | null
-  error: AppError | null
-}
-
-function ok<T>(data: T): ServiceResult<T> {
-  return { data, error: null }
-}
-
-function fail<T>(error: unknown): ServiceResult<T> {
-  return { data: null, error: extractError(error) }
-}
 
 // ── User Service ─────────────────────────────────────────────────────
 export const userService = {

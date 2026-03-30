@@ -74,6 +74,20 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Signing in…' },
   },
 
+  // ── Public Job Board ──
+  {
+    path: '/jobs',
+    name: 'JobBoard',
+    component: () => import('@/views/public/JobBoardPage.vue'),
+    meta: { title: 'Browse Jobs' },
+  },
+  {
+    path: '/jobs/:id',
+    name: 'PublicJobDetail',
+    component: () => import('@/views/public/PublicJobDetailPage.vue'),
+    meta: { title: 'Job Details' },
+  },
+
   // ── Candidate ──
   {
     path: '/candidate',
@@ -89,6 +103,30 @@ const routes: RouteRecordRaw[] = [
         name: 'CandidateDashboard',
         component: () => import('@/views/candidate/DashboardPage.vue'),
         meta: { title: 'Dashboard' },
+      },
+      {
+        path: 'candidate-profile',
+        name: 'CandidateProfileEdit',
+        component: () => import('@/views/candidate/CandidateProfilePage.vue'),
+        meta: { title: 'Candidate Profile' },
+      },
+      {
+        path: 'cv',
+        name: 'CvManagement',
+        component: () => import('@/views/candidate/CvManagementPage.vue'),
+        meta: { title: 'CV Management' },
+      },
+      {
+        path: 'recommendations',
+        name: 'JobRecommendations',
+        component: () => import('@/views/candidate/JobRecommendationsPage.vue'),
+        meta: { title: 'Job Recommendations' },
+      },
+      {
+        path: 'salary-benchmark',
+        name: 'CandidateSalaryBenchmark',
+        component: () => import('@/views/candidate/SalaryBenchmarkPage.vue'),
+        meta: { title: 'Salary Benchmark' },
       },
       {
         path: 'profile',
@@ -150,6 +188,94 @@ const routes: RouteRecordRaw[] = [
         name: 'EmployerSettings',
         component: () => import('@/views/shared/SettingsPage.vue'),
         meta: { title: 'Settings' },
+      },
+      {
+        path: 'pricing',
+        name: 'EmployerPricing',
+        component: () => import('@/views/employer/PricingPage.vue'),
+        meta: { title: 'Plans & Pricing', roles: ['COMPANY_ADMIN'] },
+      },
+      {
+        path: 'payment-status',
+        name: 'PaymentStatus',
+        component: () => import('@/views/employer/PaymentStatusPage.vue'),
+        meta: { title: 'Payment Status', roles: ['COMPANY_ADMIN'] },
+      },
+      {
+        path: 'subscription',
+        name: 'EmployerSubscription',
+        component: () => import('@/views/employer/SubscriptionPage.vue'),
+        meta: { title: 'Subscription', roles: ['COMPANY_ADMIN'] },
+      },
+      {
+        path: 'billing',
+        name: 'EmployerBilling',
+        component: () => import('@/views/employer/BillingPage.vue'),
+        meta: { title: 'Billing History', roles: ['COMPANY_ADMIN'] },
+      },
+      // ── Job Management ──
+      {
+        path: 'jobs',
+        name: 'EmployerJobs',
+        component: () => import('@/views/employer/JobListPage.vue'),
+        meta: { title: 'Jobs', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'jobs/new',
+        name: 'EmployerJobCreate',
+        component: () => import('@/views/employer/JobFormPage.vue'),
+        meta: { title: 'Create Job', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'jobs/:id/edit',
+        name: 'EmployerJobEdit',
+        component: () => import('@/views/employer/JobFormPage.vue'),
+        meta: { title: 'Edit Job', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'jobs/:id',
+        name: 'EmployerJobDetail',
+        component: () => import('@/views/employer/JobDetailPage.vue'),
+        meta: { title: 'Job Details', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      // ── Application Pipeline ──
+      {
+        path: 'jobs/:id/applications',
+        name: 'EmployerApplicationPipeline',
+        component: () => import('@/views/employer/ApplicationPipelinePage.vue'),
+        meta: { title: 'Application Pipeline', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'applications/:id',
+        name: 'EmployerApplicationDetail',
+        component: () => import('@/views/employer/ApplicationDetailPage.vue'),
+        meta: { title: 'Application Details', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      // ── Interviews ──
+      {
+        path: 'applications/:id/interviews',
+        name: 'EmployerInterviewList',
+        component: () => import('@/views/employer/InterviewListPage.vue'),
+        meta: { title: 'Interviews', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'interviews/:id',
+        name: 'EmployerInterviewDetail',
+        component: () => import('@/views/employer/InterviewDetailPage.vue'),
+        meta: { title: 'Interview Details', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
+      },
+      // ── Scorecards ──
+      {
+        path: 'interviews/:id/scorecard',
+        name: 'EmployerScorecardForm',
+        component: () => import('@/views/employer/ScorecardFormPage.vue'),
+        meta: { title: 'Submit Scorecard', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
+      },
+      {
+        path: 'interviews/:id/scorecards',
+        name: 'EmployerScorecardSummary',
+        component: () => import('@/views/employer/ScorecardSummaryPage.vue'),
+        meta: { title: 'Scorecard Summary', roles: ['COMPANY_ADMIN', 'HR', 'INTERVIEWER'] },
       },
     ],
   },

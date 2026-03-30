@@ -1,6 +1,7 @@
 import http from './http'
-import { extractError, type AppError } from './api-error'
-import type { ApiResponse } from '@/types/common'
+import { ok, fail, type ServiceResult } from './api-error'
+import type { ApiResponse, PageResponse, PaginationParams, SpringPageResponse } from '@/types/common'
+import { normalizeSpringPage } from '@/types/common'
 import type {
   DepartmentRequest,
   DepartmentResponse,
@@ -9,20 +10,6 @@ import type {
   CategoryRequest,
   CategoryResponse,
 } from '@/types/organization'
-
-// ── Result wrapper ───────────────────────────────────────────────────
-interface ServiceResult<T> {
-  data: T | null
-  error: AppError | null
-}
-
-function ok<T>(data: T): ServiceResult<T> {
-  return { data, error: null }
-}
-
-function fail<T>(error: unknown): ServiceResult<T> {
-  return { data: null, error: extractError(error) }
-}
 
 // ── Department Service ───────────────────────────────────────────────
 export const departmentService = {
@@ -35,10 +22,10 @@ export const departmentService = {
     }
   },
 
-  async list(): Promise<ServiceResult<DepartmentResponse[]>> {
+  async list(params?: PaginationParams): Promise<ServiceResult<PageResponse<DepartmentResponse>>> {
     try {
-      const { data } = await http.get<ApiResponse<DepartmentResponse[]>>('/departments')
-      return ok(data.data)
+      const { data } = await http.get<ApiResponse<SpringPageResponse<DepartmentResponse>>>('/departments', { params })
+      return ok(normalizeSpringPage(data.data))
     } catch (error) {
       return fail(error)
     }
@@ -83,10 +70,10 @@ export const locationService = {
     }
   },
 
-  async list(): Promise<ServiceResult<LocationResponse[]>> {
+  async list(params?: PaginationParams): Promise<ServiceResult<PageResponse<LocationResponse>>> {
     try {
-      const { data } = await http.get<ApiResponse<LocationResponse[]>>('/locations')
-      return ok(data.data)
+      const { data } = await http.get<ApiResponse<SpringPageResponse<LocationResponse>>>('/locations', { params })
+      return ok(normalizeSpringPage(data.data))
     } catch (error) {
       return fail(error)
     }
@@ -131,10 +118,10 @@ export const categoryService = {
     }
   },
 
-  async list(): Promise<ServiceResult<CategoryResponse[]>> {
+  async list(params?: PaginationParams): Promise<ServiceResult<PageResponse<CategoryResponse>>> {
     try {
-      const { data } = await http.get<ApiResponse<CategoryResponse[]>>('/categories')
-      return ok(data.data)
+      const { data } = await http.get<ApiResponse<SpringPageResponse<CategoryResponse>>>('/categories', { params })
+      return ok(normalizeSpringPage(data.data))
     } catch (error) {
       return fail(error)
     }

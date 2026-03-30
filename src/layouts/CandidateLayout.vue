@@ -18,6 +18,55 @@ const auth = useAuthStore()
         >
           Dashboard
         </router-link>
+
+        <!-- Job Search section -->
+        <div class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Job Search</span>
+        </div>
+        <router-link
+          to="/candidate/recommendations"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Recommendations
+        </router-link>
+        <router-link
+          to="/candidate/salary-benchmark"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Salary Benchmark
+        </router-link>
+        <router-link
+          to="/jobs"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+        >
+          Browse Jobs ↗
+        </router-link>
+
+        <!-- Profile section -->
+        <div class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Profile</span>
+        </div>
+        <router-link
+          to="/candidate/candidate-profile"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          Candidate Profile
+        </router-link>
+        <router-link
+          to="/candidate/cv"
+          class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+          active-class="!bg-primary-bg !text-primary"
+        >
+          CV Management
+        </router-link>
+
+        <!-- Account section -->
+        <div class="mt-4 mb-1 px-3">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account</span>
+        </div>
         <router-link
           to="/candidate/profile"
           class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"

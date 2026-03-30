@@ -41,7 +41,7 @@
 | `job_status` | `DRAFT`, `PUBLISHED`, `CLOSED` |
 | `application_status` | `NEW`, `SCREENING`, `INTERVIEW`, `OFFER`, `HIRED`, `REJECTED` |
 | `interview_status` | `SCHEDULED`, `COMPLETED`, `CANCELED` |
-| `scorecard_result` | `STRONG_HIRE`, `HIRE`, `NO_HIRE`, `STRONG_NO_HIRE` |
+| `scorecard_result` | `PASS`, `FAIL`, `CONSIDERING` |
 | `offer_status` | `DRAFT`, `SENT`, `ACCEPTED`, `DECLINED` |
 | `subscription_status` | `ACTIVE`, `CANCELLED`, `EXPIRED` |
 | `payment_status` | `PENDING`, `PAID`, `CANCELLED`, `FAILED`, `EXPIRED` |
@@ -104,10 +104,9 @@ export type ApplicationStatus =
 export type InterviewStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELED'
 
 export type ScorecardResult =
-  | 'STRONG_HIRE'
-  | 'HIRE'
-  | 'NO_HIRE'
-  | 'STRONG_NO_HIRE'
+  | 'PASS'
+  | 'FAIL'
+  | 'CONSIDERING'
 
 export type OfferStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'DECLINED'
 
@@ -148,6 +147,7 @@ export interface RegisterRequest {
   email: string       // @Email
   password: string    // @Pattern: ≥8 chars, upper+lower+digit+special
   fullName: string    // @NotBlank
+  phone?: string
   accountType?: AccountType
 }
 
@@ -166,15 +166,14 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
+  email: string       // @Email
   token: string       // @NotBlank
   newPassword: string // @Pattern
-  confirmPassword: string
 }
 
 export interface ChangePasswordRequest {
   currentPassword: string // @NotBlank
   newPassword: string     // @Pattern
-  confirmPassword: string
 }
 
 export interface VerifyOtpRequest {
@@ -196,14 +195,12 @@ export interface LoginResponse {
   refreshToken: string
   expiresIn: number
   tokenType: string
-  roles: string[]
 }
 
 export interface TokenRefreshResponse {
   accessToken: string
   refreshToken: string
   expiresIn: number
-  tokenType: string
 }
 ```
 
@@ -286,14 +283,17 @@ export interface BannerUploadResponse {
 export interface CandidateUpdateRequest {
   headline?: string
   summary?: string
-  skills?: string[]
-  experienceYears?: number
-  educationLevel?: string
   desiredPosition?: string
+  desiredPositionLevel?: string
+  yearsOfExperience?: number
+  skills?: string[]
+  primaryLanguage?: string
+  workType?: string
   desiredSalaryMin?: number
   desiredSalaryMax?: number
-  desiredSalaryCurrency?: string
-  workType?: string
+  availableFrom?: string
+  educationLevel?: string
+  educationMajor?: string
   isOpenToWork?: boolean
 }
 
@@ -314,38 +314,42 @@ export interface CandidateProfileResponse {
   userId: string
   headline: string | null
   summary: string | null
-  skills: string[] | null
-  experienceYears: number | null
-  educationLevel: string | null
+  defaultCvUrl: string | null
+  cvOriginalFilename: string | null
+  cvContentType: string | null
+  cvFileSizeBytes: number | null
+  cvUploadedAt: string | null
   desiredPosition: string | null
+  desiredPositionLevel: string | null
+  yearsOfExperience: number | null
+  skills: string[] | null
+  primaryLanguage: string | null
+  workType: string | null
   desiredSalaryMin: number | null
   desiredSalaryMax: number | null
-  desiredSalaryCurrency: string | null
-  workType: string | null
+  availableFrom: string | null
+  educationLevel: string | null
+  educationMajor: string | null
   isOpenToWork: boolean
-  cvUrl: string | null
-  cvOriginalFilename: string | null
-  cvFileSize: number | null
-  cvContentType: string | null
-  fullName: string
-  email: string
-  avatarUrl: string | null
   createdAt: string
   updatedAt: string
 }
 
 export interface CandidateSearchResponse {
   id: string
-  fullName: string
-  email: string
   headline: string | null
+  summary: string | null
+  desiredPosition: string | null
+  desiredPositionLevel: string | null
+  yearsOfExperience: number | null
   skills: string[] | null
-  experienceYears: number | null
-  educationLevel: string | null
   workType: string | null
+  desiredSalaryMin: number | null
+  desiredSalaryMax: number | null
+  educationLevel: string | null
+  educationMajor: string | null
   isOpenToWork: boolean
-  avatarUrl: string | null
-  createdAt: string
+  updatedAt: string
   highlights: Record<string, string[]> | null
   score: number | null
 }
@@ -353,9 +357,9 @@ export interface CandidateSearchResponse {
 export interface CvUploadResponse {
   cvUrl: string
   cvOriginalFilename: string
-  cvFileSize: number
   cvContentType: string
-  uploadedAt: string
+  cvFileSizeBytes: number
+  cvUploadedAt: string
 }
 ```
 
@@ -574,14 +578,12 @@ export interface ApplicationStatusUpdateRequest {
 export interface ApplicationResponse {
   id: string
   jobId: string
+  jobTitle: string
   candidateId: string
+  candidateName: string
+  appliedCvUrl: string | null
   coverLetter: string | null
   status: ApplicationStatus
-  aiScore: number | null
-  candidateFullName: string
-  candidateEmail: string
-  candidateAvatarUrl: string | null
-  cvUrl: string | null
   createdAt: string
   updatedAt: string
 }
@@ -590,30 +592,32 @@ export interface ApplicationSummaryResponse {
   id: string
   jobId: string
   jobTitle: string
-  candidateFullName: string
-  candidateEmail: string
+  candidateName: string
   status: ApplicationStatus
-  aiScore: number | null
   createdAt: string
-  updatedAt: string
 }
 
 export interface ApplicationScreeningResponse {
   applicationId: string
-  candidateFullName: string
+  candidateId: string
+  candidateName: string
+  candidateEmail: string
+  similarityScore: number | null
   aiScore: number | null
-  aiStrengths: string | null
-  aiGaps: string | null
-  aiSummary: string | null
+  scoreBreakdown: Record<string, number> | null
+  strengths: string[]
+  gaps: string[]
+  summary: string | null
+  applicationStatus: string
 }
 
 export interface ApplicationStatusHistoryResponse {
   id: string
-  fromStatus: ApplicationStatus | null
-  toStatus: ApplicationStatus
+  oldStatus: ApplicationStatus | null
+  newStatus: ApplicationStatus
   notes: string | null
   changedByName: string
-  createdAt: string
+  changedAt: string
 }
 
 // ── Interview ────────────────────────────────────────────────────────
@@ -622,7 +626,7 @@ export interface InterviewCreateRequest {
   scheduledAt: string          // ISO datetime
   durationMinutes?: number
   locationOrLink?: string
-  type?: string
+  interviewType?: string
   interviewerIds: string[]     // @NotEmpty
 }
 
@@ -637,19 +641,16 @@ export interface InterviewResponse {
   scheduledAt: string
   durationMinutes: number | null
   locationOrLink: string | null
-  type: string | null
+  interviewType: string | null
   status: InterviewStatus
   interviewers: InterviewerResponse[]
-  createdBy: string
   createdAt: string
-  updatedAt: string
 }
 
 export interface InterviewerResponse {
   id: string
   fullName: string
   email: string
-  avatarUrl: string | null
 }
 
 // ── Scorecard ────────────────────────────────────────────────────────
@@ -680,7 +681,7 @@ export interface OfferCreateRequest {
   baseSalary: number           // @NotNull
   currency?: string
   startDate?: string           // ISO date
-  notes?: string
+  note?: string
   offerLetterUrl?: string
 }
 
@@ -691,17 +692,13 @@ export interface OfferRespondRequest {
 export interface OfferResponse {
   id: string
   applicationId: string
+  offerLetterUrl: string | null
   baseSalary: number
   currency: string | null
   startDate: string | null
-  notes: string | null
-  offerLetterUrl: string | null
+  note: string | null
   status: OfferStatus
-  createdBy: string
-  sentAt: string | null
-  respondedAt: string | null
   createdAt: string
-  updatedAt: string
 }
 ```
 
@@ -796,62 +793,106 @@ export interface TransactionHistoryResponse {
 
 ```typescript
 export interface CvImprovementResponse {
-  sections: CvImprovementSection[]
   overallScore: number
-  generatedAt: string
+  suggestions: CvSuggestion[]
+  strengths: string[]
+  analysedAt: string
 }
 
-export interface CvImprovementSection {
-  sectionName: string
-  currentScore: number
-  suggestions: string[]
+export interface CvSuggestion {
   priority: string
+  section: string
+  issue: string
+  suggestion: string
+  source: string
 }
 
 export interface InterviewQuestionResponse {
   interviewId: string
-  questions: InterviewQuestion[]
+  jobTitle: string
+  candidateName: string
   generatedAt: string
+  questions: InterviewQuestion[]
+  source: string
 }
 
 export interface InterviewQuestion {
   category: string
   question: string
-  expectedAnswer: string | null
+  intent: string
   difficulty: string
+}
+
+export interface GeneratedJobDescription {
+  overview: string
+  responsibilities: string[]
+  requirements: string[]
+  niceToHave: string[]
+  benefits: string
 }
 
 export interface JdGenerateRequest {
   title: string
-  department?: string
-  seniorityLevel?: string
-  employmentType?: string
-  keyResponsibilities?: string[]
-  requiredSkills?: string[]
-  additionalContext?: string
+  departmentId?: string
+  employmentType: string
+  keyResponsibilities: string[]
+  requiredSkills: string[]
+  niceToHaveSkills?: string[]
+  yearsOfExperience?: number
+  tone: 'PROFESSIONAL' | 'STARTUP' | 'CORPORATE'
 }
 
 export interface JdGenerateResponse {
-  description: string
-  requirements: string
+  title: string
+  generatedDescription: GeneratedJobDescription
+  biasFlags: string[]
+  generatedAt: string
 }
 
 export interface ApplyDescriptionRequest {
-  description: string
-  requirements?: string
+  generatedDescription: GeneratedJobDescription
+}
+
+export interface SalaryRange {
+  min: number
+  median: number
+  max: number
 }
 
 export interface SalaryBenchmarkResponse {
-  title: string
-  currency: string
-  minSalary: number
-  maxSalary: number
-  medianSalary: number
-  percentile25: number
-  percentile75: number
-  sampleSize: number
-  dataSource: string
+  jobTitle: string
+  location: string | null
+  experienceLevel: string | null
+  currency: string | null
+  range: SalaryRange
+  marketPosition: string | null
+  dataPoints: number | null
+  insights: string[]
+  disclaimer: string | null
   generatedAt: string
+}
+```
+
+### `src/types/knowledge.ts`
+
+```typescript
+export interface KnowledgeDocumentResponse {
+  id: string
+  title: string
+  category: string
+  fileName: string
+  chunkCount: number
+  status: string
+  uploadedBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface KnowledgeUploadResponse {
+  documentId: string
+  title: string
+  category: string
+  status: string
 }
 ```
 
@@ -915,7 +956,7 @@ export interface SalaryBenchmarkResponse {
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
 | POST | `/departments` | `DepartmentRequest` | `DepartmentResponse` | ✓ (employer) |
-| GET | `/departments` | — | `DepartmentResponse[]` | ✓ (employer) |
+| GET | `/departments` | Pageable | `PageResponse<DepartmentResponse>` | ✓ (employer) |
 | GET | `/departments/{id}` | — | `DepartmentResponse` | ✓ (employer) |
 | PUT | `/departments/{id}` | `DepartmentRequest` | `DepartmentResponse` | ✓ (employer) |
 | DELETE | `/departments/{id}` | — | `void` | ✓ (employer) — soft-delete |
@@ -925,7 +966,7 @@ export interface SalaryBenchmarkResponse {
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
 | POST | `/locations` | `LocationRequest` | `LocationResponse` | ✓ (employer) |
-| GET | `/locations` | — | `LocationResponse[]` | ✓ (employer) |
+| GET | `/locations` | Pageable | `PageResponse<LocationResponse>` | ✓ (employer) |
 | GET | `/locations/{id}` | — | `LocationResponse` | ✓ (employer) |
 | PUT | `/locations/{id}` | `LocationRequest` | `LocationResponse` | ✓ (employer) |
 | DELETE | `/locations/{id}` | — | `void` | ✓ (employer) — hard-delete, FK check |
@@ -935,7 +976,7 @@ export interface SalaryBenchmarkResponse {
 | Method | Path | Request | Response `data` | Auth |
 |--------|------|---------|-----------------|------|
 | POST | `/categories` | `CategoryRequest` | `CategoryResponse` | ✓ (employer) |
-| GET | `/categories` | — | `CategoryResponse[]` | ✓ (employer) |
+| GET | `/categories` | Pageable | `PageResponse<CategoryResponse>` | ✓ (employer) |
 | GET | `/categories/{id}` | — | `CategoryResponse` | ✓ (employer) |
 | PUT | `/categories/{id}` | `CategoryRequest` | `CategoryResponse` | ✓ (employer) |
 | DELETE | `/categories/{id}` | — | `void` | ✓ (employer) — hard-delete, FK check |
@@ -1034,7 +1075,16 @@ export interface SalaryBenchmarkResponse {
 |--------|------|---------|-----------------|------|
 | POST | `/payment/checkout` | `CheckoutRequest` | `CheckoutResponse` | ✓ (employer) |
 | GET | `/payment/payment-status/{orderCode}` | — | `PaymentStatusResponse` | ✓ (employer) |
-| GET | `/payment/transactions` | — | `TransactionHistoryResponse[]` | ✓ (employer) |
+| GET | `/payment/transactions` | Pageable | `PageResponse<TransactionHistoryResponse>` | ✓ (employer) |
+| GET | `/admin/payment/transactions` | `?companyId=` + Pageable | `PageResponse<TransactionHistoryResponse>` | ✓ (admin) |
+
+### Knowledge Admin Service (`/admin/knowledge`)
+
+| Method | Path | Request | Response `data` | Auth |
+|--------|------|---------|-----------------|------|
+| GET | `/admin/knowledge` | `?category=&page=&size=` | `PageResponse<KnowledgeDocumentResponse>` | ✓ (admin) |
+| POST | `/admin/knowledge` | `multipart/form-data` (`file`) + `?title=&category=` | `KnowledgeUploadResponse` | ✓ (admin) |
+| DELETE | `/admin/knowledge/{documentId}` | — | `void` | ✓ (admin) |
 
 ### AI Services
 
@@ -1111,6 +1161,7 @@ export interface SalaryBenchmarkResponse {
 | `/admin/users` | UserManagementPage | CRUD `/admin/users` |
 | `/admin/users/:id` | UserDetailPage | `GET /admin/users/:id` |
 | `/admin/transactions` | TransactionListPage | `GET /admin/payment/transactions` |
+| `/admin/knowledge` | KnowledgeManagementPage | `GET/POST/DELETE /admin/knowledge` |
 
 ---
 
@@ -1213,62 +1264,62 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 4 — Subscription & Payment
 
-- [ ] **F-4.1** `planService.ts`: listPlans, getPlan
-- [ ] **F-4.2** `subscriptionService.ts`: getCurrentSubscription, getCurrentQuota, cancelSubscription
-- [ ] **F-4.3** `paymentService.ts`: checkout, getPaymentStatus, getTransactions
-- [ ] **F-4.4** Pricing page (plan cards, billing toggle monthly/yearly)
-- [ ] **F-4.5** Checkout flow (select plan → redirect to PayOS → return callback)
-- [ ] **F-4.6** Payment status polling page (after PayOS return)
-- [ ] **F-4.7** Subscription dashboard (current plan, quota bar, cancel)
-- [ ] **F-4.8** Billing history page (transaction list)
+- [x] **F-4.1** `planService.ts`: listPlans, getPlan
+- [x] **F-4.2** `subscriptionService.ts`: getCurrentSubscription, getCurrentQuota, cancelSubscription
+- [x] **F-4.3** `paymentService.ts`: checkout, getPaymentStatus, getTransactions
+- [x] **F-4.4** Pricing page (plan cards, billing toggle monthly/yearly)
+- [x] **F-4.5** Checkout flow (select plan → redirect to PayOS → return callback)
+- [x] **F-4.6** Payment status polling page (after PayOS return)
+- [x] **F-4.7** Subscription dashboard (current plan, quota bar, cancel)
+- [x] **F-4.8** Billing history page (transaction list)
 
 ### Phase 5 — Job Management (Employer)
 
-- [ ] **F-5.1** `jobService.ts`: createJob, updateJob, publishJob, closeJob, listJobs, getJob, searchJobs, autocomplete, listPublicJobs, getPublicJob
-- [ ] **F-5.2** Job list page (table with status badges, filter, pagination)
-- [ ] **F-5.3** Job form page (create/edit with rich text editor)
-- [ ] **F-5.4** AI JD generator integration (generate → preview → apply)
-- [ ] **F-5.5** Job detail page (view, publish/close buttons with state machine enforcement)
-- [ ] **F-5.6** Salary benchmark widget on job detail (`GET /jobs/{id}/salary-benchmark`)
-- [ ] **F-5.7** Quota guard UI (disable publish when quota full, show upgrade CTA)
+- [x] **F-5.1** `jobService.ts`: createJob, updateJob, publishJob, closeJob, listJobs, getJob, searchJobs, autocomplete, listPublicJobs, getPublicJob
+- [x] **F-5.2** Job list page (table with status badges, filter, pagination)
+- [x] **F-5.3** Job form page (create/edit with rich text editor)
+- [x] **F-5.4** AI JD generator integration (generate → preview → apply)
+- [x] **F-5.5** Job detail page (view, publish/close buttons with state machine enforcement)
+- [x] **F-5.6** Salary benchmark widget on job detail (`GET /jobs/{id}/salary-benchmark`)
+- [x] **F-5.7** Quota guard UI (disable publish when quota full, show upgrade CTA)
 
 ### Phase 6 — Public Job Board (Candidate)
 
-- [ ] **F-6.1** Job board page (search, filters: location, category, salary range)
-- [ ] **F-6.2** Type-ahead search (autocomplete API)
-- [ ] **F-6.3** Job detail public page
-- [ ] **F-6.4** Apply flow (cover letter form → `POST /applications`)
+- [x] **F-6.1** Job board page (search, filters: location, category, salary range)
+- [x] **F-6.2** Type-ahead search (autocomplete API)
+- [x] **F-6.3** Job detail public page
+- [x] **F-6.4** Apply flow (cover letter form → `POST /applications`)
 
 ### Phase 7 — Candidate Profile & CV
 
-- [ ] **F-7.1** `candidateService.ts`: getProfile, updateProfile, uploadCv, deleteCv, getRecommendations
-- [ ] **F-7.2** Candidate profile form (skills tags, salary expectations, work preferences)
-- [ ] **F-7.3** CV upload/replace/delete (PDF/DOCX/JPEG/PNG, max 5MB)
-- [ ] **F-7.4** AI CV improvement page (`POST /candidates/me/cv/improvement`)
-- [ ] **F-7.5** Job recommendations page (AI-matched jobs)
-- [ ] **F-7.6** Salary benchmark tool for candidates
+- [x] **F-7.1** `candidateService.ts`: getProfile, updateProfile, uploadCv, deleteCv, getRecommendations
+- [x] **F-7.2** Candidate profile form (skills tags, salary expectations, work preferences)
+- [x] **F-7.3** CV upload/replace/delete (PDF/DOCX/JPEG/PNG, max 5MB)
+- [x] **F-7.4** AI CV improvement page (`POST /candidates/me/cv/improvement`)
+- [x] **F-7.5** Job recommendations page (AI-matched jobs)
+- [x] **F-7.6** Salary benchmark tool for candidates
 
 ### Phase 8 — Application Pipeline (Employer)
 
-- [ ] **F-8.1** `applicationService.ts`: apply, listApplications, listMyApplications, getApplication, updateStatus, getStatusHistory, getScreeningResults, triggerScreening
-- [ ] **F-8.2** Application pipeline view (Kanban-style per job)
-- [ ] **F-8.3** Application detail page (candidate info, CV viewer, status history)
-- [ ] **F-8.4** Status transition buttons (enforce valid transitions per state machine)
-- [ ] **F-8.5** AI screening: trigger button + results table (scores, strengths, gaps)
+- [x] **F-8.1** `applicationService.ts`: apply, listApplications, listMyApplications, getApplication, updateStatus, getStatusHistory, getScreeningResults, triggerScreening
+- [x] **F-8.2** Application pipeline view (Kanban-style per job)
+- [x] **F-8.3** Application detail page (candidate info, CV viewer, status history)
+- [x] **F-8.4** Status transition buttons (enforce valid transitions per state machine)
+- [x] **F-8.5** AI screening: trigger button + results table (scores, strengths, gaps)
 
 ### Phase 9 — Interviews
 
-- [ ] **F-9.1** `interviewService.ts`: scheduleInterview, listInterviews, getInterview, updateInterviewStatus
-- [ ] **F-9.2** Schedule interview dialog (datetime picker, interviewer multi-select)
-- [ ] **F-9.3** Interview list per application
-- [ ] **F-9.4** Interview detail page (status, interviewer list, scorecards)
-- [ ] **F-9.5** AI interview questions (generate + display)
+- [x] **F-9.1** `interviewService.ts`: scheduleInterview, listInterviews, getInterview, updateInterviewStatus
+- [x] **F-9.2** Schedule interview dialog (datetime picker, interviewer multi-select)
+- [x] **F-9.3** Interview list per application
+- [x] **F-9.4** Interview detail page (status, interviewer list, scorecards)
+- [x] **F-9.5** AI interview questions (generate + display)
 
 ### Phase 10 — Scorecards
 
-- [ ] **F-10.1** `scorecardService.ts`: submitScorecard, listScorecards
-- [ ] **F-10.2** Scorecard form (1-10 sliders for skill/attitude/english, result select, comments)
-- [ ] **F-10.3** Scorecard summary view (radar chart, average scores)
+- [x] **F-10.1** `scorecardService.ts`: submitScorecard, listScorecards
+- [x] **F-10.2** Scorecard form (1-10 sliders for skill/attitude/english, result select, comments)
+- [x] **F-10.3** Scorecard summary view (radar chart, average scores)
 
 ### Phase 11 — Offers
 
@@ -1293,6 +1344,8 @@ CANCELLED → ACTIVE (re-subscribe)
 - [ ] **F-14.1** `adminUserService.ts`: createUser, listUsers, getUser, updateUser, deleteUser
 - [ ] **F-14.2** User management table (search, paginate, lock/unlock)
 - [ ] **F-14.3** Admin transaction history page
+- [ ] **F-14.4** `knowledgeService.ts`: listDocuments, uploadDocument, deleteDocument
+- [ ] **F-14.5** Knowledge management page (upload documents, list with category filter, delete)
 
 ### Phase 15 — Polish
 

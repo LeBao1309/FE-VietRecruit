@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import type { UserProfileResponse } from '@/types/user'
 import type { RoleCode } from '@/types/enums'
 import type { LoginRequest, RegisterRequest } from '@/types/auth'
-import { getAccessToken, getRefreshToken, clearTokens } from '@/services/http'
+import { getAccessToken, getRefreshToken, clearTokens, parseJwt } from '@/services/http'
 import { authService } from '@/services/authService'
 import { useUiStore } from './uiStore'
 import router from '@/router'
@@ -64,7 +64,12 @@ export const useAuthStore = defineStore('auth', () => {
       }
       const loginData = result.data!
       accessToken.value = loginData.accessToken
-      roles.value = loginData.roles as RoleCode[]
+      const decodedPayload = parseJwt(loginData.accessToken)
+      if (decodedPayload && decodedPayload.roles) {
+        roles.value = decodedPayload.roles as RoleCode[]
+      } else {
+        roles.value = []
+      }
 
       // Fetch full profile
       const profileResult = await authService.getProfile()
@@ -119,6 +124,12 @@ export const useAuthStore = defineStore('auth', () => {
     const refresh = getRefreshToken()
     if (token && refresh) {
       accessToken.value = token
+      const decodedPayload = parseJwt(token)
+      if (decodedPayload && decodedPayload.roles) {
+        roles.value = decodedPayload.roles as RoleCode[]
+      } else {
+        roles.value = []
+      }
     } else {
       user.value = null
       roles.value = []
