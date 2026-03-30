@@ -1335,9 +1335,9 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 13 — Interviewer Portal
 
-- [ ] **F-13.1** Interviewer dashboard (assigned interviews list)
-- [ ] **F-13.2** Interview detail view + scorecard submission
-- [ ] **F-13.3** AI-generated interview questions viewer
+- [x] **F-13.1** Interviewer dashboard (assigned interviews list)
+- [x] **F-13.2** Interview detail view + scorecard submission
+- [x] **F-13.3** AI-generated interview questions viewer
 
 ### Phase 14 — Admin Panel
 

@@ -42,6 +42,18 @@ export const interviewService = {
     }
   },
 
+  /** GET /interviews/mine — List interviews assigned to the current user (INTERVIEWER) */
+  async listMyInterviews(): Promise<ServiceResult<InterviewResponse[]>> {
+    try {
+      const { data } = await http.get<ApiResponse<InterviewResponse[]>>(
+        '/interviews/mine',
+      )
+      return ok(data.data)
+    } catch (error) {
+      return fail(error)
+    }
+  },
+
   /** GET /interviews/:id — Get a single interview */
   async getInterview(id: string): Promise<ServiceResult<InterviewResponse>> {
     try {

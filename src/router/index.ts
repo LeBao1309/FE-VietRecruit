@@ -225,6 +225,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/employer/BillingPage.vue'),
         meta: { title: 'Billing History', roles: ['COMPANY_ADMIN'] },
       },
+      // ── Interviewer Portal ──
+      {
+        path: 'my-interviews',
+        name: 'InterviewerDashboard',
+        component: () => import('@/views/employer/InterviewerDashboardPage.vue'),
+        meta: { title: 'My Interviews', roles: ['INTERVIEWER'] },
+      },
       // ── Job Management ──
       {
         path: 'jobs',

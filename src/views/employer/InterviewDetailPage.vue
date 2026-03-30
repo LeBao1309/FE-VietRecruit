@@ -12,6 +12,10 @@ const auth = useAuthStore()
 
 const interviewId = computed(() => route.params.id as string)
 const canManage = computed(() => auth.isCompanyAdmin || auth.isHR)
+const isInterviewerOnly = computed(() => auth.isInterviewer && !auth.isCompanyAdmin && !auth.isHR)
+const canSubmitScorecard = computed(() =>
+  auth.isInterviewer && (interviewStore.isScheduled || interviewStore.isCompleted),
+)
 
 // ── Status config ──
 const statusConfig: Record<InterviewStatus, { label: string; class: string; dotClass: string }> = {
@@ -167,7 +171,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- Status actions -->
+          <!-- Status actions (HR/Admin) -->
           <div v-if="canManage && interviewStore.isScheduled" class="flex items-center gap-2 shrink-0">
             <button
               @click="openConfirm('complete')"
@@ -183,6 +187,15 @@ onBeforeUnmount(() => {
             >
               Cancel Interview
             </button>
+          </div>
+          <!-- Scorecard CTA (INTERVIEWER) -->
+          <div v-else-if="canSubmitScorecard" class="shrink-0">
+            <router-link
+              :to="`/employer/interviews/${interviewId}/scorecard`"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition inline-flex items-center gap-1.5"
+            >
+              📝 Submit Scorecard
+            </router-link>
           </div>
         </div>
 
@@ -215,13 +228,21 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Back to application link -->
-        <div class="mt-4 pt-4 border-t border-border">
+        <!-- Back link (context-aware) -->
+        <div class="mt-4 pt-4 border-t border-border flex items-center gap-4">
           <router-link
+            v-if="!isInterviewerOnly"
             :to="`/employer/applications/${interview.applicationId}`"
             class="text-xs text-primary hover:text-primary-hover font-medium transition"
           >
             ← View Application
+          </router-link>
+          <router-link
+            v-if="auth.isInterviewer"
+            to="/employer/my-interviews"
+            class="text-xs text-gray-400 hover:text-gray-600 font-medium transition"
+          >
+            ← Back to My Interviews
           </router-link>
         </div>
       </div>
