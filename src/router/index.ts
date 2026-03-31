@@ -322,6 +322,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/admin/UsersPage.vue'),
         meta: { title: 'User Management' },
       },
+      {
+        path: 'transactions',
+        name: 'AdminTransactions',
+        component: () => import('@/views/admin/TransactionsPage.vue'),
+        meta: { title: 'Transaction History' },
+      },
     ],
   },
 
