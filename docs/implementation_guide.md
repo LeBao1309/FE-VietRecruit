@@ -1005,8 +1005,8 @@ export interface KnowledgeUploadResponse {
 | POST | `/candidates/me/cv` | `multipart/form-data` | `CvUploadResponse` | CANDIDATE |
 | DELETE | `/candidates/me/cv` | — | `void` | CANDIDATE |
 | GET | `/candidates/me/job-recommendations` | `?limit=` | `JobRecommendationResponse[]` | CANDIDATE |
-| GET | `/candidates/search` | Query params | `SearchPageResponse<CandidateSearchResponse>` | HR/COMPANY_ADMIN |
-| GET | `/candidates/{id}` | — | `CandidateProfileResponse` | HR/COMPANY_ADMIN |
+| GET | `/candidates/search` | Query params | `SearchPageResponse<CandidateSearchResponse>` | HR/COMPANY_ADMIN/SYSTEM_ADMIN |
+| GET | `/candidates/{id}` | — | `CandidateProfileResponse` | HR/COMPANY_ADMIN/SYSTEM_ADMIN |
 
 ### Application Service (`/applications`)
 
@@ -1026,7 +1026,8 @@ export interface KnowledgeUploadResponse {
 | Method | Path | Request | Response `data` | Role |
 |--------|------|---------|-----------------|------|
 | POST | `/applications/{id}/interviews` | `InterviewCreateRequest` | `InterviewResponse` | HR/COMPANY_ADMIN |
-| GET | `/applications/{id}/interviews` | — | `InterviewResponse[]` | HR/COMPANY_ADMIN |
+| GET | `/applications/{id}/interviews` | — | `InterviewResponse[]` | HR/COMPANY_ADMIN/CANDIDATE |
+| GET | `/interviews/mine` | — | `InterviewResponse[]` | INTERVIEWER |
 | GET | `/interviews/{id}` | — | `InterviewResponse` | HR/INTERVIEWER/CANDIDATE |
 | PUT | `/interviews/{id}/status` | `InterviewStatusUpdateRequest` | `InterviewResponse` | HR/COMPANY_ADMIN |
 
@@ -1163,6 +1164,13 @@ export interface KnowledgeUploadResponse {
 | `/admin/transactions` | TransactionListPage | `GET /admin/payment/transactions` |
 | `/admin/knowledge` | KnowledgeManagementPage | `GET/POST/DELETE /admin/knowledge` |
 
+### Interviewer Routes (`/interviewer/*`)
+
+| Route | Page | API Calls |
+|-------|------|-----------|
+| `/interviewer/dashboard` | InterviewerDashboard | `GET /interviews/mine` |
+| `/interviewer/interviews/:id` | InterviewDetailPage | `GET /interviews/:id`, scorecards, AI questions |
+
 ---
 
 ## E. STATE MACHINES
@@ -1190,6 +1198,11 @@ DRAFT → PUBLISHED → CLOSED
 - `DRAFT → PUBLISHED`: `PUT /jobs/{id}/publish` (quota deducted)
 - `PUBLISHED → CLOSED`: `PUT /jobs/{id}/close` (quota released)
 - Only `DRAFT` jobs can be edited
+
+> **Note:** `StateMachine.md` in BE-Document shows a `PUBLISHED → DRAFT` transition
+> via "unpublish" (quota refunded), but no `/jobs/{id}/unpublish` endpoint exists
+> in `ApiConstants.java` or `JobController.java` yet. Do **not** implement an
+> unpublish button until the backend adds this endpoint.
 
 ### Interview Status
 
@@ -1335,17 +1348,19 @@ CANCELLED → ACTIVE (re-subscribe)
 
 ### Phase 13 — Interviewer Portal
 
-- [x] **F-13.1** Interviewer dashboard (assigned interviews list)
+- [x] **F-13.1** Interviewer dashboard — assigned interviews list (`GET /interviews/mine`)
 - [x] **F-13.2** Interview detail view + scorecard submission
 - [x] **F-13.3** AI-generated interview questions viewer
+- [ ] **F-13.4** Interviewer routes (`/interviewer/dashboard`, `/interviewer/interviews/:id`)
 
 ### Phase 14 — Admin Panel
 
-- [ ] **F-14.1** `adminUserService.ts`: createUser, listUsers, getUser, updateUser, deleteUser
-- [ ] **F-14.2** User management table (search, paginate, lock/unlock)
-- [ ] **F-14.3** Admin transaction history page
-- [ ] **F-14.4** `knowledgeService.ts`: listDocuments, uploadDocument, deleteDocument
-- [ ] **F-14.5** Knowledge management page (upload documents, list with category filter, delete)
+- [x] **F-14.1** `adminUserService.ts`: createUser, listUsers, getUser, updateUser, deleteUser
+- [x] **F-14.2** User management table (search, paginate, view details, create/edit/delete)
+- [x] **F-14.3** Admin transaction history page
+- [x] **F-14.4** `adminStore.ts`: Pinia store with user CRUD + transaction state
+- [x] **F-14.5** `AdminLayout.vue` updated with nav links (Users, Transactions)
+- [x] **F-14.6** Router: `/admin/transactions` route added
 
 ### Phase 15 — Polish
 

@@ -76,21 +76,23 @@ Apply these type conversion rules without exception:
 
 ---
 
-### Tier 3 — API Controllers
+### Tier 3 — API Controllers & Path Constants
 
 ```
 BE-VietRecruit-main/
+  src/main/java/.../common/
+    ApiConstants.java         ← read FIRST to know exact URL paths
   src/main/java/.../feature/
-    */controller/    ← read ALL controller files under every feature package
-And verify is docs/api.json
+    */controller/             ← read ALL controller files under every feature package
 ```
 
 **Goal:** For every controller method, extract:
-- HTTP method and full path
+- HTTP method and full path (resolve from `ApiConstants.*` + method annotations)
 - `@PathVariable` and `@RequestParam` names and types
 - `@RequestBody` DTO type
 - Response DTO type
 - `@PreAuthorize` annotation (maps directly to route guard role)
+- `@RateLimiter` name (determines throttling tier)
 - Whether the endpoint returns a paginated response
 
 ---
@@ -100,7 +102,13 @@ And verify is docs/api.json
 ```
 BE-Document-main/
   flows/
-    *.md    ← read ALL flow files
+    Auth.md              ← registration, session, password, profile flows
+    Candidate.md         ← candidate journey from register to hired
+    Employer&HR.md       ← employer onboarding → job pipeline → offer
+    Interviewer.md       ← interviewer: login → view interviews → scorecard
+    SYSTEM.md            ← full system-level flow across all roles
+    StateMachine.md      ← state diagrams for Application, Interview,
+                            Offer, Job, Payment, Subscription
 ```
 
 **Goal:** Understand the state machine for each entity.
@@ -116,8 +124,27 @@ For each flow document, identify:
 
 ```
 BE-Document-main/
-  feature/
-    *.md    ← read ALL feature spec files
+  features/
+    auth/
+      authentication.md            ← registration flows, role taxonomy, brute-force
+    candidate/
+      overview.md                  ← profile, CV upload, R2 storage
+    job/
+      job.md                       ← endpoint reference (employer + public)
+      job-management.md            ← lifecycle architecture, quota guard
+      job-lifecycle.md             ← publish flow sequence diagram
+    notification/
+      email-delivery.md            ← Kafka-based async email via Resend
+    organization/
+      overview.md                  ← company, department, location, category
+      category/  department/  location/
+    payment/
+      explanation-payment-module.md ← two-phase checkout, reconciliation
+    subscription/
+      subscription-management.md   ← plan tiers, quota guard, expiry tasks
+      quota-management.md          ← atomic increment/decrement logic
+    user/
+      profile-management.md        ← profile CRUD, admin endpoints, RBAC
 ```
 
 **Goal:** Identify UI-level requirements that go beyond the raw API:
@@ -476,6 +503,7 @@ Track overall project progress here. Check off items as they are completed.
 - [ ] `JobForm.vue` — create and edit, rich text for job description
 - [ ] Job status transitions — Draft → Published → Closed, confirm on transitions
 - [ ] Publish / close actions — role-restricted, quota enforcement
+- [ ] Public job list — `/jobs/public` — with keyword, categoryId, locationId filters
 
 ---
 
@@ -516,6 +544,8 @@ Track overall project progress here. Check off items as they are completed.
 - [ ] Schedule form — date/time picker, select interviewers, online or offline type
 - [ ] Feedback form — rating, notes, go / no-go result
 - [ ] Result trigger — pass moves application to next stage, fail triggers rejection flow
+- [ ] Interviewer's "My Interviews" — `GET /interviews/mine` — INTERVIEWER role only
+- [ ] Candidate can view own application's interviews
 
 ---
 
@@ -537,12 +567,16 @@ Track overall project progress here. Check off items as they are completed.
 
 ---
 
-### Notifications (if backend supports)
+### Notifications
 
-- [ ] Notification bell in header — unread count badge
-- [ ] Notification dropdown — list with mark-as-read per item
-- [ ] Mark all as read action
-- [ ] Polling or WebSocket based on backend capability
+> **Backend status:** Email notifications are implemented via Kafka + Resend API.
+> No in-app notification API exists yet (no controller). Email delivery is fully
+> async (Kafka topic `notification.email`). No FE endpoints to consume.
+
+- [ ] Notification bell — placeholder UI (ready for future backend API)
+- [ ] Toast/snackbar for FE-side action confirmations
+- [ ] Email notification awareness — inform users that email will be sent
+        (e.g., after OTP, invitation, offer sent)
 
 ---
 
@@ -606,20 +640,22 @@ src/
 │       ├── auth.routes.ts
 │       ├── candidate.routes.ts
 │       ├── employer.routes.ts
+│       ├── interviewer.routes.ts
 │       ├── admin.routes.ts
 │       └── public.routes.ts
 │
 ├── views/
-│   ├── auth/         LoginView, RegisterView, OtpVerifyView, etc.
-│   ├── public/       LandingPage, JobBoardPage, PricingPage
-│   ├── candidate/    Dashboard, Profile, CV, Applications, Recommendations
-│   ├── employer/     Dashboard, Company, Jobs, Applications, Interviews,
-│   │                 Offers, Subscription, Billing, Team, Settings
-│   └── admin/        UserManagement, Transactions
+│   ├── auth/           LoginView, RegisterView, OtpVerifyView, etc.
+│   ├── public/         LandingPage, JobBoardPage, PricingPage
+│   ├── candidate/      Dashboard, Profile, CV, Applications, Recommendations
+│   ├── employer/       Dashboard, Company, Jobs, Applications, Interviews,
+│   │                   Offers, Subscription, Billing, Team, Settings
+│   ├── interviewer/    Dashboard, InterviewDetail, Scorecard
+│   └── admin/          UserManagement, Transactions, Knowledge
 │
 └── components/
-    ├── common/       BaseTable, BaseModal, ConfirmDialog, BaseBadge,
-    │                 BasePagination, BaseFilter, BaseForm
+    ├── common/         BaseTable, BaseModal, ConfirmDialog, BaseBadge,
+    │                   BasePagination, BaseFilter, BaseForm
     ├── candidate/
     ├── job/
     ├── application/
