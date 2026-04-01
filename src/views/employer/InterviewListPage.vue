@@ -165,22 +165,22 @@ onMounted(async () => {
       <button
         v-if="canManage"
         @click="openScheduleDialog"
-        class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition flex items-center gap-1.5 shrink-0"
+        class="btn-primary"
       >
         <span class="text-lg leading-none">+</span> Schedule Interview
       </button>
     </div>
 
     <!-- Loading -->
-    <div v-if="interviewStore.listLoading" class="space-y-3">
-      <div v-for="i in 3" :key="i" class="bg-surface border border-border rounded-lg p-5 shadow-sm animate-pulse">
+    <div v-if="interviewStore.listLoading" class="space-y-4">
+      <div v-for="i in 3" :key="i" class="premium-card p-5 animate-pulse">
         <div class="flex items-start gap-4">
-          <div class="h-10 w-10 bg-gray-100 rounded-lg" />
-          <div class="flex-1 space-y-2">
-            <div class="h-4 bg-gray-100 rounded w-48" />
-            <div class="h-3 bg-gray-100 rounded w-32" />
+          <div class="h-12 w-12 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+          <div class="flex-1 space-y-3 pt-1">
+            <div class="h-4 bg-slate-100 dark:bg-slate-800 rounded w-48" />
+            <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded w-32" />
           </div>
-          <div class="h-5 bg-gray-100 rounded-full w-20" />
+          <div class="h-6 bg-slate-100 dark:bg-slate-800 rounded-full w-24" />
         </div>
       </div>
     </div>
@@ -188,15 +188,15 @@ onMounted(async () => {
     <!-- Empty state -->
     <div
       v-else-if="interviewStore.interviews.length === 0"
-      class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center"
+      class="premium-card p-16 text-center"
     >
-      <div class="text-gray-400 text-sm">
-        <p class="font-medium mb-1">No interviews scheduled</p>
-        <p class="text-xs mb-3">Schedule an interview to start the evaluation process.</p>
+      <div class="text-slate-900 dark:text-white mb-2">
+        <p class="font-extrabold text-xl mb-1">No interviews scheduled</p>
+        <p class="text-sm text-slate-500 mb-6 mt-2">Schedule an interview to start the evaluation process.</p>
         <button
           v-if="canManage"
           @click="openScheduleDialog"
-          class="text-primary hover:text-primary-hover text-xs font-medium transition"
+          class="btn-primary inline-flex"
         >
           + Schedule Interview
         </button>
@@ -204,38 +204,38 @@ onMounted(async () => {
     </div>
 
     <!-- Interview cards -->
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-4">
       <div
         v-for="interview in interviewStore.interviews"
         :key="interview.id"
         @click="goToDetail(interview.id)"
-        class="bg-surface border border-border rounded-lg p-5 shadow-sm hover:border-primary/20 hover:shadow-md transition cursor-pointer group"
+        class="premium-card p-6 cursor-pointer group hover:border-teal-400 dark:hover:border-teal-500 block"
       >
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex items-start gap-3">
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-start gap-4">
             <!-- Calendar icon -->
             <div
-              class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0"
+              class="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black shrink-0 transition-colors border-2"
               :class="interview.status === 'SCHEDULED' && isUpcoming(interview.scheduledAt)
-                ? 'bg-primary-bg text-primary'
-                : interview.status === 'COMPLETED' ? 'bg-success-bg text-success'
-                : 'bg-gray-100 text-gray-400'"
+                ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/40 dark:border-blue-800'
+                : interview.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/40 dark:border-emerald-800'
+                : 'bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:border-slate-700'"
             >
               {{ new Date(interview.scheduledAt).getDate() }}
             </div>
             <div>
-              <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition">
+              <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                 {{ interview.title }}
               </h3>
-              <p class="text-xs text-gray-400 mt-0.5">
+              <p class="text-xs font-medium text-slate-500 mt-1">
                 {{ formatDateTime(interview.scheduledAt) }}
-                <span v-if="interview.durationMinutes" class="text-gray-300 mx-1">·</span>
+                <span v-if="interview.durationMinutes" class="text-slate-300 mx-1">·</span>
                 <span v-if="interview.durationMinutes">{{ formatDuration(interview.durationMinutes) }}</span>
               </p>
             </div>
           </div>
           <span
-            class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-medium rounded-full shrink-0"
+            class="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full shrink-0 shadow-sm border border-current"
             :class="statusConfig[interview.status].class"
           >
             <span class="w-1.5 h-1.5 rounded-full" :class="statusConfig[interview.status].dotClass" />
@@ -244,25 +244,25 @@ onMounted(async () => {
         </div>
 
         <!-- Meta -->
-        <div class="flex items-center gap-4 text-xs text-gray-400">
-          <span v-if="interview.interviewType" class="flex items-center gap-1">
-            <span>{{ interview.interviewType === 'ONLINE' ? '💻' : interview.interviewType === 'PHONE' ? '📱' : '🏢' }}</span>
-            {{ interview.interviewType }}
+        <div class="flex items-center gap-5 pt-4 text-xs font-bold text-slate-500 border-t border-slate-100 dark:border-slate-700/50">
+          <span v-if="interview.interviewType" class="flex items-center gap-1.5">
+            <span class="text-base leading-none">{{ interview.interviewType === 'ONLINE' ? '💻' : interview.interviewType === 'PHONE' ? '📱' : '🏢' }}</span>
+            <span class="uppercase tracking-wider">{{ interview.interviewType }}</span>
           </span>
-          <span v-if="interview.locationOrLink" class="truncate max-w-[200px]">
+          <span v-if="interview.locationOrLink" class="truncate max-w-[250px]">
             {{ interview.locationOrLink }}
           </span>
-          <span class="ml-auto flex items-center gap-1">
+          <span class="ml-auto flex items-center gap-2">
             {{ interview.interviewers.length }} interviewer{{ interview.interviewers.length !== 1 ? 's' : '' }}
           </span>
         </div>
 
         <!-- Interviewers pills -->
-        <div v-if="interview.interviewers.length" class="flex items-center gap-1.5 mt-3 flex-wrap">
+        <div v-if="interview.interviewers.length" class="flex items-center gap-2 mt-3 flex-wrap">
           <span
             v-for="iv in interview.interviewers"
             :key="iv.id"
-            class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-gray-50 text-gray-600 rounded-full border border-border"
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 rounded-full dark:bg-slate-800 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700"
           >
             {{ iv.fullName }}
           </span>
@@ -272,53 +272,53 @@ onMounted(async () => {
 
     <!-- ─── Schedule Interview Dialog ─── -->
     <Teleport to="body">
-      <div v-if="showScheduleDialog" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/40" @click="showScheduleDialog = false" />
-        <div class="relative bg-surface rounded-lg shadow-xl border border-border w-full max-w-lg p-6 animate-slide-up max-h-[90vh] overflow-y-auto">
-          <div class="flex items-center justify-between mb-5">
-            <h2 class="text-lg font-bold text-gray-900">Schedule Interview</h2>
+      <div v-if="showScheduleDialog" class="premium-modal-backdrop">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showScheduleDialog = false" />
+        <div class="premium-modal-content w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Schedule Interview</h2>
             <button
               @click="showScheduleDialog = false"
-              class="w-8 h-8 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
+              class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition"
             >
               ✕
             </button>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-5">
             <!-- Title -->
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                Title <span class="text-error">*</span>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Title <span class="text-rose-500">*</span>
               </label>
               <input
                 v-model="form.title"
                 type="text"
                 placeholder="e.g. Technical Interview Round 1"
-                class="w-full px-3 py-2 text-sm border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
-                :class="formErrors.title ? 'border-error' : 'border-border'"
+                class="w-full px-4 py-3 text-sm border rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none transition"
+                :class="formErrors.title ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-300 dark:border-slate-700 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
               />
-              <p v-if="formErrors.title" class="text-[11px] text-error mt-1">{{ formErrors.title }}</p>
+              <p v-if="formErrors.title" class="text-xs text-rose-500 mt-1.5">{{ formErrors.title }}</p>
             </div>
 
             <!-- Date & Time -->
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                Date & Time <span class="text-error">*</span>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Date & Time <span class="text-rose-500">*</span>
               </label>
               <input
                 v-model="form.scheduledAt"
                 type="datetime-local"
-                class="w-full px-3 py-2 text-sm border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
-                :class="formErrors.scheduledAt ? 'border-error' : 'border-border'"
+                class="w-full px-4 py-3 text-sm border rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none transition"
+                :class="formErrors.scheduledAt ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-300 dark:border-slate-700 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
               />
-              <p v-if="formErrors.scheduledAt" class="text-[11px] text-error mt-1">{{ formErrors.scheduledAt }}</p>
+              <p v-if="formErrors.scheduledAt" class="text-xs text-rose-500 mt-1.5">{{ formErrors.scheduledAt }}</p>
             </div>
 
             <!-- Duration & Type -->
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                   Duration (min)
                 </label>
                 <input
@@ -327,16 +327,16 @@ onMounted(async () => {
                   min="15"
                   max="480"
                   step="15"
-                  class="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                  class="w-full px-4 py-3 text-sm border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
                 />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                   Type
                 </label>
                 <select
                   v-model="form.interviewType"
-                  class="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                  class="w-full px-4 py-3 text-sm border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
                 >
                   <option v-for="opt in interviewTypeOptions" :key="opt.value" :value="opt.value">
                     {{ opt.label }}
@@ -347,51 +347,51 @@ onMounted(async () => {
 
             <!-- Location / Link -->
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                 Location or Meeting Link
               </label>
               <input
                 v-model="form.locationOrLink"
                 type="text"
                 placeholder="e.g. https://meet.google.com/abc-xyz or Room 301"
-                class="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                class="w-full px-4 py-3 text-sm border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
               />
             </div>
 
             <!-- Interviewer IDs -->
             <div>
-              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                Interviewers <span class="text-error">*</span>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Interviewers <span class="text-rose-500">*</span>
               </label>
               <div class="flex items-center gap-2">
                 <input
                   v-model="interviewerIdInput"
                   type="text"
                   placeholder="Enter interviewer user ID"
-                  class="flex-1 px-3 py-2 text-sm border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
-                  :class="formErrors.interviewerIds ? 'border-error' : 'border-border'"
+                  class="flex-1 px-4 py-3 text-sm border rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none transition"
+                  :class="formErrors.interviewerIds ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-300 dark:border-slate-700 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
                   @keydown.enter.prevent="addInterviewerId"
                 />
                 <button
                   @click="addInterviewerId"
                   type="button"
-                  class="px-3 py-2 text-sm font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition shrink-0"
+                  class="btn-secondary"
                 >
                   Add
                 </button>
               </div>
-              <p v-if="formErrors.interviewerIds" class="text-[11px] text-error mt-1">{{ formErrors.interviewerIds }}</p>
+              <p v-if="formErrors.interviewerIds" class="text-xs text-rose-500 mt-1.5">{{ formErrors.interviewerIds }}</p>
               <!-- Tags -->
-              <div v-if="form.interviewerIds.length" class="flex items-center gap-1.5 mt-2 flex-wrap">
+              <div v-if="form.interviewerIds.length" class="flex items-center gap-2 mt-3 flex-wrap">
                 <span
                   v-for="iId in form.interviewerIds"
                   :key="iId"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-border"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold tracking-wider bg-slate-100 text-slate-600 rounded-full dark:bg-slate-800 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700"
                 >
                   {{ iId.slice(0, 8) }}…
                   <button
                     @click="removeInterviewerId(iId)"
-                    class="text-gray-400 hover:text-error transition ml-0.5"
+                    class="text-slate-400 hover:text-rose-500 transition ml-1"
                   >
                     ✕
                   </button>
@@ -401,19 +401,19 @@ onMounted(async () => {
           </div>
 
           <!-- Actions -->
-          <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-border">
+          <div class="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-100 dark:border-slate-700">
             <button
               @click="showScheduleDialog = false"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+              class="btn-secondary"
             >
               Cancel
             </button>
             <button
               @click="submitSchedule"
               :disabled="interviewStore.createLoading"
-              class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+              class="btn-primary"
             >
-              <span v-if="interviewStore.createLoading" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span v-if="interviewStore.createLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {{ interviewStore.createLoading ? 'Scheduling…' : 'Schedule' }}
             </button>
           </div>

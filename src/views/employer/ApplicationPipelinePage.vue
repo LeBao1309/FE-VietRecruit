@@ -178,9 +178,9 @@ onMounted(async () => {
         <button
           @click="handleTriggerScreening"
           :disabled="appStore.triggerScreeningLoading"
-          class="px-4 py-2 text-sm font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition disabled:opacity-50 flex items-center gap-1.5"
+          class="btn-secondary text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
         >
-          <span v-if="appStore.triggerScreeningLoading" class="inline-block w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <span v-if="appStore.triggerScreeningLoading" class="inline-block w-4 h-4 border-2 border-teal-600/30 border-t-teal-600 rounded-full animate-spin" />
           <template v-else>⚡</template>
           AI Screen
         </button>
@@ -188,24 +188,24 @@ onMounted(async () => {
         <!-- View screening results -->
         <button
           @click="loadScreeningResults"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+          class="btn-outline"
         >
           📊 Results
         </button>
 
         <!-- View mode toggle -->
-        <div class="flex items-center bg-gray-100 rounded-md p-0.5">
+        <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
           <button
             @click="viewMode = 'kanban'"
-            class="px-3 py-1.5 text-xs font-medium rounded transition"
-            :class="viewMode === 'kanban' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all"
+            :class="viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >
             Board
           </button>
           <button
             @click="viewMode = 'table'"
-            class="px-3 py-1.5 text-xs font-medium rounded transition"
-            :class="viewMode === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all"
+            :class="viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >
             Table
           </button>
@@ -222,13 +222,13 @@ onMounted(async () => {
     </div>
 
     <!-- ─── KANBAN VIEW ─── -->
-    <div v-else-if="viewMode === 'kanban'" class="flex gap-4 overflow-x-auto pb-4" style="min-height: 400px">
+    <div v-else-if="viewMode === 'kanban'" class="flex gap-5 overflow-x-auto pb-6" style="min-height: 400px">
       <div
         v-for="col in PIPELINE_COLUMNS"
         :key="col.status"
-        class="flex-shrink-0 w-64 bg-gray-50/80 rounded-lg border border-border overflow-hidden"
+        class="flex-shrink-0 w-72 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/60 dark:border-slate-700 flex flex-col max-h-[750px] shadow-sm"
         :class="col.color"
-        style="border-top-width: 3px"
+        style="border-top-width: 4px"
       >
         <!-- Column Header -->
         <div class="px-3 py-3 flex items-center justify-between">
@@ -242,21 +242,21 @@ onMounted(async () => {
         </div>
 
         <!-- Column Cards -->
-        <div class="px-2 pb-2 space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar">
+        <div class="px-3 pb-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar">
           <div
             v-for="app in appStore.applicationsByStatus[col.status]"
             :key="app.id"
             @click="goToDetail(app.id)"
-            class="bg-white rounded-lg border border-border p-3 cursor-pointer hover:shadow-md hover:border-primary/20 transition-all group"
+            class="premium-card p-4 cursor-pointer group hover:border-teal-400 dark:hover:border-teal-500 block"
           >
-            <div class="flex items-start justify-between mb-2">
-              <span class="text-sm font-medium text-gray-900 leading-tight group-hover:text-primary transition">
+            <div class="flex items-start justify-between mb-3">
+              <span class="text-sm font-bold text-slate-900 dark:text-white leading-tight group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                 {{ app.candidateName }}
               </span>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-gray-400">{{ formatDate(app.createdAt) }}</span>
-              <span class="text-primary text-[10px] font-medium opacity-0 group-hover:opacity-100 transition">
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/50">
+              <span class="text-xs font-medium text-slate-400">{{ formatDate(app.createdAt) }}</span>
+              <span class="text-teal-600 text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
                 View →
               </span>
             </div>
@@ -289,13 +289,13 @@ onMounted(async () => {
       </div>
 
       <!-- Table -->
-      <div class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
+      <div class="premium-card overflow-hidden">
         <table class="w-full">
           <thead>
-            <tr class="border-b border-border bg-gray-50/50">
-              <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Candidate</th>
-              <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-32">Stage</th>
-              <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 w-28">Applied</th>
+            <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Candidate</th>
+              <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-36">Stage</th>
+              <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Applied</th>
             </tr>
           </thead>
           <tbody>
@@ -311,13 +311,13 @@ onMounted(async () => {
               v-for="app in appStore.applicationList"
               :key="app.id"
               @click="goToDetail(app.id)"
-              class="border-b border-border last:border-0 hover:bg-primary-bg/30 transition cursor-pointer"
+              class="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
             >
-              <td class="px-4 py-3.5">
-                <span class="text-sm font-medium text-gray-900">{{ app.candidateName }}</span>
-                <span class="block text-xs text-gray-400 mt-0.5">{{ app.jobTitle }}</span>
+              <td class="px-5 py-4">
+                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-teal-600 transition-colors">{{ app.candidateName }}</span>
+                <span class="block text-xs font-medium text-slate-500 mt-0.5">{{ app.jobTitle }}</span>
               </td>
-              <td class="px-4 py-3.5">
+              <td class="px-5 py-4">
                 <span
                   class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full"
                   :class="statusBadgeConfig[app.status].class"
@@ -325,7 +325,7 @@ onMounted(async () => {
                   {{ statusBadgeConfig[app.status].label }}
                 </span>
               </td>
-              <td class="px-4 py-3.5 text-sm text-gray-400">
+              <td class="px-5 py-4 text-sm font-medium text-slate-500">
                 {{ formatDate(app.createdAt) }}
               </td>
             </tr>
@@ -333,15 +333,15 @@ onMounted(async () => {
         </table>
 
         <!-- Pagination -->
-        <div v-if="appStore.totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-border bg-gray-50/30">
-          <span class="text-xs text-gray-400">
+        <div v-if="appStore.totalPages > 1" class="flex items-center justify-between px-5 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/10">
+          <span class="text-sm font-medium text-slate-500">
             Page {{ currentPage + 1 }} of {{ appStore.totalPages }}
           </span>
-          <div class="flex items-center gap-1">
-            <button @click="prevPage" :disabled="!canGoPrev" class="px-3 py-1.5 text-xs font-medium border border-border rounded-md transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50">
+          <div class="flex items-center gap-2">
+            <button @click="prevPage" :disabled="!canGoPrev" class="btn-outline px-3 py-1 text-sm">
               ‹ Prev
             </button>
-            <button @click="nextPage" :disabled="!canGoNext" class="px-3 py-1.5 text-xs font-medium border border-border rounded-md transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50">
+            <button @click="nextPage" :disabled="!canGoNext" class="btn-outline px-3 py-1 text-sm">
               Next ›
             </button>
           </div>
@@ -389,12 +389,12 @@ onMounted(async () => {
           </div>
 
           <!-- Results -->
-          <div v-else class="px-6 py-4 space-y-3">
+          <div v-else class="px-6 py-6 space-y-4">
             <div
               v-for="sr in appStore.screeningResults"
               :key="sr.applicationId"
               @click="goToDetail(sr.applicationId); showScreening = false"
-              class="bg-white border border-border rounded-lg p-4 hover:border-primary/20 hover:shadow-sm transition cursor-pointer group"
+              class="premium-card p-5 cursor-pointer block hover:border-teal-400"
             >
               <!-- Candidate info + score -->
               <div class="flex items-start justify-between mb-3">

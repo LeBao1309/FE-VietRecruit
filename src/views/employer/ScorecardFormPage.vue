@@ -94,16 +94,16 @@ onMounted(async () => {
     </div>
 
     <!-- Success state -->
-    <div v-if="submitted" class="bg-surface border border-border rounded-lg p-8 shadow-sm text-center">
-      <div class="w-16 h-16 rounded-full bg-success-bg text-success flex items-center justify-center text-2xl mx-auto mb-4">
+    <div v-if="submitted" class="premium-card p-12 text-center max-w-lg mx-auto mt-12">
+      <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm">
         ✓
       </div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">Scorecard Submitted</h2>
-      <p class="text-sm text-gray-500 mb-5">Your evaluation has been recorded successfully.</p>
+      <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">Scorecard Submitted</h2>
+      <p class="text-slate-500 mb-8">Your evaluation has been recorded successfully.</p>
       <div class="flex justify-center gap-3">
         <button
           @click="router.push(`/employer/interviews/${interviewId}`)"
-          class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+          class="btn-primary"
         >
           Back to Interview
         </button>
@@ -111,18 +111,18 @@ onMounted(async () => {
     </div>
 
     <!-- Form -->
-    <div v-else class="space-y-5">
+    <div v-else class="space-y-6">
       <!-- Header -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
-        <h1 class="text-xl font-bold text-gray-900 mb-1">Submit Scorecard</h1>
-        <p v-if="interviewStore.currentInterview" class="text-sm text-gray-500">
+      <div class="premium-card p-6 border-l-4 border-l-teal-500">
+        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">Submit Scorecard</h1>
+        <p v-if="interviewStore.currentInterview" class="text-sm font-medium text-slate-500">
           {{ interviewStore.currentInterview.title }}
         </p>
       </div>
 
       <!-- Score Sliders -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm space-y-6">
-        <h2 class="text-sm font-semibold text-gray-900">Evaluation Scores</h2>
+      <div class="premium-card p-8 space-y-8">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Evaluation Scores</h2>
 
         <!-- Skill Score -->
         <div>
@@ -233,19 +233,19 @@ onMounted(async () => {
       </div>
 
       <!-- Result Selection -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
-        <h2 class="text-sm font-semibold text-gray-900 mb-4">Overall Result</h2>
-        <div class="grid grid-cols-3 gap-3">
+      <div class="premium-card p-8">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-5">Overall Result</h2>
+        <div class="grid grid-cols-3 gap-4">
           <button
             v-for="opt in resultOptions"
             :key="opt.value"
             @click="result = opt.value"
-            class="p-4 rounded-lg border-2 text-center transition-all"
+            class="p-6 rounded-2xl border-2 text-center transition-all duration-200"
             :class="result === opt.value
-              ? opt.class + ' ring-2 ring-offset-1'
-              : 'border-border bg-surface text-gray-500 hover:border-gray-300'"
+              ? opt.class + ' ring-4 ring-offset-2 ring-transparent scale-[1.02] shadow-md border-transparent'
+              : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300 hover:bg-slate-100 hover:scale-[1.01] dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600'"
           >
-            <span class="block text-lg font-bold mb-0.5">
+            <span class="block text-3xl font-black mb-2">
               {{ opt.value === 'PASS' ? '✓' : opt.value === 'FAIL' ? '✕' : '~' }}
             </span>
             <span class="block text-sm font-semibold">{{ opt.label }}</span>
@@ -255,30 +255,30 @@ onMounted(async () => {
       </div>
 
       <!-- Comments -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
-        <h2 class="text-sm font-semibold text-gray-900 mb-3">Comments</h2>
+      <div class="premium-card p-8">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Comments</h2>
         <textarea
           v-model="comments"
-          rows="4"
+          rows="5"
           placeholder="Share your detailed observations, key strengths, concerns, and recommendation notes…"
-          class="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition resize-none"
+          class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition resize-none text-slate-900 dark:text-white placeholder-slate-400"
         />
       </div>
 
       <!-- Submit -->
-      <div class="flex justify-end gap-3">
+      <div class="flex justify-end gap-3 pt-4">
         <button
           @click="router.push(`/employer/interviews/${interviewId}`)"
-          class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+          class="btn-secondary"
         >
           Cancel
         </button>
         <button
           @click="handleSubmit"
           :disabled="interviewStore.submitScorecardLoading"
-          class="px-6 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+          class="btn-primary"
         >
-          <span v-if="interviewStore.submitScorecardLoading" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <span v-if="interviewStore.submitScorecardLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           {{ interviewStore.submitScorecardLoading ? 'Submitting…' : 'Submit Scorecard' }}
         </button>
       </div>

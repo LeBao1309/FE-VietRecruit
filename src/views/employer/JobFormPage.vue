@@ -282,16 +282,16 @@ onMounted(async () => {
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-surface border border-border rounded-lg p-6 shadow-sm animate-pulse space-y-4">
-      <div class="h-10 bg-gray-100 rounded" />
-      <div class="h-40 bg-gray-100 rounded" />
-      <div class="h-10 bg-gray-100 rounded" />
+    <div v-if="loading" class="premium-card p-6 animate-pulse space-y-4">
+      <div class="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+      <div class="h-40 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+      <div class="h-10 bg-slate-100 dark:bg-slate-800 rounded-xl" />
     </div>
 
     <!-- Form -->
     <form v-else @submit.prevent="handleSave" class="space-y-6">
       <!-- Title -->
-      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm space-y-5">
+      <div class="premium-card p-6 space-y-5">
         <h2 class="text-sm font-semibold text-gray-900 mb-4">Basic Information</h2>
 
         <div>
@@ -358,7 +358,7 @@ onMounted(async () => {
       </div>
 
       <!-- Salary -->
-      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm space-y-5">
+      <div class="premium-card p-6 space-y-5">
         <h2 class="text-sm font-semibold text-gray-900 mb-4">Compensation</h2>
 
         <div class="grid grid-cols-3 gap-4">
@@ -413,32 +413,32 @@ onMounted(async () => {
       </div>
 
       <!-- Description -->
-      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm space-y-5">
+      <div class="premium-card p-6 space-y-5">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-sm font-semibold text-gray-900">Job Description</h2>
           <button
             type="button"
             @click="showAiPanel = !showAiPanel"
-            class="px-3 py-1.5 text-xs font-medium rounded-md transition flex items-center gap-1.5"
+            class="transition flex items-center gap-1.5"
             :class="showAiPanel
-              ? 'bg-primary text-white'
-              : 'bg-primary-bg text-primary hover:bg-primary-light border border-primary/20'"
+              ? 'btn-primary'
+              : 'btn-secondary text-teal-700 bg-teal-50 hover:bg-teal-100 border-teal-200'"
           >
             ✦ AI Generate
           </button>
         </div>
 
         <!-- AI Panel (collapsible) -->
-        <div v-if="showAiPanel" class="bg-primary-bg/50 border border-primary/10 rounded-lg p-4 space-y-4 animate-slide-up">
-          <p class="text-xs text-gray-500">
+        <div v-if="showAiPanel" class="bg-slate-900 rounded-2xl p-6 space-y-5 shadow-inner border border-slate-800 animate-slide-up text-white">
+          <p class="text-sm text-slate-400">
             Provide some context and let AI generate a professional job description.
             The job title from above will be used automatically.
           </p>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Employment Type</label>
-              <select v-model="aiForm.employmentType" class="w-full px-2.5 py-2 text-xs border border-border rounded-md bg-surface outline-none focus:border-primary transition">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Employment Type</label>
+              <select v-model="aiForm.employmentType" class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition">
                 <option value="FULL_TIME">Full-time</option>
                 <option value="PART_TIME">Part-time</option>
                 <option value="CONTRACT">Contract</option>
@@ -446,8 +446,8 @@ onMounted(async () => {
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Tone</label>
-              <select v-model="aiForm.tone" class="w-full px-2.5 py-2 text-xs border border-border rounded-md bg-surface outline-none focus:border-primary transition">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Tone</label>
+              <select v-model="aiForm.tone" class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition">
                 <option value="PROFESSIONAL">Professional</option>
                 <option value="STARTUP">Startup</option>
                 <option value="CORPORATE">Corporate</option>
@@ -456,99 +456,99 @@ onMounted(async () => {
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Key Responsibilities (one per line)</label>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Key Responsibilities (one per line)</label>
             <textarea
               v-model="aiForm.keyResponsibilities"
               rows="3"
               placeholder="Design and develop frontend components&#10;Collaborate with backend team&#10;Write unit tests"
-              class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition resize-none"
+              class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition resize-none placeholder-slate-500"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Required Skills (one per line)</label>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Required Skills (one per line)</label>
             <textarea
               v-model="aiForm.requiredSkills"
               rows="3"
               placeholder="Vue.js / React&#10;TypeScript&#10;REST API integration"
-              class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition resize-none"
+              class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition resize-none placeholder-slate-500"
             />
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Nice-to-Have Skills (one per line)</label>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Nice-to-Have Skills (one per line)</label>
               <textarea
                 v-model="aiForm.niceToHaveSkills"
                 rows="2"
                 placeholder="Docker&#10;CI/CD"
-                class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition resize-none"
+                class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition resize-none placeholder-slate-500"
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">Years of Experience</label>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Years of Experience</label>
               <input
                 v-model="aiForm.yearsOfExperience"
                 type="text"
                 inputmode="numeric"
                 placeholder="e.g. 3"
-                class="w-full px-2.5 py-2 text-xs border border-border rounded-md outline-none focus:border-primary transition"
+                class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition placeholder-slate-500"
               />
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-3 pt-2">
             <button
               type="button"
               @click="generateJd"
               :disabled="aiGenerating"
-              class="px-4 py-2 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+              class="btn-primary"
             >
-              <span v-if="aiGenerating" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span v-if="aiGenerating" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {{ aiGenerating ? 'Generating…' : '✦ Generate Description' }}
             </button>
             <button
               type="button"
               @click="showAiPanel = false"
-              class="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 transition"
+              class="px-4 py-2 text-sm text-slate-400 hover:text-white transition"
             >
               Cancel
             </button>
           </div>
 
           <!-- AI Result Preview -->
-          <div v-if="aiResult" class="mt-4 bg-surface border border-border rounded-lg p-4 space-y-3 animate-fade-in">
+          <div v-if="aiResult" class="mt-6 bg-slate-800 border border-teal-500/30 rounded-xl p-5 space-y-4 animate-fade-in shadow-lg">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-semibold text-gray-900">Generated Preview</h3>
-              <span class="text-[10px] text-gray-400">{{ aiResult.generatedAt }}</span>
+              <h3 class="text-sm font-bold text-teal-400">Generated Preview</h3>
+              <span class="text-xs text-slate-500">{{ aiResult.generatedAt }}</span>
             </div>
 
-            <div class="text-xs text-gray-700 space-y-2 max-h-64 overflow-y-auto">
+            <div class="text-sm text-slate-300 space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
               <div>
-                <strong class="text-gray-900">Overview:</strong>
-                <p class="mt-0.5">{{ aiResult.generatedDescription.overview }}</p>
+                <strong class="text-white">Overview:</strong>
+                <p class="mt-1 leading-relaxed">{{ aiResult.generatedDescription.overview }}</p>
               </div>
               <div>
-                <strong class="text-gray-900">Responsibilities:</strong>
-                <ul class="mt-0.5 list-disc list-inside space-y-0.5">
+                <strong class="text-white">Responsibilities:</strong>
+                <ul class="mt-1 list-disc list-inside space-y-1">
                   <li v-for="(r, i) in aiResult.generatedDescription.responsibilities" :key="i">{{ r }}</li>
                 </ul>
               </div>
               <div>
-                <strong class="text-gray-900">Requirements:</strong>
-                <ul class="mt-0.5 list-disc list-inside space-y-0.5">
+                <strong class="text-white">Requirements:</strong>
+                <ul class="mt-1 list-disc list-inside space-y-1">
                   <li v-for="(r, i) in aiResult.generatedDescription.requirements" :key="i">{{ r }}</li>
                 </ul>
               </div>
               <div v-if="aiResult.generatedDescription.niceToHave.length">
-                <strong class="text-gray-900">Nice to Have:</strong>
-                <ul class="mt-0.5 list-disc list-inside space-y-0.5">
+                <strong class="text-white">Nice to Have:</strong>
+                <ul class="mt-1 list-disc list-inside space-y-1">
                   <li v-for="(r, i) in aiResult.generatedDescription.niceToHave" :key="i">{{ r }}</li>
                 </ul>
               </div>
               <div v-if="aiResult.generatedDescription.benefits">
-                <strong class="text-gray-900">Benefits:</strong>
-                <p class="mt-0.5">{{ aiResult.generatedDescription.benefits }}</p>
+                <strong class="text-white">Benefits:</strong>
+                <p class="mt-1 leading-relaxed">{{ aiResult.generatedDescription.benefits }}</p>
               </div>
             </div>
 
@@ -563,18 +563,18 @@ onMounted(async () => {
               </span>
             </div>
 
-            <div class="flex gap-2 pt-1">
+            <div class="flex gap-3 pt-3 border-t border-slate-700">
               <button
                 type="button"
                 @click="applyAiResult"
-                class="px-4 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+                class="btn-primary"
               >
                 Apply to Form
               </button>
               <button
                 type="button"
                 @click="aiResult = null"
-                class="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 transition"
+                class="btn-secondary dark:bg-slate-700 dark:text-white"
               >
                 Discard
               </button>
@@ -620,20 +620,20 @@ onMounted(async () => {
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between pt-4">
         <button
           type="button"
           @click="router.push('/employer/jobs')"
-          class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+          class="btn-secondary"
         >
           Cancel
         </button>
         <button
           type="submit"
           :disabled="saving"
-          class="px-6 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+          class="btn-primary"
         >
-          <span v-if="saving" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <span v-if="saving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           {{ saving ? 'Saving…' : isEditMode ? 'Save Changes' : 'Create Draft' }}
         </button>
       </div>
