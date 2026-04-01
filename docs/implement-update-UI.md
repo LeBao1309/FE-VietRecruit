@@ -13,7 +13,7 @@
 
 ## 2. Refactoring Phases
 
-### Phase 1: Global Theme & Token Injection
+### Phase 1: Global Theme & Token Injection (Completed)
 1.  **Tailwind Configuration (`index.css` / `tailwind.config.js`):**
     *   Enhance neutral palette to use `slate` standard for a cooler, modern premium feel compared to generic gray.
     *   Ensure focus rings are defined globally (`.focus-visible:ring-2`).
@@ -28,13 +28,43 @@
     *   *Cards:* Use `rounded-xl` or `rounded-2xl`, standard `border-slate-200/60`, and subtle hover lift for interactive cards (like job listings).
     *   *Modals:* Apply hardware-accelerated `backdrop-blur-sm bg-slate-900/40` for overlays.
 
-### Phase 3: View & Page Enhancements
-1.  **Dashboards (`DashboardPage.vue`, `EmployerLayout.vue`):**
-    *   Refactor Stat Cards to look premium (subtle gradient/icon wrappers).
-    *   Ensure typography hierarchy is flawless (`text-slate-900` for titles, `text-slate-500` for subtitles).
-2.  **Data Tables (`JobListPage.vue`):**
-    *   Convert basic data rows to premium list rows with high scannability.
-    *   Add hover states to table rows (`hover:bg-slate-50`).
+## 3. Comprehensive View Refactor Checklist (`src/views/`)
 
-## 3. Execution Standard
+To modernize the entire application uniformly, the following files will be refactored to conform to the rules in `docs/first-prompt.md`, integrating the specific business flows identified in the agent blueprints.
+
+### 3.1 Workspace, Pipeline & Management Features
+**Flow Insight:** The workspace governs job creation, the kanban application pipeline, and interview scorecards.
+*   [x] **`employer/DashboardPage.vue`**: Layout rounded, hover stat cards added, quota bar stylized.
+*   [x] **`employer/JobListPage.vue`**: Borderless table list rows with slick hovers.
+*   [ ] **`employer/JobFormPage.vue`**: Refactor extensive forms to use the `bg-slate-50` floating inputs. Ensure salary arrays and AI Job Description Generation buttons are prominent.
+*   [ ] **`employer/ApplicationPipelinePage.vue` (Kanban Board)**: 
+    *   Style the 6 kanban columns (Mới, Sàng lọc, Phỏng vấn, Đề nghị, Đã tuyển, Từ chối) with `bg-slate-100/50` fixed-height scrolling containers.
+    *   Style candidate draggable cards to clearly show Name, Position, and Application Date. Add hover-lift for drag cues.
+    *   Enhance the `CandidateDetailPanel` slide-out drawer layout.
+*   [ ] **`employer/ScorecardFormPage.vue` & `employer/ScorecardSummaryPage.vue`**: 
+    *   Implement prominent, styled radio buttons/toggle chips for the four constraints: `STRONG_YES`, `YES`, `NO`, `STRONG_NO` (e.g., ranging from emerald-green to rose-red).
+*   [ ] **`employer/InterviewDetailPage.vue`**: Add the "Generate AI Questions" panel UI gracefully alongside the candidate details.
+*   [ ] **`employer/TeamPage.vue` & `OrganizationPage.vue`**: Convert data tables/lists to new standard with role badges.
+*   [ ] **Layout Restructure**: Consolidate layouts if necessary (Admin/Employer wrappers) into a unified `WorkspaceLayout.vue` featuring the Sidebar.
+
+### 3.2 Billing / Pricing (PayOS Flow)
+**Flow Insight:** Checkout flow jumps to PayOS and returns to a status page.
+*   [ ] **`employer/PricingPage.vue`**: Marketing-focused premium pricing cards (FREE, PRO, ENTERPRISE). Add a sleek Monthly/Yearly billing toggle switch.
+*   [ ] **`employer/SubscriptionPage.vue`**: Feature the active plan strongly, integrating the remaining quota bar.
+*   [ ] **`employer/PaymentStatusPage.vue`**: Distinct success/error status message cards when returning from the PayOS link.
+
+### 3.3 Candidate Portal & AI Features
+**Flow Insight:** Candidates upload CVs (PDF <5MB) directly, apply for jobs, and use AI features to prepare.
+*   [ ] **`candidate/DashboardPage.vue`**
+*   [ ] **`candidate/CandidateProfilePage.vue` & `candidate/CvManagementPage.vue`**: Restyle the CV Upload Drag-and-Drop zone (`border-dashed hover:border-teal-500 bg-slate-50`). Ensure validation errors (<5MB, PDF only) look native.
+*   [ ] **Missing AI UIs (`JobRecommendations`, `SalaryBenchmark`)**: Create dedicated modern UI sections for AI recommendations (cards) and Salary Benchmark (charts or progress bars). Add the "Improve CV" action button to the Profile view.
+*   [ ] **`candidate/MyApplicationsPage.vue`**: Timeline step styling to track application progress visually through the 6 pipeline stages.
+
+### 3.4 Shared, Administrative & Auth
+*   [ ] **`shared/SettingsPage.vue` & `shared/ProfilePage.vue`**
+*   [ ] **`admin/UsersPage.vue` & `admin/TransactionsPage.vue`**
+*   [ ] **`auth/... (7 files)`**: Create a unified elegant centered authentication layout box.
+*   [ ] **`public/JobBoardPage.vue` & `public/PublicJobDetailPage.vue`**: Distinctive, scannable public pages with robust search autocompletion inputs.
+
+## 4. Execution Standard
 All Vue components (`.vue`) will be modified strictly using Tailwind utility classes. No arbitrary custom CSS will be added to `<style scoped>` unless absolutely necessary to avoid bloated bundles.
