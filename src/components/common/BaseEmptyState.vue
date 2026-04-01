@@ -7,12 +7,12 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center p-8 text-center min-h-[300px] border-2 border-dashed border-border rounded-lg bg-surface">
-    <div v-if="icon || $slots.icon" class="mb-4 text-4xl text-gray-400 dark:text-gray-500">
+  <div class="flex flex-col items-center justify-center p-8 text-center min-h-[300px] border-2 border-dashed border-slate-200 dark:border-slate-700/60 rounded-2xl bg-slate-50 dark:bg-slate-800/30">
+    <div v-if="icon || $slots.icon" class="mb-4 text-4xl text-slate-300 dark:text-slate-600">
       <slot name="icon">{{ icon }}</slot>
     </div>
-    <h3 class="text-lg font-medium text-text-primary">{{ title }}</h3>
-    <p v-if="description" class="mt-2 text-sm text-text-secondary max-w-sm">{{ description }}</p>
+    <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ title }}</h3>
+    <p v-if="description" class="mt-2 text-sm font-medium text-slate-500 max-w-sm">{{ description }}</p>
     <div v-if="$slots.action" class="mt-6">
       <slot name="action"></slot>
     </div>
