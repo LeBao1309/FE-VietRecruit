@@ -58,93 +58,101 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="pricing-page">
+  <div class="max-w-6xl mx-auto px-6 py-12">
     <!-- Header -->
-    <div class="pricing-header">
-      <h1>Choose Your Plan</h1>
-      <p class="pricing-subtitle">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white mb-4">Choose Your Plan</h1>
+      <p class="text-lg font-medium text-slate-500 mb-8 max-w-2xl mx-auto">
         Scale your hiring with the right plan. All plans include a free trial period.
       </p>
 
       <!-- Billing Toggle -->
-      <div class="billing-toggle">
+      <div class="inline-flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shadow-inner border border-slate-200 dark:border-slate-700">
         <button
-          :class="['toggle-btn', { active: billingCycle === 'MONTHLY' }]"
+          class="px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 block"
+          :class="billingCycle === 'MONTHLY' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'"
           @click="billingCycle = 'MONTHLY'"
         >
           Monthly
         </button>
         <button
-          :class="['toggle-btn', { active: billingCycle === 'YEARLY' }]"
+          class="px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2"
+          :class="billingCycle === 'YEARLY' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'"
           @click="billingCycle = 'YEARLY'"
         >
           Yearly
-          <span class="save-badge">Save up to 20%</span>
+          <span class="text-[10px] uppercase font-black tracking-wider bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 px-2 py-0.5 rounded-full">Save 20%</span>
         </button>
       </div>
     </div>
 
     <!-- Loading -->
-    <div v-if="subStore.loading && subStore.plans.length === 0" class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading plans...</p>
+    <div v-if="subStore.loading && subStore.plans.length === 0" class="py-20 text-center text-slate-500">
+      <div class="inline-block w-8 h-8 border-4 border-slate-200 dark:border-slate-800 border-t-teal-600 rounded-full animate-spin mb-4" />
+      <p class="font-medium">Loading plans...</p>
     </div>
 
     <!-- Plans Grid -->
-    <div v-else class="plans-grid">
+    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start relative z-0">
       <div
         v-for="plan in sortedPlans"
         :key="plan.id"
-        :class="['plan-card', { featured: plan.code === 'PROFESSIONAL' }]"
+        class="premium-card relative flex flex-col p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+        :class="plan.code === 'PROFESSIONAL' ? 'border-2 border-teal-500 shadow-lg md:-mt-4 bg-white dark:bg-slate-900' : 'border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30'"
       >
-        <div v-if="plan.code === 'PROFESSIONAL'" class="featured-badge">Most Popular</div>
-
-        <div class="plan-header">
-          <h2 class="plan-name">{{ plan.name }}</h2>
-          <p class="plan-description">{{ plan.description ?? '' }}</p>
+        <div v-if="plan.code === 'PROFESSIONAL'" class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-teal-500 text-white text-[11px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
+          Most Popular
         </div>
 
-        <div class="plan-price">
-          <span class="price-amount">{{ formatPrice(getPrice(plan), plan.currency) }}</span>
-          <span class="price-period">{{ getPeriodLabel() }}</span>
+        <div class="mb-6">
+          <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">{{ plan.name }}</h2>
+          <p class="text-sm font-medium text-slate-500 min-h-[40px]">{{ plan.description ?? '' }}</p>
+        </div>
+
+        <div class="mb-8 pb-6 border-b border-slate-200 dark:border-slate-700">
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">{{ formatPrice(getPrice(plan), plan.currency) }}</span>
+            <span class="text-sm font-bold text-slate-400">{{ getPeriodLabel() }}</span>
+          </div>
           <div
             v-if="billingCycle === 'YEARLY' && getSavingsPercent(plan) > 0"
-            class="savings-label"
+            class="mt-2 text-sm font-bold text-emerald-500"
           >
             Save {{ getSavingsPercent(plan) }}%
           </div>
+          <div v-else class="mt-2 h-5 visible"></div>
         </div>
 
-        <ul class="plan-features">
-          <li>
-            <span class="feature-icon">✓</span>
+        <ul class="flex-1 flex flex-col gap-4 mb-8">
+          <li class="flex items-start gap-3 text-sm font-bold text-slate-700 dark:text-slate-300">
+            <span class="text-teal-500 font-black shrink-0 mt-0.5">✓</span>
             <span>{{ plan.maxActiveJobs }} active job{{ plan.maxActiveJobs !== 1 ? 's' : '' }}</span>
           </li>
-          <li>
-            <span class="feature-icon">✓</span>
+          <li class="flex items-start gap-3 text-sm font-bold text-slate-700 dark:text-slate-300">
+            <span class="text-teal-500 font-black shrink-0 mt-0.5">✓</span>
             <span>{{ plan.jobDurationDays }}-day job listings</span>
           </li>
-          <li :class="{ disabled: !plan.resumeAccess }">
-            <span class="feature-icon">{{ plan.resumeAccess ? '✓' : '—' }}</span>
+          <li class="flex items-start gap-3 text-sm font-bold transition-opacity" :class="plan.resumeAccess ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'">
+            <span class="font-black shrink-0 mt-0.5" :class="plan.resumeAccess ? 'text-teal-500' : 'text-slate-300 dark:text-slate-700'">{{ plan.resumeAccess ? '✓' : '—' }}</span>
             <span>Resume database access</span>
           </li>
-          <li :class="{ disabled: !plan.aiMatching }">
-            <span class="feature-icon">{{ plan.aiMatching ? '✓' : '—' }}</span>
+          <li class="flex items-start gap-3 text-sm font-bold transition-opacity" :class="plan.aiMatching ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'">
+            <span class="font-black shrink-0 mt-0.5" :class="plan.aiMatching ? 'text-teal-500' : 'text-slate-300 dark:text-slate-700'">{{ plan.aiMatching ? '✓' : '—' }}</span>
             <span>AI candidate matching</span>
           </li>
-          <li :class="{ disabled: !plan.priorityListing }">
-            <span class="feature-icon">{{ plan.priorityListing ? '✓' : '—' }}</span>
+          <li class="flex items-start gap-3 text-sm font-bold transition-opacity" :class="plan.priorityListing ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'">
+            <span class="font-black shrink-0 mt-0.5" :class="plan.priorityListing ? 'text-teal-500' : 'text-slate-300 dark:text-slate-700'">{{ plan.priorityListing ? '✓' : '—' }}</span>
             <span>Priority job listing</span>
           </li>
         </ul>
 
         <button
-          class="plan-cta"
-          :class="{ featured: plan.code === 'PROFESSIONAL' }"
+          class="w-full justify-center transition-all duration-200"
+          :class="plan.code === 'PROFESSIONAL' ? 'btn-primary' : 'btn-secondary bg-slate-100 hover:bg-slate-200 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700'"
           :disabled="checkoutLoading !== null"
           @click="handleCheckout(plan)"
         >
-          <span v-if="checkoutLoading === plan.id" class="spinner-sm"></span>
+          <span v-if="checkoutLoading === plan.id" class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
           <span v-else>Get Started</span>
         </button>
       </div>
@@ -152,250 +160,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.pricing-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--space-8) var(--space-4);
-}
 
-.pricing-header {
-  text-align: center;
-  margin-bottom: var(--space-8);
-}
-
-.pricing-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-2);
-}
-
-.pricing-subtitle {
-  font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-6);
-}
-
-/* Billing Toggle */
-.billing-toggle {
-  display: inline-flex;
-  background: var(--color-bg-page);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 3px;
-}
-
-.toggle-btn {
-  padding: var(--space-2) var(--space-4);
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.toggle-btn.active {
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.save-badge {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-size: var(--font-size-xs);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-}
-
-/* Loading */
-.loading-state {
-  text-align: center;
-  padding: 64px 0;
-  color: var(--color-text-secondary);
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto var(--space-4);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Plans Grid */
-.plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-6);
-  align-items: start;
-}
-
-.plan-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.plan-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
-
-.plan-card.featured {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
-}
-
-.featured-badge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--color-primary);
-  color: #fff;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-
-.plan-header {
-  margin-bottom: var(--space-4);
-}
-
-.plan-name {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
-}
-
-.plan-description {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-/* Price */
-.plan-price {
-  margin-bottom: var(--space-6);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.price-amount {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.price-period {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-left: 2px;
-}
-
-.savings-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-success);
-  font-weight: 600;
-  margin-top: var(--space-1);
-}
-
-/* Features */
-.plan-features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.plan-features li {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-.plan-features li.disabled {
-  color: var(--color-text-disabled);
-}
-
-.feature-icon {
-  width: 18px;
-  text-align: center;
-  font-weight: 600;
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.plan-features li.disabled .feature-icon {
-  color: var(--color-text-disabled);
-}
-
-/* CTA */
-.plan-cta {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  cursor: pointer;
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  transition: all 0.2s ease;
-}
-
-.plan-cta:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.plan-cta.featured {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-}
-
-.plan-cta.featured:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
-
-.plan-cta:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.spinner-sm {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-</style>

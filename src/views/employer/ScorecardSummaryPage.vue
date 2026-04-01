@@ -199,22 +199,22 @@ onMounted(async () => {
       </div>
       <router-link
         :to="`/employer/interviews/${interviewId}/scorecard`"
-        class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition shrink-0"
+        class="btn-primary"
       >
         + Submit Scorecard
       </router-link>
     </div>
 
     <!-- Loading -->
-    <div v-if="interviewStore.scorecardsLoading" class="space-y-4">
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm animate-pulse">
-        <div class="flex gap-8">
-          <div class="w-60 h-60 bg-gray-100 rounded" />
-          <div class="flex-1 space-y-3">
-            <div class="h-5 bg-gray-100 rounded w-32" />
-            <div class="h-4 bg-gray-100 rounded w-full" />
-            <div class="h-4 bg-gray-100 rounded w-full" />
-            <div class="h-4 bg-gray-100 rounded w-3/4" />
+    <div v-if="interviewStore.scorecardsLoading" class="space-y-6">
+      <div class="premium-card p-8 animate-pulse">
+        <div class="flex gap-10">
+          <div class="w-64 h-64 bg-slate-100 dark:bg-slate-800 rounded-full" />
+          <div class="flex-1 space-y-4 pt-4">
+            <div class="h-6 bg-slate-100 dark:bg-slate-800 rounded-lg w-40" />
+            <div class="h-5 bg-slate-100 dark:bg-slate-800 rounded-lg w-full" />
+            <div class="h-5 bg-slate-100 dark:bg-slate-800 rounded-lg w-full" />
+            <div class="h-5 bg-slate-100 dark:bg-slate-800 rounded-lg w-3/4" />
           </div>
         </div>
       </div>
@@ -223,67 +223,68 @@ onMounted(async () => {
     <!-- Empty -->
     <div
       v-else-if="interviewStore.scorecards.length === 0"
-      class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center"
+      class="premium-card p-16 text-center max-w-2xl mx-auto mt-8"
     >
-      <p class="text-sm text-gray-400 mb-2 font-medium">No scorecards yet</p>
-      <p class="text-xs text-gray-400 mb-4">Interviewers will submit their evaluations after the interview.</p>
+      <div class="text-4xl mb-4 text-slate-300">📊</div>
+      <p class="text-lg font-bold text-slate-900 dark:text-white mb-2">No scorecards yet</p>
+      <p class="text-sm font-medium text-slate-500 mb-6">Interviewers will submit their evaluations after the interview.</p>
       <router-link
         :to="`/employer/interviews/${interviewId}/scorecard`"
-        class="text-primary hover:text-primary-hover text-xs font-medium transition"
+        class="inline-flex items-center text-teal-600 hover:text-teal-700 font-bold transition-colors"
       >
         + Submit a Scorecard
       </router-link>
     </div>
 
-    <div v-else class="space-y-5">
+    <div v-else class="space-y-6">
       <!-- ─── Top Summary: Radar Chart + Stats ─── -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row gap-8 items-center sm:items-start">
+      <div class="premium-card p-8">
+        <div class="flex flex-col sm:flex-row gap-10 items-center sm:items-start">
           <!-- Radar Chart -->
           <div class="shrink-0">
             <canvas ref="radarCanvas" class="block" />
           </div>
 
           <!-- Scores + Result distribution -->
-          <div class="flex-1 w-full space-y-5">
+          <div class="flex-1 w-full space-y-6">
             <!-- Overall average -->
             <div class="text-center sm:text-left">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
                 Overall Average
               </span>
               <span
-                class="text-4xl font-bold tabular-nums"
-                :class="interviewStore.averageScore !== null ? getScoreColor(interviewStore.averageScore) : 'text-gray-400'"
+                class="text-5xl font-black tabular-nums tracking-tight"
+                :class="interviewStore.averageScore !== null ? getScoreColor(interviewStore.averageScore) : 'text-slate-300'"
               >
                 {{ interviewStore.averageScore?.toFixed(1) ?? '—' }}
               </span>
-              <span class="text-sm text-gray-400 ml-1">/ 10</span>
+              <span class="text-sm font-bold text-slate-400 ml-1">/ 10</span>
             </div>
 
             <!-- Per-dimension bars -->
-            <div class="space-y-3">
+            <div class="space-y-4">
               <div v-for="{ label, value } in [
                 { label: 'Skill', value: interviewStore.avgSkill },
                 { label: 'Attitude', value: interviewStore.avgAttitude },
                 { label: 'English', value: interviewStore.avgEnglish },
-              ]" :key="label" class="flex items-center gap-3">
-                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">{{ label }}</span>
-                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+              ]" :key="label" class="flex items-center gap-4">
+                <span class="text-sm font-bold text-slate-600 dark:text-slate-400 w-20 shrink-0">{{ label }}</span>
+                <div class="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
                   <div
                     class="h-full rounded-full transition-all duration-700"
                     :class="getBarColor(value)"
                     :style="{ width: getBarWidth(value) }"
                   />
                 </div>
-                <span class="text-sm font-bold tabular-nums w-8 text-right" :class="getScoreColor(value)">
+                <span class="text-base font-black tabular-nums w-10 text-right" :class="getScoreColor(value)">
                   {{ value.toFixed(1) }}
                 </span>
               </div>
             </div>
 
             <!-- Result distribution -->
-            <div class="pt-4 border-t border-border">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-3">
                 Result Distribution
               </span>
               <div class="flex items-center gap-4">
@@ -309,65 +310,65 @@ onMounted(async () => {
       </div>
 
       <!-- ─── Individual Scorecards ─── -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
-        <h2 class="text-sm font-semibold text-gray-900 mb-4">
+      <div class="premium-card p-8">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-6">
           Individual Evaluations ({{ interviewStore.scorecards.length }})
         </h2>
 
-        <div class="space-y-3">
+        <div class="space-y-4">
           <div
             v-for="sc in interviewStore.scorecards"
             :key="sc.id"
-            class="bg-white border border-border rounded-lg p-4"
+            class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 transition-colors"
           >
             <!-- Header -->
             <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 flex items-center justify-center text-sm font-bold shrink-0">
                   {{ sc.interviewerName.charAt(0).toUpperCase() }}
                 </div>
                 <div>
-                  <span class="text-sm font-medium text-gray-900">{{ sc.interviewerName }}</span>
-                  <span class="block text-[10px] text-gray-400">{{ formatDate(sc.createdAt) }}</span>
+                  <span class="text-base font-bold text-slate-900 dark:text-white">{{ sc.interviewerName }}</span>
+                  <span class="block text-xs font-medium text-slate-500">{{ formatDate(sc.createdAt) }}</span>
                 </div>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-4">
                 <span
-                  class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full"
+                  class="inline-flex items-center px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-full border border-current shadow-sm"
                   :class="resultConfig[sc.result].class"
                 >
                   {{ resultConfig[sc.result].label }}
                 </span>
-                <span class="text-xl font-bold tabular-nums" :class="getScoreColor(sc.averageScore)">
+                <span class="text-3xl font-black tabular-nums tracking-tight" :class="getScoreColor(sc.averageScore)">
                   {{ sc.averageScore.toFixed(1) }}
                 </span>
               </div>
             </div>
 
             <!-- Score bars -->
-            <div class="space-y-1.5">
+            <div class="space-y-2.5 mt-4">
               <div v-for="{ label, value } in [
                 { label: 'Skill', value: sc.skillScore },
                 { label: 'Attitude', value: sc.attitudeScore },
                 { label: 'English', value: sc.englishScore },
-              ]" :key="label" class="flex items-center gap-2">
-                <span class="text-[10px] font-medium text-gray-400 w-14 shrink-0">{{ label }}</span>
-                <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              ]" :key="label" class="flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-500 w-16 shrink-0">{{ label }}</span>
+                <div class="flex-1 h-2 bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden">
                   <div
                     class="h-full rounded-full transition-all duration-500"
                     :class="getBarColor(value)"
                     :style="{ width: getBarWidth(value) }"
                   />
                 </div>
-                <span class="text-xs font-medium tabular-nums w-5 text-right" :class="getScoreColor(value)">
+                <span class="text-xs font-black tabular-nums w-6 text-right" :class="getScoreColor(value)">
                   {{ value }}
                 </span>
               </div>
             </div>
 
             <!-- Comments -->
-            <p v-if="sc.comments" class="mt-3 text-xs text-gray-500 bg-gray-50 rounded-md px-3 py-2 border border-border italic">
-              {{ sc.comments }}
+            <p v-if="sc.comments" class="mt-5 text-sm text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 italic shadow-sm">
+              "{{ sc.comments }}"
             </p>
           </div>
         </div>

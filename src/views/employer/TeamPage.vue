@@ -91,19 +91,19 @@ function roleBadgeClass(role: string): string {
       </div>
       <button
         @click="openInviteModal"
-        class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition flex items-center gap-1.5"
+        class="btn-primary"
       >
         <span class="text-lg leading-none">+</span> Invite member
       </button>
     </div>
 
     <!-- Info callout -->
-    <div class="bg-info-bg border border-info/20 rounded-lg p-4 mb-6">
-      <div class="flex gap-3">
-        <span class="text-info text-lg">ℹ</span>
+    <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-xl p-5 mb-8">
+      <div class="flex gap-4">
+        <span class="text-teal-600 text-xl font-bold">ℹ</span>
         <div>
-          <p class="text-sm font-medium text-info">How invitations work</p>
-          <p class="text-sm text-gray-600 mt-1">
+          <p class="text-sm font-bold text-teal-800 dark:text-teal-400">How invitations work</p>
+          <p class="text-sm text-teal-700/80 dark:text-teal-300/80 mt-1">
             When you invite a team member, they'll receive an email with a link to set up their account.
             Invitations expire after 7 days.
           </p>
@@ -112,39 +112,39 @@ function roleBadgeClass(role: string): string {
     </div>
 
     <!-- Sent invitations table -->
-    <div class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
-      <div class="p-4 border-b border-border">
-        <h2 class="text-sm font-semibold text-gray-900">Pending Invitations</h2>
+    <div class="premium-card overflow-hidden">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Pending Invitations</h2>
       </div>
 
       <table class="w-full">
         <thead>
-          <tr class="border-b border-border bg-gray-50/50">
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Email</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Role</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Sent</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Expires</th>
+          <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Email</th>
+            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Role</th>
+            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Sent</th>
+            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Expires</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="sentInvites.length === 0">
-            <td colspan="4" class="text-center text-sm text-gray-400 py-12">
-              <div class="space-y-2">
-                <span class="text-3xl">👥</span>
-                <p>No invitations sent yet</p>
-                <p class="text-xs text-gray-300">Click "Invite member" to get started</p>
+            <td colspan="4" class="text-center text-sm text-slate-400 py-16">
+              <div class="space-y-3">
+                <span class="text-4xl">👥</span>
+                <p class="font-bold">No invitations sent yet</p>
+                <p class="text-xs text-slate-400">Click "Invite member" to get started</p>
               </div>
             </td>
           </tr>
-          <tr v-for="invite in sentInvites" :key="invite.invitationId" class="border-b border-border last:border-0 hover:bg-gray-50/50 transition">
-            <td class="px-4 py-3 text-sm text-gray-900">{{ invite.email }}</td>
-            <td class="px-4 py-3">
-              <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full" :class="roleBadgeClass(invite.role)">
+          <tr v-for="invite in sentInvites" :key="invite.invitationId" class="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+            <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">{{ invite.email }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full" :class="roleBadgeClass(invite.role)">
                 {{ invite.role }}
               </span>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-500">{{ formatDate(invite.sentAt) }}</td>
-            <td class="px-4 py-3 text-sm text-gray-500">{{ formatDate(invite.expiresAt) }}</td>
+            <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ formatDate(invite.sentAt) }}</td>
+            <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ formatDate(invite.expiresAt) }}</td>
           </tr>
         </tbody>
       </table>
@@ -152,71 +152,71 @@ function roleBadgeClass(role: string): string {
 
     <!-- Invite Modal -->
     <Teleport to="body">
-      <div v-if="showInviteModal" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/40" @click="closeInviteModal" />
-        <div class="relative bg-surface rounded-lg shadow-xl border border-border w-full max-w-md p-6 animate-slide-up">
-          <h2 class="text-lg font-bold text-gray-900 mb-4">Invite team member</h2>
+      <div v-if="showInviteModal" class="premium-modal-backdrop">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeInviteModal" />
+        <div class="premium-modal-content w-full max-w-lg">
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Invite team member</h2>
 
-          <form @submit.prevent="handleInvite" class="space-y-4">
+          <form @submit.prevent="handleInvite" class="space-y-5">
             <!-- Email -->
             <div>
-              <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">
-                Email <span class="text-error">*</span>
+              <label for="invite-email" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                Email <span class="text-rose-500">*</span>
               </label>
               <input
                 id="invite-email"
                 v-model="inviteForm.email"
                 type="email"
                 placeholder="colleague@company.com"
-                class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
-                :class="inviteErrors.email ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+                class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition"
+                :class="inviteErrors.email ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
               />
-              <p v-if="inviteErrors.email" class="text-xs text-error mt-1">{{ inviteErrors.email }}</p>
+              <p v-if="inviteErrors.email" class="text-xs text-rose-500 mt-1">{{ inviteErrors.email }}</p>
             </div>
 
             <!-- Role -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-              <div class="grid grid-cols-2 gap-3">
+              <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Role</label>
+              <div class="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   @click="inviteForm.role = 'HR'"
-                  class="p-3 border rounded-lg text-left transition"
+                  class="p-4 rounded-xl text-left transition-all border-2"
                   :class="inviteForm.role === 'HR'
-                    ? 'border-primary bg-primary-bg'
-                    : 'border-border hover:border-gray-300'"
+                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/10 ring-4 ring-teal-500/10'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
                 >
-                  <div class="text-sm font-semibold" :class="inviteForm.role === 'HR' ? 'text-primary' : 'text-gray-900'">HR Manager</div>
-                  <p class="text-xs text-gray-500 mt-0.5">Manage jobs, candidates & pipelines</p>
+                  <div class="text-sm font-bold" :class="inviteForm.role === 'HR' ? 'text-teal-700 dark:text-teal-400' : 'text-slate-900 dark:text-white'">HR Manager</div>
+                  <p class="text-xs text-slate-500 mt-1">Manage jobs, candidates & pipelines</p>
                 </button>
                 <button
                   type="button"
                   @click="inviteForm.role = 'INTERVIEWER'"
-                  class="p-3 border rounded-lg text-left transition"
+                  class="p-4 rounded-xl text-left transition-all border-2"
                   :class="inviteForm.role === 'INTERVIEWER'
-                    ? 'border-primary bg-primary-bg'
-                    : 'border-border hover:border-gray-300'"
+                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/10 ring-4 ring-purple-500/10'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
                 >
-                  <div class="text-sm font-semibold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-primary' : 'text-gray-900'">Interviewer</div>
-                  <p class="text-xs text-gray-500 mt-0.5">Conduct interviews & submit scorecards</p>
+                  <div class="text-sm font-bold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-purple-700 dark:text-purple-400' : 'text-slate-900 dark:text-white'">Interviewer</div>
+                  <p class="text-xs text-slate-500 mt-1">Conduct interviews & submit scorecards</p>
                 </button>
               </div>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2">
+            <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-700 mt-4">
               <button
                 type="button"
                 @click="closeInviteModal"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+                class="btn-secondary"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 :disabled="inviteLoading"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+                class="btn-primary"
               >
-                <span v-if="inviteLoading" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span v-if="inviteLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 {{ inviteLoading ? 'Sending…' : 'Send invitation' }}
               </button>
             </div>

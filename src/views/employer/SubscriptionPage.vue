@@ -12,14 +12,7 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { dateStyle: 'medium' })
 }
 
-function getStatusClass(status: string): string {
-  switch (status) {
-    case 'ACTIVE': return 'status-active'
-    case 'CANCELLED': return 'status-cancelled'
-    case 'EXPIRED': return 'status-expired'
-    default: return ''
-  }
-}
+
 
 async function confirmCancel(): Promise<void> {
   cancelling.value = true
@@ -50,97 +43,109 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="subscription-page">
-    <div class="page-header">
-      <h1>Subscription</h1>
-      <p class="page-subtitle">Manage your plan and usage</p>
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Subscription</h1>
+      <p class="text-sm font-medium text-slate-500">Manage your plan and usage</p>
     </div>
 
     <!-- No Subscription -->
-    <div v-if="!subStore.currentSubscription" class="empty-state">
-      <div class="empty-icon">📋</div>
-      <h2>No Active Subscription</h2>
-      <p>Choose a plan to start posting jobs and managing candidates.</p>
+    <div v-if="!subStore.currentSubscription" class="premium-card p-16 text-center">
+      <div class="text-5xl mb-6 text-slate-300 dark:text-slate-600">📋</div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">No Active Subscription</h2>
+      <p class="text-sm font-medium text-slate-500 mb-8 max-w-sm mx-auto">Choose a plan to start posting jobs and managing candidates.</p>
       <button class="btn-primary" @click="goToPricing">View Plans</button>
     </div>
 
     <!-- Active Subscription -->
     <template v-else>
       <!-- Plan Info Card -->
-      <div class="info-grid">
-        <div class="info-card">
-          <div class="info-card-header">
-            <h2>Current Plan</h2>
-            <span :class="['status-badge', getStatusClass(subStore.currentSubscription.status)]">
-              {{ subStore.currentSubscription.status }}
-            </span>
-          </div>
-          <div class="plan-info">
-            <div class="plan-name-large">{{ subStore.currentSubscription.planName }}</div>
-            <div class="plan-dates">
-              <div class="date-row">
-                <span class="date-label">Started</span>
-                <span class="date-value">{{ formatDate(subStore.currentSubscription.startedAt) }}</span>
-              </div>
-              <div class="date-row">
-                <span class="date-label">Expires</span>
-                <span class="date-value">{{ formatDate(subStore.currentSubscription.expiresAt) }}</span>
-              </div>
-              <div class="date-row">
-                <span class="date-label">Auto-Renew</span>
-                <span class="date-value">{{ subStore.currentSubscription.autoRenew ? 'Yes' : 'No' }}</span>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="premium-card p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">Current Plan</h2>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm"
+                    :class="subStore.currentSubscription.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/30 dark:border-emerald-800' :
+                           (subStore.currentSubscription.status === 'CANCELLED' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-rose-50 text-rose-600 border border-rose-200')">
+                {{ subStore.currentSubscription.status }}
+              </span>
+            </div>
+            
+            <div class="mb-2">
+              <div class="text-2xl font-black text-teal-600 dark:text-teal-400 mb-6">{{ subStore.currentSubscription.planName }}</div>
+              <div class="flex flex-col gap-3">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="font-bold text-slate-500">Started</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ formatDate(subStore.currentSubscription.startedAt) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="font-bold text-slate-500">Expires</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ formatDate(subStore.currentSubscription.expiresAt) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="font-bold text-slate-500">Auto-Renew</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ subStore.currentSubscription.autoRenew ? 'Yes' : 'No' }}</span>
+                </div>
               </div>
             </div>
           </div>
-          <div class="card-actions">
-            <button v-if="subStore.currentSubscription.status === 'ACTIVE'" class="btn-outline btn-danger" @click="showCancelConfirm = true">
+          <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-3">
+            <button v-if="subStore.currentSubscription.status === 'ACTIVE'" class="btn-secondary text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" @click="showCancelConfirm = true">
               Cancel Subscription
             </button>
-            <button class="btn-outline" @click="goToPricing">
+            <button class="btn-primary" @click="goToPricing">
               Change Plan
             </button>
           </div>
         </div>
 
         <!-- Quota Card -->
-        <div v-if="subStore.currentQuota" class="info-card">
-          <div class="info-card-header">
-            <h2>Usage</h2>
+        <div v-if="subStore.currentQuota" class="premium-card p-8 flex flex-col justify-between">
+          <div>
+            <div class="mb-6">
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">Usage</h2>
+            </div>
+            
+            <div class="flex flex-col gap-6">
+              <!-- Progress Bar -->
+              <div>
+                <div class="flex justify-between items-center text-sm mb-3">
+                  <span class="font-bold text-slate-600 dark:text-slate-300">Active Jobs</span>
+                  <span class="font-black tabular-nums">
+                    {{ subStore.currentQuota.jobsActive }} <span class="text-slate-400 font-medium">/ {{ subStore.currentQuota.maxActiveJobs }}</span>
+                  </span>
+                </div>
+                <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                  <div
+                    class="h-full rounded-full transition-all duration-500 shadow-sm"
+                    :class="subStore.isQuotaFull ? 'bg-rose-500' : 'bg-teal-500'"
+                    :style="{ width: `${subStore.quotaUsagePercent}%` }"
+                  ></div>
+                </div>
+                <p v-if="subStore.isQuotaFull" class="text-xs font-bold text-rose-500 mt-2">
+                  Quota full — upgrade your plan to publish more jobs.
+                </p>
+              </div>
+
+              <!-- Stats Blocks -->
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-center border border-slate-100 dark:border-slate-700/50">
+                  <div class="text-3xl font-black text-teal-600 dark:text-teal-400 mb-1 leading-none">{{ subStore.currentQuota.jobsPosted }}</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Jobs Posted</div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-center border border-slate-100 dark:border-slate-700/50">
+                  <div class="text-3xl font-black text-slate-700 dark:text-slate-300 mb-1 leading-none">{{ subStore.currentQuota.maxActiveJobs }}</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Max Active Jobs</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="quota-section">
-            <div class="quota-item">
-              <div class="quota-label">
-                <span>Active Jobs</span>
-                <span class="quota-count">
-                  {{ subStore.currentQuota.jobsActive }} / {{ subStore.currentQuota.maxActiveJobs }}
-                </span>
-              </div>
-              <div class="quota-bar">
-                <div
-                  class="quota-bar-fill"
-                  :class="{ full: subStore.isQuotaFull }"
-                  :style="{ width: `${subStore.quotaUsagePercent}%` }"
-                ></div>
-              </div>
-              <p v-if="subStore.isQuotaFull" class="quota-warning">
-                Quota full — upgrade your plan to publish more jobs.
-              </p>
-            </div>
-
-            <div class="quota-stats">
-              <div class="stat-item">
-                <div class="stat-value">{{ subStore.currentQuota.jobsPosted }}</div>
-                <div class="stat-label">Total Jobs Posted</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value">{{ subStore.currentQuota.maxActiveJobs }}</div>
-                <div class="stat-label">Max Active Jobs</div>
-              </div>
-            </div>
-
-            <div class="quota-cycle">
-              <span class="date-label">Billing Cycle:</span>
-              <span class="date-value">
+          
+          <div class="mt-8 pt-5 border-t border-slate-100 dark:border-slate-700/50">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 text-sm">
+              <span class="font-bold text-slate-500">Billing Cycle:</span>
+              <span class="font-bold text-slate-900 dark:text-white">
                 {{ formatDate(subStore.currentQuota.cycleStart) }} — {{ formatDate(subStore.currentQuota.cycleEnd) }}
               </span>
             </div>
@@ -149,39 +154,40 @@ onMounted(async () => {
       </div>
 
       <!-- Quick Links -->
-      <div class="quick-links">
-        <button class="link-card" @click="goToBilling">
-          <span class="link-icon">📄</span>
-          <span>
-            <strong>Billing History</strong>
-            <small>View past transactions</small>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-400 p-5 rounded-2xl flex items-center gap-4 text-left transition hover:shadow-md hover:-translate-y-0.5 group" @click="goToBilling">
+          <span class="text-3xl shrink-0 group-hover:scale-110 transition-transform">📄</span>
+          <span class="flex-1">
+            <strong class="block text-sm font-bold text-slate-900 dark:text-white mb-0.5">Billing History</strong>
+            <span class="block text-xs font-medium text-slate-500">View past transactions</span>
           </span>
-          <span class="link-arrow">›</span>
+          <span class="text-2xl text-slate-300 dark:text-slate-600 group-hover:translate-x-1 transition-transform">›</span>
         </button>
-        <button class="link-card" @click="goToPricing">
-          <span class="link-icon">📊</span>
-          <span>
-            <strong>Compare Plans</strong>
-            <small>See all available plans</small>
+        <button class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-400 p-5 rounded-2xl flex items-center gap-4 text-left transition hover:shadow-md hover:-translate-y-0.5 group" @click="goToPricing">
+          <span class="text-3xl shrink-0 group-hover:scale-110 transition-transform">📊</span>
+          <span class="flex-1">
+            <strong class="block text-sm font-bold text-slate-900 dark:text-white mb-0.5">Compare Plans</strong>
+            <span class="block text-xs font-medium text-slate-500">See all available plans</span>
           </span>
-          <span class="link-arrow">›</span>
+          <span class="text-2xl text-slate-300 dark:text-slate-600 group-hover:translate-x-1 transition-transform">›</span>
         </button>
       </div>
     </template>
 
     <!-- Cancel Confirmation Modal -->
     <Teleport to="body">
-      <div v-if="showCancelConfirm" class="modal-overlay" @click.self="showCancelConfirm = false">
-        <div class="modal">
-          <h2>Cancel Subscription?</h2>
-          <p>
+      <div v-if="showCancelConfirm" class="premium-modal-backdrop">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click.self="showCancelConfirm = false" />
+        <div class="premium-modal-content w-full max-w-sm">
+          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white mb-3">Cancel Subscription?</h2>
+          <p class="text-sm font-medium text-slate-500 mb-8 leading-relaxed">
             Your plan will remain active until the end of the current billing period.
             After that, you will lose access to premium features.
           </p>
-          <div class="modal-actions">
-            <button class="btn-outline" @click="showCancelConfirm = false">Keep Plan</button>
-            <button class="btn-danger" :disabled="cancelling" @click="confirmCancel">
-              <span v-if="cancelling" class="spinner-sm"></span>
+          <div class="flex justify-end gap-3">
+            <button class="btn-secondary" @click="showCancelConfirm = false">Keep Plan</button>
+            <button class="btn-primary bg-rose-600 hover:bg-rose-700 shadow-sm" :disabled="cancelling" @click="confirmCancel">
+              <span v-if="cancelling" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               <span v-else>Yes, Cancel</span>
             </button>
           </div>
@@ -190,384 +196,3 @@ onMounted(async () => {
     </Teleport>
   </div>
 </template>
-
-<style scoped>
-.subscription-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
-}
-
-.page-header {
-  margin-bottom: var(--space-6);
-}
-
-.page-header h1 {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.page-subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-top: var(--space-1);
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 64px var(--space-4);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: var(--space-4);
-}
-
-.empty-state h2 {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--space-2);
-}
-
-.empty-state p {
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-6);
-}
-
-/* Info Grid */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-}
-
-@media (max-width: 768px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.info-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-}
-
-.info-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
-}
-
-.info-card-header h2 {
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-/* Status Badges */
-.status-badge {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-}
-
-.status-active {
-  background: #dcfce7;
-  color: var(--color-success);
-}
-
-.status-cancelled {
-  background: #fef9c3;
-  color: var(--color-warning);
-}
-
-.status-expired {
-  background: #fee2e2;
-  color: var(--color-error);
-}
-
-/* Plan Info */
-.plan-name-large {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: var(--space-4);
-}
-
-.plan-dates {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.date-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--font-size-sm);
-}
-
-.date-label {
-  color: var(--color-text-secondary);
-}
-
-.date-value {
-  font-weight: 500;
-  color: var(--color-text-primary);
-}
-
-.card-actions {
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  gap: var(--space-3);
-}
-
-/* Quota */
-.quota-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.quota-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-2);
-}
-
-.quota-count {
-  font-weight: 600;
-}
-
-.quota-bar {
-  height: 8px;
-  background: var(--color-bg-page);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.quota-bar-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.quota-bar-fill.full {
-  background: var(--color-error);
-}
-
-.quota-warning {
-  font-size: var(--font-size-xs);
-  color: var(--color-error);
-  margin-top: var(--space-1);
-}
-
-.quota-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
-.stat-item {
-  background: var(--color-bg-page);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  text-align: center;
-}
-
-.stat-value {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.stat-label {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  margin-top: 2px;
-}
-
-.quota-cycle {
-  font-size: var(--font-size-sm);
-  display: flex;
-  gap: var(--space-2);
-}
-
-/* Quick Links */
-.quick-links {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
-
-@media (max-width: 768px) {
-  .quick-links {
-    grid-template-columns: 1fr;
-  }
-}
-
-.link-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-  width: 100%;
-}
-
-.link-card:hover {
-  border-color: var(--color-primary);
-}
-
-.link-icon {
-  font-size: 24px;
-}
-
-.link-card strong {
-  display: block;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-.link-card small {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.link-arrow {
-  margin-left: auto;
-  font-size: 20px;
-  color: var(--color-text-disabled);
-}
-
-/* Buttons */
-.btn-primary {
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn-primary:hover {
-  background: var(--color-primary-hover);
-}
-
-.btn-outline {
-  padding: var(--space-2) var(--space-4);
-  background: transparent;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.btn-outline:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.btn-outline.btn-danger {
-  color: var(--color-error);
-  border-color: var(--color-error);
-}
-
-.btn-outline.btn-danger:hover {
-  background: #fee2e2;
-}
-
-.btn-danger {
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-error);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-danger:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: var(--color-bg-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  max-width: 420px;
-  width: 90%;
-}
-
-.modal h2 {
-  font-size: var(--font-size-md);
-  margin-bottom: var(--space-3);
-}
-
-.modal p {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-  margin-bottom: var(--space-6);
-}
-
-.modal-actions {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: flex-end;
-}
-
-.spinner-sm {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-</style>

@@ -36,16 +36,16 @@ To modernize the entire application uniformly, the following files will be refac
 **Flow Insight:** The workspace governs job creation, the kanban application pipeline, and interview scorecards.
 *   [x] **`employer/DashboardPage.vue`**: Layout rounded, hover stat cards added, quota bar stylized.
 *   [x] **`employer/JobListPage.vue`**: Borderless table list rows with slick hovers.
-*   [ ] **`employer/JobFormPage.vue`**: Refactor extensive forms to use the `bg-slate-50` floating inputs. Ensure salary arrays and AI Job Description Generation buttons are prominent.
-*   [ ] **`employer/ApplicationPipelinePage.vue` (Kanban Board)**: 
+*   [x] **`employer/JobFormPage.vue`**: Refactor extensive forms to use the `bg-slate-50` floating inputs. Ensure salary arrays and AI Job Description Generation buttons are prominent.
+*   [x] **`employer/ApplicationPipelinePage.vue` (Kanban Board)**: 
     *   Style the 6 kanban columns (Mới, Sàng lọc, Phỏng vấn, Đề nghị, Đã tuyển, Từ chối) with `bg-slate-100/50` fixed-height scrolling containers.
     *   Style candidate draggable cards to clearly show Name, Position, and Application Date. Add hover-lift for drag cues.
     *   Enhance the `CandidateDetailPanel` slide-out drawer layout.
-*   [ ] **`employer/ScorecardFormPage.vue` & `employer/ScorecardSummaryPage.vue`**: 
+*   [x] **`employer/ScorecardFormPage.vue` & `employer/ScorecardSummaryPage.vue`**: 
     *   Implement prominent, styled radio buttons/toggle chips for the four constraints: `STRONG_YES`, `YES`, `NO`, `STRONG_NO` (e.g., ranging from emerald-green to rose-red).
-*   [ ] **`employer/InterviewDetailPage.vue`**: Add the "Generate AI Questions" panel UI gracefully alongside the candidate details.
-*   [ ] **`employer/TeamPage.vue` & `OrganizationPage.vue`**: Convert data tables/lists to new standard with role badges.
-*   [ ] **Layout Restructure**: Consolidate layouts if necessary (Admin/Employer wrappers) into a unified `WorkspaceLayout.vue` featuring the Sidebar.
+*   [x] **`employer/InterviewDetailPage.vue`**: Add the "Generate AI Questions" panel UI gracefully alongside the candidate details.
+*   [x] **`employer/TeamPage.vue` & `OrganizationPage.vue`**: Convert data tables/lists to new standard with role badges.
+*   [x] **Layout Restructure**: Consolidate layouts if necessary (Admin/Employer wrappers) into a unified `WorkspaceLayout.vue` featuring the Sidebar.
 
 ### 3.2 Billing / Pricing (PayOS Flow)
 **Flow Insight:** Checkout flow jumps to PayOS and returns to a status page.
