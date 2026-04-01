@@ -11,8 +11,8 @@
   --color-primary-bg: #f0fafa;
 
   --color-surface: #ffffff;
-  --color-page: #f5f7fa;
-  --color-border: #dde2e8;
+  --color-page: #f8fafc; /* slate-50 */
+  --color-border: #e2e8f0; /* slate-200 */
 
   --color-success: #22863a;
   --color-success-bg: #eafbee;
@@ -67,15 +67,15 @@
   }
 
   body {
-    @apply font-sans text-sm text-gray-900 bg-page min-h-screen;
+    @apply font-sans text-sm text-slate-900 bg-page min-h-screen;
   }
 
   a {
-    @apply text-primary no-underline transition-colors duration-150;
+    @apply text-[#007070] no-underline transition-colors duration-200;
   }
 
   a:hover {
-    @apply text-primary-hover;
+    @apply text-[#005656];
   }
   
   /* Dark mode overrides */

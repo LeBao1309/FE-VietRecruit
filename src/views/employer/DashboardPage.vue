@@ -57,74 +57,102 @@ onMounted(async () => {
     <template v-else>
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Total Jobs</span>
-          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{{ stats.total }}</p>
+        <!-- Total Jobs -->
+        <div class="bg-surface border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out group">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Jobs</span>
+          </div>
+          <p class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ stats.total }}</p>
         </div>
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Published</span>
-          <p class="text-2xl font-bold text-success mt-1">{{ stats.published }}</p>
+
+        <!-- Published -->
+        <div class="bg-surface border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out group">
+           <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Published</span>
+          </div>
+          <p class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">{{ stats.published }}</p>
         </div>
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Drafts</span>
-          <p class="text-2xl font-bold text-gray-500 mt-1">{{ stats.draft }}</p>
+
+        <!-- Drafts -->
+        <div class="bg-surface border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out group">
+           <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Drafts</span>
+          </div>
+          <p class="text-3xl font-extrabold text-amber-600 dark:text-amber-400 tracking-tight">{{ stats.draft }}</p>
         </div>
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Closed</span>
-          <p class="text-2xl font-bold text-error mt-1">{{ stats.closed }}</p>
+
+        <!-- Closed -->
+        <div class="bg-surface border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ease-out group">
+           <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Closed</span>
+          </div>
+          <p class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight">{{ stats.closed }}</p>
         </div>
       </div>
 
       <!-- Quota Card -->
-      <div v-if="quota" class="bg-surface border border-border rounded-lg p-5 shadow-sm mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-semibold text-gray-900">Active Job Quota</h2>
-          <span class="text-xs text-gray-400">
+      <div v-if="quota" class="bg-surface border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6 hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white">Active Job Quota</h2>
+          <span class="text-xs font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-500 dark:text-slate-400">
             {{ subStore.hasActiveSubscription ? subStore.currentSubscription?.planName : 'No active plan' }}
           </span>
         </div>
         <div class="flex items-center gap-4">
           <div class="flex-1">
-            <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <div
-                class="h-full rounded-full transition-all duration-500"
-                :class="subStore.isQuotaFull ? 'bg-error' : 'bg-primary'"
+                class="h-full rounded-full transition-all duration-700 ease-out"
+                :class="subStore.isQuotaFull ? 'bg-rose-500' : 'bg-teal-500'"
                 :style="{ width: `${Math.min(subStore.quotaUsagePercent, 100)}%` }"
               />
             </div>
           </div>
-          <span class="text-sm font-medium shrink-0" :class="subStore.isQuotaFull ? 'text-error' : 'text-gray-700'">
-            {{ quota.jobsActive }} / {{ quota.maxActiveJobs < 0 ? '∞' : quota.maxActiveJobs }}
+          <span class="text-sm font-bold shrink-0" :class="subStore.isQuotaFull ? 'text-rose-500' : 'text-slate-700 dark:text-slate-300'">
+            {{ quota.jobsActive }} <span class="text-slate-400 font-medium">/ {{ quota.maxActiveJobs < 0 ? '∞' : quota.maxActiveJobs }}</span>
           </span>
         </div>
-        <p class="text-xs text-gray-400 mt-2">
+        <p class="text-xs text-slate-400 mt-3 font-medium">
           Cycle: {{ new Date(quota.cycleStart).toLocaleDateString() }} – {{ new Date(quota.cycleEnd).toLocaleDateString() }}
         </p>
-        <div v-if="subStore.isQuotaFull" class="mt-3 flex items-center gap-2 px-3 py-2 rounded-md bg-warning-bg text-warning text-xs">
-          <span class="font-medium">⚠ Quota limit reached.</span>
-          <router-link to="/employer/pricing" class="font-medium underline">Upgrade your plan</router-link>
+        <div v-if="subStore.isQuotaFull" class="mt-4 flex items-center gap-2 px-3 py-2.5 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-sm">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <span class="font-medium">Quota limit reached.</span>
+          <router-link to="/employer/pricing" class="font-semibold underline hover:text-rose-700 transition-colors ml-auto">Upgrade plan</router-link>
         </div>
       </div>
 
       <!-- Quick Actions -->
-      <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-        <h2 class="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h2>
-        <div class="flex items-center gap-3">
+      <div class="bg-surface border border-slate-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+        <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
+        <div class="flex flex-wrap items-center gap-3">
           <button
             @click="router.push('/employer/jobs/new')"
-            class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+            class="px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 hover:-translate-y-0.5 hover:shadow-md rounded-lg transition-all focus:ring-2 focus:ring-teal-500/50 outline-none"
           >
             + New Job
           </button>
           <button
             @click="router.push('/employer/jobs')"
-            class="px-4 py-2 text-sm font-medium text-primary bg-primary-bg hover:bg-primary-light rounded-md transition border border-primary/10"
+            class="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400 dark:hover:bg-teal-900/50 hover:-translate-y-0.5 rounded-lg transition-all border border-teal-200/50 dark:border-teal-800/50 focus:ring-2 focus:ring-teal-500/50 outline-none"
           >
             View All Jobs
           </button>
           <button
             @click="router.push('/employer/organization')"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
+            class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 transition-all shadow-sm focus:ring-2 focus:ring-slate-400/50 outline-none"
           >
             Organization
           </button>
