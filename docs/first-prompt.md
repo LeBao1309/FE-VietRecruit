@@ -181,29 +181,31 @@ Before producing any output, read all files in this order:
 
 If any file is missing or unreadable, report it before continuing.
 
-## DESIGN RULES
+## DESIGN RULES & TAILWIND AESTHETICS
 
-Primary color: #008c8c
-Use this color for:
-- Primary buttons and active states
-- Selected items and focus rings
-- Progress indicators and status badges for positive states
-- Link color
+Primary Brand Color: `#008c8c`
+(Note: Test contrast. If `#008c8c` on white fails WCAG AA, use darker shades like `#007070` for text and standard `#008c8c` for thick UI elements or backgrounds).
 
-Icons:
-Use only basic functional icons. Do not use decorative icons.
-Allowed icon categories:
-- Navigation: chevron-left, chevron-right, chevron-down, chevron-up
-- Actions: search, filter, sort, close, plus, minus, edit, trash, download
-- Status: check, warning, info, spinner/loader, eye, eye-off
-- Data: calendar, clock
+1. **Premium & Modern UI Requirements:**
+   - **DO NOT create basic, plain, or barebones interfaces.** The UI must look premium, modern, and state-of-the-art.
+   - Use **Tailwind CSS** extensively for all styling.
+   - Avoid generic colors. Use curated, harmonious color palettes (e.g., sleek dark modes, slate/gray UI scales).
+   - Use high-quality layout composition: generous padding/margins, clean whitespace, and subtle borders (`border-slate-200/50`).
 
-Do not use illustration icons, emoji, or feature-specific decorative icons.
+2. **Dynamic & Interactive Elements:**
+   - Every interactive element (button, card, list item) MUST have a dynamic hover state (`hover:bg-gray-50`, `hover:scale-[1.01]`, `hover:shadow-md`).
+   - Implement smooth transitions (`transition-all duration-200 ease-in-out`).
+   - Use subtle micro-animations for feedback (e.g., active clicks, focus within inputs).
 
-Typography and spacing:
-- Use system font stack or a single clean sans-serif
-- Consistent 4px spacing grid
-- Tables and lists must be scannable with clear row separation
+3. **Typography & Structure:**
+   - Use standard modern font stacks via Tailwind (e.g., `font-sans`, `tracking-tight` for headings).
+   - Differentiate hierarchy clearly: use text-gray-500 for secondary text, text-gray-900 for primary text, and maintain consistent text sizing.
+   - Tables and lists must be highly scannable with clear row separation and responsive wrappers (`overflow-x-auto`).
+
+4. **Icons:**
+   - Use standard functional SVG icons or Lucide/Heroicons equivalents.
+   - Allowed categories: Navigation (chevrons), Actions (search, filter, sort, edit, trash), Status (check, warning, info, spinner), Data (calendar, clock).
+   - Size icons consistently (e.g., `w-5 h-5`).
 
 ## CODE STANDARDS
 
