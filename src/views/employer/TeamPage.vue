@@ -13,216 +13,216 @@ const inviteErrors = ref<Record<string, string>>({})
 
 // ── Sent invitations (stored locally after sending) ──
 interface SentInvite {
-  email: string
-  role: string
-  invitationId: string
-  expiresAt: string
-  sentAt: string
+ email: string
+ role: string
+ invitationId: string
+ expiresAt: string
+ sentAt: string
 }
 const sentInvites = ref<SentInvite[]>([])
 
 function openInviteModal(): void {
-  inviteForm.value = { email: '', role: 'HR' }
-  inviteErrors.value = {}
-  showInviteModal.value = true
+ inviteForm.value = { email: '', role: 'HR' }
+ inviteErrors.value = {}
+ showInviteModal.value = true
 }
 
 function closeInviteModal(): void {
-  showInviteModal.value = false
+ showInviteModal.value = false
 }
 
 function validate(): boolean {
-  inviteErrors.value = {}
-  if (!inviteForm.value.email.trim()) {
-    inviteErrors.value.email = 'Email is required.'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.value.email)) {
-    inviteErrors.value.email = 'Please enter a valid email.'
-  }
-  return Object.keys(inviteErrors.value).length === 0
+ inviteErrors.value = {}
+ if (!inviteForm.value.email.trim()) {
+ inviteErrors.value.email = 'Email is required.'
+ } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.value.email)) {
+ inviteErrors.value.email = 'Please enter a valid email.'
+ }
+ return Object.keys(inviteErrors.value).length === 0
 }
 
 async function handleInvite(): Promise<void> {
-  if (!validate()) return
-  inviteLoading.value = true
-  try {
-    const result = await invitationService.createInvitation({
-      email: inviteForm.value.email,
-      role: inviteForm.value.role,
-    })
-    if (result.error) {
-      ui.toastError('Invitation failed', result.error.message)
-      return
-    }
-    sentInvites.value.unshift({
-      email: inviteForm.value.email,
-      role: inviteForm.value.role,
-      invitationId: result.data!.invitationId,
-      expiresAt: result.data!.expiresAt,
-      sentAt: new Date().toISOString(),
-    })
-    ui.toastSuccess('Invitation sent', `An invite has been sent to ${inviteForm.value.email}`)
-    closeInviteModal()
-  } finally {
-    inviteLoading.value = false
-  }
+ if (!validate()) return
+ inviteLoading.value = true
+ try {
+ const result = await invitationService.createInvitation({
+ email: inviteForm.value.email,
+ role: inviteForm.value.role,
+ })
+ if (result.error) {
+ ui.toastError('Invitation failed', result.error.message)
+ return
+ }
+ sentInvites.value.unshift({
+ email: inviteForm.value.email,
+ role: inviteForm.value.role,
+ invitationId: result.data!.invitationId,
+ expiresAt: result.data!.expiresAt,
+ sentAt: new Date().toISOString(),
+ })
+ ui.toastSuccess('Invitation sent', `An invite has been sent to ${inviteForm.value.email}`)
+ closeInviteModal()
+ } finally {
+ inviteLoading.value = false
+ }
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+ return new Date(iso).toLocaleDateString('en-US', {
+ month: 'short',
+ day: 'numeric',
+ year: 'numeric',
+ })
 }
 
 function roleBadgeClass(role: string): string {
-  return role === 'HR'
-    ? 'bg-blue-50 text-blue-700'
-    : 'bg-purple-50 text-purple-700'
+ return role === 'HR'
+ ? 'bg-blue-50 text-blue-700'
+ : 'bg-purple-50 text-purple-700'
 }
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-xl font-bold text-gray-900">Team</h1>
-        <p class="text-sm text-gray-500 mt-1">Invite HR managers and interviewers to collaborate</p>
-      </div>
-      <button
-        @click="openInviteModal"
-        class="btn-primary"
-      >
-        <span class="text-lg leading-none">+</span> Invite member
-      </button>
-    </div>
+ <div class="max-w-3xl mx-auto px-6 py-8">
+ <div class="flex items-center justify-between mb-6">
+ <div>
+ <h1 class="text-xl font-bold text-gray-900">Team</h1>
+ <p class="text-sm text-gray-500 mt-1">Invite HR managers and interviewers to collaborate</p>
+ </div>
+ <button
+ @click="openInviteModal"
+ class="btn-primary"
+ >
+ <span class="text-lg leading-none">+</span> Invite member
+ </button>
+ </div>
 
-    <!-- Info callout -->
-    <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-xl p-5 mb-8">
-      <div class="flex gap-4">
-        <span class="text-teal-600 text-xl font-bold">ℹ</span>
-        <div>
-          <p class="text-sm font-bold text-teal-800 dark:text-teal-400">How invitations work</p>
-          <p class="text-sm text-teal-700/80 dark:text-teal-300/80 mt-1">
-            When you invite a team member, they'll receive an email with a link to set up their account.
-            Invitations expire after 7 days.
-          </p>
-        </div>
-      </div>
-    </div>
+ <!-- Info callout -->
+ <div class="bg-teal-50 border border-teal-200 rounded-xl p-5 mb-8">
+ <div class="flex gap-4">
+ <span class="text-teal-600 text-xl font-bold">ℹ</span>
+ <div>
+ <p class="text-sm font-bold text-teal-800 ">How invitations work</p>
+ <p class="text-sm text-teal-700/80 mt-1">
+ When you invite a team member, they'll receive an email with a link to set up their account.
+ Invitations expire after 7 days.
+ </p>
+ </div>
+ </div>
+ </div>
 
-    <!-- Sent invitations table -->
-    <div class="premium-card overflow-hidden">
-      <div class="p-6 border-b border-slate-200 dark:border-slate-700">
-        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Pending Invitations</h2>
-      </div>
+ <!-- Sent invitations table -->
+ <div class="premium-card overflow-hidden">
+ <div class="p-6 border-b border-slate-200 ">
+ <h2 class="text-lg font-bold text-slate-900 ">Pending Invitations</h2>
+ </div>
 
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Email</th>
-            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Role</th>
-            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Sent</th>
-            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Expires</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="sentInvites.length === 0">
-            <td colspan="4" class="text-center text-sm text-slate-400 py-16">
-              <div class="space-y-3">
-                <span class="text-4xl">👥</span>
-                <p class="font-bold">No invitations sent yet</p>
-                <p class="text-xs text-slate-400">Click "Invite member" to get started</p>
-              </div>
-            </td>
-          </tr>
-          <tr v-for="invite in sentInvites" :key="invite.invitationId" class="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-            <td class="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white">{{ invite.email }}</td>
-            <td class="px-6 py-4">
-              <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full" :class="roleBadgeClass(invite.role)">
-                {{ invite.role }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ formatDate(invite.sentAt) }}</td>
-            <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ formatDate(invite.expiresAt) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+ <table class="w-full">
+ <thead>
+ <tr class="border-b border-slate-200 bg-slate-50 ">
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Email</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Role</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Sent</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Expires</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr v-if="sentInvites.length === 0">
+ <td colspan="4" class="text-center text-sm text-slate-400 py-16">
+ <div class="space-y-3">
+ <span class="text-4xl">👥</span>
+ <p class="font-bold">No invitations sent yet</p>
+ <p class="text-xs text-slate-400">Click "Invite member" to get started</p>
+ </div>
+ </td>
+ </tr>
+ <tr v-for="invite in sentInvites" :key="invite.invitationId" class="border-b border-slate-100 last:border-0 hover:bg-slate-50 :bg-slate-800/50 transition-colors">
+ <td class="px-6 py-4 text-sm font-bold text-slate-900 ">{{ invite.email }}</td>
+ <td class="px-6 py-4">
+ <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full" :class="roleBadgeClass(invite.role)">
+ {{ invite.role }}
+ </span>
+ </td>
+ <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ formatDate(invite.sentAt) }}</td>
+ <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ formatDate(invite.expiresAt) }}</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
 
-    <!-- Invite Modal -->
-    <Teleport to="body">
-      <div v-if="showInviteModal" class="premium-modal-backdrop">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeInviteModal" />
-        <div class="premium-modal-content w-full max-w-lg">
-          <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Invite team member</h2>
+ <!-- Invite Modal -->
+ <Teleport to="body">
+ <div v-if="showInviteModal" class="premium-modal-backdrop">
+ <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeInviteModal" />
+ <div class="premium-modal-content w-full max-w-lg">
+ <h2 class="text-xl font-bold text-slate-900 mb-6">Invite team member</h2>
 
-          <form @submit.prevent="handleInvite" class="space-y-5">
-            <!-- Email -->
-            <div>
-              <label for="invite-email" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Email <span class="text-rose-500">*</span>
-              </label>
-              <input
-                id="invite-email"
-                v-model="inviteForm.email"
-                type="email"
-                placeholder="colleague@company.com"
-                class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition"
-                :class="inviteErrors.email ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
-              />
-              <p v-if="inviteErrors.email" class="text-xs text-rose-500 mt-1">{{ inviteErrors.email }}</p>
-            </div>
+ <form @submit.prevent="handleInvite" class="space-y-5">
+ <!-- Email -->
+ <div>
+ <label for="invite-email" class="block text-sm font-bold text-slate-700 mb-2">
+ Email <span class="text-rose-500">*</span>
+ </label>
+ <input
+ id="invite-email"
+ v-model="inviteForm.email"
+ type="email"
+ placeholder="colleague@company.com"
+ class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition"
+ :class="inviteErrors.email ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
+ />
+ <p v-if="inviteErrors.email" class="text-xs text-rose-500 mt-1">{{ inviteErrors.email }}</p>
+ </div>
 
-            <!-- Role -->
-            <div>
-              <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Role</label>
-              <div class="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  @click="inviteForm.role = 'HR'"
-                  class="p-4 rounded-xl text-left transition-all border-2"
-                  :class="inviteForm.role === 'HR'
-                    ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/10 ring-4 ring-teal-500/10'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
-                >
-                  <div class="text-sm font-bold" :class="inviteForm.role === 'HR' ? 'text-teal-700 dark:text-teal-400' : 'text-slate-900 dark:text-white'">HR Manager</div>
-                  <p class="text-xs text-slate-500 mt-1">Manage jobs, candidates & pipelines</p>
-                </button>
-                <button
-                  type="button"
-                  @click="inviteForm.role = 'INTERVIEWER'"
-                  class="p-4 rounded-xl text-left transition-all border-2"
-                  :class="inviteForm.role === 'INTERVIEWER'
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/10 ring-4 ring-purple-500/10'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
-                >
-                  <div class="text-sm font-bold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-purple-700 dark:text-purple-400' : 'text-slate-900 dark:text-white'">Interviewer</div>
-                  <p class="text-xs text-slate-500 mt-1">Conduct interviews & submit scorecards</p>
-                </button>
-              </div>
-            </div>
+ <!-- Role -->
+ <div>
+ <label class="block text-sm font-bold text-slate-700 mb-3">Role</label>
+ <div class="grid grid-cols-2 gap-4">
+ <button
+ type="button"
+ @click="inviteForm.role = 'HR'"
+ class="p-4 rounded-xl text-left transition-all border-2"
+ :class="inviteForm.role === 'HR'
+ ? 'border-teal-500 bg-teal-50 ring-4 ring-teal-500/10'
+ : 'border-slate-200 hover:border-slate-300 :border-slate-600'"
+ >
+ <div class="text-sm font-bold" :class="inviteForm.role === 'HR' ? 'text-teal-700 ' : 'text-slate-900 '">HR Manager</div>
+ <p class="text-xs text-slate-500 mt-1">Manage jobs, candidates & pipelines</p>
+ </button>
+ <button
+ type="button"
+ @click="inviteForm.role = 'INTERVIEWER'"
+ class="p-4 rounded-xl text-left transition-all border-2"
+ :class="inviteForm.role === 'INTERVIEWER'
+ ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-500/10'
+ : 'border-slate-200 hover:border-slate-300 :border-slate-600'"
+ >
+ <div class="text-sm font-bold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-purple-700 ' : 'text-slate-900 '">Interviewer</div>
+ <p class="text-xs text-slate-500 mt-1">Conduct interviews & submit scorecards</p>
+ </button>
+ </div>
+ </div>
 
-            <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-700 mt-4">
-              <button
-                type="button"
-                @click="closeInviteModal"
-                class="btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                :disabled="inviteLoading"
-                class="btn-primary"
-              >
-                <span v-if="inviteLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {{ inviteLoading ? 'Sending…' : 'Send invitation' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
-  </div>
+ <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-4">
+ <button
+ type="button"
+ @click="closeInviteModal"
+ class="btn-secondary"
+ >
+ Cancel
+ </button>
+ <button
+ type="submit"
+ :disabled="inviteLoading"
+ class="btn-primary"
+ >
+ <span v-if="inviteLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+ {{ inviteLoading ? 'Sending…' : 'Send invitation' }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </Teleport>
+ </div>
 </template>

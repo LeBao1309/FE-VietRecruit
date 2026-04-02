@@ -27,333 +27,333 @@ const applied = ref(false)
 
 // ── Load ──
 async function loadJob(): Promise<void> {
-  loading.value = true
-  notFound.value = false
-  try {
-    const result = await jobService.getPublicJob(jobId.value)
-    if (result.data) {
-      job.value = result.data
-    } else {
-      notFound.value = true
-    }
-  } finally {
-    loading.value = false
-  }
+ loading.value = true
+ notFound.value = false
+ try {
+ const result = await jobService.getPublicJob(jobId.value)
+ if (result.data) {
+ job.value = result.data
+ } else {
+ notFound.value = true
+ }
+ } finally {
+ loading.value = false
+ }
 }
 
 // ── Apply button logic ──
 function handleApplyClick(): void {
-  if (!auth.isAuthenticated) {
-    // Redirect to login with return URL
-    router.push({ path: '/login', query: { redirect: route.fullPath } })
-    return
-  }
-  if (!auth.isCandidate) {
-    ui.toastWarning('Candidate only', 'Only candidates can apply to jobs.')
-    return
-  }
-  showApplyModal.value = true
+ if (!auth.isAuthenticated) {
+ // Redirect to login with return URL
+ router.push({ path: '/login', query: { redirect: route.fullPath } })
+ return
+ }
+ if (!auth.isCandidate) {
+ ui.toastWarning('Candidate only', 'Only candidates can apply to jobs.')
+ return
+ }
+ showApplyModal.value = true
 }
 
 async function submitApplication(): Promise<void> {
-  applying.value = true
-  try {
-    const result = await applicationService.apply({
-      jobId: jobId.value,
-      coverLetter: coverLetter.value.trim() || undefined,
-    })
-    if (result.error) {
-      ui.toastError('Application failed', result.error.message)
-      return
-    }
-    applied.value = true
-    showApplyModal.value = false
-    coverLetter.value = ''
-    ui.toastSuccess('Application submitted!', 'You will be notified about updates to your application.')
-  } finally {
-    applying.value = false
-  }
+ applying.value = true
+ try {
+ const result = await applicationService.apply({
+ jobId: jobId.value,
+ coverLetter: coverLetter.value.trim() || undefined,
+ })
+ if (result.error) {
+ ui.toastError('Application failed', result.error.message)
+ return
+ }
+ applied.value = true
+ showApplyModal.value = false
+ coverLetter.value = ''
+ ui.toastSuccess('Application submitted!', 'You will be notified about updates to your application.')
+ } finally {
+ applying.value = false
+ }
 }
 
 // ── Formatting ──
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'long', day: 'numeric', year: 'numeric',
-  })
+ return new Date(iso).toLocaleDateString('en-US', {
+ month: 'long', day: 'numeric', year: 'numeric',
+ })
 }
 
 function formatSalary(n: number | null): string {
-  if (n === null) return '—'
-  return n.toLocaleString('en-US')
+ if (n === null) return '—'
+ return n.toLocaleString('en-US')
 }
 
 function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  if (days === 0) return 'Posted today'
-  if (days === 1) return 'Posted 1 day ago'
-  if (days < 30) return `Posted ${days} days ago`
-  const months = Math.floor(days / 30)
-  return months === 1 ? 'Posted 1 month ago' : `Posted ${months} months ago`
+ const diff = Date.now() - new Date(iso).getTime()
+ const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+ if (days === 0) return 'Posted today'
+ if (days === 1) return 'Posted 1 day ago'
+ if (days < 30) return `Posted ${days} days ago`
+ const months = Math.floor(days / 30)
+ return months === 1 ? 'Posted 1 month ago' : `Posted ${months} months ago`
 }
 
 function copyLink(): void {
-  if (job.value?.publicLink) {
-    navigator.clipboard.writeText(job.value.publicLink)
-    ui.toastSuccess('Copied', 'Link copied to clipboard')
-  }
+ if (job.value?.publicLink) {
+ navigator.clipboard.writeText(job.value.publicLink)
+ ui.toastSuccess('Copied', 'Link copied to clipboard')
+ }
 }
 
 onMounted(loadJob)
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-    <!-- Header -->
-    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 py-4 sticky top-0 z-30 transition-all duration-300">
-      <div class="max-w-5xl mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <router-link to="/" class="text-2xl font-extrabold text-teal-600 dark:text-teal-400 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
-        </div>
-        <nav class="flex items-center gap-2 sm:gap-4">
-          <router-link
-            to="/jobs"
-            class="px-4 py-2.5 text-sm font-bold text-teal-600 bg-teal-50 dark:bg-teal-500/10 rounded-xl transition-colors hover:bg-teal-100 dark:hover:bg-teal-500/20"
-          >
-            Browse Jobs
-          </router-link>
-          <template v-if="!auth.isAuthenticated">
-            <router-link to="/login" class="px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-              Login
-            </router-link>
-            <router-link to="/register" class="btn-primary py-2.5 px-5 shrink-0 shadow-sm hover:shadow-md">
-              Get Started
-            </router-link>
-          </template>
-          <template v-else>
-            <span class="text-sm font-bold text-slate-500">{{ auth.user?.fullName }}</span>
-          </template>
-        </nav>
-      </div>
-    </header>
+ <div class="min-h-screen flex flex-col bg-slate-50 ">
+ <!-- Header -->
+ <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-30 transition-all duration-300">
+ <div class="max-w-5xl mx-auto flex items-center justify-between">
+ <div class="flex items-center gap-3">
+ <router-link to="/" class="text-2xl font-extrabold text-teal-600 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
+ </div>
+ <nav class="flex items-center gap-2 sm:gap-4">
+ <router-link
+ to="/jobs"
+ class="px-4 py-2.5 text-sm font-bold text-teal-600 bg-teal-50 rounded-xl transition-colors hover:bg-teal-100 :bg-teal-500/20"
+ >
+ Browse Jobs
+ </router-link>
+ <template v-if="!auth.isAuthenticated">
+ <router-link to="/login" class="px-4 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 :text-white rounded-xl hover:bg-slate-100 :bg-slate-800 transition-colors">
+ Login
+ </router-link>
+ <router-link to="/register" class="btn-primary py-2.5 px-5 shrink-0 shadow-sm hover:shadow-md">
+ Get Started
+ </router-link>
+ </template>
+ <template v-else>
+ <span class="text-sm font-bold text-slate-500">{{ auth.user?.fullName }}</span>
+ </template>
+ </nav>
+ </div>
+ </header>
 
-    <!-- Loading -->
-    <main v-if="loading" class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
-      <div class="animate-pulse space-y-6">
-        <div class="h-10 bg-slate-200 dark:bg-slate-700 rounded-md w-64" />
-        <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-40" />
-        <div class="h-64 bg-slate-200 dark:bg-slate-700 rounded-xl mt-8" />
-      </div>
-    </main>
+ <!-- Loading -->
+ <main v-if="loading" class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
+ <div class="animate-pulse space-y-6">
+ <div class="h-10 bg-slate-200 rounded-md w-64" />
+ <div class="h-4 bg-slate-200 rounded w-40" />
+ <div class="h-64 bg-slate-200 rounded-xl mt-8" />
+ </div>
+ </main>
 
-    <!-- Not found -->
-    <main v-else-if="notFound || !job" class="flex-1 flex items-center justify-center">
-      <div class="text-center py-20">
-        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center text-slate-400 text-3xl mx-auto mb-4">
-          🔍
-        </div>
-        <p class="font-bold text-slate-900 dark:text-white mb-2 text-lg">Job not found</p>
-        <p class="text-sm font-medium text-slate-500 mb-6">This listing may have been closed or removed.</p>
-        <router-link to="/jobs" class="text-teal-600 hover:text-teal-500 dark:text-teal-400 font-bold transition-colors">
-          &larr; Browse All Jobs
-        </router-link>
-      </div>
-    </main>
+ <!-- Not found -->
+ <main v-else-if="notFound || !job" class="flex-1 flex items-center justify-center">
+ <div class="text-center py-20">
+ <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-3xl mx-auto mb-4">
+ 🔍
+ </div>
+ <p class="font-bold text-slate-900 mb-2 text-lg">Job not found</p>
+ <p class="text-sm font-medium text-slate-500 mb-6">This listing may have been closed or removed.</p>
+ <router-link to="/jobs" class="text-teal-600 hover:text-teal-500 font-bold transition-colors">
+ &larr; Browse All Jobs
+ </router-link>
+ </div>
+ </main>
 
-    <!-- Job Detail -->
-    <main v-else class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
-      <!-- Back link -->
-      <div class="mb-8">
-        <router-link to="/jobs" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 font-bold transition-colors">
-          &larr; Back to Jobs
-        </router-link>
-      </div>
+ <!-- Job Detail -->
+ <main v-else class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
+ <!-- Back link -->
+ <div class="mb-8">
+ <router-link to="/jobs" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-teal-600 :text-teal-400 font-bold transition-colors">
+ &larr; Back to Jobs
+ </router-link>
+ </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main content -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Title card -->
-          <div class="premium-card p-8 sm:p-10">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4 tracking-tight leading-tight">{{ job.title }}</h1>
-            <p class="text-sm font-bold text-slate-400 flex items-center gap-2 mb-8 border-b border-slate-100 dark:border-slate-800 pb-6">
-               <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {{ timeAgo(job.createdAt) }}
-            </p>
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+ <!-- Main content -->
+ <div class="lg:col-span-2 space-y-6">
+ <!-- Title card -->
+ <div class="premium-card p-8 sm:p-10">
+ <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">{{ job.title }}</h1>
+ <p class="text-sm font-bold text-slate-400 flex items-center gap-2 mb-8 border-b border-slate-100 pb-6">
+ <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ {{ timeAgo(job.createdAt) }}
+ </p>
 
-            <!-- Job description -->
-            <div>
-              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white mb-5">Job Description</h2>
-              <div class="prose prose-slate prose-lg dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{{ job.description }}</div>
-            </div>
-          </div>
+ <!-- Job description -->
+ <div>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-5">Job Description</h2>
+ <div class="prose prose-slate prose-lg max-w-none text-slate-600 whitespace-pre-wrap leading-relaxed">{{ job.description }}</div>
+ </div>
+ </div>
 
-          <!-- Requirements -->
-          <div v-if="job.requirements" class="premium-card p-8 sm:p-10">
-            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
-              <span class="flex items-center justify-center w-8 h-8 rounded-full bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400">
-                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-              </span>
-              Requirements
-            </h2>
-            <div class="prose prose-slate prose-lg dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{{ job.requirements }}</div>
-          </div>
-        </div>
+ <!-- Requirements -->
+ <div v-if="job.requirements" class="premium-card p-8 sm:p-10">
+ <h2 class="text-xl font-extrabold text-slate-900 mb-5 flex items-center gap-2">
+ <span class="flex items-center justify-center w-8 h-8 rounded-full bg-teal-50 text-teal-600 ">
+ <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+ </span>
+ Requirements
+ </h2>
+ <div class="prose prose-slate prose-lg max-w-none text-slate-600 whitespace-pre-wrap leading-relaxed">{{ job.requirements }}</div>
+ </div>
+ </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6 lg:sticky lg:top-28 self-start">
-          <!-- Apply CTA -->
-          <div class="premium-card p-6 shadow-xl shadow-teal-900/5 dark:shadow-none border border-teal-100 dark:border-slate-800">
-            <button
-              v-if="!applied"
-              @click="handleApplyClick"
-              class="btn-primary w-full py-4 flex items-center justify-center gap-2 text-lg font-bold shadow-teal-500/30 hover:shadow-teal-500/50 hover:-translate-y-0.5 transition-all"
-            >
-              Apply Now
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </button>
-            <div v-else class="text-center py-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
-              <span class="flex flex-col items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400 font-extrabold">
-                <span class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                </span>
-                Application Submitted
-              </span>
-              <p class="text-xs font-bold text-emerald-600/70 dark:text-emerald-400/70 mt-2 px-4">You'll be notified about updates to your status.</p>
-            </div>
-            <p v-if="!auth.isAuthenticated" class="text-xs font-bold text-slate-400 text-center mt-4">
-              You will be prompted to log in to apply.
-            </p>
-          </div>
+ <!-- Sidebar -->
+ <div class="space-y-6 lg:sticky lg:top-28 self-start">
+ <!-- Apply CTA -->
+ <div class="premium-card p-6 shadow-xl shadow-teal-900/5 border border-teal-100 ">
+ <button
+ v-if="!applied"
+ @click="handleApplyClick"
+ class="btn-primary w-full py-4 flex items-center justify-center gap-2 text-lg font-bold shadow-teal-500/30 hover:shadow-teal-500/50 hover:-translate-y-0.5 transition-all"
+ >
+ Apply Now
+ <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+ </button>
+ <div v-else class="text-center py-4 bg-emerald-50 rounded-2xl border border-emerald-100 ">
+ <span class="flex flex-col items-center gap-2 text-sm text-emerald-700 font-extrabold">
+ <span class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-1">
+ <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+ </span>
+ Application Submitted
+ </span>
+ <p class="text-xs font-bold text-emerald-600/70 mt-2 px-4">You'll be notified about updates to your status.</p>
+ </div>
+ <p v-if="!auth.isAuthenticated" class="text-xs font-bold text-slate-400 text-center mt-4">
+ You will be prompted to log in to apply.
+ </p>
+ </div>
 
-          <!-- Details card -->
-          <div class="premium-card p-6 space-y-6">
-            <h3 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              Overview
-            </h3>
+ <!-- Details card -->
+ <div class="premium-card p-6 space-y-6">
+ <h3 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2">
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ Overview
+ </h3>
 
-            <!-- Salary -->
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center shrink-0 text-teal-600 dark:text-teal-400">
-                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <div>
-                <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Monthly Salary</span>
-                <span class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                  <template v-if="job.minSalary || job.maxSalary">
-                    {{ formatSalary(job.minSalary) }} – {{ formatSalary(job.maxSalary) }} {{ job.currency ?? 'VND' }}
-                  </template>
-                  <template v-else-if="job.isNegotiable">Negotiable</template>
-                  <template v-else>Not specified</template>
-                </span>
-                <span v-if="job.isNegotiable" class="text-xs font-bold text-slate-400 mt-0.5 block">(Negotiable based on experience)</span>
-              </div>
-            </div>
+ <!-- Salary -->
+ <div class="flex items-start gap-3">
+ <div class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center shrink-0 text-teal-600 ">
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ </div>
+ <div>
+ <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Monthly Salary</span>
+ <span class="text-sm font-extrabold text-emerald-600 mt-0.5 block">
+ <template v-if="job.minSalary || job.maxSalary">
+ {{ formatSalary(job.minSalary) }} – {{ formatSalary(job.maxSalary) }} {{ job.currency ?? 'VND' }}
+ </template>
+ <template v-else-if="job.isNegotiable">Negotiable</template>
+ <template v-else>Not specified</template>
+ </span>
+ <span v-if="job.isNegotiable" class="text-xs font-bold text-slate-400 mt-0.5 block">(Negotiable based on experience)</span>
+ </div>
+ </div>
 
-            <!-- Deadline -->
-            <div v-if="job.deadline" class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center shrink-0 text-rose-500">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-              </div>
-              <div>
-                <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Apply Before</span>
-                <span class="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
-                  {{ formatDate(job.deadline) }}
-                </span>
-              </div>
-            </div>
+ <!-- Deadline -->
+ <div v-if="job.deadline" class="flex items-start gap-3">
+ <div class="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center shrink-0 text-rose-500">
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+ </div>
+ <div>
+ <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Apply Before</span>
+ <span class="text-sm font-bold text-slate-900 mt-0.5 block">
+ {{ formatDate(job.deadline) }}
+ </span>
+ </div>
+ </div>
 
-            <!-- Posted On -->
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-500">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <div>
-                <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Posted Date</span>
-                <span class="text-sm font-bold text-slate-700 dark:text-slate-300 mt-0.5 block">
-                  {{ formatDate(job.createdAt) }}
-                </span>
-              </div>
-            </div>
-          </div>
+ <!-- Posted On -->
+ <div class="flex items-start gap-3">
+ <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0 text-slate-500">
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ </div>
+ <div>
+ <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Posted Date</span>
+ <span class="text-sm font-bold text-slate-700 mt-0.5 block">
+ {{ formatDate(job.createdAt) }}
+ </span>
+ </div>
+ </div>
+ </div>
 
-          <!-- Share -->
-          <div v-if="job.publicLink" class="premium-card p-6 border-slate-100 dark:border-slate-800">
-            <h3 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-              Share Job
-            </h3>
-            <div class="relative">
-              <input
-                :value="job.publicLink"
-                readonly
-                class="w-full pl-4 pr-10 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-500 cursor-text outline-none focus:ring-2 focus:ring-teal-500/50 transition-all font-mono"
-                @click="($event.target as HTMLInputElement).select()"
-              />
-              <button 
-                class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-teal-600 transition-colors"
-                @click="copyLink"
-                title="Copy Link"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
+ <!-- Share -->
+ <div v-if="job.publicLink" class="premium-card p-6 border-slate-100 ">
+ <h3 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+ Share Job
+ </h3>
+ <div class="relative">
+ <input
+ :value="job.publicLink"
+ readonly
+ class="w-full pl-4 pr-10 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-text outline-none focus:ring-2 focus:ring-teal-500/50 transition-all font-mono"
+ @click="($event.target as HTMLInputElement).select()"
+ />
+ <button 
+ class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-teal-600 transition-colors"
+ @click="copyLink"
+ title="Copy Link"
+ >
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+ </main>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-8 mt-auto">
-      <div class="max-w-5xl mx-auto text-center text-sm font-bold text-slate-400">
-        © {{ new Date().getFullYear() }} VietRecruit. All rights reserved.
-      </div>
-    </footer>
+ <!-- Footer -->
+ <footer class="bg-white border-t border-slate-200 px-6 py-8 mt-auto">
+ <div class="max-w-5xl mx-auto text-center text-sm font-bold text-slate-400">
+ © {{ new Date().getFullYear() }} VietRecruit. All rights reserved.
+ </div>
+ </footer>
 
-    <!-- Apply Modal -->
-    <Teleport to="body">
-      <div v-if="showApplyModal" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showApplyModal = false" />
-        <div class="relative premium-card w-full max-w-lg p-8 animate-slide-up mx-4 shadow-2xl">
-          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white mb-2">Apply to <span class="text-teal-600 dark:text-teal-400">{{ job?.title }}</span></h2>
-          <p class="text-sm font-medium text-slate-500 mb-6">
-            Your default CV on file will be attached automatically.
-          </p>
+ <!-- Apply Modal -->
+ <Teleport to="body">
+ <div v-if="showApplyModal" class="fixed inset-0 z-50 flex items-center justify-center">
+ <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showApplyModal = false" />
+ <div class="relative premium-card w-full max-w-lg p-8 animate-slide-up mx-4 shadow-2xl">
+ <h2 class="text-xl font-extrabold text-slate-900 mb-2">Apply to <span class="text-teal-600 ">{{ job?.title }}</span></h2>
+ <p class="text-sm font-medium text-slate-500 mb-6">
+ Your default CV on file will be attached automatically.
+ </p>
 
-          <form @submit.prevent="submitApplication" class="space-y-6">
-            <div>
-              <label for="cover-letter" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Cover Letter <span class="text-slate-400 font-medium ml-1">(optional)</span>
-              </label>
-              <textarea
-                id="cover-letter"
-                v-model="coverLetter"
-                rows="6"
-                placeholder="Write a brief cover letter to introduce yourself and explain why you're a great fit…"
-                class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y"
-              />
-            </div>
+ <form @submit.prevent="submitApplication" class="space-y-6">
+ <div>
+ <label for="cover-letter" class="block text-sm font-bold text-slate-700 mb-2">
+ Cover Letter <span class="text-slate-400 font-medium ml-1">(optional)</span>
+ </label>
+ <textarea
+ id="cover-letter"
+ v-model="coverLetter"
+ rows="6"
+ placeholder="Write a brief cover letter to introduce yourself and explain why you're a great fit…"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y"
+ />
+ </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                @click="showApplyModal = false"
-                class="px-5 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                :disabled="applying"
-                class="btn-primary py-2.5 px-6 flex items-center justify-center gap-2 min-w-[150px]"
-              >
-                <span v-if="applying" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {{ applying ? 'Submitting…' : 'Submit Application' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
-  </div>
+ <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 ">
+ <button
+ type="button"
+ @click="showApplyModal = false"
+ class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors"
+ >
+ Cancel
+ </button>
+ <button
+ type="submit"
+ :disabled="applying"
+ class="btn-primary py-2.5 px-6 flex items-center justify-center gap-2 min-w-[150px]"
+ >
+ <span v-if="applying" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+ {{ applying ? 'Submitting…' : 'Submit Application' }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </Teleport>
+ </div>
 </template>

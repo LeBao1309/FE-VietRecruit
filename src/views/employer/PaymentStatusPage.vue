@@ -16,183 +16,183 @@ let pollCount = 0
 const MAX_POLLS = 60 // 5 minutes at 5s intervals
 
 function getOrderCode(): number | null {
-  const code = route.query.orderCode as string | undefined
-  if (!code) return null
-  return parseInt(code, 10)
+ const code = route.query.orderCode as string | undefined
+ if (!code) return null
+ return parseInt(code, 10)
 }
 
 async function pollStatus(): Promise<void> {
-  const orderCode = getOrderCode()
-  if (!orderCode) {
-    error.value = 'No order code provided.'
-    polling.value = false
-    return
-  }
+ const orderCode = getOrderCode()
+ if (!orderCode) {
+ error.value = 'No order code provided.'
+ polling.value = false
+ return
+ }
 
-  const result = await paymentService.getPaymentStatus(orderCode)
-  if (result.error) {
-    error.value = result.error.message
-    polling.value = false
-    return
-  }
+ const result = await paymentService.getPaymentStatus(orderCode)
+ if (result.error) {
+ error.value = result.error.message
+ polling.value = false
+ return
+ }
 
-  status.value = result.data
+ status.value = result.data
 
-  const paymentStatus = result.data?.status
-  if (paymentStatus === 'PAID' || paymentStatus === 'CANCELLED' || paymentStatus === 'FAILED') {
-    polling.value = false
-    if (pollTimer) {
-      clearInterval(pollTimer)
-      pollTimer = null
-    }
-  }
+ const paymentStatus = result.data?.status
+ if (paymentStatus === 'PAID' || paymentStatus === 'CANCELLED' || paymentStatus === 'FAILED') {
+ polling.value = false
+ if (pollTimer) {
+ clearInterval(pollTimer)
+ pollTimer = null
+ }
+ }
 
-  pollCount++
-  if (pollCount >= MAX_POLLS) {
-    polling.value = false
-    if (pollTimer) {
-      clearInterval(pollTimer)
-      pollTimer = null
-    }
-  }
+ pollCount++
+ if (pollCount >= MAX_POLLS) {
+ polling.value = false
+ if (pollTimer) {
+ clearInterval(pollTimer)
+ pollTimer = null
+ }
+ }
 }
 
 function formatAmount(amount: number): string {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
+ return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
+ return new Date(dateStr).toLocaleString('en-US', {
+ dateStyle: 'medium',
+ timeStyle: 'short',
+ })
 }
 
 
 
 function goToSubscription(): void {
-  router.push('/employer/subscription')
+ router.push('/employer/subscription')
 }
 
 function goToDashboard(): void {
-  router.push('/employer/dashboard')
+ router.push('/employer/dashboard')
 }
 
 onMounted(() => {
-  pollStatus()
-  pollTimer = setInterval(pollStatus, 5000)
+ pollStatus()
+ pollTimer = setInterval(pollStatus, 5000)
 })
 
 onUnmounted(() => {
-  if (pollTimer) {
-    clearInterval(pollTimer)
-  }
+ if (pollTimer) {
+ clearInterval(pollTimer)
+ }
 })
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-[60vh] p-6 lg:p-12">
-    <div class="premium-card w-full max-w-lg p-10 text-center">
-      <!-- Loading / Polling -->
-      <template v-if="polling && !status">
-        <div class="w-20 h-20 mx-auto bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center rounded-3xl rotate-3 mb-6 shadow-sm border border-teal-100 dark:border-teal-800">
-          <div class="inline-block w-8 h-8 border-4 border-teal-200 dark:border-teal-800 border-t-teal-600 rounded-full animate-spin" />
-        </div>
-        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Processing Payment</h1>
-        <p class="text-sm font-medium text-slate-500 mb-6">Please wait while we confirm your payment...</p>
-      </template>
+ <div class="flex items-center justify-center min-h-[60vh] p-6 lg:p-12">
+ <div class="premium-card w-full max-w-lg p-10 text-center">
+ <!-- Loading / Polling -->
+ <template v-if="polling && !status">
+ <div class="w-20 h-20 mx-auto bg-teal-50 flex items-center justify-center rounded-3xl rotate-3 mb-6 shadow-sm border border-teal-100 ">
+ <div class="inline-block w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+ </div>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Processing Payment</h1>
+ <p class="text-sm font-medium text-slate-500 mb-6">Please wait while we confirm your payment...</p>
+ </template>
 
-      <!-- Error -->
-      <template v-else-if="error">
-        <div class="w-20 h-20 mx-auto bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400 flex items-center justify-center rounded-3xl -rotate-3 mb-6 shadow-sm border border-rose-100 dark:border-rose-800 text-4xl font-bold">
-          ✕
-        </div>
-        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Payment Error</h1>
-        <p class="text-sm font-medium text-slate-500 mb-8">{{ error }}</p>
-        <button class="btn-primary w-full max-w-[240px]" @click="goToDashboard">Go to Dashboard</button>
-      </template>
+ <!-- Error -->
+ <template v-else-if="error">
+ <div class="w-20 h-20 mx-auto bg-rose-50 text-rose-500 flex items-center justify-center rounded-3xl -rotate-3 mb-6 shadow-sm border border-rose-100 text-4xl font-bold">
+ ✕
+ </div>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment Error</h1>
+ <p class="text-sm font-medium text-slate-500 mb-8">{{ error }}</p>
+ <button class="btn-primary w-full max-w-[240px]" @click="goToDashboard">Go to Dashboard</button>
+ </template>
 
-      <!-- Status Received -->
-      <template v-else-if="status">
-        <!-- PAID -->
-        <template v-if="status.status === 'PAID'">
-          <div class="w-20 h-20 mx-auto bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center rounded-3xl rotate-3 mb-6 shadow-sm border border-emerald-100 dark:border-emerald-800 text-4xl font-bold">
-            ✓
-          </div>
-          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Payment Successful!</h1>
-          <p class="text-sm font-medium text-slate-500 mb-6">
-            Your <strong class="text-slate-900 dark:text-white">{{ status.planName }}</strong> subscription is now active.
-          </p>
-        </template>
+ <!-- Status Received -->
+ <template v-else-if="status">
+ <!-- PAID -->
+ <template v-if="status.status === 'PAID'">
+ <div class="w-20 h-20 mx-auto bg-emerald-50 text-emerald-500 flex items-center justify-center rounded-3xl rotate-3 mb-6 shadow-sm border border-emerald-100 text-4xl font-bold">
+ ✓
+ </div>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment Successful!</h1>
+ <p class="text-sm font-medium text-slate-500 mb-6">
+ Your <strong class="text-slate-900 ">{{ status.planName }}</strong> subscription is now active.
+ </p>
+ </template>
 
-        <!-- PENDING -->
-        <template v-else-if="status.status === 'PENDING'">
-          <div class="w-20 h-20 mx-auto bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center rounded-3xl mb-6 shadow-sm border border-teal-100 dark:border-teal-800">
-            <div class="inline-block w-8 h-8 border-4 border-teal-200 dark:border-teal-800 border-t-teal-600 rounded-full animate-spin" />
-          </div>
-          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Payment Pending</h1>
-          <p class="text-sm font-medium text-slate-500 mb-6">
-            Waiting for payment confirmation. This page will update automatically.
-          </p>
-        </template>
+ <!-- PENDING -->
+ <template v-else-if="status.status === 'PENDING'">
+ <div class="w-20 h-20 mx-auto bg-teal-50 flex items-center justify-center rounded-3xl mb-6 shadow-sm border border-teal-100 ">
+ <div class="inline-block w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+ </div>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment Pending</h1>
+ <p class="text-sm font-medium text-slate-500 mb-6">
+ Waiting for payment confirmation. This page will update automatically.
+ </p>
+ </template>
 
-        <!-- CANCELLED / FAILED -->
-        <template v-else>
-          <div class="w-20 h-20 mx-auto bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400 flex items-center justify-center rounded-3xl -rotate-3 mb-6 shadow-sm border border-rose-100 dark:border-rose-800 text-4xl font-bold">
-            ✕
-          </div>
-          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Payment {{ status.status === 'CANCELLED' ? 'Cancelled' : 'Failed' }}</h1>
-          <p class="text-sm font-medium text-slate-500 mb-6">
-            Your payment was not completed. No charges have been made.
-          </p>
-        </template>
+ <!-- CANCELLED / FAILED -->
+ <template v-else>
+ <div class="w-20 h-20 mx-auto bg-rose-50 text-rose-500 flex items-center justify-center rounded-3xl -rotate-3 mb-6 shadow-sm border border-rose-100 text-4xl font-bold">
+ ✕
+ </div>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment {{ status.status === 'CANCELLED' ? 'Cancelled' : 'Failed' }}</h1>
+ <p class="text-sm font-medium text-slate-500 mb-6">
+ Your payment was not completed. No charges have been made.
+ </p>
+ </template>
 
-        <!-- Payment Details -->
-        <div class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-left mb-8">
-          <div class="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0">
-            <span class="text-sm font-bold text-slate-500">Order Code</span>
-            <span class="text-sm font-black text-slate-900 dark:text-white">#{{ status.orderCode }}</span>
-          </div>
-          <div class="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0">
-            <span class="text-sm font-bold text-slate-500">Plan</span>
-            <span class="text-sm font-black text-slate-900 dark:text-white">{{ status.planName }}</span>
-          </div>
-          <div class="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0">
-            <span class="text-sm font-bold text-slate-500">Amount</span>
-            <span class="text-sm font-black text-slate-900 dark:text-white">{{ formatAmount(status.amount) }}</span>
-          </div>
-          <div class="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0">
-            <span class="text-sm font-bold text-slate-500">Status</span>
-            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm"
-                  :class="status.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
-                         (status.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-rose-50 text-rose-600 border border-rose-200')">
-              {{ status.status }}
-            </span>
-          </div>
-          <div class="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700/50 last:border-0">
-            <span class="text-sm font-bold text-slate-500">Date</span>
-            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ formatDate(status.createdAt) }}</span>
-          </div>
-        </div>
+ <!-- Payment Details -->
+ <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left mb-8">
+ <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
+ <span class="text-sm font-bold text-slate-500">Order Code</span>
+ <span class="text-sm font-black text-slate-900 ">#{{ status.orderCode }}</span>
+ </div>
+ <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
+ <span class="text-sm font-bold text-slate-500">Plan</span>
+ <span class="text-sm font-black text-slate-900 ">{{ status.planName }}</span>
+ </div>
+ <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
+ <span class="text-sm font-bold text-slate-500">Amount</span>
+ <span class="text-sm font-black text-slate-900 ">{{ formatAmount(status.amount) }}</span>
+ </div>
+ <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
+ <span class="text-sm font-bold text-slate-500">Status</span>
+ <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm"
+ :class="status.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+ (status.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-rose-50 text-rose-600 border border-rose-200')">
+ {{ status.status }}
+ </span>
+ </div>
+ <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
+ <span class="text-sm font-bold text-slate-500">Date</span>
+ <span class="text-sm font-bold text-slate-900 ">{{ formatDate(status.createdAt) }}</span>
+ </div>
+ </div>
 
-        <!-- Actions -->
-        <div class="flex gap-4 justify-center">
-          <button
-            v-if="status.status === 'PAID'"
-            class="btn-primary"
-            @click="goToSubscription"
-          >
-            View Subscription
-          </button>
-          <button
-            v-else
-            class="btn-primary"
-            @click="goToDashboard"
-          >
-            Go to Dashboard
-          </button>
-        </div>
-      </template>
-    </div>
-  </div>
+ <!-- Actions -->
+ <div class="flex gap-4 justify-center">
+ <button
+ v-if="status.status === 'PAID'"
+ class="btn-primary"
+ @click="goToSubscription"
+ >
+ View Subscription
+ </button>
+ <button
+ v-else
+ class="btn-primary"
+ @click="goToDashboard"
+ >
+ Go to Dashboard
+ </button>
+ </div>
+ </template>
+ </div>
+ </div>
 </template>
