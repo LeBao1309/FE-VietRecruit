@@ -13,6 +13,7 @@ const mode = ref<Mode>('browse')
 
 // ── Search state ──
 const searchQuery = ref('')
+const locationQuery = ref('')
 const debouncedQuery = ref('')
 const autocompleteResults = ref<string[]>([])
 const showAutocomplete = ref(false)
@@ -125,8 +126,15 @@ function onSearchInput(): void {
 function handleSearch(): void {
   showAutocomplete.value = false
   currentPage.value = 0
-  debouncedQuery.value = searchQuery.value
-  if (debouncedQuery.value.trim()) {
+  
+  // Combine search and location for semantic text search
+  const queryParts = []
+  if (searchQuery.value.trim()) queryParts.push(searchQuery.value.trim())
+  if (locationQuery.value.trim()) queryParts.push(locationQuery.value.trim())
+  
+  debouncedQuery.value = queryParts.join(' ')
+  
+  if (debouncedQuery.value) {
     loadSearchResults()
   } else {
     mode.value = 'browse'
@@ -136,6 +144,7 @@ function handleSearch(): void {
 
 function clearSearch(): void {
   searchQuery.value = ''
+  locationQuery.value = ''
   debouncedQuery.value = ''
   autocompleteResults.value = []
   showAutocomplete.value = false
@@ -196,25 +205,25 @@ onMounted(() => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header / Nav -->
-    <header class="bg-surface border-b border-border px-6 py-4 sticky top-0 z-30">
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 py-4 sticky top-0 z-30 transition-all duration-300">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <router-link to="/" class="text-xl font-bold text-primary">VietRecruit</router-link>
-        <nav class="flex items-center gap-3">
+        <router-link to="/" class="text-2xl font-extrabold text-teal-600 dark:text-teal-400 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
+        <nav class="flex items-center gap-2 sm:gap-4">
           <router-link
             to="/jobs"
-            class="px-3 py-2 text-sm font-medium text-primary bg-primary-bg rounded-md"
+            class="px-4 py-2.5 text-sm font-bold text-teal-600 bg-teal-50 dark:bg-teal-500/10 rounded-xl transition-colors hover:bg-teal-100 dark:hover:bg-teal-500/20"
           >
             Browse Jobs
           </router-link>
           <router-link
             to="/login"
-            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-50 transition"
+            class="px-5 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             Login
           </router-link>
           <router-link
             to="/register"
-            class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+            class="btn-primary py-2.5 px-6 shrink-0 shadow-sm hover:shadow-md"
           >
             Get Started
           </router-link>
@@ -222,32 +231,44 @@ onMounted(() => {
       </div>
     </header>
 
-    <!-- Hero / Search Section -->
-    <section class="bg-gradient-to-b from-primary-bg to-page px-6 pt-10 pb-8">
-      <div class="max-w-3xl mx-auto text-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Find Your Next Opportunity</h1>
-        <p class="text-sm text-gray-500">Search through open positions from top companies in Vietnam</p>
+    <!-- Hero / Search Section (Light Theme) -->
+    <section class="bg-white dark:bg-slate-900 px-6 pt-20 pb-16 relative overflow-hidden border-b border-slate-200 dark:border-slate-800">
+      <!-- Decorative light blobs -->
+      <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80 pointer-events-none" aria-hidden="true">
+        <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-teal-50 to-emerald-50 dark:from-teal-900/20 dark:to-emerald-900/20 opacity-60 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
       </div>
 
-      <!-- Search bar -->
-      <div class="max-w-2xl mx-auto relative">
-        <form @submit.prevent="handleSearch" class="flex gap-2">
-          <div class="relative flex-1">
+      <div class="max-w-4xl mx-auto text-center mb-12 animate-fade-in-up">
+        <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">
+          Find Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">Next Opportunity</span>
+        </h1>
+        <p class="text-lg sm:text-xl font-medium text-slate-500 max-w-2xl mx-auto">
+          Discover open positions from top companies and take the next step in your career.
+        </p>
+      </div>
+
+      <!-- Search Box - Elevated -->
+      <div class="max-w-4xl mx-auto relative group animate-fade-in-up" style="animation-delay: 100ms;">
+        <form @submit.prevent="handleSearch" class="bg-white dark:bg-slate-800 p-2 sm:p-3 rounded-3xl shadow-xl dark:shadow-2xl-dark border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-2 transition-all hover:shadow-2xl">
+          <!-- Keyword input -->
+          <div class="relative flex-1 flex items-center border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-700 pb-2 sm:pb-0 mb-2 sm:mb-0">
+            <div class="absolute left-4 text-slate-400 group-focus-within:text-teal-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
             <input
               v-model="searchQuery"
               @input="onSearchInput"
               @focus="showAutocomplete = autocompleteResults.length > 0"
               @blur="onSearchBlur"
               type="text"
-              placeholder="Search jobs by title, skills, company…"
-              class="w-full px-4 py-3 text-sm border border-border rounded-lg bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition pr-8"
+              placeholder="Job title, keywords, or company..."
+              class="w-full pl-12 pr-10 py-3.5 text-base sm:text-lg bg-transparent border-0 outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
             />
-            <!-- Clear button -->
             <button
               v-if="searchQuery"
               type="button"
-              @click="clearSearch"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm transition"
+              @click="searchQuery = ''"
+              class="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors p-1"
             >
               ✕
             </button>
@@ -255,69 +276,94 @@ onMounted(() => {
             <!-- Autocomplete dropdown -->
             <div
               v-if="showAutocomplete && autocompleteResults.length > 0"
-              class="absolute left-0 right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-20 overflow-hidden animate-fade-in"
+              class="absolute left-0 right-0 top-[calc(100%+16px)] premium-card overflow-hidden shadow-xl z-20 animate-slide-up origin-top"
             >
               <button
                 v-for="(item, i) in autocompleteResults"
                 :key="i"
                 type="button"
                 @mousedown.prevent="selectAutocomplete(item)"
-                class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-bg hover:text-primary transition"
+                class="w-full text-left px-5 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-teal-600 transition-colors"
               >
                 {{ item }}
               </button>
             </div>
           </div>
+
+          <!-- Location input -->
+          <div class="relative flex-1 flex items-center">
+            <div class="absolute left-4 text-slate-400 transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </div>
+            <input
+              v-model="locationQuery"
+              type="text"
+              placeholder="City, state, zip code, or remotely..."
+              class="w-full pl-12 pr-10 py-3.5 text-base sm:text-lg bg-transparent border-0 outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
+            />
+             <button
+              v-if="locationQuery"
+              type="button"
+              @click="locationQuery = ''"
+              class="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors p-1"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Submit Button -->
           <button
             type="submit"
-            class="px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition shrink-0"
+            class="btn-primary py-3.5 px-8 shrink-0 rounded-2xl shadow-sm hover:shadow-md sm:w-auto w-full text-lg"
           >
             Search
           </button>
         </form>
 
         <!-- Active search indicator -->
-        <div v-if="mode === 'search' && debouncedQuery" class="flex items-center gap-2 mt-3">
-          <span class="text-xs text-gray-500">
-            Showing results for "<span class="font-medium text-gray-700">{{ debouncedQuery }}</span>"
+        <div v-if="mode === 'search' && debouncedQuery" class="flex items-center justify-center gap-2 mt-6">
+          <span class="text-sm font-medium text-slate-500">
+            Showing results for "<span class="font-bold text-slate-900 dark:text-white">{{ debouncedQuery }}</span>"
           </span>
-          <span v-if="searchData?.tookMs" class="text-[10px] text-gray-400">({{ searchData.tookMs }}ms)</span>
-          <button @click="clearSearch" class="text-xs text-primary hover:text-primary-hover font-medium ml-1">
-            Clear
+          <button @click="clearSearch" class="text-sm text-teal-600 hover:text-teal-500 font-bold ml-2 transition-colors border-b border-teal-600/30">
+            Clear All
           </button>
         </div>
       </div>
     </section>
 
     <!-- Results -->
-    <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+    <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-10 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
       <!-- Results count -->
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-xs text-gray-400">
+      <div class="flex items-center justify-between mb-6">
+        <span class="text-sm font-bold text-slate-500">
           {{ totalElements }} job{{ totalElements !== 1 ? 's' : '' }} found
         </span>
       </div>
 
       <!-- Loading -->
-      <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="i in 6" :key="i" class="bg-surface border border-border rounded-lg p-5 shadow-sm animate-pulse">
-          <div class="h-5 bg-gray-100 rounded w-3/4 mb-3" />
-          <div class="h-3 bg-gray-100 rounded w-1/2 mb-4" />
-          <div class="h-3 bg-gray-100 rounded w-full mb-2" />
-          <div class="h-3 bg-gray-100 rounded w-2/3" />
+      <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="i in 6" :key="i" class="premium-card p-6 animate-pulse">
+          <div class="h-5 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-4" />
+          <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2 mb-5" />
+          <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-full mb-2.5" />
+          <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
         </div>
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="isEmpty" class="text-center py-20">
-        <div class="text-gray-400 text-sm">
-          <p class="font-medium mb-1">
+      <div v-else-if="isEmpty" class="text-center py-24">
+        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center text-slate-400 text-3xl mx-auto mb-4">
+          🔍
+        </div>
+        <div class="text-slate-500 text-sm">
+          <p class="font-bold text-slate-900 dark:text-white mb-1.5 text-base">
             {{ mode === 'search' ? 'No jobs match your search' : 'No open positions right now' }}
           </p>
-          <p class="text-xs">
+          <p class="font-medium">
             {{ mode === 'search' ? 'Try different keywords or clear your filters.' : 'Check back soon for new opportunities.' }}
           </p>
-          <button v-if="mode === 'search'" @click="clearSearch" class="mt-3 text-primary hover:text-primary-hover text-xs font-medium transition">
+          <button v-if="mode === 'search'" @click="clearSearch" class="mt-4 px-4 py-2 text-teal-600 bg-teal-50 dark:bg-teal-500/10 hover:bg-teal-100 dark:hover:bg-teal-500/20 rounded-xl font-bold transition-colors">
             Clear Search
           </button>
         </div>
@@ -325,24 +371,30 @@ onMounted(() => {
 
       <!-- Browse mode: card grid -->
       <template v-else-if="mode === 'browse' && browseData">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             v-for="job in browseData.content"
             :key="job.id"
             @click="goToJob(job.id)"
-            class="bg-surface border border-border rounded-lg p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition cursor-pointer group"
+            class="premium-card p-6 border-slate-200 dark:border-slate-800 transition-all duration-300 cursor-pointer group flex flex-col h-full bg-white dark:bg-slate-900 hover:-translate-y-1 hover:shadow-[0_12px_24px_-10px_rgba(20,184,166,0.3)] hover:border-teal-400/50 dark:hover:border-teal-500/50"
           >
-            <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition mb-1 line-clamp-2">
-              {{ job.title }}
-            </h3>
-            <p class="text-xs text-gray-400 mb-3">{{ timeAgo(job.createdAt) }}</p>
-            <div class="space-y-1.5">
+            <div class="mb-5 flex-1">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors line-clamp-2 leading-snug">
+                {{ job.title }}
+              </h3>
+              <p class="text-xs font-bold text-slate-400 mt-2 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {{ timeAgo(job.createdAt) }}
+              </p>
+            </div>
+            <div class="space-y-3 mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
               <div class="flex items-center justify-between">
-                <span class="text-xs text-gray-500">
+                <span class="px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm font-bold border border-emerald-100 dark:border-emerald-500/20">
                   {{ formatSalary(job.minSalary, job.maxSalary, job.currency, job.isNegotiable) }}
                 </span>
               </div>
-              <div v-if="job.deadline" class="text-[10px] text-gray-400">
+              <div v-if="job.deadline" class="text-xs font-medium text-rose-500/80 flex items-center gap-1.5 pt-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 Deadline: {{ formatDate(job.deadline) }}
               </div>
             </div>
@@ -352,46 +404,62 @@ onMounted(() => {
 
       <!-- Search mode: list with highlights -->
       <template v-else-if="mode === 'search' && searchData">
-        <div class="space-y-3">
+        <div class="space-y-4">
           <div
             v-for="job in searchData.content"
             :key="job.id"
             @click="goToJob(job.id)"
-            class="bg-surface border border-border rounded-lg p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition cursor-pointer group"
+            class="premium-card p-6 md:p-8 hover:-translate-y-1 hover:shadow-[0_12px_24px_-10px_rgba(20,184,166,0.3)] hover:border-teal-400/50 transition-all duration-300 cursor-pointer group bg-white dark:bg-slate-900"
           >
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
               <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition mb-0.5">
+                <h3 class="text-xl font-extrabold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
                   {{ job.title }}
                 </h3>
-                <div class="flex items-center gap-2 text-xs text-gray-400 mb-2 flex-wrap">
-                  <span v-if="job.companyName" class="font-medium text-gray-500">{{ job.companyName }}</span>
-                  <span v-if="job.locationName">· {{ job.locationName }}</span>
-                  <span v-if="job.categoryName">· {{ job.categoryName }}</span>
+                <div class="flex items-center gap-3 text-sm font-semibold text-slate-500 mb-4 flex-wrap">
+                  <span v-if="job.companyName" class="text-slate-800 dark:text-slate-200 font-extrabold flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    {{ job.companyName }}
+                  </span>
+                  <span v-if="job.locationName" class="flex items-center gap-1.5 text-slate-500">
+                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    {{ job.locationName }}
+                  </span>
+                  <span v-if="job.categoryName" class="flex items-center gap-1.5 text-slate-500">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14.5a3 3 0 10-6 0 3 3 0 006 0zm10 0a3 3 0 10-6 0 3 3 0 006 0zm-5-3.5v-4zm-5 0v-4z" /></svg>
+                    {{ job.categoryName }}
+                  </span>
                 </div>
                 <!-- Description snippet -->
-                <p v-if="job.description" class="text-xs text-gray-500 line-clamp-2 mb-2">
+                <p v-if="job.description" class="text-sm font-medium text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 leading-relaxed">
                   {{ job.description }}
                 </p>
                 <!-- Highlights -->
-                <div v-if="job.highlights" class="flex flex-wrap gap-1">
+                <div v-if="job.highlights" class="flex flex-wrap gap-2 mt-auto">
                   <template v-for="(values, field) in job.highlights" :key="field">
                     <span
                       v-for="(val, i) in values"
                       :key="`${field}-${i}`"
-                      class="inline-block px-1.5 py-0.5 text-[10px] bg-primary-bg text-primary rounded"
+                      class="inline-flex items-center px-2.5 py-1 text-xs font-bold bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300 rounded-lg border border-teal-100 dark:border-teal-500/20"
                       v-html="val"
                     />
                   </template>
                 </div>
               </div>
-              <div class="text-right shrink-0">
-                <p class="text-xs font-medium text-gray-700">
+              <div class="sm:text-right shrink-0 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:gap-4 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+                <span class="px-4 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-bold border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
                   {{ formatSalary(job.minSalary, job.maxSalary, job.currency, job.isNegotiable) }}
+                </span>
+                <p class="text-xs font-bold text-slate-400 flex items-center justify-end gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  {{ timeAgo(job.createdAt) }}
                 </p>
-                <p class="text-[10px] text-gray-400 mt-0.5">{{ timeAgo(job.createdAt) }}</p>
-                <div v-if="job.score !== null && job.score !== undefined" class="mt-1">
-                  <span class="text-[10px] text-primary font-medium">{{ Math.round(job.score * 100) }}% match</span>
+                <div v-if="job.score !== null && job.score !== undefined" class="mt-2 text-right">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide"
+                    :class="job.score > 0.8 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400'"
+                  >
+                    {{ Math.round(job.score * 100) }}% match
+                  </span>
                 </div>
               </div>
             </div>
@@ -400,32 +468,32 @@ onMounted(() => {
       </template>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex items-center justify-between mt-8 pt-4 border-t border-border">
-        <span class="text-xs text-gray-400">
+      <div v-if="totalPages > 1" class="flex items-center justify-between mt-10 pt-6 border-t border-slate-200 dark:border-slate-800">
+        <span class="text-sm font-bold text-slate-500">
           Page {{ currentPage + 1 }} of {{ totalPages }}
         </span>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-2">
           <button
             @click="prevPage"
             :disabled="!canGoPrev"
-            class="px-3 py-1.5 text-xs font-medium border border-border rounded-md transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+            class="px-4 py-2 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
           >
-            ‹ Prev
+            &larr; Prev
           </button>
           <button
             @click="nextPage"
             :disabled="!canGoNext"
-            class="px-3 py-1.5 text-xs font-medium border border-border rounded-md transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+            class="px-4 py-2 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
           >
-            Next ›
+            Next &rarr;
           </button>
         </div>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-surface border-t border-border px-6 py-6 mt-auto">
-      <div class="max-w-6xl mx-auto text-center text-xs text-gray-400">
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-8 mt-auto">
+      <div class="max-w-6xl mx-auto text-center text-sm font-bold text-slate-400">
         © {{ new Date().getFullYear() }} VietRecruit. All rights reserved.
       </div>
     </footer>

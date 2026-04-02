@@ -43,19 +43,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-page">
+  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50">
     <template v-if="!error">
-      <span class="inline-block w-8 h-8 border-3 border-gray-200 border-t-primary rounded-full animate-spin mb-4" />
-      <p class="text-sm text-gray-500">Completing sign-in…</p>
+      <span class="inline-block w-10 h-10 border-4 border-slate-200 dark:border-slate-700 border-t-teal-500 rounded-full animate-spin mb-4" />
+      <p class="text-sm font-medium text-slate-500">Completing sign-in…</p>
     </template>
     <template v-else>
-      <div class="bg-surface border border-border rounded-lg shadow-sm p-8 max-w-sm text-center">
-        <div class="w-12 h-12 bg-error-bg rounded-full flex items-center justify-center text-error text-xl mx-auto mb-4">
+      <div class="premium-card shadow-xl p-8 max-w-sm text-center">
+        <div class="w-14 h-14 bg-rose-50 dark:bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 text-2xl mx-auto mb-6">
           ✕
         </div>
-        <h1 class="text-lg font-bold text-gray-900 mb-2">Sign-in failed</h1>
-        <p class="text-sm text-gray-500 mb-4">{{ error }}</p>
-        <router-link to="/login" class="inline-flex px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition">
+        <h1 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Sign-in failed</h1>
+        <p class="text-sm font-medium text-slate-500 mb-6">{{ error }}</p>
+        <router-link to="/login" class="btn-primary py-2.5 px-6 shrink-0">
           Back to login
         </router-link>
       </div>

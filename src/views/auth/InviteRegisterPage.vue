@@ -62,42 +62,44 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-page">
-    <div class="py-6 text-center">
-      <router-link to="/" class="text-xl font-bold text-primary">VietRecruit</router-link>
+  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md mx-auto mb-8 text-center">
+      <router-link to="/" class="text-3xl font-extrabold text-teal-600 dark:text-teal-400 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
     </div>
 
-    <div class="w-full max-w-md mx-auto px-4">
-      <div class="bg-surface border border-border rounded-lg shadow-sm p-8 animate-fade-in">
+    <div class="w-full max-w-md mx-auto">
+      <div class="premium-card shadow-xl p-8 sm:p-10 animate-fade-in">
         <div class="text-center mb-8">
-          <div class="w-12 h-12 bg-primary-light rounded-full flex items-center justify-center text-primary text-xl mx-auto mb-4">
+          <div class="w-14 h-14 bg-teal-50 dark:bg-teal-500/10 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 text-2xl mx-auto mb-6">
             🤝
           </div>
-          <h1 class="text-2xl font-bold text-gray-900">Accept invitation</h1>
-          <p class="text-sm text-gray-500 mt-1">Set up your account to join the team</p>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Accept invitation</h1>
+          <p class="text-sm font-medium text-slate-500 mt-1">Set up your account to join the team</p>
         </div>
 
-        <p v-if="errors.token" class="text-sm text-error bg-error-bg rounded-md p-3 mb-4">
+        <p v-if="errors.token" class="text-sm font-bold text-rose-500 bg-rose-50/50 dark:bg-rose-500/10 rounded-xl p-4 mb-6 text-center">
           {{ errors.token }}
         </p>
 
-        <form @submit.prevent="handleSubmit" class="space-y-4">
+        <form @submit.prevent="handleSubmit" class="space-y-5">
+          <!-- Full Name -->
           <div>
-            <label for="invite-name" class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+            <label for="invite-name" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Full name</label>
             <input
               id="invite-name"
               v-model="form.fullName"
               type="text"
               autocomplete="name"
               placeholder="John Smith"
-              class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
-              :class="errors.fullName ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+              class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition-all duration-300 bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700"
+              :class="errors.fullName ? 'border-rose-500 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/50' : 'border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:bg-white dark:focus:bg-slate-900'"
             />
-            <p v-if="errors.fullName" class="text-xs text-error mt-1">{{ errors.fullName }}</p>
+            <p v-if="errors.fullName" class="text-xs font-bold text-rose-500 mt-1.5">{{ errors.fullName }}</p>
           </div>
 
+          <!-- Password -->
           <div>
-            <label for="invite-pw" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label for="invite-pw" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
             <div class="relative">
               <input
                 id="invite-pw"
@@ -105,38 +107,39 @@ onMounted(() => {
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
                 placeholder="••••••••"
-                class="w-full px-3 py-2.5 pr-10 text-sm border rounded-md outline-none transition"
-                :class="errors.password ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+                class="w-full px-4 py-3 pr-16 text-sm border rounded-xl outline-none transition-all duration-300 bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700"
+                :class="errors.password ? 'border-rose-500 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/50' : 'border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:bg-white dark:focus:bg-slate-900'"
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors bg-white/50 dark:bg-slate-800/50 rounded-md text-xs font-bold"
               >
                 {{ showPassword ? 'Hide' : 'Show' }}
               </button>
             </div>
-            <p v-if="errors.password" class="text-xs text-error mt-1">{{ errors.password }}</p>
+            <p v-if="errors.password" class="text-xs font-bold text-rose-500 mt-1.5">{{ errors.password }}</p>
           </div>
 
+          <!-- Confirm Password -->
           <div>
-            <label for="invite-confirm" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+            <label for="invite-confirm" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Confirm password</label>
             <input
               id="invite-confirm"
               v-model="form.confirmPassword"
               type="password"
               autocomplete="new-password"
               placeholder="••••••••"
-              class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
-              :class="errors.confirmPassword ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
+              class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition-all duration-300 bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700"
+              :class="errors.confirmPassword ? 'border-rose-500 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/50' : 'border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:bg-white dark:focus:bg-slate-900'"
             />
-            <p v-if="errors.confirmPassword" class="text-xs text-error mt-1">{{ errors.confirmPassword }}</p>
+            <p v-if="errors.confirmPassword" class="text-xs font-bold text-rose-500 mt-1.5">{{ errors.confirmPassword }}</p>
           </div>
 
           <button
             type="submit"
             :disabled="loading || !token"
-            class="w-full py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            class="btn-primary w-full py-3 mt-4 flex items-center justify-center gap-2"
           >
             <span v-if="loading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             {{ loading ? 'Joining…' : 'Join team' }}

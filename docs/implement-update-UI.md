@@ -61,10 +61,10 @@ To modernize the entire application uniformly, the following files will be refac
 *   [x] **`candidate/MyApplicationsPage.vue`**: Timeline step styling to track application progress visually through the 6 pipeline stages.
 
 ### 3.4 Shared, Administrative & Auth
-*   [ ] **`shared/SettingsPage.vue` & `shared/ProfilePage.vue`**
-*   [ ] **`admin/UsersPage.vue` & `admin/TransactionsPage.vue`**
-*   [ ] **`auth/... (7 files)`**: Create a unified elegant centered authentication layout box.
-*   [ ] **`public/JobBoardPage.vue` & `public/PublicJobDetailPage.vue`**: Distinctive, scannable public pages with robust search autocompletion inputs.
+*   [x] **`shared/SettingsPage.vue` & `shared/ProfilePage.vue`**
+*   [x] **`admin/UsersPage.vue` & `admin/TransactionsPage.vue`**
+*   [x] **`auth/... (7 files)`**: Create a unified elegant centered authentication layout box.
+*   [x] **`public/JobBoardPage.vue` & `public/PublicJobDetailPage.vue`**: Distinctive, scannable public pages with robust search autocompletion inputs.
 
 ## 4. Execution Standard
 All Vue components (`.vue`) will be modified strictly using Tailwind utility classes. No arbitrary custom CSS will be added to `<style scoped>` unless absolutely necessary to avoid bloated bundles.
