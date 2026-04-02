@@ -160,62 +160,54 @@ function formatDate(iso: string): string {
   })
 }
 
-const priorityConfig: Record<string, { class: string; label: string }> = {
-  HIGH: { class: 'bg-error-bg text-error', label: 'High' },
-  MEDIUM: { class: 'bg-warning-bg text-warning', label: 'Medium' },
-  LOW: { class: 'bg-info-bg text-info', label: 'Low' },
-}
-
-function getPriorityConfig(priority: string) {
-  return priorityConfig[priority.toUpperCase()] ?? { class: 'bg-gray-100 text-gray-600', label: priority }
-}
 
 onMounted(loadProfile)
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-6 py-8">
-    <div class="mb-6">
-      <h1 class="text-xl font-bold text-gray-900">CV Management</h1>
-      <p class="text-sm text-gray-500 mt-1">Upload your CV and get AI-powered improvement suggestions.</p>
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">CV Management</h1>
+      <p class="text-sm font-medium text-slate-500">Upload your CV and get AI-powered improvement suggestions.</p>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="bg-surface border border-border rounded-lg p-6 shadow-sm animate-pulse space-y-4">
-      <div class="h-24 bg-gray-100 rounded" />
-      <div class="h-4 bg-gray-100 rounded w-48" />
+    <div v-if="loading" class="premium-card p-8 animate-pulse space-y-4">
+      <div class="h-24 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+      <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-48" />
     </div>
 
     <template v-else>
       <!-- Upload Area -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm mb-6">
-        <h2 class="text-sm font-semibold text-gray-900 mb-4">Your CV</h2>
+      <div class="premium-card p-8 mb-8">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Your CV</h2>
 
         <!-- Has CV -->
-        <div v-if="hasCv && cvInfo" class="flex items-center justify-between p-4 bg-primary-bg/30 border border-primary/10 rounded-lg">
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-sm font-bold shrink-0">
+        <div v-if="hasCv && cvInfo" class="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 rounded-xl gap-6">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-700 dark:text-teal-400 text-sm font-black shrink-0 shadow-sm">
               {{ cvInfo.filename.split('.').pop()?.toUpperCase() ?? 'CV' }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-medium text-gray-900 truncate">{{ cvInfo.filename }}</p>
-              <p class="text-[10px] text-gray-400">
-                {{ formatFileSize(cvInfo.size) }} · Uploaded {{ formatDate(cvInfo.uploadedAt) }}
+              <p class="text-base font-bold text-slate-900 dark:text-white truncate">{{ cvInfo.filename }}</p>
+              <p class="text-xs font-medium text-slate-500 mt-1">
+                {{ formatFileSize(cvInfo.size) }} <span class="mx-1.5 opacity-50">•</span> Uploaded {{ formatDate(cvInfo.uploadedAt) }}
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2 shrink-0 ml-4">
+          <div class="flex items-center gap-3 shrink-0 sm:ml-4">
             <button
               @click="triggerFileInput"
               :disabled="uploading"
-              class="px-3 py-1.5 text-xs font-medium text-primary bg-surface border border-primary/20 rounded-md hover:bg-primary-light transition disabled:opacity-50"
+              class="btn-secondary px-4 py-2"
             >
+              <span v-if="uploading" class="inline-block w-4 h-4 border-2 border-slate-500 border-t-transparent rounded-full animate-spin mr-1"></span>
               {{ uploading ? 'Uploading…' : 'Replace' }}
             </button>
             <button
               @click="handleDelete"
               :disabled="deleting"
-              class="px-3 py-1.5 text-xs font-medium text-error bg-surface border border-error/20 rounded-md hover:bg-error-bg transition disabled:opacity-50"
+              class="px-4 py-2 text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 dark:bg-rose-900/20 dark:border-rose-800/50 dark:hover:bg-rose-900/40 transition-colors disabled:opacity-50"
             >
               {{ deleting ? 'Deleting…' : 'Delete' }}
             </button>
@@ -229,17 +221,19 @@ onMounted(loadProfile)
           @dragover.prevent="dragOver = true"
           @dragleave="dragOver = false"
           @drop="onDrop"
-          class="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg cursor-pointer transition"
-          :class="dragOver ? 'border-primary bg-primary-bg/30' : 'border-border hover:border-primary/40 hover:bg-primary-bg/10'"
+          class="flex flex-col items-center justify-center py-16 px-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300"
+          :class="dragOver ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/10 scale-[1.02]' : 'border-slate-300 dark:border-slate-600 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 bg-slate-50/50 dark:bg-slate-800/20'"
         >
-          <div class="w-12 h-12 rounded-full bg-primary-bg flex items-center justify-center text-primary text-lg mb-3">
-            ↑
+          <div class="w-16 h-16 rounded-full bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-center text-teal-500 text-2xl mb-4 group-hover:-translate-y-1 transition-transform">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
           </div>
-          <p class="text-sm font-medium text-gray-700 mb-1">
+          <p class="text-base font-bold text-slate-800 dark:text-slate-200 mb-2 text-center">
             {{ uploading ? 'Uploading…' : 'Drop your CV here or click to browse' }}
           </p>
-          <p class="text-xs text-gray-400">PDF, DOCX, JPEG, or PNG — max {{ MAX_SIZE_MB }}MB</p>
-          <span v-if="uploading" class="mt-2 inline-block w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p class="text-xs font-medium text-slate-500">PDF, DOCX, JPEG, or PNG — max {{ MAX_SIZE_MB }}MB</p>
+          <div v-if="uploading" class="mt-4 inline-block w-6 h-6 border-2 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
         </div>
 
         <!-- Hidden file input -->
@@ -253,46 +247,52 @@ onMounted(loadProfile)
       </div>
 
       <!-- AI Improvement Section -->
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
+      <div class="premium-card p-8">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900">AI CV Analysis</h2>
-            <p class="text-xs text-gray-400 mt-0.5">Get personalized suggestions to improve your CV and stand out.</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">AI CV Analysis</h2>
+            <p class="text-sm font-medium text-slate-500 max-w-lg">Get personalized suggestions from our AI engine to optimize your CV for applicant tracking systems and stand out to recruiters.</p>
           </div>
           <button
             @click="runAnalysis"
             :disabled="analyzing || !hasCv"
-            class="px-4 py-2 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-2"
+            class="btn-primary py-2.5 px-6 shrink-0 flex items-center justify-center gap-2"
           >
-            <span v-if="analyzing" class="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            {{ analyzing ? 'Analyzing…' : '✦ Analyze My CV' }}
+            <span v-if="analyzing" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <svg v-else class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            {{ analyzing ? 'Analyzing…' : 'Analyze My CV' }}
           </button>
         </div>
 
-        <div v-if="!hasCv" class="text-xs text-gray-400 text-center py-6">
-          Upload your CV first to enable AI analysis.
+        <div v-if="!hasCv" class="bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 rounded-xl p-10 text-center">
+          <p class="text-sm font-bold text-slate-500">Upload your CV first to enable AI analysis.</p>
         </div>
 
         <!-- Results -->
-        <div v-else-if="improvement" class="space-y-5 animate-fade-in">
+        <div v-else-if="improvement" class="space-y-8 animate-fade-in">
           <!-- Score -->
-          <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-            <div class="relative w-16 h-16 shrink-0">
+          <div class="flex items-center gap-6 p-6 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+            <div class="relative w-24 h-24 shrink-0 drop-shadow-sm">
               <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e5e7eb" stroke-width="3" />
+                <circle cx="18" cy="18" r="15.5" fill="none" class="stroke-slate-200 dark:stroke-slate-700" stroke-width="3" />
                 <circle
                   cx="18" cy="18" r="15.5" fill="none" stroke-width="3" stroke-linecap="round"
-                  :stroke="improvement.overallScore >= 70 ? '#22863a' : improvement.overallScore >= 40 ? '#b08800' : '#cb2431'"
+                  :stroke="improvement.overallScore >= 70 ? '#10b981' : improvement.overallScore >= 40 ? '#f59e0b' : '#f43f5e'"
                   :stroke-dasharray="`${(improvement.overallScore / 100) * 97.4} 97.4`"
+                  class="transition-all duration-1000 ease-out"
                 />
               </svg>
-              <span class="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-900">
-                {{ improvement.overallScore }}
-              </span>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-2xl font-black text-slate-900 dark:text-white leading-none">
+                  {{ improvement.overallScore }}
+                </span>
+              </div>
             </div>
             <div>
-              <p class="text-sm font-semibold text-gray-900">Overall Score</p>
-              <p class="text-xs text-gray-500">
+              <p class="text-lg font-bold text-slate-900 dark:text-white mb-1">Overall CV Score</p>
+              <p class="text-sm font-medium text-slate-500">
                 Analysed {{ formatDate(improvement.analysedAt) }}
               </p>
             </div>
@@ -300,47 +300,57 @@ onMounted(loadProfile)
 
           <!-- Strengths -->
           <div v-if="improvement.strengths.length">
-            <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Strengths</h3>
-            <ul class="space-y-1">
-              <li v-for="(s, i) in improvement.strengths" :key="i" class="flex items-start gap-1.5 text-xs text-gray-700">
-                <span class="text-success mt-0.5 shrink-0">✓</span> {{ s }}
+            <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-4 bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1 rounded-full">Notable Strengths</h3>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <li v-for="(s, i) in improvement.strengths" :key="i" class="flex items-start gap-3 p-3 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/50 rounded-lg text-sm font-medium text-emerald-900 dark:text-emerald-200">
+                <span class="text-emerald-500 shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                </span>
+                <span class="leading-relaxed">{{ s }}</span>
               </li>
             </ul>
           </div>
 
           <!-- Suggestions -->
           <div v-if="improvement.suggestions.length">
-            <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-              Suggestions ({{ improvement.suggestions.length }})
-            </h3>
-            <div class="space-y-2">
+            <div class="flex items-center gap-3 mb-4">
+               <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1 rounded-full">
+                 Areas to Improve
+               </h3>
+               <span class="text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{{ improvement.suggestions.length }}</span>
+            </div>
+            
+            <div class="space-y-4">
               <div
                 v-for="(sug, i) in improvement.suggestions"
                 :key="i"
-                class="p-3 border border-border rounded-lg"
+                class="p-5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               >
-                <div class="flex items-center gap-2 mb-1.5">
+                <div class="flex items-center gap-3 mb-3">
                   <span
-                    class="px-1.5 py-0.5 text-[10px] font-medium rounded"
-                    :class="getPriorityConfig(sug.priority).class"
+                    class="px-2 py-1 text-[10px] font-black tracking-wider uppercase rounded-md shadow-sm"
+                    :class="sug.priority === 'HIGH' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' :
+                           (sug.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300')"
                   >
-                    {{ getPriorityConfig(sug.priority).label }}
+                    {{ sug.priority }} Priority
                   </span>
-                  <span class="text-xs font-medium text-gray-700">{{ sug.section }}</span>
+                  <span class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ sug.section }}</span>
                 </div>
-                <p class="text-xs text-gray-600 mb-1">
-                  <span class="font-medium text-gray-800">Issue:</span> {{ sug.issue }}
+                <p class="text-sm text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                  <strong class="font-bold text-slate-900 dark:text-white mr-1">Issue:</strong> {{ sug.issue }}
                 </p>
-                <p class="text-xs text-gray-600">
-                  <span class="font-medium text-primary">Suggestion:</span> {{ sug.suggestion }}
-                </p>
+                <div class="p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/60 rounded-lg">
+                  <p class="text-sm text-teal-800 dark:text-teal-200 leading-relaxed">
+                    <strong class="font-bold text-teal-900 dark:text-white mr-1">Fix:</strong> {{ sug.suggestion }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div v-else-if="!analyzing" class="text-xs text-gray-400 text-center py-6">
-          Click "Analyze My CV" to get AI-powered suggestions.
+        <div v-else-if="!analyzing" class="bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 rounded-xl p-10 text-center">
+          <p class="text-sm font-bold text-slate-500">Click "Analyze My CV" to get AI-powered suggestions.</p>
         </div>
       </div>
     </template>

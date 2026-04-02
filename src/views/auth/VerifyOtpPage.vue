@@ -68,27 +68,27 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-page">
-    <div class="py-6 text-center">
-      <router-link to="/" class="text-xl font-bold text-primary">VietRecruit</router-link>
+  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md mx-auto mb-8 text-center">
+      <router-link to="/" class="text-3xl font-extrabold text-teal-600 dark:text-teal-400 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
     </div>
 
-    <div class="w-full max-w-md mx-auto px-4">
-      <div class="bg-surface border border-border rounded-lg shadow-sm p-8 animate-fade-in">
+    <div class="w-full max-w-md mx-auto">
+      <div class="premium-card shadow-xl p-8 sm:p-10 animate-fade-in">
         <div class="text-center mb-8">
-          <div class="w-12 h-12 bg-primary-light rounded-full flex items-center justify-center text-primary text-xl mx-auto mb-4">
+          <div class="w-14 h-14 bg-teal-50 dark:bg-teal-500/10 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 text-2xl mx-auto mb-6">
             ✉
           </div>
-          <h1 class="text-2xl font-bold text-gray-900">Check your email</h1>
-          <p class="text-sm text-gray-500 mt-2">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Check your email</h1>
+          <p class="text-sm font-medium text-slate-500 mt-2">
             We sent a verification code to
-            <span class="font-medium text-gray-700">{{ email }}</span>
+            <span class="font-bold text-slate-700 dark:text-slate-300">{{ email }}</span>
           </p>
         </div>
 
         <form @submit.prevent="handleVerify" class="space-y-5">
           <div>
-            <label for="otp-code" class="block text-sm font-medium text-gray-700 mb-1">Verification code</label>
+            <label for="otp-code" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Verification code</label>
             <input
               id="otp-code"
               v-model="code"
@@ -96,36 +96,36 @@ onMounted(() => {
               inputmode="numeric"
               maxlength="8"
               placeholder="Enter 8-digit code"
-              class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition text-center tracking-widest font-mono text-lg"
+              class="w-full px-4 py-3 text-lg border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-mono tracking-widest text-center bg-slate-50 dark:bg-slate-800/50"
             />
           </div>
 
           <button
             type="submit"
             :disabled="loading || code.length !== 8"
-            class="w-full py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            class="btn-primary w-full py-3 mt-4 flex items-center justify-center gap-2"
           >
             <span v-if="loading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             {{ loading ? 'Verifying…' : 'Verify email' }}
           </button>
         </form>
 
-        <div class="text-center mt-6">
-          <p class="text-sm text-gray-500">
+        <div class="text-center mt-8">
+          <p class="text-sm font-medium text-slate-500">
             Didn't receive a code?
             <button
               @click="handleResend"
               :disabled="resendCooldown > 0 || loading"
-              class="text-primary font-medium hover:text-primary-hover disabled:text-gray-400 disabled:cursor-not-allowed"
+              class="text-teal-600 hover:text-teal-500 dark:text-teal-400 font-bold ml-1 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
             >
               {{ resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code' }}
             </button>
           </p>
         </div>
 
-        <p class="text-center text-sm text-gray-500 mt-4">
-          <router-link to="/login" class="text-primary hover:text-primary-hover">
-            ← Back to login
+        <p class="text-center text-sm font-bold mt-6">
+          <router-link to="/login" class="text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+            &larr; Back to login
           </router-link>
         </p>
       </div>

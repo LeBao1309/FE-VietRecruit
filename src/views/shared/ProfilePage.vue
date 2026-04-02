@@ -138,28 +138,28 @@ onMounted(loadProfile)
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-6 py-8">
+  <div class="max-w-3xl mx-auto px-6 py-10">
     <!-- Page header -->
-    <div class="mb-6">
-      <h1 class="text-xl font-bold text-gray-900">My Profile</h1>
-      <p class="text-sm text-gray-500 mt-1">Manage your personal information and media</p>
+    <div class="mb-8">
+      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">My Profile</h1>
+      <p class="text-sm font-medium text-slate-500 mt-1">Manage your personal information and media</p>
     </div>
 
     <!-- Loading skeleton -->
     <template v-if="loading">
-      <div class="bg-surface border border-border rounded-lg p-6 shadow-sm space-y-6 animate-pulse">
-        <div class="h-36 bg-gray-100 rounded-lg" />
+      <div class="premium-card p-6 space-y-6 animate-pulse">
+        <div class="h-36 bg-slate-200 dark:bg-slate-700 rounded-xl" />
         <div class="flex items-center gap-4">
-          <div class="w-20 h-20 rounded-full bg-gray-100" />
+          <div class="w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-700" />
           <div class="space-y-2">
-            <div class="h-4 w-32 bg-gray-100 rounded" />
-            <div class="h-3 w-24 bg-gray-100 rounded" />
+            <div class="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div class="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div v-for="i in 6" :key="i" class="space-y-2">
-            <div class="h-3 w-20 bg-gray-100 rounded" />
-            <div class="h-9 bg-gray-100 rounded" />
+            <div class="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div class="h-10 bg-slate-200 dark:bg-slate-700 rounded-xl" />
           </div>
         </div>
       </div>
@@ -167,11 +167,11 @@ onMounted(loadProfile)
 
     <template v-else>
       <!-- Banner card -->
-      <div class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden mb-6">
-        <div class="p-4 border-b border-border">
-          <h2 class="text-sm font-semibold text-gray-900">Banner Image</h2>
+      <div class="premium-card overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white">Banner Image</h2>
         </div>
-        <div class="p-4">
+        <div class="p-6">
           <MediaUpload
             :model-value="bannerUrl"
             variant="banner"
@@ -184,11 +184,11 @@ onMounted(loadProfile)
       </div>
 
       <!-- Avatar + Form card -->
-      <div class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden mb-6">
-        <div class="p-4 border-b border-border">
-          <h2 class="text-sm font-semibold text-gray-900">Profile Photo</h2>
+      <div class="premium-card overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white">Profile Photo</h2>
         </div>
-        <div class="p-4">
+        <div class="p-6">
           <MediaUpload
             :model-value="avatarUrl"
             variant="avatar"
@@ -200,65 +200,65 @@ onMounted(loadProfile)
       </div>
 
       <!-- Personal Information -->
-      <div class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-border">
-          <h2 class="text-sm font-semibold text-gray-900">Personal Information</h2>
+      <div class="premium-card overflow-hidden">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white">Personal Information</h2>
         </div>
-        <form @submit.prevent="handleSave" class="p-4 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form @submit.prevent="handleSave" class="p-6 space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- Full Name -->
             <div>
-              <label for="prof-name" class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+              <label for="prof-name" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Full name</label>
               <input
                 id="prof-name"
                 v-model="form.fullName"
                 type="text"
-                class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
               />
             </div>
 
             <!-- Phone -->
             <div>
-              <label for="prof-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label for="prof-phone" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Phone</label>
               <input
                 id="prof-phone"
                 v-model="form.phone"
                 type="tel"
                 placeholder="+84 xxx xxx xxxx"
-                class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
               />
             </div>
 
             <!-- Location -->
             <div>
-              <label for="prof-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <label for="prof-location" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Location</label>
               <input
                 id="prof-location"
                 v-model="form.location"
                 type="text"
                 placeholder="e.g. Ho Chi Minh City"
-                class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
               />
             </div>
 
             <!-- Date of birth -->
             <div>
-              <label for="prof-dob" class="block text-sm font-medium text-gray-700 mb-1">Date of birth</label>
+              <label for="prof-dob" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date of birth</label>
               <input
                 id="prof-dob"
                 v-model="form.dob"
                 type="date"
-                class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
               />
             </div>
 
             <!-- Gender -->
             <div>
-              <label for="prof-gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <label for="prof-gender" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Gender</label>
               <select
                 id="prof-gender"
                 v-model="form.gender"
-                class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition bg-surface"
+                class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
               >
                 <option value="">Prefer not to say</option>
                 <option value="MALE">Male</option>
@@ -269,53 +269,53 @@ onMounted(loadProfile)
           </div>
 
           <!-- Separator -->
-          <div class="border-t border-border pt-4 mt-4">
-            <h3 class="text-sm font-semibold text-gray-900 mb-4">Social Links</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="border-t border-slate-200 dark:border-slate-800 pt-6 mt-2">
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-5">Social Links</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <!-- LinkedIn -->
               <div>
-                <label for="prof-linkedin" class="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                <label for="prof-linkedin" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">LinkedIn</label>
                 <input
                   id="prof-linkedin"
                   v-model="form.linkedinUrl"
                   type="url"
                   placeholder="https://linkedin.com/in/..."
-                  class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                  class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
                 />
               </div>
 
               <!-- GitHub -->
               <div>
-                <label for="prof-github" class="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+                <label for="prof-github" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">GitHub</label>
                 <input
                   id="prof-github"
                   v-model="form.githubUrl"
                   type="url"
                   placeholder="https://github.com/..."
-                  class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                  class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
                 />
               </div>
 
               <!-- Portfolio -->
               <div class="sm:col-span-2">
-                <label for="prof-portfolio" class="block text-sm font-medium text-gray-700 mb-1">Portfolio / Website</label>
+                <label for="prof-portfolio" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Portfolio / Website</label>
                 <input
                   id="prof-portfolio"
                   v-model="form.portfolioUrl"
                   type="url"
                   placeholder="https://..."
-                  class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
+                  class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
                 />
               </div>
             </div>
           </div>
 
           <!-- Submit -->
-          <div class="flex justify-end pt-2">
+          <div class="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800 mt-2">
             <button
               type="submit"
               :disabled="saving"
-              class="px-6 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              class="btn-primary py-2.5 px-6 flex items-center gap-2"
             >
               <span v-if="saving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {{ saving ? 'Saving…' : 'Save changes' }}
