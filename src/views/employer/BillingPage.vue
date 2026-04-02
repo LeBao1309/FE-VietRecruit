@@ -39,12 +39,12 @@ function formatDate(dateStr: string): string {
 
 function getStatusClass(status: string): string {
   switch (status) {
-    case 'PAID': return 'status-success'
-    case 'PENDING': return 'status-warning'
+    case 'PAID': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+    case 'PENDING': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
     case 'CANCELLED':
     case 'FAILED':
-    case 'EXPIRED': return 'status-error'
-    default: return ''
+    case 'EXPIRED': return 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+    default: return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
   }
 }
 
@@ -66,46 +66,49 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="billing-page">
-    <div class="page-header">
-      <h1>Billing History</h1>
-      <p class="page-subtitle">View your past transactions and payment activity</p>
+  <div class="max-w-[960px] mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Billing History</h1>
+      <p class="text-sm text-slate-500 mt-1">View your past transactions and payment activity</p>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading && !transactions" class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading transactions...</p>
+    <div v-if="loading && !transactions" class="text-center py-16 px-4 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl">
+      <div class="inline-block w-8 h-8 border-3 border-teal-600/30 border-t-teal-600 rounded-full animate-spin mb-4" />
+      <p class="text-slate-500">Loading transactions...</p>
     </div>
 
     <!-- Empty -->
-    <div v-else-if="transactions && transactions.empty" class="empty-state">
-      <div class="empty-icon">💳</div>
-      <h2>No Transactions Yet</h2>
-      <p>Your payment history will appear here after your first subscription.</p>
+    <div v-else-if="transactions && transactions.empty" class="text-center py-16 px-4 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl">
+      <div class="text-5xl mb-4">💳</div>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">No Transactions Yet</h2>
+      <p class="text-slate-500">Your payment history will appear here after your first subscription.</p>
     </div>
 
     <!-- Table -->
     <template v-else-if="transactions">
-      <div class="table-container">
-        <table class="billing-table">
+      <div class="premium-card overflow-hidden">
+        <table class="w-full text-left border-collapse">
           <thead>
-            <tr>
-              <th>Order</th>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Amount</th>
-              <th>Status</th>
+            <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
+              <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order</th>
+              <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+              <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</th>
+              <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+              <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="tx in transactions.content" :key="tx.orderCode">
-              <td class="order-code">#{{ tx.orderCode }}</td>
-              <td>{{ formatDate(tx.transactionDateTime) }}</td>
-              <td>{{ tx.description ?? '—' }}</td>
-              <td class="amount">{{ formatAmount(tx.amount, tx.currency) }}</td>
-              <td>
-                <span :class="['status-badge', getStatusClass(tx.status)]">
+            <tr v-for="tx in transactions.content" :key="tx.orderCode" class="border-b border-slate-100 dark:border-slate-700/50 last:border-none hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+              <td class="py-3 px-4 text-sm font-medium font-mono text-slate-900 dark:text-slate-300">#{{ tx.orderCode }}</td>
+              <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">{{ formatDate(tx.transactionDateTime) }}</td>
+              <td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">{{ tx.description ?? '—' }}</td>
+              <td class="py-3 px-4 text-sm font-semibold text-slate-900 dark:text-slate-300 whitespace-nowrap">{{ formatAmount(tx.amount, tx.currency) }}</td>
+              <td class="py-3 px-4">
+                <span 
+                  class="inline-flex px-2 py-1 text-xs font-semibold rounded-md whitespace-nowrap"
+                  :class="getStatusClass(tx.status)"
+                >
                   {{ tx.status }}
                 </span>
               </td>
@@ -115,19 +118,19 @@ onMounted(() => {
       </div>
 
       <!-- Pagination -->
-      <div class="pagination">
+      <div v-if="transactions.totalPages > 1" class="flex justify-center items-center gap-4 mt-6">
         <button
-          class="page-btn"
+          class="btn-outline px-3 py-1.5 text-sm"
           :disabled="transactions.first"
           @click="prevPage"
         >
           ‹ Previous
         </button>
-        <span class="page-info">
+        <span class="text-sm text-slate-500 font-medium">
           Page {{ currentPage + 1 }} of {{ transactions.totalPages }}
         </span>
         <button
-          class="page-btn"
+          class="btn-outline px-3 py-1.5 text-sm"
           :disabled="transactions.last"
           @click="nextPage"
         >
@@ -137,177 +140,3 @@ onMounted(() => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.billing-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
-}
-
-.page-header {
-  margin-bottom: var(--space-6);
-}
-
-.page-header h1 {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.page-subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-top: var(--space-1);
-}
-
-/* Loading & Empty */
-.loading-state,
-.empty-state {
-  text-align: center;
-  padding: 64px var(--space-4);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto var(--space-4);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: var(--space-4);
-}
-
-.empty-state h2 {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--space-2);
-}
-
-.empty-state p {
-  color: var(--color-text-secondary);
-}
-
-.loading-state p {
-  color: var(--color-text-secondary);
-}
-
-/* Table */
-.table-container {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.billing-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.billing-table th {
-  text-align: left;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-  background: var(--color-bg-page);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.billing-table td {
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.billing-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.billing-table tbody tr:hover {
-  background: var(--color-bg-page);
-}
-
-.order-code {
-  font-family: monospace;
-  font-weight: 500;
-}
-
-.amount {
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.status-badge {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-
-.status-success {
-  background: #dcfce7;
-  color: var(--color-success);
-}
-
-.status-warning {
-  background: #fef9c3;
-  color: var(--color-warning);
-}
-
-.status-error {
-  background: #fee2e2;
-  color: var(--color-error);
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-}
-
-.page-btn {
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.page-btn:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.page-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.page-info {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-</style>

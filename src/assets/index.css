@@ -31,6 +31,7 @@
   --animate-spin-slow: spin 0.6s linear infinite;
   --animate-fade-in: fade-in 0.2s ease forwards;
   --animate-slide-up: slide-up 0.3s ease forwards;
+  --animate-slide-right: slide-right 0.25s ease-out;
 }
 
 /* ── Animations ───────────────────────────────────────────────────── */
@@ -57,6 +58,55 @@
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Custom Component Utilities ───────────────────────────────────── */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #dde2e8; border-radius: 2px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #adb5bd; }
+
+  .scorecard-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+  .scorecard-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid currentColor;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+    transition: box-shadow 0.15s;
+  }
+  .scorecard-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  .scorecard-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+  }
+  .scorecard-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid currentColor;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+  }
 }
 
 /* ── Global base ──────────────────────────────────────────────────── */

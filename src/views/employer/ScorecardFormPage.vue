@@ -286,44 +286,4 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
-.scorecard-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 4px;
-  outline: none;
-  cursor: pointer;
-}
 
-.scorecard-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: white;
-  border: 3px solid currentColor;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  cursor: grab;
-  transition: box-shadow 0.15s;
-}
-
-.scorecard-slider::-webkit-slider-thumb:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.scorecard-slider::-webkit-slider-thumb:active {
-  cursor: grabbing;
-}
-
-.scorecard-slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: white;
-  border: 3px solid currentColor;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-  cursor: grab;
-}
-</style>
