@@ -34,14 +34,13 @@ const hasCv = computed(() => !!profile.value?.defaultCvUrl)
 
 // ── Status config ──
 const statusColors: Record<string, string> = {
-  SUBMITTED: 'bg-info-bg text-info',
-  UNDER_REVIEW: 'bg-warning-bg text-warning',
-  SHORTLISTED: 'bg-primary-bg text-primary',
-  INTERVIEW_SCHEDULED: 'bg-primary-bg text-primary',
-  OFFERED: 'bg-success-bg text-success',
-  HIRED: 'bg-success-bg text-success',
-  REJECTED: 'bg-error-bg text-error',
-  WITHDRAWN: 'bg-gray-100 text-gray-500',
+  NEW: 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800',
+  SCREENING: 'bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-900/30 dark:border-amber-800',
+  INTERVIEW: 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-900/30 dark:border-purple-800',
+  OFFER: 'bg-teal-50 text-teal-600 border border-teal-200 dark:bg-teal-900/30 dark:border-teal-800',
+  HIRED: 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/30 dark:border-emerald-800',
+  REJECTED: 'bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-900/30 dark:border-rose-800',
+  WITHDRAWN: 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
 }
 
 function formatDate(iso: string): string {
@@ -70,38 +69,38 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto px-6 py-8">
+  <div class="max-w-4xl mx-auto px-6 py-10">
     <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-xl font-bold text-gray-900">
+    <div class="mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
         Welcome back, {{ auth.user?.fullName?.split(' ')[0] ?? 'Candidate' }}
       </h1>
-      <p class="text-sm text-gray-500 mt-1">Here's an overview of your job search activity.</p>
+      <p class="text-sm font-medium text-slate-500">Here's an overview of your job search activity.</p>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="grid grid-cols-3 gap-4 mb-6">
-      <div v-for="i in 3" :key="i" class="bg-surface border border-border rounded-lg p-5 shadow-sm animate-pulse">
-        <div class="h-3 bg-gray-100 rounded w-20 mb-3" />
-        <div class="h-6 bg-gray-100 rounded w-12" />
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div v-for="i in 3" :key="i" class="premium-card p-6 animate-pulse">
+        <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-20 mb-4" />
+        <div class="h-8 bg-slate-200 dark:bg-slate-700 rounded w-16" />
       </div>
     </div>
 
     <template v-else>
       <!-- Stats -->
-      <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Applications</span>
-          <p class="text-2xl font-bold text-gray-900 mt-1">{{ applications.length }}</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="premium-card p-6 flex flex-col justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Applications</span>
+          <p class="text-4xl font-black text-slate-900 dark:text-white mt-2">{{ applications.length }}</p>
         </div>
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Recommendations</span>
-          <p class="text-2xl font-bold text-primary mt-1">{{ recommendations.length }}</p>
+        <div class="premium-card p-6 flex flex-col justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recommendations</span>
+          <p class="text-4xl font-black text-teal-600 dark:text-teal-400 mt-2">{{ recommendations.length }}</p>
         </div>
-        <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Profile</span>
-          <div class="flex items-center gap-2 mt-1">
-            <p class="text-2xl font-bold" :class="profileCompletion >= 80 ? 'text-success' : profileCompletion >= 50 ? 'text-warning' : 'text-error'">
+        <div class="premium-card p-6 flex flex-col justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Profile Completion</span>
+          <div class="flex items-center gap-2 mt-2">
+            <p class="text-4xl font-black" :class="profileCompletion >= 80 ? 'text-emerald-500' : profileCompletion >= 50 ? 'text-amber-500' : 'text-rose-500'">
               {{ profileCompletion }}%
             </p>
           </div>
@@ -109,24 +108,24 @@ onMounted(async () => {
       </div>
 
       <!-- Profile completion CTA -->
-      <div v-if="profileCompletion < 80" class="bg-primary-bg/50 border border-primary/10 rounded-lg p-4 mb-6 flex items-center justify-between">
+      <div v-if="profileCompletion < 80" class="premium-card bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800 p-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p class="text-sm font-medium text-gray-900">Complete your profile</p>
-          <p class="text-xs text-gray-500">
+          <p class="text-base font-bold text-slate-900 dark:text-white mb-1">Complete your profile</p>
+          <p class="text-sm font-medium text-slate-500">
             {{ !hasCv ? 'Upload your CV and fill in your details' : 'Fill in more details' }} to get better job matches.
           </p>
         </div>
-        <div class="flex gap-2 shrink-0 ml-4">
+        <div class="flex gap-3 shrink-0">
           <router-link
             v-if="!hasCv"
             to="/candidate/cv"
-            class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+            class="btn-primary py-2"
           >
             Upload CV
           </router-link>
           <router-link
             to="/candidate/candidate-profile"
-            class="px-3 py-1.5 text-xs font-medium text-primary bg-surface border border-primary/20 rounded-md hover:bg-primary-light transition"
+            class="btn-secondary py-2"
           >
             Edit Profile
           </router-link>
@@ -134,36 +133,37 @@ onMounted(async () => {
       </div>
 
       <!-- Two-column layout -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Recent Applications -->
-        <div class="bg-surface border border-border rounded-lg shadow-sm">
-          <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-900">Recent Applications</h2>
-            <router-link to="/candidate/applications" class="text-xs text-primary hover:text-primary-hover font-medium transition">
-              View All →
+        <div class="premium-card flex flex-col">
+          <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900 dark:text-white">Recent Applications</h2>
+            <router-link to="/candidate/applications" class="text-xs font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors">
+              View All &rarr;
             </router-link>
           </div>
-          <div v-if="applications.length === 0" class="px-5 py-8 text-center">
-            <p class="text-xs text-gray-400">No applications yet.</p>
-            <router-link to="/jobs" class="text-xs text-primary hover:text-primary-hover font-medium mt-1 inline-block transition">
-              Browse Jobs →
+          <div v-if="applications.length === 0" class="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[200px]">
+             <span class="text-4xl mb-3 opacity-50">📋</span>
+             <p class="text-sm font-medium text-slate-500 mb-4">No applications yet.</p>
+             <router-link to="/jobs" class="btn-primary py-2">
+              Browse Jobs
             </router-link>
           </div>
-          <div v-else>
+          <div v-else class="flex-1">
             <div
               v-for="app in applications"
               :key="app.id"
               @click="router.push(`/candidate/applications/${app.id}`)"
-              class="px-5 py-3 border-b border-border last:border-0 hover:bg-gray-50/50 transition cursor-pointer"
+              class="group px-6 py-4 border-b border-slate-50 dark:border-slate-800/30 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
             >
               <div class="flex items-center justify-between">
-                <div class="min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">{{ app.jobTitle }}</p>
-                  <p class="text-[10px] text-gray-400">{{ formatDate(app.createdAt) }}</p>
+                <div class="min-w-0 pr-4">
+                  <p class="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">{{ app.jobTitle }}</p>
+                  <p class="text-xs font-medium text-slate-400 mt-1">{{ formatDate(app.createdAt) }}</p>
                 </div>
                 <span
-                  class="px-2 py-0.5 text-[10px] font-medium rounded-full shrink-0 ml-2"
-                  :class="statusColors[app.status] ?? 'bg-gray-100 text-gray-500'"
+                  class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full shrink-0"
+                  :class="statusColors[app.status] ?? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'"
                 >
                   {{ formatStatus(app.status) }}
                 </span>
@@ -173,29 +173,30 @@ onMounted(async () => {
         </div>
 
         <!-- Top Recommendations -->
-        <div class="bg-surface border border-border rounded-lg shadow-sm">
-          <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-900">Top Matches</h2>
-            <router-link to="/candidate/recommendations" class="text-xs text-primary hover:text-primary-hover font-medium transition">
-              View All →
+        <div class="premium-card flex flex-col">
+          <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900 dark:text-white">Top Matches</h2>
+            <router-link to="/candidate/recommendations" class="text-xs font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors">
+              View All &rarr;
             </router-link>
           </div>
-          <div v-if="recommendations.length === 0" class="px-5 py-8 text-center">
-            <p class="text-xs text-gray-400">Complete your profile to see recommendations.</p>
+          <div v-if="recommendations.length === 0" class="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[200px]">
+             <span class="text-4xl mb-3 opacity-50">✨</span>
+             <p class="text-sm font-medium text-slate-500">Complete your profile to see recommendations.</p>
           </div>
-          <div v-else>
+          <div v-else class="flex-1">
             <div
               v-for="rec in recommendations"
               :key="rec.jobId"
               @click="router.push(`/jobs/${rec.jobId}`)"
-              class="px-5 py-3 border-b border-border last:border-0 hover:bg-gray-50/50 transition cursor-pointer"
+              class="group px-6 py-4 border-b border-slate-50 dark:border-slate-800/30 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
             >
               <div class="flex items-center justify-between">
-                <div class="min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">{{ rec.title }}</p>
-                  <p class="text-[10px] text-gray-400">{{ rec.companyName }}</p>
+                <div class="min-w-0 pr-4">
+                  <p class="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">{{ rec.title }}</p>
+                  <p class="text-xs font-medium text-slate-400 mt-1">{{ rec.companyName }}</p>
                 </div>
-                <span class="text-xs font-bold shrink-0 ml-2" :class="rec.matchScore >= 70 ? 'text-success' : 'text-primary'">
+                <span class="text-sm font-black shrink-0" :class="rec.matchScore >= 70 ? 'text-emerald-500' : 'text-teal-500'">
                   {{ rec.matchScore }}%
                 </span>
               </div>
@@ -205,16 +206,16 @@ onMounted(async () => {
       </div>
 
       <!-- Quick Actions -->
-      <div class="mt-6 bg-surface border border-border rounded-lg p-5 shadow-sm">
-        <h2 class="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h2>
+      <div class="premium-card p-6">
+        <h2 class="text-base font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
         <div class="flex items-center gap-3 flex-wrap">
-          <router-link to="/jobs" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition">
+          <router-link to="/jobs" class="btn-primary py-2 px-6">
             Browse Jobs
           </router-link>
-          <router-link to="/candidate/cv" class="px-4 py-2 text-sm font-medium text-primary bg-primary-bg hover:bg-primary-light rounded-md transition border border-primary/10">
+          <router-link to="/candidate/cv" class="btn-secondary py-2 px-6">
             Manage CV
           </router-link>
-          <router-link to="/candidate/salary-benchmark" class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition">
+          <router-link to="/candidate/salary-benchmark" class="btn-secondary py-2 px-6 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700">
             Salary Benchmark
           </router-link>
         </div>

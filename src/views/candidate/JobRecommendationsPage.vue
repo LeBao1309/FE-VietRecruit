@@ -28,101 +28,107 @@ function goToJob(jobId: string): void {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 80) return 'text-success'
-  if (score >= 60) return 'text-primary'
-  if (score >= 40) return 'text-warning'
-  return 'text-gray-500'
+  if (score >= 80) return 'text-emerald-500'
+  if (score >= 60) return 'text-teal-500'
+  if (score >= 40) return 'text-amber-500'
+  return 'text-slate-500'
 }
 
-function scoreBg(score: number): string {
-  if (score >= 80) return 'bg-success'
-  if (score >= 60) return 'bg-primary'
-  if (score >= 40) return 'bg-warning'
-  return 'bg-gray-400'
+function scoreStroke(score: number): string {
+  if (score >= 80) return 'stroke-emerald-500'
+  if (score >= 60) return 'stroke-teal-500'
+  if (score >= 40) return 'stroke-amber-500'
+  return 'stroke-slate-400'
 }
 
 onMounted(loadRecommendations)
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-6 py-8">
-    <div class="mb-6">
-      <h1 class="text-xl font-bold text-gray-900">Job Recommendations</h1>
-      <p class="text-sm text-gray-500 mt-1">AI-matched jobs based on your profile, skills, and preferences.</p>
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Job Recommendations</h1>
+      <p class="text-sm font-medium text-slate-500">AI-matched jobs based on your profile, skills, and preferences.</p>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="space-y-3">
-      <div v-for="i in 5" :key="i" class="bg-surface border border-border rounded-lg p-5 shadow-sm animate-pulse">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-gray-100 rounded-lg shrink-0" />
-          <div class="flex-1 space-y-2">
-            <div class="h-4 bg-gray-100 rounded w-48" />
-            <div class="h-3 bg-gray-100 rounded w-32" />
+    <div v-if="loading" class="space-y-4">
+      <div v-for="i in 5" :key="i" class="premium-card p-6 animate-pulse">
+        <div class="flex items-center gap-6">
+          <div class="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full shrink-0" />
+          <div class="flex-1 space-y-3">
+            <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-48" />
+            <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-32" />
           </div>
-          <div class="h-8 w-16 bg-gray-100 rounded shrink-0" />
+          <div class="h-8 w-24 bg-slate-200 dark:bg-slate-700 rounded shrink-0" />
         </div>
       </div>
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="recommendations.length === 0" class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center">
-      <div class="text-gray-400 text-sm">
-        <p class="font-medium mb-1">No recommendations yet</p>
-        <p class="text-xs mb-3">Complete your profile and upload your CV to get AI-powered job matches.</p>
-        <router-link to="/candidate/candidate-profile" class="text-primary hover:text-primary-hover text-xs font-medium transition">
-          Complete Your Profile →
-        </router-link>
-      </div>
+    <div v-else-if="recommendations.length === 0" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+      <span class="text-5xl mb-4 opacity-50">🤖</span>
+      <p class="text-lg font-bold text-slate-900 dark:text-white mb-2">No recommendations yet</p>
+      <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Complete your profile and upload your CV to get AI-powered job matches.</p>
+      <router-link to="/candidate/candidate-profile" class="btn-primary py-2.5 px-6">
+        Complete Your Profile
+      </router-link>
     </div>
 
     <!-- Results -->
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-4">
       <div
         v-for="rec in recommendations"
         :key="rec.jobId"
         @click="goToJob(rec.jobId)"
-        class="bg-surface border border-border rounded-lg p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition cursor-pointer group"
+        class="premium-card p-6 flex flex-col sm:flex-row sm:items-center sm:gap-6 hover:shadow-lg hover:-translate-y-0.5 hover:border-teal-500/30 dark:hover:border-teal-500/30 transition-all duration-300 cursor-pointer group"
       >
-        <div class="flex items-start gap-4">
-          <!-- Match score -->
-          <div class="relative w-12 h-12 shrink-0">
-            <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e5e7eb" stroke-width="2.5" />
-              <circle
-                cx="18" cy="18" r="15.5" fill="none" stroke-width="2.5" stroke-linecap="round"
-                :class="scoreBg(rec.matchScore).replace('bg-', 'stroke-')"
-                :stroke-dasharray="`${(rec.matchScore / 100) * 97.4} 97.4`"
-              />
-            </svg>
-            <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold" :class="scoreColor(rec.matchScore)">
-              {{ rec.matchScore }}%
-            </span>
-          </div>
+        <!-- Match score -->
+        <div class="relative w-16 h-16 shrink-0 mb-4 sm:mb-0 drop-shadow-sm">
+          <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+            <circle cx="18" cy="18" r="15.5" fill="none" class="stroke-slate-200 dark:stroke-slate-700" stroke-width="3" />
+            <circle
+              cx="18" cy="18" r="15.5" fill="none" stroke-width="3" stroke-linecap="round"
+              :class="scoreStroke(rec.matchScore)"
+              :stroke-dasharray="`${(rec.matchScore / 100) * 97.4} 97.4`"
+              class="transition-all duration-1000 ease-out"
+            />
+          </svg>
+          <span class="absolute inset-0 flex items-center justify-center text-sm font-black" :class="scoreColor(rec.matchScore)">
+            {{ rec.matchScore }}%
+          </span>
+        </div>
 
-          <!-- Job info -->
-          <div class="flex-1 min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition mb-0.5">
-              {{ rec.title }}
-            </h3>
-            <p class="text-xs text-gray-500 mb-1.5">
-              {{ rec.companyName }}
-              <span v-if="rec.location" class="text-gray-400"> · {{ rec.location }}</span>
+        <!-- Job info -->
+        <div class="flex-1 min-w-0 mb-4 sm:mb-0">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-1 truncate">
+            {{ rec.title }}
+          </h3>
+          <p class="text-sm font-medium text-slate-500 mb-2">
+            <span class="text-slate-700 dark:text-slate-300">{{ rec.companyName }}</span>
+            <span v-if="rec.location" class="mx-1.5 opacity-50">•</span>
+            <span v-if="rec.location">{{ rec.location }}</span>
+          </p>
+          <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/80">
+            <p class="text-xs font-medium text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+              <span class="font-bold text-slate-700 dark:text-slate-300 mr-1">Why matches:</span>{{ rec.matchReason }}
             </p>
-            <p class="text-xs text-gray-500 line-clamp-2">{{ rec.matchReason }}</p>
           </div>
+        </div>
 
-          <!-- CTA -->
-          <div class="shrink-0 mt-1">
-            <span class="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition">
-              View →
-            </span>
+        <!-- CTA -->
+        <div class="shrink-0 flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto">
+          <span class="sm:hidden text-xs font-bold text-teal-600">View Job</span>
+          <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-900/30 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </div>
         </div>
       </div>
 
       <!-- Footer note -->
-      <p class="text-[10px] text-gray-400 text-center mt-4">
+      <p class="text-xs font-medium text-slate-400 text-center mt-8">
         Recommendations are generated by AI based on your profile and CV. Update your profile for better results.
       </p>
     </div>

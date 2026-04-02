@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { applicationService } from '@/services/applicationService'
 import type { PageResponse } from '@/types/common'
 import type { ApplicationSummaryResponse } from '@/types/application'
-import type { ApplicationStatus } from '@/types/enums'
 
 const router = useRouter()
 
@@ -15,15 +14,7 @@ const page = ref(0)
 const pageSize = ref(10)
 const statusFilter = ref<string>('')
 
-// ── Status config ──
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; class: string; dotClass: string }> = {
-  NEW: { label: 'Applied', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
-  SCREENING: { label: 'Screening', class: 'bg-amber-50 text-amber-600', dotClass: 'bg-amber-400' },
-  INTERVIEW: { label: 'Interview', class: 'bg-purple-50 text-purple-600', dotClass: 'bg-purple-500' },
-  OFFER: { label: 'Offer', class: 'bg-primary-bg text-primary', dotClass: 'bg-primary' },
-  HIRED: { label: 'Hired', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
-  REJECTED: { label: 'Rejected', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
-}
+import MiniStepper from '@/components/candidate/MiniStepper.vue'
 
 const STATUS_FILTERS: { label: string; value: string }[] = [
   { label: 'All', value: '' },
@@ -79,123 +70,122 @@ onMounted(() => loadApplications())
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-6">
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 class="text-xl font-bold text-gray-900">My Applications</h1>
-        <p class="text-sm text-gray-500 mt-1">Track the progress of your job applications.</p>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">My Applications</h1>
+        <p class="text-sm font-medium text-slate-500">Track the progress of your job applications.</p>
       </div>
       <router-link
         to="/jobs"
-        class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+        class="btn-primary py-2.5 px-6 shrink-0"
       >
         Browse Jobs
       </router-link>
     </div>
 
     <!-- Status filter pills -->
-    <div class="flex items-center gap-2 mb-5 flex-wrap">
+    <div class="flex items-center gap-2.5 mb-8 flex-wrap">
       <button
         v-for="filter in STATUS_FILTERS"
         :key="filter.value"
         @click="statusFilter = filter.value; page = 0; loadApplications()"
-        class="px-3 py-1.5 text-xs font-medium rounded-full border transition"
+        class="px-4 py-2 text-xs font-bold rounded-xl border transition-colors shadow-sm whitespace-nowrap outline-none focus:ring-2 focus:ring-teal-500/30"
         :class="statusFilter === filter.value
-          ? 'bg-primary text-white border-primary'
-          : 'bg-surface text-gray-600 border-border hover:border-gray-300'"
+          ? 'bg-teal-600 text-white border-teal-600 hover:bg-teal-700'
+          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-700'"
       >
         {{ filter.label }}
       </button>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="space-y-3">
-      <div v-for="i in 5" :key="i" class="bg-surface border border-border rounded-lg p-4 shadow-sm animate-pulse">
-        <div class="flex items-center justify-between">
-          <div class="space-y-2 flex-1">
-            <div class="h-4 bg-gray-100 rounded w-48" />
-            <div class="h-3 bg-gray-100 rounded w-24" />
+    <div v-if="loading" class="space-y-4">
+      <div v-for="i in 5" :key="i" class="premium-card p-6 animate-pulse">
+        <div class="flex items-center justify-between mb-4">
+          <div class="space-y-3 flex-1 pr-6">
+            <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-48" />
+            <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-32" />
           </div>
-          <div class="h-5 bg-gray-100 rounded w-16" />
+          <div class="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded-full shrink-0" />
         </div>
+        <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full" />
       </div>
     </div>
 
     <!-- Empty -->
-    <div v-else-if="appList.length === 0" class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center">
-      <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl mx-auto mb-4">
-        📋
-      </div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">No Applications Yet</h2>
-      <p class="text-sm text-gray-500 mb-5">Start applying to jobs to see your applications here.</p>
+    <div v-else-if="appList.length === 0" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+      <span class="text-5xl mb-4 opacity-50">📋</span>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-2">No Applications Yet</h2>
+      <p class="text-sm font-medium text-slate-500 mb-6">Start applying to jobs to track your progress here.</p>
       <router-link
         to="/jobs"
-        class="inline-block px-5 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+        class="btn-primary py-2.5 px-8"
       >
         Browse Jobs
       </router-link>
     </div>
 
     <!-- Application List -->
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-4">
       <div
         v-for="app in appList"
         :key="app.id"
         @click="router.push(`/candidate/applications/${app.id}`)"
-        class="bg-surface border border-border rounded-lg p-4 shadow-sm hover:border-primary/30 hover:shadow-md transition cursor-pointer group"
+        class="premium-card p-6 flex flex-col gap-6 hover:shadow-lg hover:-translate-y-0.5 hover:border-teal-500/30 dark:hover:border-teal-500/30 transition-all duration-300 cursor-pointer group"
       >
-        <div class="flex items-center justify-between">
-          <div class="min-w-0 flex-1">
-            <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary transition truncate">
+        <div class="flex items-start justify-between">
+          <div class="min-w-0 pr-4">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate mb-1">
               {{ app.jobTitle }}
             </h3>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <p class="text-xs font-medium text-slate-500">
               Applied {{ formatDate(app.createdAt) }}
             </p>
           </div>
-          <div class="flex items-center gap-3 shrink-0 ml-4">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full"
-              :class="STATUS_CONFIG[app.status].class"
-            >
-              <span class="w-1.5 h-1.5 rounded-full" :class="STATUS_CONFIG[app.status].dotClass" />
-              {{ STATUS_CONFIG[app.status].label }}
-            </span>
-            <span class="text-gray-300 group-hover:text-gray-400 transition text-sm">→</span>
+          <div class="shrink-0 flex items-center">
+            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-900/40 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
           </div>
         </div>
+        
+        <!-- Application Progress Visualization -->
+        <MiniStepper :status-code="app.status" />
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex items-center justify-between pt-4">
-        <span class="text-xs text-gray-400">
-          {{ totalElements }} application{{ totalElements !== 1 ? 's' : '' }}
+      <div v-if="totalPages > 1" class="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-800">
+        <span class="text-xs font-medium text-slate-500">
+          Showing <span class="font-bold">{{ totalElements }}</span> application{{ totalElements !== 1 ? 's' : '' }}
         </span>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
           <button
             @click="goToPage(page - 1)"
             :disabled="page === 0"
-            class="px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-surface border border-border rounded-md hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            class="px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            ‹ Prev
+            &larr; Prev
           </button>
           <button
             v-for="p in totalPages"
             :key="p"
             @click="goToPage(p - 1)"
-            class="w-8 h-8 text-xs font-medium rounded-md transition"
+            class="w-8 h-8 text-xs font-bold rounded-lg transition-colors border"
             :class="page === p - 1
-              ? 'bg-primary text-white'
-              : 'text-gray-600 hover:bg-gray-50'"
+              ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300'"
           >
             {{ p }}
           </button>
           <button
             @click="goToPage(page + 1)"
             :disabled="page >= totalPages - 1"
-            class="px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-surface border border-border rounded-md hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            class="px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Next ›
+            Next &rarr;
           </button>
         </div>
       </div>

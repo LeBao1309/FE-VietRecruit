@@ -49,16 +49,16 @@ To modernize the entire application uniformly, the following files will be refac
 
 ### 3.2 Billing / Pricing (PayOS Flow)
 **Flow Insight:** Checkout flow jumps to PayOS and returns to a status page.
-*   [ ] **`employer/PricingPage.vue`**: Marketing-focused premium pricing cards (FREE, PRO, ENTERPRISE). Add a sleek Monthly/Yearly billing toggle switch.
-*   [ ] **`employer/SubscriptionPage.vue`**: Feature the active plan strongly, integrating the remaining quota bar.
-*   [ ] **`employer/PaymentStatusPage.vue`**: Distinct success/error status message cards when returning from the PayOS link.
+*   [x] **`employer/PricingPage.vue`**: Marketing-focused premium pricing cards (FREE, PRO, ENTERPRISE). Add a sleek Monthly/Yearly billing toggle switch.
+*   [x] **`employer/SubscriptionPage.vue`**: Feature the active plan strongly, integrating the remaining quota bar.
+*   [x] **`employer/PaymentStatusPage.vue`**: Distinct success/error status message cards when returning from the PayOS link.
 
 ### 3.3 Candidate Portal & AI Features
 **Flow Insight:** Candidates upload CVs (PDF <5MB) directly, apply for jobs, and use AI features to prepare.
-*   [ ] **`candidate/DashboardPage.vue`**
-*   [ ] **`candidate/CandidateProfilePage.vue` & `candidate/CvManagementPage.vue`**: Restyle the CV Upload Drag-and-Drop zone (`border-dashed hover:border-teal-500 bg-slate-50`). Ensure validation errors (<5MB, PDF only) look native.
-*   [ ] **Missing AI UIs (`JobRecommendations`, `SalaryBenchmark`)**: Create dedicated modern UI sections for AI recommendations (cards) and Salary Benchmark (charts or progress bars). Add the "Improve CV" action button to the Profile view.
-*   [ ] **`candidate/MyApplicationsPage.vue`**: Timeline step styling to track application progress visually through the 6 pipeline stages.
+*   [x] **`candidate/DashboardPage.vue`**
+*   [x] **`candidate/CandidateProfilePage.vue` & `candidate/CvManagementPage.vue`**: Restyle the CV Upload Drag-and-Drop zone (`border-dashed hover:border-teal-500 bg-slate-50`). Ensure validation errors (<5MB, PDF only) look native.
+*   [x] **Missing AI UIs (`JobRecommendations`, `SalaryBenchmark`)**: Create dedicated modern UI sections for AI recommendations (cards) and Salary Benchmark (charts or progress bars). Add the "Improve CV" action button to the Profile view.
+*   [x] **`candidate/MyApplicationsPage.vue`**: Timeline step styling to track application progress visually through the 6 pipeline stages.
 
 ### 3.4 Shared, Administrative & Auth
 *   [ ] **`shared/SettingsPage.vue` & `shared/ProfilePage.vue`**
