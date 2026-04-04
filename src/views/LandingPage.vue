@@ -113,7 +113,91 @@ onMounted(async () => {
      </p>
    </div>
 
-   <!-- Bento grid (added in Tasks 2–5) -->
+   <!-- Bento grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-3.5">
+
+    <!-- Hidden SVG defs for score ring gradient -->
+    <svg width="0" height="0" class="absolute">
+      <defs>
+        <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#008c8c"/>
+          <stop offset="100%" stop-color="#2dd4bf"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ① AI Scoring — col 1, rows 1–2 -->
+    <div class="relative md:row-span-2 bg-gradient-to-b from-[#f0fafa] to-[#e8f8f8] border border-[#b2e0e0] rounded-2xl p-6 overflow-hidden hover:shadow-lg hover:border-[#008c8c]/40 transition-all">
+      <div class="ai-dot-grid"></div>
+
+      <!-- Tag -->
+      <span class="inline-flex items-center gap-1.5 bg-[#c4ecec] text-[#007070] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-4">
+        ✦ AI Scoring
+      </span>
+
+      <!-- Score ring + subject -->
+      <div class="flex items-center gap-4 mb-5">
+        <!-- Ring -->
+        <div class="relative w-[88px] h-[88px] shrink-0">
+          <svg width="88" height="88" viewBox="0 0 88 88" class="-rotate-90">
+            <circle class="score-ring-bg" cx="44" cy="44" r="36"/>
+            <circle class="score-ring-fill" cx="44" cy="44" r="36"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-[22px] font-extrabold text-slate-900 leading-none">87</span>
+            <span class="text-[8px] text-slate-400 font-semibold mt-0.5">/ 100</span>
+          </div>
+        </div>
+        <!-- Meta -->
+        <div>
+          <div class="text-sm font-bold text-slate-900 mb-0.5">Nguyen Van A</div>
+          <div class="text-[10px] text-slate-500 leading-snug mb-2">Senior Frontend Eng<br>TechCorp Vietnam</div>
+          <span class="inline-flex items-center gap-1 bg-[#e0f4f4] border border-[#b2e0e0] text-[#007070] text-[9px] font-bold px-2 py-0.5 rounded">✦ AI Matched</span>
+        </div>
+      </div>
+
+      <!-- Score bars -->
+      <div class="space-y-2.5 mb-5">
+        <div v-for="bar in [
+          { label: 'Technical Skills', value: 9,  max: 10,  pct: '90%' },
+          { label: 'Attitude',         value: 8,  max: 10,  pct: '80%' },
+          { label: 'English',          value: 7,  max: 10,  pct: '70%' },
+          { label: 'CV Match',         value: 92, max: 100, pct: '92%', suffix: '%' },
+        ]" :key="bar.label">
+          <div class="flex justify-between mb-1">
+            <span class="text-[10px] text-slate-500 font-semibold">{{ bar.label }}</span>
+            <span class="text-[10px] font-extrabold text-[#008c8c]">{{ bar.value }}{{ bar.suffix ?? `/${bar.max}` }}</span>
+          </div>
+          <div class="h-1.5 bg-[#d1eeee] rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-[#008c8c] to-teal-400" :style="{ width: bar.pct }"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidate ranking list -->
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-2">3 candidates analyzed</div>
+      <div class="space-y-2">
+        <div v-for="cand in [
+          { initials: 'NA', name: 'Nguyen Van A', role: 'Frontend Engineer',  pct: '87%', bg: 'bg-[#e0f4f4]', color: 'text-[#008c8c]' },
+          { initials: 'TL', name: 'Tran Le B',    role: 'Full Stack Dev',     pct: '74%', bg: 'bg-violet-100',  color: 'text-violet-600' },
+          { initials: 'PD', name: 'Pham Duc C',   role: 'Vue.js Specialist',  pct: '61%', bg: 'bg-sky-100',     color: 'text-sky-600' },
+        ]" :key="cand.initials"
+          class="flex items-center gap-2.5 p-2 bg-white border border-slate-200 rounded-xl hover:border-[#008c8c]/30 transition-colors">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0" :class="[cand.bg, cand.color]">
+            {{ cand.initials }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[11px] font-semibold text-slate-800 truncate">{{ cand.name }}</div>
+            <div class="text-[9px] text-slate-400">{{ cand.role }}</div>
+          </div>
+          <div class="text-xs font-extrabold shrink-0" :class="cand.color">{{ cand.pct }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② ③ ④ cells added in Tasks 3–5 -->
+
+  </div>
  </section>
 
  <!-- 3. Features Highlights -->
@@ -257,3 +341,30 @@ onMounted(async () => {
  </footer>
  </div>
 </template>
+
+<style scoped>
+/* Score ring SVG gradient */
+.score-ring-fill {
+  fill: none;
+  stroke: url(#scoreGrad);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 226;
+  stroke-dashoffset: 38;
+}
+.score-ring-bg {
+  fill: none;
+  stroke: #d1eeee;
+  stroke-width: 8;
+}
+/* Dot-grid pattern for AI cell */
+.ai-dot-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: radial-gradient(circle, #008c8c 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  border-radius: inherit;
+}
+</style>
