@@ -1,37 +1,52 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import MiniStepper from '@/components/candidate/MiniStepper.vue'
+import { planService } from '@/services/subscriptionService'
+import type { PlanResponse } from '@/types/subscription'
 
 const isAnnual = ref(true)
+const auth = useAuthStore()
 
-const plans = [
- {
- name: 'Free',
- desc: 'Perfect for startups hiring their first roles.',
- priceMonthly: 0,
- priceAnnual: 0,
- features: ['Up to 1 active job', 'Basic application tracking', 'Community support'],
- buttonText: 'Get Started Free',
- isPopular: false
- },
- {
- name: 'Pro',
- desc: 'Advanced tools for growing recruitment teams.',
- priceMonthly: 49,
- priceAnnual: 39,
- features: ['Up to 10 active jobs', 'AI Salary Benchmarks', 'Collaborative interviewing', 'Priority email support'],
- buttonText: 'Start Pro Trial',
- isPopular: true
- },
- {
- name: 'Enterprise',
- desc: 'Unlimited power for large organizations.',
- priceMonthly: 199,
- priceAnnual: 149,
- features: ['Unlimited active jobs', 'AI JD Generation', 'Advanced analytics', 'Dedicated account manager'],
- buttonText: 'Contact Sales',
- isPopular: false
- }
-]
+const rawPlans = ref<PlanResponse[]>([])
+
+function deriveFeatures(plan: PlanResponse): string[] {
+  const features: string[] = []
+  if (plan.maxActiveJobs === 0 || plan.maxActiveJobs < 0) {
+    features.push('Unlimited active jobs')
+  } else {
+    features.push(`Up to ${plan.maxActiveJobs} active job${plan.maxActiveJobs === 1 ? '' : 's'}`)
+  }
+  if (plan.resumeAccess) features.push('Resume access')
+  if (plan.aiMatching) features.push('AI Matching')
+  if (plan.priorityListing) features.push('Priority listing')
+  return features
+}
+
+function deriveButtonText(code: string): string {
+  const c = code.toUpperCase()
+  if (c.includes('FREE')) return 'Get Started Free'
+  if (c.includes('ENTERPRISE')) return 'Contact Sales'
+  return 'Start Trial'
+}
+
+const plans = computed(() =>
+  rawPlans.value.map(plan => ({
+    id: plan.id,
+    name: plan.name,
+    desc: plan.description ?? '',
+    priceMonthly: plan.priceMonthly,
+    priceAnnual: Math.round(plan.priceYearly / 12),
+    features: deriveFeatures(plan),
+    buttonText: deriveButtonText(plan.code),
+    isPopular: plan.code.toUpperCase().includes('PRO'),
+  }))
+)
+
+onMounted(async () => {
+  const result = await planService.listPlans()
+  if (result.data) rawPlans.value = result.data
+})
 </script>
 
 <template>
@@ -49,8 +64,13 @@ const plans = [
  <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Pricing</a>
  </nav>
  <div class="flex items-center gap-4">
+ <template v-if="!auth.isAuthenticated">
  <router-link to="/login" class="text-sm font-bold text-slate-700 hover:text-[#008c8c] transition-colors">Log In</router-link>
  <router-link to="/register" class="btn-primary px-5 py-2 hover:shadow-lg transition-all rounded-full">Get Started</router-link>
+ </template>
+ <template v-else>
+ <span class="text-sm font-bold text-slate-700">{{ auth.user?.fullName }}</span>
+ </template>
  </div>
  </div>
  </header>
@@ -78,11 +98,22 @@ const plans = [
  </section>
 
  <!-- 2. App Demo Section -->
- <section id="demo" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
- <div class="relative rounded-2xl md:rounded-[2rem] p-4 md:p-8 bg-slate-50 border border-slate-200/60 shadow-2xl overflow-hidden group">
- <div class="absolute inset-0 bg-gradient-to-tr from-teal-500/5 to-blue-500/5 opacity-50"></div>
- <img src="/assets/img/vietrecruit-banner.svg" alt="VietRecruit Dashboard Preview" class="relative z-10 w-full h-auto rounded-xl md:rounded-2xl border border-slate-200 shadow-sm transition-transform duration-700 group-hover:scale-[1.01]" />
- </div>
+ <section id="demo" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+   <!-- Section heading -->
+   <div class="text-center mb-12">
+     <div class="inline-flex items-center gap-2 bg-[#e0f4f4] text-[#007070] text-xs font-bold px-3 py-1 rounded-full mb-4">
+       <span class="w-1.5 h-1.5 rounded-full bg-[#008c8c] animate-pulse"></span>
+       See it in action
+     </div>
+     <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
+       One platform for <span class="bg-gradient-to-r from-[#008c8c] to-teal-400 bg-clip-text text-transparent">every</span> hiring role
+     </h2>
+     <p class="text-slate-500 text-base max-w-xl mx-auto">
+       From AI-powered candidate scoring to real-time pipeline tracking — VietRecruit keeps your whole team in sync.
+     </p>
+   </div>
+
+   <!-- Bento grid (added in Tasks 2–5) -->
  </section>
 
  <!-- 3. Features Highlights -->
