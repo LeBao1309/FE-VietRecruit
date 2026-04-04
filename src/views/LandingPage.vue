@@ -237,7 +237,33 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- ③ ④ cells added in Tasks 4–5 -->
+    <!-- ③ Candidate Pipeline — col 2, row 2 -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#008c8c]/30 transition-all">
+      <span class="inline-flex items-center gap-1.5 bg-[#e0f4f4] text-[#008c8c] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-3">
+        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Candidate
+      </span>
+      <div class="text-xs font-bold text-slate-900 mb-3">My Applications</div>
+
+      <div class="divide-y divide-slate-50">
+        <div v-for="app in [
+          { title: 'Senior Frontend Eng.',  company: 'TechCorp · Apr 1',    status: 'INTERVIEW', badge: 'Interview', badgeClass: 'bg-[#e0f4f4] text-[#008c8c]' },
+          { title: 'Product Designer',      company: 'Saola Studio · Mar 20', status: 'OFFER',   badge: 'Offer 🎉',  badgeClass: 'bg-green-50 text-green-700' },
+          { title: 'Backend Engineer',      company: 'VietCode · Apr 3',    status: 'NEW',       badge: 'Applied',   badgeClass: 'bg-amber-50 text-amber-700' },
+        ]" :key="app.title" class="py-2.5 first:pt-0 last:pb-0">
+          <div class="flex items-start justify-between mb-1.5">
+            <div>
+              <div class="text-xs font-bold text-slate-900 leading-snug">{{ app.title }}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">{{ app.company }}</div>
+            </div>
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ml-2" :class="app.badgeClass">{{ app.badge }}</span>
+          </div>
+          <MiniStepper :status-code="app.status" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ Recruiter cell added in Task 5 -->
 
    </div>
  </section>
