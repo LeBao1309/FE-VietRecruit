@@ -114,10 +114,10 @@ onMounted(async () => {
    </div>
 
    <!-- Bento grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-3.5">
+   <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-3.5">
 
-    <!-- Hidden SVG defs for score ring gradient -->
-    <svg width="0" height="0" class="absolute">
+     <!-- Hidden SVG defs for score ring gradient -->
+     <svg width="0" height="0" class="absolute" aria-hidden="true">
       <defs>
         <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="#008c8c"/>
@@ -126,8 +126,8 @@ onMounted(async () => {
       </defs>
     </svg>
 
-    <!-- ① AI Scoring — col 1, rows 1–2 -->
-    <div class="relative md:row-span-2 bg-gradient-to-b from-[#f0fafa] to-[#e8f8f8] border border-[#b2e0e0] rounded-2xl p-6 overflow-hidden hover:shadow-lg hover:border-[#008c8c]/40 transition-all">
+     <!-- ① AI Scoring — col 1, rows 1–2 -->
+     <div class="relative md:row-span-2 bg-gradient-to-b from-[#f0fafa] to-[#e8f8f8] border border-[#b2e0e0] rounded-2xl p-6 overflow-hidden hover:shadow-lg hover:border-[#008c8c]/40 transition-all">
       <div class="ai-dot-grid"></div>
 
       <!-- Tag -->
@@ -193,11 +193,11 @@ onMounted(async () => {
           <div class="text-xs font-extrabold shrink-0" :class="cand.color">{{ cand.pct }}</div>
         </div>
       </div>
-    </div>
+     </div>
 
-    <!-- ② ③ ④ cells added in Tasks 3–5 -->
+     <!-- ② ③ ④ cells added in Tasks 3–5 -->
 
-  </div>
+   </div>
  </section>
 
  <!-- 3. Features Highlights -->
