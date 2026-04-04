@@ -263,9 +263,43 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- ④ Recruiter cell added in Task 5 -->
+    <!-- ④ Recruiter Job List — col 3, row 2 -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#008c8c]/30 transition-all">
+      <span class="inline-flex items-center gap-1.5 bg-[#e0f4f4] text-[#008c8c] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-3">
+        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Recruiter
+      </span>
+      <div class="text-xs font-bold text-slate-900 mb-3">Job Listings</div>
 
-   </div>
+      <!-- Quota bar -->
+      <div class="mb-3">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-[10px] text-slate-500 font-semibold">Quota used</span>
+          <span class="text-[10px] font-extrabold text-slate-700">7 / 10 jobs</span>
+        </div>
+        <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div class="h-full w-[70%] rounded-full bg-gradient-to-r from-[#008c8c] to-teal-400"></div>
+        </div>
+      </div>
+
+      <!-- Job rows -->
+      <div class="space-y-1.5">
+        <div v-for="job in [
+          { title: 'Senior Engineer', apps: '24 applicants', pill: 'Published', pillClass: 'bg-green-50 text-green-700' },
+          { title: 'Product Lead',    apps: '7 applicants',  pill: 'Draft',     pillClass: 'bg-slate-100 text-slate-500' },
+          { title: 'Data Analyst',    apps: '52 applicants', pill: 'Closed',    pillClass: 'bg-red-50 text-red-600' },
+        ]" :key="job.title"
+          class="flex items-center justify-between px-2.5 py-2 bg-slate-50 rounded-lg">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-700">{{ job.title }}</div>
+            <div class="text-[9px] text-slate-400">{{ job.apps }}</div>
+          </div>
+          <span class="text-[8px] font-bold px-1.5 py-0.5 rounded" :class="job.pillClass">{{ job.pill }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end bento grid -->
  </section>
 
  <!-- 3. Features Highlights -->
