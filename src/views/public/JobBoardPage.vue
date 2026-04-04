@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 import { jobService } from '@/services/jobService'
+import FloatingBackButton from '@/components/common/FloatingBackButton.vue'
 import type { JobSearchResponse, JobSummaryResponse } from '@/types/job'
 import type { SearchPageResponse, PageResponse } from '@/types/common'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 // ── Search mode ──
 type Mode = 'browse' | 'search'
@@ -18,6 +21,8 @@ const debouncedQuery = ref('')
 const autocompleteResults = ref<string[]>([])
 const showAutocomplete = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
+let autocompleteSeq = 0
+let searchSeq = 0
 
 function onSearchBlur(): void {
  setTimeout(() => { showAutocomplete.value = false }, 200)
@@ -30,7 +35,7 @@ const currency = ref('VND')
 
 // ── Pagination ──
 const currentPage = ref(0)
-const pageSize = ref(12)
+const pageSize = ref(24)
 
 // ── Browse results (GET /jobs/public) ──
 const browseData = ref<PageResponse<JobSummaryResponse> | null>(null)
@@ -56,6 +61,17 @@ const totalElements = computed(() => {
 })
 const canGoPrev = computed(() => currentPage.value > 0)
 const canGoNext = computed(() => currentPage.value < totalPages.value - 1)
+const pageNumbers = computed<(number | '...')[]>(() => {
+  const total = totalPages.value
+  const cur = currentPage.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i)
+  const pages: (number | '...')[] = [0]
+  if (cur > 2) pages.push('...')
+  for (let i = Math.max(1, cur - 1); i <= Math.min(total - 2, cur + 1); i++) pages.push(i)
+  if (cur < total - 3) pages.push('...')
+  pages.push(total - 1)
+  return pages
+})
 
 // ── Browse: load published jobs ──
 async function loadPublicJobs(): Promise<void> {
@@ -79,6 +95,7 @@ async function loadSearchResults(): Promise<void> {
  loadPublicJobs()
  return
  }
+ const seq = ++searchSeq
  searchLoading.value = true
  mode.value = 'search'
  try {
@@ -90,9 +107,10 @@ async function loadSearchResults(): Promise<void> {
  page: currentPage.value,
  size: pageSize.value,
  })
+ if (seq !== searchSeq) return
  if (result.data) searchData.value = result.data
  } finally {
- searchLoading.value = false
+ if (seq === searchSeq) searchLoading.value = false
  }
 }
 
@@ -103,7 +121,9 @@ async function fetchAutocomplete(): Promise<void> {
  showAutocomplete.value = false
  return
  }
+ const seq = ++autocompleteSeq
  const result = await jobService.autocomplete(searchQuery.value.trim(), 6)
+ if (seq !== autocompleteSeq) return
  if (result.data) {
  autocompleteResults.value = result.data
  showAutocomplete.value = result.data.length > 0
@@ -166,6 +186,10 @@ function nextPage(): void {
  mode.value === 'search' ? loadSearchResults() : loadPublicJobs()
  }
 }
+function goToPage(p: number): void {
+ currentPage.value = p
+ mode.value === 'search' ? loadSearchResults() : loadPublicJobs()
+}
 
 // ── Navigation ──
 function goToJob(id: string): void {
@@ -200,10 +224,15 @@ function timeAgo(iso: string): string {
 onMounted(() => {
  loadPublicJobs()
 })
+
+onUnmounted(() => {
+ if (debounceTimer) clearTimeout(debounceTimer)
+})
 </script>
 
 <template>
  <div class="min-h-screen flex flex-col">
+ <FloatingBackButton />
  <!-- Header / Nav -->
  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-30 transition-all duration-300">
  <div class="max-w-6xl mx-auto flex items-center justify-between">
@@ -215,6 +244,7 @@ onMounted(() => {
  >
  Browse Jobs
  </router-link>
+ <template v-if="!auth.isAuthenticated">
  <router-link
  to="/login"
  class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 :text-white rounded-xl hover:bg-slate-50 :bg-slate-800 transition-colors"
@@ -227,6 +257,10 @@ onMounted(() => {
  >
  Get Started
  </router-link>
+ </template>
+ <template v-else>
+ <span class="text-sm font-bold text-slate-700">{{ auth.user?.fullName }}</span>
+ </template>
  </nav>
  </div>
  </header>
@@ -343,7 +377,7 @@ onMounted(() => {
 
  <!-- Loading -->
  <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
- <div v-for="i in 6" :key="i" class="premium-card p-6 animate-pulse">
+ <div v-for="i in 12" :key="i" class="premium-card p-6 animate-pulse">
  <div class="h-5 bg-slate-200 rounded-md w-3/4 mb-4" />
  <div class="h-3 bg-slate-200 rounded w-1/2 mb-5" />
  <div class="h-3 bg-slate-200 rounded w-full mb-2.5" />
@@ -468,24 +502,37 @@ onMounted(() => {
  </template>
 
  <!-- Pagination -->
- <div v-if="totalPages > 1" class="flex items-center justify-between mt-10 pt-6 border-t border-slate-200 ">
- <span class="text-sm font-bold text-slate-500">
- Page {{ currentPage + 1 }} of {{ totalPages }}
+ <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-slate-200">
+ <span class="text-sm font-bold text-slate-500 order-2 sm:order-1">
+ Page {{ currentPage + 1 }} of {{ totalPages }} &mdash; {{ totalElements }} jobs
  </span>
- <div class="flex items-center gap-2">
+ <div class="flex items-center gap-1.5 order-1 sm:order-2 flex-wrap justify-center">
  <button
  @click="prevPage"
  :disabled="!canGoPrev"
- class="px-4 py-2 text-sm font-bold border border-slate-200 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 :bg-slate-800 text-slate-600 "
+ class="px-3 py-2 text-sm font-bold border border-slate-200 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 text-slate-600"
  >
- &larr; Prev
+ &larr;
  </button>
+ <template v-for="(p, i) in pageNumbers" :key="i">
+ <span v-if="p === '...'" class="px-2 py-2 text-sm text-slate-400 font-bold select-none">…</span>
+ <button
+ v-else
+ @click="goToPage(p)"
+ class="min-w-[36px] px-3 py-2 text-sm font-bold rounded-xl border transition-all"
+ :class="p === currentPage
+ ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+ : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+ >
+ {{ p + 1 }}
+ </button>
+ </template>
  <button
  @click="nextPage"
  :disabled="!canGoNext"
- class="px-4 py-2 text-sm font-bold border border-slate-200 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 :bg-slate-800 text-slate-600 "
+ class="px-3 py-2 text-sm font-bold border border-slate-200 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 text-slate-600"
  >
- Next &rarr;
+ &rarr;
  </button>
  </div>
  </div>

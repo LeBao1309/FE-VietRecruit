@@ -8,8 +8,8 @@ const { isDark, toggleTheme } = useTheme()
 const menuOpen = ref(false)
 
 const navItems = [
- { to: '/admin/users', label: 'Users', icon: '👥' },
- { to: '/admin/transactions', label: 'Transactions', icon: '💳' },
+ { to: '/admin/users', label: 'Đội Ngũ', icon: '👥' },
+ { to: '/admin/transactions', label: 'Giao Dịch', icon: '💳' },
 ]
 </script>
 
@@ -19,7 +19,7 @@ const navItems = [
  <header class="md:hidden flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
  <div class="flex items-center gap-2 text-white">
  <span class="text-xl">⚙</span>
- <span class="text-sm font-bold tracking-tight">VietRecruit Admin</span>
+ <span class="text-sm font-bold tracking-tight">VietRecruit Quản Trị Viên</span>
  </div>
  <div class="flex items-center gap-3">
  <button @click="toggleTheme" class="text-gray-400 hover:text-white transition" aria-label="Toggle dark mode">
@@ -40,7 +40,7 @@ const navItems = [
  <div class="hidden md:flex items-center justify-between p-5 border-b border-white/5">
  <router-link to="/admin/users" class="flex items-center gap-2 hover:opacity-80 transition text-white">
  <span class="text-xl">⚙</span>
- <span class="text-sm font-bold tracking-tight">VietRecruit Admin</span>
+ <span class="text-sm font-bold tracking-tight">VietRecruit Quản Trị Viên</span>
  </router-link>
  <button @click="toggleTheme" class="text-gray-400 hover:text-white transition" aria-label="Toggle dark mode">
  <span v-if="isDark">☀️</span>
@@ -68,11 +68,11 @@ const navItems = [
  {{ auth.user?.fullName?.charAt(0)?.toUpperCase() ?? 'A' }}
  </div>
  <div class="flex flex-col truncate">
- <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Admin' }}</span>
- <span class="text-[10px] text-slate-500">System Admin</span>
+ <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Quản Trị Viên' }}</span>
+ <span class="text-[10px] text-slate-500">Quản Trị Hệ Thống</span>
  </div>
  </div>
- <button @click="auth.logout()" class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition shrink-0" title="Log out">
+ <button @click="auth.logout()" class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition shrink-0" title="Đăng Xuất">
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
  <polyline points="16 17 21 12 16 7" />

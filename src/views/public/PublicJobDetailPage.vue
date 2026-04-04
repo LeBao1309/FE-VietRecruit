@@ -6,6 +6,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { jobService } from '@/services/jobService'
 import { applicationService } from '@/services/applicationService'
 import type { JobResponse } from '@/types/job'
+import FloatingBackButton from '@/components/common/FloatingBackButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,6 +110,7 @@ onMounted(loadJob)
 
 <template>
  <div class="min-h-screen flex flex-col bg-slate-50 ">
+ <FloatingBackButton />
  <!-- Header -->
  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-30 transition-all duration-300">
  <div class="max-w-5xl mx-auto flex items-center justify-between">

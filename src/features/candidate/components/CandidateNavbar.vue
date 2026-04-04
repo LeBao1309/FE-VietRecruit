@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/core/stores/auth.store'
-import { useCandidateStore } from '../stores/candidate.store'
+import { useAuthStore } from '@/stores/authStore'
+import { useCandidateStore } from '@/stores/candidateStore'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -10,9 +10,9 @@ const candidateStore = useCandidateStore()
 const mobileMenuOpen = ref(false)
 
 const navItems = [
- { to: '/jobs', label: 'Tim viec', icon: 'search' },
- { to: '/applications/mine', label: 'Don ung tuyen', icon: 'applications' },
- { to: '/candidate/profile', label: 'Ho so', icon: 'profile' },
+  { to: '/jobs', label: 'Tìm Việc', icon: 'search' },
+  { to: '/applications/mine', label: 'Đơn Ứng Tuyển', icon: 'applications' },
+  { to: '/candidate/profile', label: 'Hồ Sơ', icon: 'profile' },
 ] as const
 
 async function handleLogout() {
@@ -72,7 +72,7 @@ function getInitials(name: string | undefined | null): string {
  <span v-else>{{ getInitials(authStore.user?.fullName) }}</span>
  </div>
  <span class="text-sm text-text-secondary max-w-[120px] truncate">
- {{ authStore.user?.fullName || 'Ung vien' }}
+ {{ authStore.user?.fullName || 'Ứng Viên' }}
  </span>
  </div>
 
@@ -80,7 +80,7 @@ function getInitials(name: string | undefined | null): string {
  @click="handleLogout"
  class="text-xs text-text-muted hover:text-danger font-medium px-2 py-1.5 rounded-lg hover:bg-surface-muted transition-colors hidden sm:block"
  >
- Dang xuat
+ Đăng Xuất
  </button>
 
  <!-- Mobile menu toggle -->
@@ -122,7 +122,7 @@ function getInitials(name: string | undefined | null): string {
  @click="handleLogout"
  class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-danger hover:bg-danger-light transition-colors"
  >
- Dang xuat
+ Đăng Xuất
  </button>
  </div>
  </div>

@@ -68,21 +68,21 @@ onMounted(() => {
 <template>
  <div class="max-w-[960px] mx-auto px-4 py-8">
  <div class="mb-8">
- <h1 class="text-2xl font-bold text-slate-900 ">Billing History</h1>
- <p class="text-sm text-slate-500 mt-1">View your past transactions and payment activity</p>
+ <h1 class="text-2xl font-bold text-slate-900 ">Lịch Sử Thanh Toán</h1>
+ <p class="text-sm text-slate-500 mt-1">Xem chi tiết các giao dịch và hoạt động thanh toán của bạn</p>
  </div>
 
  <!-- Loading -->
  <div v-if="loading && !transactions" class="text-center py-16 px-4 bg-white border border-slate-200 rounded-xl">
  <div class="inline-block w-8 h-8 border-3 border-teal-600/30 border-t-teal-600 rounded-full animate-spin mb-4" />
- <p class="text-slate-500">Loading transactions...</p>
+ <p class="text-slate-500">Đang tải lịch sử giao dịch...</p>
  </div>
 
  <!-- Empty -->
  <div v-else-if="transactions && transactions.empty" class="text-center py-16 px-4 bg-white border border-slate-200 rounded-xl">
  <div class="text-5xl mb-4">💳</div>
- <h2 class="text-xl font-bold text-slate-900 mb-2">No Transactions Yet</h2>
- <p class="text-slate-500">Your payment history will appear here after your first subscription.</p>
+ <h2 class="text-xl font-bold text-slate-900 mb-2">Chưa có giao dịch nào</h2>
+ <p class="text-slate-500">Lịch sử thanh toán sẽ xuất hiện ở đây sau khi bạn đăng ký gói dịch vụ đầu tiên.</p>
  </div>
 
  <!-- Table -->
@@ -91,11 +91,11 @@ onMounted(() => {
  <table class="w-full text-left border-collapse">
  <thead>
  <tr class="bg-slate-50 border-b border-slate-200/60 ">
- <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order</th>
- <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
- <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</th>
- <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
- <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+ <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Mã GD</th>
+ <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Thời Gian</th>
+ <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Nội Dung</th>
+ <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Số Tiền</th>
+ <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng Thái</th>
  </tr>
  </thead>
  <tbody>
@@ -124,17 +124,17 @@ onMounted(() => {
  :disabled="transactions.first"
  @click="prevPage"
  >
- ‹ Previous
+ ‹ Trang trước
  </button>
  <span class="text-sm text-slate-500 font-medium">
- Page {{ currentPage + 1 }} of {{ transactions.totalPages }}
+ Trang {{ currentPage + 1 }} / {{ transactions.totalPages }}
  </span>
  <button
  class="btn-outline px-3 py-1.5 text-sm"
  :disabled="transactions.last"
  @click="nextPage"
  >
- Next ›
+ Trang sau ›
  </button>
  </div>
  </template>

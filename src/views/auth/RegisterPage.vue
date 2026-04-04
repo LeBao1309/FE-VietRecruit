@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import type { AccountType } from '@/types/enums'
+import FloatingBackButton from '@/components/common/FloatingBackButton.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -101,6 +102,7 @@ async function handleSubmit(): Promise<void> {
 
 <template>
  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+ <FloatingBackButton />
  <div class="w-full max-w-md mx-auto mb-8 text-center">
  <router-link to="/" class="text-3xl font-extrabold text-teal-600 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
  </div>
@@ -151,12 +153,6 @@ async function handleSubmit(): Promise<void> {
 
  <!-- Step 2: Registration Form -->
  <template v-else>
- <div class="mb-8">
- <button @click="goBack" class="text-sm font-bold text-slate-500 hover:text-teal-600 :text-teal-400 transition-colors flex items-center gap-1.5">
- &larr; Back
- </button>
- </div>
-
  <div class="text-center mb-8">
  <h1 class="text-2xl font-bold text-slate-900 ">
  {{ accountType === 'CANDIDATE' ? 'Join as a Candidate' : 'Join as an Employer' }}

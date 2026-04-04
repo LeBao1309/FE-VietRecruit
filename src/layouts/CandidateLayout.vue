@@ -42,88 +42,88 @@ const menuOpen = ref(false)
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- Dashboard
+ Tổng Quan
  </router-link>
 
  <!-- Job Search section -->
  <div class="mt-4 mb-1 px-3">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Job Search</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Tìm Việc Làm</span>
  </div>
  <router-link
  to="/candidate/recommendations"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- Recommendations
+ Việc Làm Đề Xuất
  </router-link>
  <router-link
  to="/candidate/salary-benchmark"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- Salary Benchmark
+ Mức Lương Tham Khảo
  </router-link>
  <router-link
  to="/jobs"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  >
- Browse Jobs ↗
+ Xem Việc Làm ↗
  </router-link>
 
  <!-- Applications section -->
  <div class="mt-4 mb-1 px-3">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Applications</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Hồ Sơ Ứng Tuyển</span>
  </div>
  <router-link
  to="/candidate/applications"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- My Applications
+ Đơn Ứng Tuyển Của Tôi
  </router-link>
 
  <!-- Profile section -->
  <div class="mt-4 mb-1 px-3">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Profile</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Hồ Sơ</span>
  </div>
  <router-link
  to="/candidate/candidate-profile"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- Candidate Profile
+ Hồ Sơ Năng Lực
  </router-link>
  <router-link
  to="/candidate/cv"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- CV Management
+ Quản Lý CV
  </router-link>
 
  <!-- Account section -->
  <div class="mt-4 mb-1 px-3">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Account</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Tài Khoản</span>
  </div>
  <router-link
  to="/candidate/profile"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- My Profile
+ Quản Lý Tài Khoản
  </router-link>
  <router-link
  to="/candidate/settings"
  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
  active-class="!bg-primary-bg !text-primary"
  >
- Settings
+ Cài Đặt
  </router-link>
  </nav>
  <div class="px-4 py-3 border-t border-border">
- <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Candidate' }}</span>
+ <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Ứng Viên' }}</span>
  <button @click="auth.logout()" class="block text-xs text-gray-400 hover:text-error mt-1 transition">
- Log out
+ Đăng Xuất
  </button>
  </div>
  </aside>

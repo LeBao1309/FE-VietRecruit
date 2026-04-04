@@ -21,9 +21,9 @@ const confirmProcessing = ref(false)
 
 // ── Status config ──
 const statusConfig: Record<JobStatus, { label: string; class: string; dot: string }> = {
- DRAFT: { label: 'Draft', class: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
- PUBLISHED: { label: 'Published', class: 'bg-success-bg text-success', dot: 'bg-success' },
- CLOSED: { label: 'Closed', class: 'bg-error-bg text-error', dot: 'bg-error' },
+ DRAFT: { label: 'Bản Nháp', class: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
+ PUBLISHED: { label: 'Đang Mở', class: 'bg-success-bg text-success', dot: 'bg-success' },
+ CLOSED: { label: 'Đã Đóng', class: 'bg-error-bg text-error', dot: 'bg-error' },
 }
 
 // ── Computed helpers ──
@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
  <!-- Back link -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.push('/employer/jobs')" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ All Jobs
+ ‹ Tất Cả Công Việc
  </button>
  </div>
 
@@ -125,9 +125,9 @@ onBeforeUnmount(() => {
  <span class="w-1.5 h-1.5 rounded-full" :class="statusConfig[job.status].dot" />
  {{ statusConfig[job.status].label }}
  </span>
- <span class="text-xs text-gray-400">Created {{ formatDateTime(job.createdAt) }}</span>
+ <span class="text-xs text-gray-400">Tạo ngày {{ formatDateTime(job.createdAt) }}</span>
  <span v-if="job.deadline" class="text-xs text-gray-400">
- · Deadline: {{ formatDate(job.deadline) }}
+ · Hạn chót: {{ formatDate(job.deadline) }}
  </span>
  </div>
  </div>
@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
  @click="router.push(`/employer/jobs/${jobId}/edit`)"
  class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
  >
- Edit
+ Chỉnh Sửa
  </button>
 
  <!-- Publish (DRAFT only) -->
@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-1.5"
  :class="{ 'opacity-50 cursor-not-allowed': subStore.isQuotaFull }"
  >
- Publish
+ Đăng Tuyển
  </button>
 
  <!-- Close (PUBLISHED only) -->
@@ -161,7 +161,7 @@ onBeforeUnmount(() => {
  :disabled="jobStore.actionLoading"
  class="px-4 py-2 text-sm font-medium text-white bg-error hover:bg-red-700 rounded-md transition disabled:opacity-50"
  >
- Close Listing
+ Đóng Tin Tuyển Dụng
  </button>
  </div>
  </div>
@@ -171,36 +171,36 @@ onBeforeUnmount(() => {
  v-if="jobStore.canPublish && subStore.isQuotaFull"
  class="mt-3 flex items-center gap-2 px-3 py-2.5 rounded-md bg-warning-bg text-warning text-xs"
  >
- <span class="font-medium">⚠ Quota limit reached.</span>
- <span>You cannot publish more jobs. Close an existing job or</span>
- <router-link to="/employer/pricing" class="font-medium underline">upgrade your plan</router-link>.
+ <span class="font-medium">⚠ Hết giới hạn quota.</span>
+ <span>Bạn không thể đăng thêm công việc. Hãy đóng công việc hiện tại hoặc</span>
+ <router-link to="/employer/pricing" class="font-medium underline">nâng cấp gói</router-link>.
  </div>
 
  <!-- Salary -->
  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-border">
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Min Salary</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Mức Lương Tối Thiểu</span>
  <span class="text-sm font-medium text-gray-900">{{ formatSalary(job.minSalary) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Max Salary</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Mức Lương Tối Đa</span>
  <span class="text-sm font-medium text-gray-900">{{ formatSalary(job.maxSalary) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Currency</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Tiền Tệ</span>
  <span class="text-sm font-medium text-gray-900">{{ job.currency ?? '—' }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Negotiable</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Có Thể Thương Lượng</span>
  <span class="text-sm font-medium" :class="job.isNegotiable ? 'text-success' : 'text-gray-500'">
- {{ job.isNegotiable ? 'Yes' : 'No' }}
+ {{ job.isNegotiable ? 'Có' : 'Không' }}
  </span>
  </div>
  </div>
 
  <!-- Public link -->
  <div v-if="job.publicLink && job.status === 'PUBLISHED'" class="mt-4 pt-4 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Public Link</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Liên Kết Công Khai</span>
  <a :href="job.publicLink" target="_blank" rel="noopener" class="text-xs text-primary hover:text-primary-hover break-all">
  {{ job.publicLink }}
  </a>
@@ -209,26 +209,26 @@ onBeforeUnmount(() => {
 
  <!-- Description -->
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-3">Job Description</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-3">Mô Tả Công Việc</h2>
  <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ job.description }}</div>
  </div>
 
  <!-- Requirements -->
  <div v-if="job.requirements" class="bg-surface border border-border rounded-lg p-6 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-3">Requirements</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-3">Yêu Cầu Tham Gia</h2>
  <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ job.requirements }}</div>
  </div>
 
  <!-- Salary Benchmark Widget -->
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
  <div class="flex items-center justify-between mb-4">
- <h2 class="text-sm font-semibold text-gray-900">Salary Benchmark</h2>
+ <h2 class="text-sm font-semibold text-gray-900">Phân Tích Mức Lương</h2>
  <button
  v-if="!jobStore.benchmarkLoading && !benchmark"
  @click="jobStore.fetchSalaryBenchmark(jobId)"
  class="text-xs text-primary hover:text-primary-hover font-medium transition"
  >
- Load Benchmark
+ Lấy Dữ Liệu
  </button>
  </div>
 
@@ -240,7 +240,7 @@ onBeforeUnmount(() => {
 
  <!-- No data -->
  <div v-else-if="!benchmark" class="text-sm text-gray-400 text-center py-6">
- No benchmark data available. Click "Load Benchmark" to fetch AI-generated salary insights.
+ Chưa có dữ liệu phân tích. Bấm "Lấy Dữ Liệu" để sử dụng AI phân tích thị trường lương cho vị trí này.
  </div>
 
  <!-- Benchmark data -->
@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
  <div class="space-y-2">
  <div class="flex items-center justify-between text-xs text-gray-500">
  <span>{{ benchmark.range.min.toLocaleString() }}</span>
- <span class="font-medium text-gray-700">{{ benchmark.range.median.toLocaleString() }} (median)</span>
+ <span class="font-medium text-gray-700">{{ benchmark.range.median.toLocaleString() }} (trung vị)</span>
  <span>{{ benchmark.range.max.toLocaleString() }}</span>
  </div>
  <div class="relative h-3 bg-gray-100 rounded-full overflow-hidden">
@@ -282,13 +282,13 @@ onBeforeUnmount(() => {
  </div>
  <div class="flex items-center gap-3 text-[10px] text-gray-400">
  <span class="flex items-center gap-1">
- <span class="w-2 h-2 rounded-full bg-primary inline-block" /> Market median
+ <span class="w-2 h-2 rounded-full bg-primary inline-block" /> Trung vị thị trường
  </span>
  <span v-if="job.minSalary" class="flex items-center gap-1">
- <span class="w-2 h-2 rounded-full bg-info inline-block" /> Your min
+ <span class="w-2 h-2 rounded-full bg-info inline-block" /> Tối thiểu
  </span>
  <span v-if="job.maxSalary" class="flex items-center gap-1">
- <span class="w-2 h-2 rounded-full bg-success inline-block" /> Your max
+ <span class="w-2 h-2 rounded-full bg-success inline-block" /> Tối đa
  </span>
  </div>
  </div>
@@ -296,22 +296,22 @@ onBeforeUnmount(() => {
  <!-- Meta info -->
  <div class="grid grid-cols-3 gap-3 text-xs">
  <div>
- <span class="block text-gray-400 mb-0.5">Location</span>
+ <span class="block text-gray-400 mb-0.5">Khu Vực</span>
  <span class="text-gray-700 font-medium">{{ benchmark.location ?? 'N/A' }}</span>
  </div>
  <div>
- <span class="block text-gray-400 mb-0.5">Experience</span>
+ <span class="block text-gray-400 mb-0.5">Kinh Nghiệm</span>
  <span class="text-gray-700 font-medium">{{ benchmark.experienceLevel ?? 'N/A' }}</span>
  </div>
  <div>
- <span class="block text-gray-400 mb-0.5">Market Position</span>
+ <span class="block text-gray-400 mb-0.5">Xếp Hạng Thị Trường</span>
  <span class="text-gray-700 font-medium">{{ benchmark.marketPosition ?? 'N/A' }}</span>
  </div>
  </div>
 
  <!-- Insights -->
  <div v-if="benchmark.insights.length" class="pt-3 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Insights</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Lời Khuyên & Nhận Định</span>
  <ul class="space-y-1">
  <li v-for="(insight, i) in benchmark.insights" :key="i" class="text-xs text-gray-600 flex items-start gap-1.5">
  <span class="text-primary mt-0.5 shrink-0">•</span>
@@ -329,13 +329,13 @@ onBeforeUnmount(() => {
 
  <!-- Quick links -->
  <div v-if="job.status === 'PUBLISHED'" class="bg-surface border border-border rounded-lg p-5 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-3">Thao Tác Nhanh</h2>
  <div class="flex items-center gap-3">
  <router-link
  :to="`/employer/jobs/${jobId}/applications`"
  class="px-4 py-2 text-sm font-medium text-primary bg-primary-bg hover:bg-primary-light rounded-md transition border border-primary/10"
  >
- View Applications
+ Xem Danh Sách Ứng Viên
  </router-link>
  </div>
  </div>
@@ -343,9 +343,9 @@ onBeforeUnmount(() => {
 
  <!-- Not found -->
  <div v-else class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center">
- <p class="text-gray-400 text-sm">Job not found or you don't have access to view it.</p>
+ <p class="text-gray-400 text-sm">Không tìm thấy thông tin công việc hoặc bạn không có quyền xem.</p>
  <button @click="router.push('/employer/jobs')" class="mt-3 text-primary hover:text-primary-hover text-sm font-medium transition">
- ← Back to Jobs
+ ← Về Danh Sách
  </button>
  </div>
 
@@ -362,14 +362,14 @@ onBeforeUnmount(() => {
  {{ confirmAction === 'publish' ? '🚀' : '✕' }}
  </div>
  <h2 class="text-lg font-bold text-gray-900 mb-1">
- {{ confirmAction === 'publish' ? 'Publish Job?' : 'Close Listing?' }}
+ {{ confirmAction === 'publish' ? 'Đăng Tuyển?' : 'Đóng Tin Cũ?' }}
  </h2>
  <p class="text-sm text-gray-500 mb-6">
  <template v-if="confirmAction === 'publish'">
- This will make the job visible to all candidates and deduct one slot from your active quota.
+ Thao tác này sẽ hiển thị tin tuyển dụng tới mọi người và sử dụng một quota đang hoạt động của bạn.
  </template>
  <template v-else>
- This will remove the job from the public board. You cannot re-open a closed listing, but the quota slot will be released.
+ Thao tác này sẽ tắt bài tuyển dụng khỏi trang công khai. Bạn sẽ không thể mở lại và một hạn mức quota sẽ được giải phóng.
  </template>
  </p>
  <div class="flex justify-center gap-2">
@@ -377,7 +377,7 @@ onBeforeUnmount(() => {
  @click="showConfirm = false"
  class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
  >
- Cancel
+ Hủy Bỏ
  </button>
  <button
  @click="handleConfirm"
@@ -386,7 +386,7 @@ onBeforeUnmount(() => {
  :class="confirmAction === 'publish' ? 'bg-primary hover:bg-primary-hover' : 'bg-error hover:bg-red-700'"
  >
  <span v-if="confirmProcessing" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ confirmProcessing ? 'Processing…' : confirmAction === 'publish' ? 'Publish' : 'Close' }}
+ {{ confirmProcessing ? 'Đang Xử Lý…' : confirmAction === 'publish' ? 'Đăng Tuyển' : 'Đóng Lại' }}
  </button>
  </div>
  </div>

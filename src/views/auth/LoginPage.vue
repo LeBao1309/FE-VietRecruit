@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import type { LoginRequest } from '@/types/auth'
+import FloatingBackButton from '@/components/common/FloatingBackButton.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -48,6 +49,7 @@ function getDefaultRoute(): string {
 
 <template>
  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+ <FloatingBackButton />
  <div class="w-full max-w-md mx-auto mb-8 text-center">
  <router-link to="/" class="text-3xl font-extrabold text-teal-600 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
  </div>
