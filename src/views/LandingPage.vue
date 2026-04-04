@@ -195,7 +195,49 @@ onMounted(async () => {
       </div>
      </div>
 
-     <!-- ② ③ ④ cells added in Tasks 3–5 -->
+    <!-- ② Job Board — cols 2–3, row 1 -->
+    <div class="md:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#008c8c]/30 transition-all">
+      <span class="inline-flex items-center gap-1.5 bg-[#e0f4f4] text-[#008c8c] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-3">
+        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Job Board
+      </span>
+
+      <!-- Mock search bar -->
+      <div class="flex items-stretch bg-slate-50 border border-slate-200 rounded-xl overflow-hidden mb-4">
+        <div class="flex items-center gap-2 flex-1 px-3 py-2.5 border-r border-slate-200">
+          <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span class="text-[11px] text-slate-400">Job title, skill, keyword…</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-2.5 border-r border-slate-200">
+          <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          <span class="text-[11px] text-slate-400">Ho Chi Minh City</span>
+        </div>
+        <div class="flex items-center px-3 py-2.5 bg-[#008c8c] text-white text-[10px] font-bold cursor-default">
+          Search Jobs
+        </div>
+      </div>
+
+      <!-- Job chips -->
+      <div class="flex flex-wrap gap-2">
+        <div v-for="job in [
+          { title: 'Senior Frontend Engineer', salary: '$3k–5k',    loc: 'HCMC',   color: '#008c8c' },
+          { title: 'Product Manager',          salary: 'Negotiable', loc: 'Remote', color: '#2dd4bf' },
+          { title: 'Data Engineer',            salary: '$2.5k–4k',  loc: 'Hanoi',  color: '#6366f1' },
+          { title: 'UX / UI Designer',         salary: '$2k–3.5k',  loc: 'HCMC',   color: '#f59e0b' },
+        ]" :key="job.title"
+          class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-600 hover:border-[#008c8c]/40 transition-colors">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ background: job.color }"></span>
+          {{ job.title }}
+          <span class="font-bold ml-0.5" style="color: #008c8c">{{ job.salary }}</span>
+          <span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">{{ job.loc }}</span>
+        </div>
+        <router-link to="/jobs" class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-400 italic hover:border-[#008c8c]/30 transition-colors">
+          +338 open roles →
+        </router-link>
+      </div>
+    </div>
+
+    <!-- ③ ④ cells added in Tasks 4–5 -->
 
    </div>
  </section>
