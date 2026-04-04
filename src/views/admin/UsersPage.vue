@@ -130,21 +130,21 @@ onMounted(() => {
  <!-- Header -->
  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
  <div>
- <h1 class="text-2xl font-extrabold text-slate-900 ">User Management</h1>
+ <h1 class="text-2xl font-extrabold text-slate-900 ">Quản Lý Người Dùng</h1>
  <p class="text-sm font-medium text-slate-500 mt-1">
- {{ admin.users?.totalElements ?? 0 }} users on the platform
+ Hiển thị {{ admin.users?.totalElements ?? 0 }} tài khoản hoạt động trên nền tảng
  </p>
  </div>
  <button class="btn-primary py-3 px-6 flex items-center justify-center gap-2" @click="openCreate">
  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
- Create User
+ Thêm Người Dùng
  </button>
  </div>
 
  <!-- Loading -->
  <div v-if="admin.loading && !admin.users" class="py-24 flex flex-col items-center justify-center text-center">
  <div class="w-10 h-10 border-4 border-slate-200 border-t-teal-500 rounded-full animate-spin mb-4" />
- <p class="text-sm font-bold text-slate-500">Loading users…</p>
+ <p class="text-sm font-bold text-slate-500">Đang tải dữ liệu…</p>
  </div>
 
  <!-- Empty -->
@@ -152,8 +152,8 @@ onMounted(() => {
  <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-3xl mx-auto mb-4">
  👥
  </div>
- <h2 class="text-lg font-bold text-slate-900 mb-2">No Users Found</h2>
- <p class="text-sm font-medium text-slate-500">Create a new user to get started.</p>
+ <h2 class="text-lg font-bold text-slate-900 mb-2">Không Có Dữ Liệu</h2>
+ <p class="text-sm font-medium text-slate-500">Chưa có người dùng nào trên hệ thống.</p>
  </div>
 
  <!-- Table -->
@@ -163,12 +163,12 @@ onMounted(() => {
  <table class="w-full text-left border-collapse whitespace-nowrap">
  <thead>
  <tr class="bg-slate-50/50 border-b border-slate-200 ">
- <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">User</th>
+ <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Người Dùng</th>
  <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Email</th>
- <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Roles</th>
- <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Status</th>
- <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Last Login</th>
- <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-center">Actions</th>
+ <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Vai Trò</th>
+ <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Trạng Thái</th>
+ <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-left">Đăng Nhập Gần Nhất</th>
+ <th class="px-6 py-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest text-center">Thao Tác</th>
  </tr>
  </thead>
  <tbody>
@@ -199,13 +199,13 @@ onMounted(() => {
  <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ formatDate(user.lastLoginAt) }}</td>
  <td class="px-6 py-4">
  <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
- <button class="p-2 text-slate-400 hover:text-teal-600 transition-colors rounded-lg hover:bg-teal-50 :bg-teal-500/10" title="View" @click="openDetail(user)">
+ <button class="p-2 text-slate-400 hover:text-teal-600 transition-colors rounded-lg hover:bg-teal-50 :bg-teal-500/10" title="View" aria-label="View" @click="openDetail(user)">
  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
  </button>
- <button class="p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 :bg-blue-500/10" title="Edit" @click="openEdit(user)">
+ <button class="p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50 :bg-blue-500/10" title="Edit" aria-label="Edit" @click="openEdit(user)">
  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
  </button>
- <button class="p-2 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-rose-50 :bg-rose-500/10" title="Delete" @click="confirmDelete(user)">
+ <button class="p-2 text-slate-400 hover:text-rose-600 transition-colors rounded-lg hover:bg-rose-50 :bg-rose-500/10" title="Delete" aria-label="Delete" @click="confirmDelete(user)">
  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
  </button>
  </div>
@@ -219,14 +219,14 @@ onMounted(() => {
  <!-- Pagination -->
  <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-200 ">
  <span class="text-sm font-bold text-slate-500 order-2 sm:order-1">
- Page {{ currentPage + 1 }} of {{ totalPages }} <span class="mx-1 text-slate-300 ">·</span> {{ admin.users.totalElements }} total
+ Trang {{ currentPage + 1 }} / {{ totalPages }} <span class="mx-1 text-slate-300 ">·</span> Tổng số tài khoản: {{ admin.users.totalElements }}
  </span>
  <div class="flex items-center gap-2 order-1 sm:order-2">
  <button class="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors" :disabled="admin.users.first" @click="goToPage(currentPage - 1)">
- &larr; Previous
+ &larr; Trang Trước
  </button>
  <button class="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors" :disabled="admin.users.last" @click="goToPage(currentPage + 1)">
- Next &rarr;
+ Trang Sau &rarr;
  </button>
  </div>
  </div>
@@ -238,48 +238,48 @@ onMounted(() => {
  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showCreateModal = false"></div>
  <div class="relative premium-card w-full max-w-lg p-6 sm:p-8 animate-slide-up mx-4 shadow-2xl overflow-y-auto max-h-[90vh]">
  <div class="flex items-center justify-between mb-6">
- <h2 class="text-xl font-extrabold text-slate-900 ">Create User</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 ">Thêm Người Dùng Mới</h2>
  <button class="text-slate-400 hover:text-slate-600 transition-colors" @click="showCreateModal = false">
  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
  </button>
  </div>
  <form @submit.prevent="submitCreate" class="space-y-5">
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Full Name <span class="text-rose-500">*</span></label>
- <input v-model="form.fullName" type="text" required maxlength="255" placeholder="Full name" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Họ và Tên <span class="text-rose-500">*</span></label>
+ <input v-model="form.fullName" type="text" required maxlength="255" placeholder="Nhập họ và tên" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div>
  <label class="block text-sm font-bold text-slate-700 mb-1.5">Email</label>
- <input v-model="form.email" type="email" maxlength="255" placeholder="Email address" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <input v-model="form.email" type="email" maxlength="255" placeholder="Nhập địa chỉ email" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Phone</label>
- <input v-model="form.phone" type="text" maxlength="20" placeholder="+84 …" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Số Điện Thoại</label>
+ <input v-model="form.phone" type="text" maxlength="20" placeholder="Ví dụ: +84..." class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Gender</label>
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Giới Tính</label>
  <select v-model="form.gender" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none">
- <option value="">—</option>
- <option value="MALE">Male</option>
- <option value="FEMALE">Female</option>
- <option value="OTHER">Other</option>
+ <option value="">— Chọn —</option>
+ <option value="MALE">Nam</option>
+ <option value="FEMALE">Nữ</option>
+ <option value="OTHER">Khác</option>
  </select>
  </div>
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Date of Birth</label>
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Ngày Sinh</label>
  <input v-model="form.dob" type="date" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Location</label>
- <input v-model="form.location" type="text" maxlength="255" placeholder="City, Country" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Địa Chỉ</label>
+ <input v-model="form.location" type="text" maxlength="255" placeholder="Thành phố, Quốc gia" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  </div>
  <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 ">
- <button type="button" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showCreateModal = false">Cancel</button>
+ <button type="button" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showCreateModal = false">Hủy</button>
  <button type="submit" class="btn-primary py-2.5 px-6 min-w-[120px] flex justify-center items-center gap-2" :disabled="admin.userLoading || !form.fullName">
  <span v-if="admin.userLoading" class="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
- {{ admin.userLoading ? 'Creating…' : 'Create User' }}
+ {{ admin.userLoading ? 'Đang tạo…' : 'Thêm Người Dùng' }}
  </button>
  </div>
  </form>
@@ -293,48 +293,48 @@ onMounted(() => {
  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showEditModal = false"></div>
  <div class="relative premium-card w-full max-w-lg p-6 sm:p-8 animate-slide-up mx-4 shadow-2xl overflow-y-auto max-h-[90vh]">
  <div class="flex items-center justify-between mb-6">
- <h2 class="text-xl font-extrabold text-slate-900 ">Edit User</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 ">Chỉnh Sửa Người Dùng</h2>
  <button class="text-slate-400 hover:text-slate-600 transition-colors" @click="showEditModal = false">
  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
  </button>
  </div>
  <form @submit.prevent="submitEdit" class="space-y-5">
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Full Name <span class="text-rose-500">*</span></label>
- <input v-model="form.fullName" type="text" required maxlength="255" placeholder="Full name" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Họ và Tên <span class="text-rose-500">*</span></label>
+ <input v-model="form.fullName" type="text" required maxlength="255" placeholder="Nhập họ và tên" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div>
  <label class="block text-sm font-bold text-slate-700 mb-1.5">Email</label>
- <input v-model="form.email" type="email" maxlength="255" placeholder="Email address" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <input v-model="form.email" type="email" maxlength="255" placeholder="Nhập địa chỉ email" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Phone</label>
- <input v-model="form.phone" type="text" maxlength="20" placeholder="+84 …" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Số Điện Thoại</label>
+ <input v-model="form.phone" type="text" maxlength="20" placeholder="Ví dụ: +84 ..." class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Gender</label>
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Giới Tính</label>
  <select v-model="form.gender" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none">
- <option value="">—</option>
- <option value="MALE">Male</option>
- <option value="FEMALE">Female</option>
- <option value="OTHER">Other</option>
+ <option value="">— Chọn —</option>
+ <option value="MALE">Nam</option>
+ <option value="FEMALE">Nữ</option>
+ <option value="OTHER">Khác</option>
  </select>
  </div>
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Date of Birth</label>
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Ngày Sinh</label>
  <input v-model="form.dob" type="date" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-1.5">Location</label>
- <input v-model="form.location" type="text" maxlength="255" placeholder="City, Country" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">Địa Chỉ</label>
+ <input v-model="form.location" type="text" maxlength="255" placeholder="Thành phố, Quốc gia" class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium" />
  </div>
  </div>
  <div class="flex justify-end gap-3 pt-6 border-t border-slate-100 ">
- <button type="button" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showEditModal = false">Cancel</button>
+ <button type="button" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showEditModal = false">Hủy</button>
  <button type="submit" class="btn-primary py-2.5 px-6 min-w-[120px] flex justify-center items-center gap-2" :disabled="admin.userLoading || !form.fullName">
  <span v-if="admin.userLoading" class="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin"></span>
- {{ admin.userLoading ? 'Saving…' : 'Save Changes' }}
+ {{ admin.userLoading ? 'Đang lưu…' : 'Lưu Thay Đổi' }}
  </button>
  </div>
  </form>
@@ -348,7 +348,7 @@ onMounted(() => {
  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showDetailModal = false"></div>
  <div class="relative premium-card w-full max-w-2xl p-6 sm:p-8 animate-slide-up mx-4 shadow-2xl overflow-y-auto max-h-[90vh]">
  <div class="flex items-center justify-between mb-6">
- <h2 class="text-xl font-extrabold text-slate-900 ">User Details</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 ">Chi Tiết Người Dùng</h2>
  <button class="text-slate-400 hover:text-slate-600 transition-colors" @click="showDetailModal = false">
  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
  </button>
@@ -374,7 +374,7 @@ onMounted(() => {
  <!-- Detail Grid -->
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Trạng Thái</span>
  <div class="font-medium text-slate-900 ">
  <span :class="['inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold rounded-lg border uppercase', getStatusIndicator(targetUser).cls]">
  <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
@@ -383,39 +383,39 @@ onMounted(() => {
  </div>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Phone</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Số Điện Thoại</span>
  <span class="font-medium text-slate-900 ">{{ targetUser.phone ?? '—' }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Location</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Địa Chỉ</span>
  <span class="font-medium text-slate-900 ">{{ targetUser.location ?? '—' }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Gender</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giới Tính</span>
  <span class="font-medium text-slate-900 ">{{ targetUser.gender ?? '—' }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Date of Birth</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ngày Sinh</span>
  <span class="font-medium text-slate-900 ">{{ targetUser.dob ?? '—' }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Company ID</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">ID Công Ty</span>
  <span class="font-medium text-slate-900 font-mono text-xs">{{ targetUser.companyId ?? '—' }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Failed Attempts</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Số Lần Lỗi Xác Thực</span>
  <span class="font-medium text-slate-900 ">{{ targetUser.failedAttempts }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Lock Until</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Khóa Đến Ngày</span>
  <span class="font-medium text-slate-900 ">{{ formatDate(targetUser.lockUntil) }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Last Login</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Đăng Nhập Cuối Cùng</span>
  <span class="font-medium text-slate-900 ">{{ formatDate(targetUser.lastLoginAt) }}</span>
  </div>
  <div class="flex flex-col">
- <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Created</span>
+ <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ngày Đăng Ký Tạo Mới</span>
  <span class="font-medium text-slate-900 ">{{ formatDate(targetUser.createdAt) }}</span>
  </div>
  </div>
@@ -436,8 +436,8 @@ onMounted(() => {
  </div>
  </div>
  <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-slate-100 ">
- <button class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showDetailModal = false">Close</button>
- <button class="btn-primary py-2.5 px-6" @click="showDetailModal = false; openEdit(targetUser!)">Edit</button>
+ <button class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showDetailModal = false">Đóng</button>
+ <button class="btn-primary py-2.5 px-6" @click="showDetailModal = false; openEdit(targetUser!)">Chỉnh Sửa</button>
  </div>
  </div>
  </div>
@@ -452,16 +452,16 @@ onMounted(() => {
  <div class="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4">
  <svg class="w-8 h-8 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
  </div>
- <h2 class="text-xl font-extrabold text-slate-900 mb-2">Delete User</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-2">Xác Nhận Xóa Người Dùng</h2>
  <p class="text-sm font-medium text-slate-500">
- Are you sure you want to delete <strong>{{ targetUser.fullName }}</strong>? This action cannot be undone.
+ Bạn có chắc chắn muốn xóa <strong>{{ targetUser.fullName }}</strong> không? Hành động này không thể hoàn tác.
  </p>
  </div>
  <div class="flex justify-end gap-3 mt-8">
- <button class="flex-1 px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showDeleteConfirm = false">Cancel</button>
+ <button class="flex-1 px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors" @click="showDeleteConfirm = false">Hủy</button>
  <button class="flex-1 btn-primary bg-rose-600 hover:bg-rose-700 shadow-rose-500/30 flex items-center justify-center" :disabled="admin.userLoading" @click="submitDelete">
  <span v-if="admin.userLoading" class="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin mr-2"></span>
- {{ admin.userLoading ? 'Deleting…' : 'Delete' }}
+ {{ admin.userLoading ? 'Đang xóa…' : 'Xác Nhận Xóa' }}
  </button>
  </div>
  </div>

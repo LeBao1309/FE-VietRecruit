@@ -98,8 +98,8 @@ onUnmounted(() => {
  <div class="w-20 h-20 mx-auto bg-teal-50 flex items-center justify-center rounded-3xl rotate-3 mb-6 shadow-sm border border-teal-100 ">
  <div class="inline-block w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
  </div>
- <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Processing Payment</h1>
- <p class="text-sm font-medium text-slate-500 mb-6">Please wait while we confirm your payment...</p>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Đang Giao Dịch</h1>
+ <p class="text-sm font-medium text-slate-500 mb-6">Xin vui lòng không thoát trang. Giao dịch đang được hạch toán...</p>
  </template>
 
  <!-- Error -->
@@ -107,9 +107,9 @@ onUnmounted(() => {
  <div class="w-20 h-20 mx-auto bg-rose-50 text-rose-500 flex items-center justify-center rounded-3xl -rotate-3 mb-6 shadow-sm border border-rose-100 text-4xl font-bold">
  ✕
  </div>
- <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment Error</h1>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Thanh Toán Bị Lỗi</h1>
  <p class="text-sm font-medium text-slate-500 mb-8">{{ error }}</p>
- <button class="btn-primary w-full max-w-[240px]" @click="goToDashboard">Go to Dashboard</button>
+ <button class="btn-primary w-full max-w-[240px]" @click="goToDashboard">Về Trang Chủ</button>
  </template>
 
  <!-- Status Received -->
@@ -119,9 +119,9 @@ onUnmounted(() => {
  <div class="w-20 h-20 mx-auto bg-emerald-50 text-emerald-500 flex items-center justify-center rounded-3xl rotate-3 mb-6 shadow-sm border border-emerald-100 text-4xl font-bold">
  ✓
  </div>
- <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment Successful!</h1>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Thanh Toán Thành Công!</h1>
  <p class="text-sm font-medium text-slate-500 mb-6">
- Your <strong class="text-slate-900 ">{{ status.planName }}</strong> subscription is now active.
+ Gói dịch vụ <strong class="text-slate-900 ">{{ status.planName }}</strong> của bạn đã được gia hạn tự động.
  </p>
  </template>
 
@@ -130,9 +130,9 @@ onUnmounted(() => {
  <div class="w-20 h-20 mx-auto bg-teal-50 flex items-center justify-center rounded-3xl mb-6 shadow-sm border border-teal-100 ">
  <div class="inline-block w-8 h-8 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
  </div>
- <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment Pending</h1>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Giao Dịch Đang Chờ</h1>
  <p class="text-sm font-medium text-slate-500 mb-6">
- Waiting for payment confirmation. This page will update automatically.
+ Đang chốt trạng thái ngân hàng. Trang này có khả năng tự reload lại sớm thôi.
  </p>
  </template>
 
@@ -141,28 +141,28 @@ onUnmounted(() => {
  <div class="w-20 h-20 mx-auto bg-rose-50 text-rose-500 flex items-center justify-center rounded-3xl -rotate-3 mb-6 shadow-sm border border-rose-100 text-4xl font-bold">
  ✕
  </div>
- <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Payment {{ status.status === 'CANCELLED' ? 'Cancelled' : 'Failed' }}</h1>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-3">Giao Dịch {{ status.status === 'CANCELLED' ? 'Đã Hủy Tự Động' : 'Thất Bại' }}</h1>
  <p class="text-sm font-medium text-slate-500 mb-6">
- Your payment was not completed. No charges have been made.
+ Việc chuyển khoản chưa hoàn tất. Bạn cũng chưa bị trừ tín dụng.
  </p>
  </template>
 
  <!-- Payment Details -->
  <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left mb-8">
  <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
- <span class="text-sm font-bold text-slate-500">Order Code</span>
+ <span class="text-sm font-bold text-slate-500">Mã Chứng Từ Khớp Lệnh</span>
  <span class="text-sm font-black text-slate-900 ">#{{ status.orderCode }}</span>
  </div>
  <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
- <span class="text-sm font-bold text-slate-500">Plan</span>
+ <span class="text-sm font-bold text-slate-500">Gói Kích Hoạt</span>
  <span class="text-sm font-black text-slate-900 ">{{ status.planName }}</span>
  </div>
  <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
- <span class="text-sm font-bold text-slate-500">Amount</span>
+ <span class="text-sm font-bold text-slate-500">Thành Tiền</span>
  <span class="text-sm font-black text-slate-900 ">{{ formatAmount(status.amount) }}</span>
  </div>
  <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
- <span class="text-sm font-bold text-slate-500">Status</span>
+ <span class="text-sm font-bold text-slate-500">Trạng Thái</span>
  <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm"
  :class="status.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
  (status.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-rose-50 text-rose-600 border border-rose-200')">
@@ -170,7 +170,7 @@ onUnmounted(() => {
  </span>
  </div>
  <div class="flex justify-between items-center py-3 border-b border-slate-200 last:border-0">
- <span class="text-sm font-bold text-slate-500">Date</span>
+ <span class="text-sm font-bold text-slate-500">Ngày Tạo</span>
  <span class="text-sm font-bold text-slate-900 ">{{ formatDate(status.createdAt) }}</span>
  </div>
  </div>
@@ -182,14 +182,14 @@ onUnmounted(() => {
  class="btn-primary"
  @click="goToSubscription"
  >
- View Subscription
+ Kiểm Tra Tư Cách Hôi Viên
  </button>
  <button
  v-else
  class="btn-primary"
  @click="goToDashboard"
  >
- Go to Dashboard
+ Về Lại Không Gian Làm Việc
  </button>
  </div>
  </template>

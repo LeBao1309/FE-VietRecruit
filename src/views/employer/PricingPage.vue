@@ -61,9 +61,9 @@ onMounted(() => {
  <div class="max-w-6xl mx-auto px-6 py-12">
  <!-- Header -->
  <div class="text-center mb-12">
- <h1 class="text-4xl font-extrabold text-slate-900 mb-4">Choose Your Plan</h1>
+ <h1 class="text-4xl font-extrabold text-slate-900 mb-4">Các Gói Đăng Ký</h1>
  <p class="text-lg font-medium text-slate-500 mb-8 max-w-2xl mx-auto">
- Scale your hiring with the right plan. All plans include a free trial period.
+ Hãy lựa chọn một gói phù hợp với nhu cầu. Có thể dùng thử cho mọi trường hợp.
  </p>
 
  <!-- Billing Toggle -->
@@ -73,15 +73,15 @@ onMounted(() => {
  :class="billingCycle === 'MONTHLY' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5 ' : 'text-slate-500 hover:text-slate-900 :text-white'"
  @click="billingCycle = 'MONTHLY'"
  >
- Monthly
+ Hàng Tháng
  </button>
  <button
  class="px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2"
  :class="billingCycle === 'YEARLY' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5 ' : 'text-slate-500 hover:text-slate-900 :text-white'"
  @click="billingCycle = 'YEARLY'"
  >
- Yearly
- <span class="text-[10px] uppercase font-black tracking-wider bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">Save 20%</span>
+ Hàng Năm
+ <span class="text-[10px] uppercase font-black tracking-wider bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">Tiết Kiệm 20%</span>
  </button>
  </div>
  </div>
@@ -89,7 +89,7 @@ onMounted(() => {
  <!-- Loading -->
  <div v-if="subStore.loading && subStore.plans.length === 0" class="py-20 text-center text-slate-500">
  <div class="inline-block w-8 h-8 border-4 border-slate-200 border-t-teal-600 rounded-full animate-spin mb-4" />
- <p class="font-medium">Loading plans...</p>
+ <p class="font-medium">Hệ thống đang tải bảng giá...</p>
  </div>
 
  <!-- Plans Grid -->
@@ -101,7 +101,7 @@ onMounted(() => {
  :class="plan.code === 'PROFESSIONAL' ? 'border-2 border-teal-500 shadow-lg md:-mt-4 bg-white ' : 'border border-slate-200 bg-slate-50/50 '"
  >
  <div v-if="plan.code === 'PROFESSIONAL'" class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-teal-500 text-white text-[11px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
- Most Popular
+ Phổ Biến Nhất
  </div>
 
  <div class="mb-6">
@@ -118,7 +118,7 @@ onMounted(() => {
  v-if="billingCycle === 'YEARLY' && getSavingsPercent(plan) > 0"
  class="mt-2 text-sm font-bold text-emerald-500"
  >
- Save {{ getSavingsPercent(plan) }}%
+ Tiết Kiệm {{ getSavingsPercent(plan) }}%
  </div>
  <div v-else class="mt-2 h-5 visible"></div>
  </div>
@@ -126,23 +126,23 @@ onMounted(() => {
  <ul class="flex-1 flex flex-col gap-4 mb-8">
  <li class="flex items-start gap-3 text-sm font-bold text-slate-700 ">
  <span class="text-teal-500 font-black shrink-0 mt-0.5">✓</span>
- <span>{{ plan.maxActiveJobs }} active job{{ plan.maxActiveJobs !== 1 ? 's' : '' }}</span>
+ <span>Tối đa {{ plan.maxActiveJobs }} tin đăng cùng lúc</span>
  </li>
  <li class="flex items-start gap-3 text-sm font-bold text-slate-700 ">
  <span class="text-teal-500 font-black shrink-0 mt-0.5">✓</span>
- <span>{{ plan.jobDurationDays }}-day job listings</span>
+ <span>Thời lượng bài duy trì {{ plan.jobDurationDays }} ngày</span>
  </li>
  <li class="flex items-start gap-3 text-sm font-bold transition-opacity" :class="plan.resumeAccess ? 'text-slate-700 ' : 'text-slate-400 '">
  <span class="font-black shrink-0 mt-0.5" :class="plan.resumeAccess ? 'text-teal-500' : 'text-slate-300 '">{{ plan.resumeAccess ? '✓' : '—' }}</span>
- <span>Resume database access</span>
+ <span>Duyệt hồ sơ với cơ sở dữ liệu lớn</span>
  </li>
  <li class="flex items-start gap-3 text-sm font-bold transition-opacity" :class="plan.aiMatching ? 'text-slate-700 ' : 'text-slate-400 '">
  <span class="font-black shrink-0 mt-0.5" :class="plan.aiMatching ? 'text-teal-500' : 'text-slate-300 '">{{ plan.aiMatching ? '✓' : '—' }}</span>
- <span>AI candidate matching</span>
+ <span>Ghép nối thông minh ứng viên bằng AI</span>
  </li>
  <li class="flex items-start gap-3 text-sm font-bold transition-opacity" :class="plan.priorityListing ? 'text-slate-700 ' : 'text-slate-400 '">
  <span class="font-black shrink-0 mt-0.5" :class="plan.priorityListing ? 'text-teal-500' : 'text-slate-300 '">{{ plan.priorityListing ? '✓' : '—' }}</span>
- <span>Priority job listing</span>
+ <span>Ưu tiên đẩy top hiển thị</span>
  </li>
  </ul>
 
@@ -153,7 +153,7 @@ onMounted(() => {
  @click="handleCheckout(plan)"
  >
  <span v-if="checkoutLoading === plan.id" class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
- <span v-else>Get Started</span>
+ <span class="block px-2 text-center" v-else>Đăng Ký Ngay</span>
  </button>
  </div>
  </div>

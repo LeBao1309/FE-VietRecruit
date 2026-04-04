@@ -14,39 +14,39 @@ const applicationId = computed(() => route.params.id as string)
 
 // ── Status config ──
 const statusConfig: Record<ApplicationStatus, { label: string; class: string; dotClass: string }> = {
- NEW: { label: 'New', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- SCREENING: { label: 'Screening', class: 'bg-amber-50 text-amber-600', dotClass: 'bg-amber-400' },
- INTERVIEW: { label: 'Interview', class: 'bg-purple-50 text-purple-600', dotClass: 'bg-purple-500' },
- OFFER: { label: 'Offer', class: 'bg-primary-bg text-primary', dotClass: 'bg-primary' },
- HIRED: { label: 'Hired', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- REJECTED: { label: 'Rejected', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
+ NEW: { label: 'Ứng Tuyển', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ SCREENING: { label: 'Sàng Lọc', class: 'bg-amber-50 text-amber-600', dotClass: 'bg-amber-400' },
+ INTERVIEW: { label: 'Phỏng Vấn', class: 'bg-purple-50 text-purple-600', dotClass: 'bg-purple-500' },
+ OFFER: { label: 'Thư Mời', class: 'bg-primary-bg text-primary', dotClass: 'bg-primary' },
+ HIRED: { label: 'Đã Tuyển', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ REJECTED: { label: 'Bị Từ Chối', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
 
 // ── Transition button config ──
 const transitionButtonConfig: Record<ApplicationStatus, { label: string; class: string; confirmTitle: string; confirmDesc: string }> = {
  SCREENING: {
- label: 'Move to Screening',
+ label: 'Chuyển Sang Sàng Lọc',
  class: 'bg-amber-500 hover:bg-amber-600 text-white',
- confirmTitle: 'Move to Screening?',
- confirmDesc: 'This will advance the candidate to the screening stage for further evaluation.',
+ confirmTitle: 'Chuyển Sang Sàng Lọc?',
+ confirmDesc: 'Bấm xác nhận để di chuyển ứng viên này sang giai đoạn sàng lọc.',
  },
  INTERVIEW: {
- label: 'Move to Interview',
+ label: 'Chuyển Sang Phỏng Vấn',
  class: 'bg-purple-500 hover:bg-purple-600 text-white',
- confirmTitle: 'Move to Interview?',
- confirmDesc: 'This will advance the candidate to the interview stage. You can schedule interviews after this step.',
+ confirmTitle: 'Chuyển Sang Phỏng Vấn?',
+ confirmDesc: 'Ứng viên sẽ được đưa sang bước Phỏng vấn. Tại đây bạn có thể lên lịch phỏng vấn.',
  },
  OFFER: {
- label: 'Move to Offer',
+ label: 'Chuyển Sang Gửi Thư Mời',
  class: 'bg-primary hover:bg-primary-hover text-white',
- confirmTitle: 'Move to Offer?',
- confirmDesc: 'This will advance the candidate to the offer stage. You can create an offer for the candidate after this step.',
+ confirmTitle: 'Chuyển Sang Gửi Thư Mời?',
+ confirmDesc: 'Ứng viên sẽ được đưa sang bước cấp Thư mời. Bạn có thể soạn thư mời ngay sau bước này.',
  },
  REJECTED: {
- label: 'Reject',
+ label: 'Từ Chối',
  class: 'bg-error hover:bg-red-700 text-white',
- confirmTitle: 'Reject Application?',
- confirmDesc: 'This will reject the candidate\'s application. This action cannot be undone.',
+ confirmTitle: 'Từ Chối Ứng Viên?',
+ confirmDesc: 'Đơn ứng tuyển này sẽ bị đánh dấu Từ chối. Thao tác này không thể hoàn tác.',
  },
  NEW: { label: '', class: '', confirmTitle: '', confirmDesc: '' },
  HIRED: { label: '', class: '', confirmTitle: '', confirmDesc: '' },
@@ -54,11 +54,11 @@ const transitionButtonConfig: Record<ApplicationStatus, { label: string; class: 
 
 // ── Pipeline step display ──
 const PIPELINE_STEPS: { status: ApplicationStatus; label: string }[] = [
- { status: 'NEW', label: 'Applied' },
- { status: 'SCREENING', label: 'Screening' },
- { status: 'INTERVIEW', label: 'Interview' },
- { status: 'OFFER', label: 'Offer' },
- { status: 'HIRED', label: 'Hired' },
+ { status: 'NEW', label: 'Ứng Tuyển' },
+ { status: 'SCREENING', label: 'Sàng Lọc' },
+ { status: 'INTERVIEW', label: 'Phỏng Vấn' },
+ { status: 'OFFER', label: 'Thư Mời' },
+ { status: 'HIRED', label: 'Đã Tuyển' },
 ]
 
 const STAGE_ORDER: ApplicationStatus[] = ['NEW', 'SCREENING', 'INTERVIEW', 'OFFER', 'HIRED']
@@ -148,7 +148,7 @@ onBeforeUnmount(() => {
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back
+ ‹ Quay Lại
  </button>
  </div>
 
@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
  {{ statusConfig[appStore.currentApplication.status].label }}
  </span>
  <span class="text-xs text-gray-400">
- Applied {{ formatDateTime(appStore.currentApplication.createdAt) }}
+ Đã ứng tuyển lúc {{ formatDateTime(appStore.currentApplication.createdAt) }}
  </span>
  </div>
  </div>
@@ -189,14 +189,14 @@ onBeforeUnmount(() => {
  :to="`/employer/applications/${applicationId}/interviews`"
  class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
  >
- Interviews
+ Phỏng Vấn
  </router-link>
  <router-link
  v-if="appStore.currentApplication.status === 'OFFER'"
  :to="`/employer/offers/${applicationId}`"
  class="px-3 py-1.5 text-xs font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
  >
- View Offer
+ Xem Thư Mời
  </router-link>
  </div>
  </div>
@@ -261,15 +261,15 @@ onBeforeUnmount(() => {
  v-if="appStore.currentApplication.status === 'REJECTED'"
  class="mt-3 flex items-center gap-2 px-3 py-2 rounded-md bg-error-bg text-error text-xs"
  >
- <span class="font-medium">Rejected</span>
- <span class="text-red-400">— This application has been rejected.</span>
+ <span class="font-medium">Bị Từ Chối</span>
+ <span class="text-red-400">— Đơn ứng tuyển này đã bị từ chối.</span>
  </div>
  </div>
  </div>
 
  <!-- ─── Status Transition Buttons ─── -->
  <div v-if="canManage && appStore.canTransition" class="bg-surface border border-border rounded-lg p-5 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-3">Move Candidate</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-3">Chuyển Trạng Thái</h2>
  <div class="flex items-center gap-2 flex-wrap">
  <button
  v-for="nextStatus in appStore.validTransitions"
@@ -286,10 +286,10 @@ onBeforeUnmount(() => {
 
  <!-- ─── Candidate Info ─── -->
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-4">Application Info</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">Thông Tin Hồ Sơ</h2>
  <div class="grid grid-cols-2 gap-4">
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Job Title</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Vị Trí</span>
  <router-link
  :to="`/employer/jobs/${appStore.currentApplication.jobId}`"
  class="text-sm font-medium text-primary hover:text-primary-hover transition"
@@ -298,22 +298,22 @@ onBeforeUnmount(() => {
  </router-link>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Candidate</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Ứng Viên</span>
  <span class="text-sm font-medium text-gray-900">{{ appStore.currentApplication.candidateName }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Applied On</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Ngày Ứng Tuyển</span>
  <span class="text-sm text-gray-700">{{ formatDateTime(appStore.currentApplication.createdAt) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Last Updated</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Cập Nhật Cuối</span>
  <span class="text-sm text-gray-700">{{ formatDateTime(appStore.currentApplication.updatedAt) }}</span>
  </div>
  </div>
 
  <!-- Cover Letter -->
  <div v-if="appStore.currentApplication.coverLetter" class="mt-5 pt-5 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Cover Letter</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Thư Giới Thiệu</span>
  <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border border-border">
  {{ appStore.currentApplication.coverLetter }}
  </div>
@@ -321,7 +321,7 @@ onBeforeUnmount(() => {
 
  <!-- CV Link -->
  <div v-if="appStore.currentApplication.appliedCvUrl" class="mt-5 pt-5 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Submitted CV</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">CV Đã Nộp</span>
  <a
  :href="appStore.currentApplication.appliedCvUrl"
  target="_blank"
@@ -329,7 +329,7 @@ onBeforeUnmount(() => {
  class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
  >
  <span>📄</span>
- View CV
+ Xem CV
  <span class="text-xs text-gray-400">↗</span>
  </a>
  </div>
@@ -337,7 +337,7 @@ onBeforeUnmount(() => {
 
  <!-- ─── Status History (Timeline) ─── -->
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-4">Status History</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">Lịch Sử Trạng Thái</h2>
 
  <!-- Loading -->
  <div v-if="appStore.historyLoading" class="animate-pulse space-y-3">
@@ -352,7 +352,7 @@ onBeforeUnmount(() => {
 
  <!-- Empty -->
  <div v-else-if="appStore.statusHistory.length === 0" class="text-sm text-gray-400 text-center py-8">
- No status changes recorded yet.
+ Chưa có sự thay đổi trạng thái nào được ghi nhận.
  </div>
 
  <!-- Timeline -->
@@ -401,9 +401,9 @@ onBeforeUnmount(() => {
 
  <!-- Not found -->
  <div v-else-if="!appStore.detailLoading" class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center">
- <p class="text-gray-400 text-sm">Application not found or you don't have access to view it.</p>
+ <p class="text-gray-400 text-sm">Không tìm thấy hồ sơ hoặc bạn không có quyền truy cập để xem hồ sơ này.</p>
  <button @click="router.back()" class="mt-3 text-primary hover:text-primary-hover text-sm font-medium transition">
- ← Go Back
+ ← Quay Lại
  </button>
  </div>
 
@@ -430,12 +430,12 @@ onBeforeUnmount(() => {
  <!-- Optional notes -->
  <div class="mb-5">
  <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
- Notes (optional)
+ Ghi Chú (Tùy Chọn)
  </label>
  <textarea
  v-model="transitionNotes"
  rows="3"
- placeholder="Add a note about this decision…"
+ placeholder="Viết vài dòng ghi chú ở đây…"
  class="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition resize-none"
  />
  </div>
@@ -445,7 +445,7 @@ onBeforeUnmount(() => {
  @click="showConfirm = false"
  class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
  >
- Cancel
+ Hủy Bỏ
  </button>
  <button
  @click="confirmTransition"
@@ -454,7 +454,7 @@ onBeforeUnmount(() => {
  :class="transitionButtonConfig[pendingTransition].class"
  >
  <span v-if="appStore.statusLoading" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ appStore.statusLoading ? 'Processing…' : 'Confirm' }}
+ {{ appStore.statusLoading ? 'Đang xử lý…' : 'Xác Nhận' }}
  </button>
  </div>
  </div>

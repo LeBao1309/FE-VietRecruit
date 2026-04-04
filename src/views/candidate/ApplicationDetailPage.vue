@@ -22,25 +22,25 @@ const interviewsLoading = ref(false)
 
 // ── Status config ──
 const statusConfig: Record<ApplicationStatus, { label: string; class: string; dotClass: string }> = {
- NEW: { label: 'Applied', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- SCREENING: { label: 'Screening', class: 'bg-amber-50 text-amber-600', dotClass: 'bg-amber-400' },
- INTERVIEW: { label: 'Interview', class: 'bg-purple-50 text-purple-600', dotClass: 'bg-purple-500' },
- OFFER: { label: 'Offer', class: 'bg-primary-bg text-primary', dotClass: 'bg-primary' },
- HIRED: { label: 'Hired', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- REJECTED: { label: 'Rejected', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
+ NEW: { label: 'Đã Ứng Tuyển', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ SCREENING: { label: 'Sàng Lọc', class: 'bg-amber-50 text-amber-600', dotClass: 'bg-amber-400' },
+ INTERVIEW: { label: 'Phỏng Vấn', class: 'bg-purple-50 text-purple-600', dotClass: 'bg-purple-500' },
+ OFFER: { label: 'Đề Nghị', class: 'bg-primary-bg text-primary', dotClass: 'bg-primary' },
+ HIRED: { label: 'Đã Tuyển', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ REJECTED: { label: 'Bị Từ Chối', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
 
 const OFFER_STATUS_CONFIG: Record<OfferStatus, { label: string; class: string; dotClass: string }> = {
- DRAFT: { label: 'Draft', class: 'bg-gray-100 text-gray-600', dotClass: 'bg-gray-400' },
- SENT: { label: 'Pending Response', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- ACCEPTED: { label: 'Accepted', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- DECLINED: { label: 'Declined', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
+ DRAFT: { label: 'Bản Nháp', class: 'bg-gray-100 text-gray-600', dotClass: 'bg-gray-400' },
+ SENT: { label: 'Chờ Phản Hồi', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ ACCEPTED: { label: 'Đã Chấp Nhận', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ DECLINED: { label: 'Đã Từ Chối', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
 
 const INTERVIEW_STATUS_CONFIG: Record<InterviewStatus, { label: string; class: string; dotClass: string }> = {
- SCHEDULED: { label: 'Scheduled', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- COMPLETED: { label: 'Completed', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- CANCELED: { label: 'Canceled', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
+ SCHEDULED: { label: 'Đã Lên Lịch', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ COMPLETED: { label: 'Đã Hoàn Thành', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ CANCELED: { label: 'Đã Hủy', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
 }
 
 /** Whether candidate can see interviews (application has reached INTERVIEW stage or later) */
@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.push('/candidate/applications')" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back to Applications
+ ‹ Danh Sách Đơn
  </button>
  </div>
 
@@ -300,8 +300,8 @@ onBeforeUnmount(() => {
  v-if="application.status === 'REJECTED'"
  class="mt-3 flex items-center gap-2 px-3 py-2 rounded-md bg-error-bg text-error text-xs"
  >
- <span class="font-medium">Rejected</span>
- <span class="text-red-400">— Your application has been rejected.</span>
+ <span class="font-medium">Bị Từ Chối</span>
+ <span class="text-red-400">— Đơn ứng tuyển của bạn đã bị từ chối.</span>
  </div>
  </div>
  </div>
@@ -309,7 +309,7 @@ onBeforeUnmount(() => {
  <!-- ─── Offer Section (F-11.4: Candidate Offer Response UI) ─── -->
  <div v-if="showOfferSection" class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
  <div class="px-6 py-4 border-b border-border flex items-center justify-between">
- <h2 class="text-sm font-semibold text-gray-900">Offer Details</h2>
+ <h2 class="text-sm font-semibold text-gray-900">Chi Tiết Thư Mời</h2>
  <span
  v-if="latestOffer"
  class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full"
@@ -328,7 +328,7 @@ onBeforeUnmount(() => {
 
  <!-- No offers yet (status is OFFER but no offer created by employer) -->
  <div v-else-if="offerStore.offers.length === 0" class="p-6 text-center">
- <p class="text-sm text-gray-500">An offer is being prepared for you. You'll be notified once it's ready.</p>
+ <p class="text-sm text-gray-500">Mức lương và vị trí đang được chuẩn bị. Bạn sẽ sớm nhận được thông báo.</p>
  </div>
 
  <!-- Offer exists -->
@@ -340,8 +340,8 @@ onBeforeUnmount(() => {
  📋
  </div>
  <div>
- <p class="text-sm font-semibold text-gray-900">You've received an offer!</p>
- <p class="text-xs text-gray-500">Review the details below and respond.</p>
+ <p class="text-sm font-semibold text-gray-900">Bạn đã nhận được thư mời làm việc!</p>
+ <p class="text-xs text-gray-500">Vui lòng đọc kỹ thông tin và phản hồi.</p>
  </div>
  </div>
  <div class="flex items-center gap-3">
@@ -350,14 +350,14 @@ onBeforeUnmount(() => {
  :disabled="offerStore.respondLoading"
  class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition disabled:opacity-50 flex items-center gap-2"
  >
- ✓ Accept Offer
+ ✓ Chấp Nhận
  </button>
  <button
  @click="openRespond('DECLINE')"
  :disabled="offerStore.respondLoading"
  class="px-5 py-2.5 text-sm font-medium text-error bg-error-bg hover:bg-red-100 rounded-md transition disabled:opacity-50 flex items-center gap-2"
  >
- ✕ Decline Offer
+ ✕ Từ Chối
  </button>
  </div>
  </div>
@@ -369,8 +369,8 @@ onBeforeUnmount(() => {
  ✓
  </div>
  <div>
- <p class="text-sm font-semibold text-green-800">Congratulations! You accepted this offer.</p>
- <p class="text-xs text-green-600">Welcome aboard! Your start date and details are below.</p>
+ <p class="text-sm font-semibold text-green-800">Chúc mừng! Bạn đã chấp nhận lời mời này.</p>
+ <p class="text-xs text-green-600">Chào mừng bạn gia nhập! Thông tin bắt đầu công việc ở dưới.</p>
  </div>
  </div>
  </div>
@@ -382,8 +382,8 @@ onBeforeUnmount(() => {
  ✕
  </div>
  <div>
- <p class="text-sm font-semibold text-red-800">You declined this offer.</p>
- <p class="text-xs text-red-600">The employer has been notified of your decision.</p>
+ <p class="text-sm font-semibold text-red-800">Bạn đã từ chối lời mời này.</p>
+ <p class="text-xs text-red-600">Nhà tuyển dụng đã được thông báo về quyết định của bạn.</p>
  </div>
  </div>
  </div>
@@ -392,42 +392,42 @@ onBeforeUnmount(() => {
  <div class="px-6 py-5">
  <div class="grid grid-cols-2 gap-x-8 gap-y-4">
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Base Salary</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Mức Lương Cơ Bản</span>
  <span class="text-lg font-bold text-gray-900">
  {{ formatSalary(latestOffer.baseSalary, latestOffer.currency) }}
  </span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Currency</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Tiền Tệ</span>
  <span class="text-sm font-medium text-gray-900">{{ latestOffer.currency ?? 'VND' }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Start Date</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Ngày Bắt Đầu</span>
  <span class="text-sm text-gray-700">{{ latestOffer.startDate ? formatDate(latestOffer.startDate) : '—' }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Offer Date</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Ngày Gửi Thư Mời</span>
  <span class="text-sm text-gray-700">{{ formatDate(latestOffer.createdAt) }}</span>
  </div>
  </div>
 
  <!-- Offer letter link -->
  <div v-if="latestOffer.offerLetterUrl" class="mt-4 pt-4 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Offer Letter</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Thư Mời (Offer Letter)</span>
  <a
  :href="latestOffer.offerLetterUrl"
  target="_blank"
  rel="noopener"
  class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
  >
- 📄 View Offer Letter
+ 📄 Xem Thư Mời
  <span class="text-xs text-gray-400">↗</span>
  </a>
  </div>
 
  <!-- Notes -->
  <div v-if="latestOffer.note" class="mt-4 pt-4 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Notes from Employer</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Ghi Chú Từ Nhà Tuyển Dụng</span>
  <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border border-border">
  {{ latestOffer.note }}
  </div>
@@ -439,7 +439,7 @@ onBeforeUnmount(() => {
  <!-- ─── Interview Details (F-12.2) ─── -->
  <div v-if="showInterviewSection" class="bg-surface border border-border rounded-lg shadow-sm overflow-hidden">
  <div class="px-6 py-4 border-b border-border flex items-center justify-between">
- <h2 class="text-sm font-semibold text-gray-900">Interviews</h2>
+ <h2 class="text-sm font-semibold text-gray-900">Phỏng Vấn</h2>
  <span v-if="interviews.length > 0" class="text-xs text-gray-400">
  {{ interviews.length }} interview{{ interviews.length !== 1 ? 's' : '' }}
  </span>
@@ -453,7 +453,7 @@ onBeforeUnmount(() => {
 
  <!-- No interviews -->
  <div v-else-if="interviews.length === 0" class="p-6 text-center">
- <p class="text-sm text-gray-400">No interviews scheduled yet.</p>
+ <p class="text-sm text-gray-400">Chưa có lịch phỏng vấn nào.</p>
  </div>
 
  <!-- Interview cards -->
@@ -484,17 +484,17 @@ onBeforeUnmount(() => {
  <div class="grid grid-cols-2 gap-4">
  <!-- Date/Time -->
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Scheduled</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Lịch Hẹn</span>
  <span class="text-sm text-gray-700">{{ formatDateTime(interview.scheduledAt) }}</span>
  </div>
  <!-- Duration -->
  <div v-if="interview.durationMinutes">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Duration</span>
- <span class="text-sm text-gray-700">{{ interview.durationMinutes }} min</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Thời Lượng</span>
+ <span class="text-sm text-gray-700">{{ interview.durationMinutes }} phút</span>
  </div>
  <!-- Location -->
  <div v-if="interview.locationOrLink" class="col-span-2">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Location / Link</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Địa Điểm / Link</span>
  <a
  v-if="interview.locationOrLink.startsWith('http')"
  :href="interview.locationOrLink"
@@ -510,7 +510,7 @@ onBeforeUnmount(() => {
 
  <!-- Interviewers -->
  <div v-if="interview.interviewers && interview.interviewers.length > 0" class="mt-3 pt-3 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Interviewers</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Người Phỏng Vấn</span>
  <div class="flex items-center gap-2 flex-wrap">
  <div
  v-for="interviewer in interview.interviewers"
@@ -531,21 +531,21 @@ onBeforeUnmount(() => {
  <div v-if="interviews.length > 1" class="px-6 py-3 bg-gray-50/50 border-t border-border flex items-center gap-4">
  <div v-if="scheduledInterviews.length > 0" class="flex items-center gap-1.5">
  <span class="w-2 h-2 rounded-full bg-blue-400" />
- <span class="text-[10px] text-gray-500">{{ scheduledInterviews.length }} upcoming</span>
+ <span class="text-[10px] text-gray-500">{{ scheduledInterviews.length }} sắp diễn ra</span>
  </div>
  <div v-if="completedInterviews.length > 0" class="flex items-center gap-1.5">
  <span class="w-2 h-2 rounded-full bg-green-500" />
- <span class="text-[10px] text-gray-500">{{ completedInterviews.length }} completed</span>
+ <span class="text-[10px] text-gray-500">{{ completedInterviews.length }} đã hoàn thành</span>
  </div>
  </div>
  </div>
 
  <!-- ─── Application Info ─── -->
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-4">Application Info</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">Thông Tin Đơn Ứng Tuyển</h2>
  <div class="grid grid-cols-2 gap-4">
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Job Title</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Vị Trí</span>
  <router-link
  :to="`/jobs/${application.jobId}`"
  class="text-sm font-medium text-primary hover:text-primary-hover transition"
@@ -554,15 +554,15 @@ onBeforeUnmount(() => {
  </router-link>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Applied On</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Ngày Ứng Tuyển</span>
  <span class="text-sm text-gray-700">{{ formatDateTime(application.createdAt) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Last Updated</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Cập Nhật Lần Cuối</span>
  <span class="text-sm text-gray-700">{{ formatDateTime(application.updatedAt) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Status</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Trạng Thái</span>
  <span
  class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full"
  :class="statusConfig[application.status].class"
@@ -574,7 +574,7 @@ onBeforeUnmount(() => {
 
  <!-- Cover Letter -->
  <div v-if="application.coverLetter" class="mt-5 pt-5 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Cover Letter</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Thư Giới Thiệu</span>
  <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border border-border">
  {{ application.coverLetter }}
  </div>
@@ -582,14 +582,14 @@ onBeforeUnmount(() => {
 
  <!-- CV Link -->
  <div v-if="application.appliedCvUrl" class="mt-5 pt-5 border-t border-border">
- <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Submitted CV</span>
+ <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">CV Đã Nộp</span>
  <a
  :href="application.appliedCvUrl"
  target="_blank"
  rel="noopener"
  class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
  >
- 📄 View CV
+ 📄 Xem CV
  <span class="text-xs text-gray-400">↗</span>
  </a>
  </div>
@@ -597,10 +597,10 @@ onBeforeUnmount(() => {
 
  <!-- ─── Status History ─── -->
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-4">Status History</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">Lịch Sử Trạng Thái</h2>
 
  <div v-if="statusHistory.length === 0" class="text-sm text-gray-400 text-center py-8">
- No status changes recorded yet.
+ Chưa có sự thay đổi trạng thái nào.
  </div>
 
  <div v-else class="relative">
@@ -650,9 +650,9 @@ onBeforeUnmount(() => {
 
  <!-- Not found -->
  <div v-else-if="!loading" class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center">
- <p class="text-gray-400 text-sm">Application not found or you don't have access to view it.</p>
+ <p class="text-gray-400 text-sm">Không tìm thấy đơn ứng tuyển hoặc bạn không có quyền xem.</p>
  <button @click="router.push('/candidate/applications')" class="mt-3 text-primary hover:text-primary-hover text-sm font-medium transition">
- ← Go Back
+ ← Quay Lại
  </button>
  </div>
 
@@ -669,25 +669,25 @@ onBeforeUnmount(() => {
  {{ respondAction === 'ACCEPT' ? '✓' : '✕' }}
  </div>
  <h2 class="text-lg font-bold text-gray-900 mb-2">
- {{ respondAction === 'ACCEPT' ? 'Accept This Offer?' : 'Decline This Offer?' }}
+ {{ respondAction === 'ACCEPT' ? 'Chấp Nhận Lời Mời?' : 'Từ Chối Lời Mời?' }}
  </h2>
  <p class="text-sm text-gray-500">
  <template v-if="respondAction === 'ACCEPT'">
  By accepting, you confirm your intent to join. Your application will move to <strong>Hired</strong> status.
  </template>
  <template v-else>
- By declining, you will reject this offer. Your application status will reflect this decision. This action cannot be undone.
+ Bằng cách từ chối, bạn sẽ hủy lời mời này. Thao tác không thể hoàn tác.
  </template>
  </p>
 
  <!-- Show salary summary -->
  <div v-if="pendingOffer" class="mt-4 p-3 bg-gray-50 rounded-lg border border-border text-left">
  <div class="flex items-center justify-between text-sm">
- <span class="text-gray-500">Salary:</span>
+ <span class="text-gray-500">Mức Lương:</span>
  <span class="font-bold text-gray-900">{{ formatSalary(pendingOffer.baseSalary, pendingOffer.currency) }}</span>
  </div>
  <div v-if="pendingOffer.startDate" class="flex items-center justify-between text-sm mt-1">
- <span class="text-gray-500">Start Date:</span>
+ <span class="text-gray-500">Ngày Bắt Đầu:</span>
  <span class="font-medium text-gray-700">{{ formatDate(pendingOffer.startDate) }}</span>
  </div>
  </div>
@@ -698,7 +698,7 @@ onBeforeUnmount(() => {
  @click="showRespondModal = false"
  class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
  >
- Cancel
+ Hủy
  </button>
  <button
  @click="confirmRespond"
@@ -708,8 +708,8 @@ onBeforeUnmount(() => {
  >
  <span v-if="offerStore.respondLoading" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
  {{ offerStore.respondLoading
- ? 'Processing…'
- : respondAction === 'ACCEPT' ? 'Accept Offer' : 'Decline Offer'
+ ? 'Đang xử lý…'
+ : respondAction === 'ACCEPT' ? 'Chấp Nhận' : 'Từ Chối'
  }}
  </button>
  </div>

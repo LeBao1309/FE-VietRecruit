@@ -34,9 +34,9 @@ function closeInviteModal(): void {
 function validate(): boolean {
  inviteErrors.value = {}
  if (!inviteForm.value.email.trim()) {
- inviteErrors.value.email = 'Email is required.'
+ inviteErrors.value.email = 'Vui lòng cung cấp email.'
  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.value.email)) {
- inviteErrors.value.email = 'Please enter a valid email.'
+ inviteErrors.value.email = 'Vui lòng nhập định dạng email hợp lệ.'
  }
  return Object.keys(inviteErrors.value).length === 0
 }
@@ -50,7 +50,7 @@ async function handleInvite(): Promise<void> {
  role: inviteForm.value.role,
  })
  if (result.error) {
- ui.toastError('Invitation failed', result.error.message)
+ ui.toastError('Mời Không Thành Công', result.error.message)
  return
  }
  sentInvites.value.unshift({
@@ -60,7 +60,7 @@ async function handleInvite(): Promise<void> {
  expiresAt: result.data!.expiresAt,
  sentAt: new Date().toISOString(),
  })
- ui.toastSuccess('Invitation sent', `An invite has been sent to ${inviteForm.value.email}`)
+ ui.toastSuccess('Gửi Lời Mời Về Mail', `Đã gửi lời mời thành công đến ${inviteForm.value.email}`)
  closeInviteModal()
  } finally {
  inviteLoading.value = false
@@ -86,14 +86,14 @@ function roleBadgeClass(role: string): string {
  <div class="max-w-3xl mx-auto px-6 py-8">
  <div class="flex items-center justify-between mb-6">
  <div>
- <h1 class="text-xl font-bold text-gray-900">Team</h1>
- <p class="text-sm text-gray-500 mt-1">Invite HR managers and interviewers to collaborate</p>
+ <h1 class="text-xl font-bold text-gray-900">Nhân Sự & Đội Ngũ</h1>
+ <p class="text-sm text-gray-500 mt-1">Mời thêm các Giám đốc nhân sự và Người phỏng vấn vào nền tảng</p>
  </div>
  <button
  @click="openInviteModal"
  class="btn-primary"
  >
- <span class="text-lg leading-none">+</span> Invite member
+ <span class="text-lg leading-none">+</span> Mời Đồng Nghiệp
  </button>
  </div>
 
@@ -102,10 +102,10 @@ function roleBadgeClass(role: string): string {
  <div class="flex gap-4">
  <span class="text-teal-600 text-xl font-bold">ℹ</span>
  <div>
- <p class="text-sm font-bold text-teal-800 ">How invitations work</p>
+ <p class="text-sm font-bold text-teal-800 ">Cách thức tính năng này hoạt động</p>
  <p class="text-sm text-teal-700/80 mt-1">
- When you invite a team member, they'll receive an email with a link to set up their account.
- Invitations expire after 7 days.
+ Khi thao tác mời một đồng nghiệp, người đó sẽ nhận được email hướng dẫn tự tạo tài khoản.
+ Lời mời sẽ không còn hiệu lực sau 7 ngày chờ.
  </p>
  </div>
  </div>
@@ -114,16 +114,16 @@ function roleBadgeClass(role: string): string {
  <!-- Sent invitations table -->
  <div class="premium-card overflow-hidden">
  <div class="p-6 border-b border-slate-200 ">
- <h2 class="text-lg font-bold text-slate-900 ">Pending Invitations</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">Lời Mời Chưa Phản Hồi</h2>
  </div>
 
  <table class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Email</th>
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Role</th>
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Sent</th>
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Expires</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Địa Chỉ Phản Hồi</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Vai Trò Nhiệm Vụ</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Thời Gian Gửi Đạt Được</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Thông Số Hạn</th>
  </tr>
  </thead>
  <tbody>
@@ -131,8 +131,8 @@ function roleBadgeClass(role: string): string {
  <td colspan="4" class="text-center text-sm text-slate-400 py-16">
  <div class="space-y-3">
  <span class="text-4xl">👥</span>
- <p class="font-bold">No invitations sent yet</p>
- <p class="text-xs text-slate-400">Click "Invite member" to get started</p>
+ <p class="font-bold">Đang không có lời mời đợi kích hoạt.</p>
+ <p class="text-xs text-slate-400">Dùng chức năng "Mời Đồng Nghiệp" để bắt đầu thiết lập nhân lực mới.</p>
  </div>
  </td>
  </tr>
@@ -155,19 +155,19 @@ function roleBadgeClass(role: string): string {
  <div v-if="showInviteModal" class="premium-modal-backdrop">
  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeInviteModal" />
  <div class="premium-modal-content w-full max-w-lg">
- <h2 class="text-xl font-bold text-slate-900 mb-6">Invite team member</h2>
+ <h2 class="text-xl font-bold text-slate-900 mb-6">Mời thành viên mới tham gia</h2>
 
  <form @submit.prevent="handleInvite" class="space-y-5">
  <!-- Email -->
  <div>
  <label for="invite-email" class="block text-sm font-bold text-slate-700 mb-2">
- Email <span class="text-rose-500">*</span>
+ Địa chỉ hộp thư Email <span class="text-rose-500">*</span>
  </label>
  <input
  id="invite-email"
  v-model="inviteForm.email"
  type="email"
- placeholder="colleague@company.com"
+ placeholder="thuandongnghiep@company.com"
  class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition"
  :class="inviteErrors.email ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
  />
@@ -176,7 +176,7 @@ function roleBadgeClass(role: string): string {
 
  <!-- Role -->
  <div>
- <label class="block text-sm font-bold text-slate-700 mb-3">Role</label>
+ <label class="block text-sm font-bold text-slate-700 mb-3">Tùy Chọn Phân Cấp</label>
  <div class="grid grid-cols-2 gap-4">
  <button
  type="button"
@@ -186,8 +186,8 @@ function roleBadgeClass(role: string): string {
  ? 'border-teal-500 bg-teal-50 ring-4 ring-teal-500/10'
  : 'border-slate-200 hover:border-slate-300 :border-slate-600'"
  >
- <div class="text-sm font-bold" :class="inviteForm.role === 'HR' ? 'text-teal-700 ' : 'text-slate-900 '">HR Manager</div>
- <p class="text-xs text-slate-500 mt-1">Manage jobs, candidates & pipelines</p>
+ <div class="text-sm font-bold" :class="inviteForm.role === 'HR' ? 'text-teal-700 ' : 'text-slate-900 '">Quản Lý Tuyển Dụng (HR Manager)</div>
+ <p class="text-xs text-slate-500 mt-1">Điều phối vị trí đăng, sàng lọc hồ sơ và làm đường ống luân chuyển ứng viên.</p>
  </button>
  <button
  type="button"
@@ -197,8 +197,8 @@ function roleBadgeClass(role: string): string {
  ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-500/10'
  : 'border-slate-200 hover:border-slate-300 :border-slate-600'"
  >
- <div class="text-sm font-bold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-purple-700 ' : 'text-slate-900 '">Interviewer</div>
- <p class="text-xs text-slate-500 mt-1">Conduct interviews & submit scorecards</p>
+ <div class="text-sm font-bold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-purple-700 ' : 'text-slate-900 '">Hội Đồng Phỏng Vấn (Interviewer)</div>
+ <p class="text-xs text-slate-500 mt-1">Lên lịch gặp gửi đường dẫn họp và tổng hợp phiếu đánh giá cuối kì.</p>
  </button>
  </div>
  </div>
@@ -209,7 +209,7 @@ function roleBadgeClass(role: string): string {
  @click="closeInviteModal"
  class="btn-secondary"
  >
- Cancel
+ Quay Trở Ra
  </button>
  <button
  type="submit"
@@ -217,7 +217,7 @@ function roleBadgeClass(role: string): string {
  class="btn-primary"
  >
  <span v-if="inviteLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ inviteLoading ? 'Sending…' : 'Send invitation' }}
+ {{ inviteLoading ? 'Đang chuyển lời…' : 'Bắt Đầu Gửi Thư' }}
  </button>
  </div>
  </form>

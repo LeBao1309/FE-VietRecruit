@@ -1,7 +1,20 @@
 import http from './http'
 import { ok, fail, type ServiceResult } from './api-error'
 import type { ApiResponse } from '@/types/common'
-import type { SubscriptionResponse, QuotaResponse } from '@/types/subscription'
+import type { PlanResponse, SubscriptionResponse, QuotaResponse } from '@/types/subscription'
+
+// ── Plan Service ─────────────────────────────────────────────────────
+export const planService = {
+  /** GET /plans — list all active subscription plans (public) */
+  async listPlans(): Promise<ServiceResult<PlanResponse[]>> {
+    try {
+      const { data } = await http.get<ApiResponse<PlanResponse[]>>('/plans')
+      return ok(data.data)
+    } catch (error) {
+      return fail(error)
+    }
+  },
+}
 
 // ── Subscription Service ─────────────────────────────────────────────
 export const subscriptionService = {

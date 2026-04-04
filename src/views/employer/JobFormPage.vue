@@ -15,7 +15,7 @@ const ui = useUiStore()
 // ── Mode ──
 const jobId = computed(() => route.params.id as string | undefined)
 const isEditMode = computed(() => !!jobId.value)
-const pageTitle = computed(() => isEditMode.value ? 'Edit Job' : 'Create New Job')
+const pageTitle = computed(() => isEditMode.value ? 'Chỉnh Sửa Công Việc' : 'Tạo Công Việc Mới')
 
 // ── State ──
 const loading = ref(false)
@@ -102,7 +102,7 @@ async function loadJob(): Promise<void> {
 
  // Only DRAFT can be edited
  if (j.status !== 'DRAFT') {
- ui.toastWarning('Cannot edit', 'Only draft jobs can be edited.')
+ ui.toastWarning('Không Thể Sửa', 'Chỉ có thể sửa đổi những tin tuyển dụng còn đang là bản nháp.')
  router.push(`/employer/jobs/${jobId.value}`)
  return
  }
@@ -121,7 +121,7 @@ async function loadJob(): Promise<void> {
  deadline: j.deadline?.split('T')[0] ?? '',
  }
  } else {
- ui.toastError('Job not found', result.error?.message)
+ ui.toastError('Không Tìm Thấy Công Việc', result.error?.message)
  router.push('/employer/jobs')
  }
  } finally {
@@ -134,27 +134,27 @@ function validate(): boolean {
  errors.value = {}
 
  if (!form.value.title.trim()) {
- errors.value.title = 'Job title is required.'
+ errors.value.title = 'Vui lòng nhập tên vị trí.'
  } else if (form.value.title.length > 255) {
- errors.value.title = 'Title must be 255 characters or fewer.'
+ errors.value.title = 'Tên vị trí phải dưới 255 ký tự.'
  }
 
  if (!form.value.description.trim()) {
- errors.value.description = 'Job description is required.'
+ errors.value.description = 'Vui lòng cung cấp mô tả công việc.'
  } else if (form.value.description.length > 50000) {
- errors.value.description = 'Description is too long (max 50,000 characters).'
+ errors.value.description = 'Mô tả quá dài (tối đa 50,000 ký tự).'
  }
 
  if (form.value.requirements.length > 50000) {
- errors.value.requirements = 'Requirements is too long (max 50,000 characters).'
+ errors.value.requirements = 'Yêu cầu tham gia quá dài (tối đa 50,000 ký tự).'
  }
 
  const minSal = form.value.minSalary ? Number(form.value.minSalary) : null
  const maxSal = form.value.maxSalary ? Number(form.value.maxSalary) : null
- if (minSal !== null && isNaN(minSal)) errors.value.minSalary = 'Must be a number.'
- if (maxSal !== null && isNaN(maxSal)) errors.value.maxSalary = 'Must be a number.'
+ if (minSal !== null && isNaN(minSal)) errors.value.minSalary = 'Phải là dạng số.'
+ if (maxSal !== null && isNaN(maxSal)) errors.value.maxSalary = 'Phải là dạng số.'
  if (minSal !== null && maxSal !== null && minSal > maxSal) {
- errors.value.minSalary = 'Minimum salary cannot exceed maximum.'
+ errors.value.minSalary = 'Mức lương tối thiểu không thể cao hơn tối đa.'
  }
 
  return Object.keys(errors.value).length === 0
@@ -183,18 +183,18 @@ async function handleSave(): Promise<void> {
  if (isEditMode.value) {
  const result = await jobService.updateJob(jobId.value!, payload)
  if (result.error) {
- ui.toastError('Update failed', result.error.message)
+ ui.toastError('Xảy ra lỗi khi cập nhật', result.error.message)
  return
  }
- ui.toastSuccess('Job updated')
+ ui.toastSuccess('Cập nhật thành công')
  router.push(`/employer/jobs/${jobId.value}`)
  } else {
  const result = await jobService.createJob(payload as JobCreateRequest)
  if (result.error) {
- ui.toastError('Create failed', result.error.message)
+ ui.toastError('Xảy ra lỗi khi tạo', result.error.message)
  return
  }
- ui.toastSuccess('Job created', 'Your job has been saved as a draft.')
+ ui.toastSuccess('Khởi tạo thành công', 'Công việc mới đã được lưu thành bản nháp.')
  router.push(`/employer/jobs/${result.data!.id}`)
  }
  } finally {
@@ -209,7 +209,7 @@ function splitLines(text: string): string[] {
 
 async function generateJd(): Promise<void> {
  if (!form.value.title.trim()) {
- ui.toastWarning('Title required', 'Enter a job title before generating a description.')
+ ui.toastWarning('Thiếu Tiêu Đề', 'Hãy nhập vào ô Tiêu Đề Vị Trí trước khi nhờ AI phân tích.')
  return
  }
 
@@ -228,9 +228,9 @@ async function generateJd(): Promise<void> {
  const result = await jobService.generateDescription(body)
  if (result.data) {
  aiResult.value = result.data
- ui.toastSuccess('Description generated', 'Review the AI-generated content below.')
+ ui.toastSuccess('Khởi Tạo Xong', 'Mời bạn xem lại nội dung bản nháp do AI cung cấp.')
  } else {
- ui.toastError('Generation failed', result.error?.message)
+ ui.toastError('Có Lỗi AI', result.error?.message)
  }
  } finally {
  aiGenerating.value = false
@@ -241,11 +241,11 @@ function applyAiResult(): void {
  if (!aiResult.value) return
  const desc = aiResult.value.generatedDescription
  const sections = [
- `## Overview\n${desc.overview}`,
- `## Responsibilities\n${desc.responsibilities.map((r) => `- ${r}`).join('\n')}`,
- `## Requirements\n${desc.requirements.map((r) => `- ${r}`).join('\n')}`,
- desc.niceToHave.length > 0 ? `## Nice to Have\n${desc.niceToHave.map((r) => `- ${r}`).join('\n')}` : '',
- desc.benefits ? `## Benefits\n${desc.benefits}` : '',
+ `## Tổng Quan\n${desc.overview}`,
+ `## Trách Nhiệm Vị Trí\n${desc.responsibilities.map((r) => `- ${r}`).join('\n')}`,
+ `## Kỹ Năng / Yêu Cầu\n${desc.requirements.map((r) => `- ${r}`).join('\n')}`,
+ desc.niceToHave.length > 0 ? `## Yêu Cầu Thêm (Ưu tiên)\n${desc.niceToHave.map((r) => `- ${r}`).join('\n')}` : '',
+ desc.benefits ? `## Chế Độ Đãi Ngộ\n${desc.benefits}` : '',
  ].filter(Boolean)
 
  form.value.description = sections.join('\n\n')
@@ -254,13 +254,13 @@ function applyAiResult(): void {
  if (isEditMode.value && jobId.value) {
  aiApplying.value = true
  jobService.applyDescription(jobId.value, { generatedDescription: desc }).then((res) => {
- if (res.error) ui.toastWarning('Apply sync failed', 'Description updated locally but sync to server failed.')
+ if (res.error) ui.toastWarning('Lưu Đồng Bộ Thất Bại', 'Đã chèn nội dung thành công nhưng chưa thể lưu đè lên máy chủ.')
  }).finally(() => { aiApplying.value = false })
  }
 
  aiResult.value = null
  showAiPanel.value = false
- ui.toastSuccess('Applied', 'AI-generated description has been applied to the form.')
+ ui.toastSuccess('Đã Áp Dụng', 'Bản mô tả do AI viết đã được đưa vào hộp văn bản thành công.')
 }
 
 onMounted(async () => {
@@ -276,7 +276,7 @@ onMounted(async () => {
  <!-- Header -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back
+ ‹ Quay Lại
  </button>
  <h1 class="text-xl font-bold text-gray-900">{{ pageTitle }}</h1>
  </div>
@@ -292,17 +292,17 @@ onMounted(async () => {
  <form v-else @submit.prevent="handleSave" class="space-y-6">
  <!-- Title -->
  <div class="premium-card p-6 space-y-5">
- <h2 class="text-sm font-semibold text-gray-900 mb-4">Basic Information</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">Thông Tin Cơ Bản</h2>
 
  <div>
  <label for="job-title" class="block text-sm font-medium text-gray-700 mb-1">
- Job Title <span class="text-error">*</span>
+ Tiêu Đề Vị Trí <span class="text-error">*</span>
  </label>
  <input
  id="job-title"
  v-model="form.title"
  type="text"
- placeholder="e.g. Senior Frontend Developer"
+ placeholder="VD: Lập trình viên FrontEnd cấp cao"
  class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
  :class="errors.title ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
  />
@@ -312,42 +312,42 @@ onMounted(async () => {
  <!-- Organization selects -->
  <div class="grid grid-cols-3 gap-4">
  <div>
- <label for="job-dept" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+ <label for="job-dept" class="block text-sm font-medium text-gray-700 mb-1">Phòng Ban</label>
  <select
  id="job-dept"
  v-model="form.departmentId"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  >
- <option value="">— None —</option>
+ <option value="">— Trống —</option>
  <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
  </select>
  </div>
  <div>
- <label for="job-loc" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+ <label for="job-loc" class="block text-sm font-medium text-gray-700 mb-1">Địa Chỉ</label>
  <select
  id="job-loc"
  v-model="form.locationId"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  >
- <option value="">— None —</option>
+ <option value="">— Trống —</option>
  <option v-for="l in locations" :key="l.id" :value="l.id">{{ l.name }}</option>
  </select>
  </div>
  <div>
- <label for="job-cat" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+ <label for="job-cat" class="block text-sm font-medium text-gray-700 mb-1">Ngành Tuyển</label>
  <select
  id="job-cat"
  v-model="form.categoryId"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  >
- <option value="">— None —</option>
+ <option value="">— Trống —</option>
  <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
  </select>
  </div>
  </div>
 
  <div>
- <label for="job-deadline" class="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+ <label for="job-deadline" class="block text-sm font-medium text-gray-700 mb-1">Hạn Chót Ứng Tuyển</label>
  <input
  id="job-deadline"
  v-model="form.deadline"
@@ -359,37 +359,37 @@ onMounted(async () => {
 
  <!-- Salary -->
  <div class="premium-card p-6 space-y-5">
- <h2 class="text-sm font-semibold text-gray-900 mb-4">Compensation</h2>
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">Các Khoản Thu Nhập</h2>
 
  <div class="grid grid-cols-3 gap-4">
  <div>
- <label for="job-min-sal" class="block text-sm font-medium text-gray-700 mb-1">Min Salary</label>
+ <label for="job-min-sal" class="block text-sm font-medium text-gray-700 mb-1">Mức Lương Tối Thiểu</label>
  <input
  id="job-min-sal"
  v-model="form.minSalary"
  type="text"
  inputmode="numeric"
- placeholder="e.g. 15000000"
+ placeholder="VD: 15000000"
  class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
  :class="errors.minSalary ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
  />
  <p v-if="errors.minSalary" class="text-xs text-error mt-1">{{ errors.minSalary }}</p>
  </div>
  <div>
- <label for="job-max-sal" class="block text-sm font-medium text-gray-700 mb-1">Max Salary</label>
+ <label for="job-max-sal" class="block text-sm font-medium text-gray-700 mb-1">Mức Tối Đa</label>
  <input
  id="job-max-sal"
  v-model="form.maxSalary"
  type="text"
  inputmode="numeric"
- placeholder="e.g. 30000000"
+ placeholder="VD: 30000000"
  class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
  :class="errors.maxSalary ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
  />
  <p v-if="errors.maxSalary" class="text-xs text-error mt-1">{{ errors.maxSalary }}</p>
  </div>
  <div>
- <label for="job-currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+ <label for="job-currency" class="block text-sm font-medium text-gray-700 mb-1">Tiền Tệ</label>
  <select
  id="job-currency"
  v-model="form.currency"
@@ -408,14 +408,14 @@ onMounted(async () => {
  type="checkbox"
  class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
  />
- <span class="text-sm text-gray-700">Salary is negotiable</span>
+ <span class="text-sm text-gray-700">Mức lương có thể thương lượng sau.</span>
  </label>
  </div>
 
  <!-- Description -->
  <div class="premium-card p-6 space-y-5">
  <div class="flex items-center justify-between mb-4">
- <h2 class="text-sm font-semibold text-gray-900">Job Description</h2>
+ <h2 class="text-sm font-semibold text-gray-900">Nội Dung Chi Tiết</h2>
  <button
  type="button"
  @click="showAiPanel = !showAiPanel"
@@ -424,49 +424,49 @@ onMounted(async () => {
  ? 'btn-primary'
  : 'btn-secondary text-teal-700 bg-teal-50 hover:bg-teal-100 border-teal-200'"
  >
- ✦ AI Generate
+ ✦ AI Tự Động Viết
  </button>
  </div>
 
  <!-- AI Panel (collapsible) -->
  <div v-if="showAiPanel" class="bg-slate-900 rounded-2xl p-6 space-y-5 shadow-inner border border-slate-800 animate-slide-up text-white">
  <p class="text-sm text-slate-400">
- Provide some context and let AI generate a professional job description.
- The job title from above will be used automatically.
+ Cung cấp một vài thông tin thiết yếu, AI sẽ tự viết nên một tin tuyển dụng chuyên nghiệp.
+ Thông tin của vị trí trên sẽ được nạp tự động vào quá trình này.
  </p>
 
  <div class="grid grid-cols-2 gap-4">
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Employment Type</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Loại Hình Hợp Đồng</label>
  <select v-model="aiForm.employmentType" class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition">
- <option value="FULL_TIME">Full-time</option>
- <option value="PART_TIME">Part-time</option>
- <option value="CONTRACT">Contract</option>
- <option value="INTERNSHIP">Internship</option>
+ <option value="FULL_TIME">Toàn Thời Gian</option>
+ <option value="PART_TIME">Bán Thời Gian</option>
+ <option value="CONTRACT">Thời Vụ</option>
+ <option value="INTERNSHIP">Thực Tập</option>
  </select>
  </div>
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Tone</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Văn Phong Môi Trường</label>
  <select v-model="aiForm.tone" class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition">
- <option value="PROFESSIONAL">Professional</option>
- <option value="STARTUP">Startup</option>
- <option value="CORPORATE">Corporate</option>
+ <option value="PROFESSIONAL">Theo Quy Chuẩn Chuyên Nghiệp</option>
+ <option value="STARTUP">Trẻ Trung Môi Trường Start-up</option>
+ <option value="CORPORATE">Phong Cách Tập Đoàn</option>
  </select>
  </div>
  </div>
 
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Key Responsibilities (one per line)</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Nhiệm Vụ Chính (mỗi ý 1 dòng)</label>
  <textarea
  v-model="aiForm.keyResponsibilities"
  rows="3"
- placeholder="Design and develop frontend components&#10;Collaborate with backend team&#10;Write unit tests"
+ placeholder="Phát triển giao diện web&#10;Phối hợp nhóm BackEnd&#10;Viết test case"
  class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition resize-none placeholder-slate-500"
  />
  </div>
 
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Required Skills (one per line)</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Kỹ Năng Yêu Cầu (mỗi ý 1 dòng)</label>
  <textarea
  v-model="aiForm.requiredSkills"
  rows="3"
@@ -477,7 +477,7 @@ onMounted(async () => {
 
  <div class="grid grid-cols-2 gap-4">
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Nice-to-Have Skills (one per line)</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Kỹ Năng Ưu Tiên Thêm (mỗi ý 1 dòng)</label>
  <textarea
  v-model="aiForm.niceToHaveSkills"
  rows="2"
@@ -486,7 +486,7 @@ onMounted(async () => {
  />
  </div>
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Years of Experience</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Số Năm Kinh Nghiệm Đạt Được</label>
  <input
  v-model="aiForm.yearsOfExperience"
  type="text"
@@ -505,49 +505,49 @@ onMounted(async () => {
  class="btn-primary"
  >
  <span v-if="aiGenerating" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ aiGenerating ? 'Generating…' : '✦ Generate Description' }}
+ {{ aiGenerating ? 'Đang Khởi Tạo…' : '✦ Sinh Văn Bản Bản Nháp' }}
  </button>
  <button
  type="button"
  @click="showAiPanel = false"
  class="px-4 py-2 text-sm text-slate-400 hover:text-white transition"
  >
- Cancel
+ Hủy Ảo Hóa
  </button>
  </div>
 
  <!-- AI Result Preview -->
  <div v-if="aiResult" class="mt-6 bg-slate-800 border border-teal-500/30 rounded-xl p-5 space-y-4 animate-fade-in shadow-lg">
  <div class="flex items-center justify-between">
- <h3 class="text-sm font-bold text-teal-400">Generated Preview</h3>
+ <h3 class="text-sm font-bold text-teal-400">Xem Trước Nội Dung</h3>
  <span class="text-xs text-slate-500">{{ aiResult.generatedAt }}</span>
  </div>
 
  <div class="text-sm text-slate-300 space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
  <div>
- <strong class="text-white">Overview:</strong>
+ <strong class="text-white">Tổng Quan:</strong>
  <p class="mt-1 leading-relaxed">{{ aiResult.generatedDescription.overview }}</p>
  </div>
  <div>
- <strong class="text-white">Responsibilities:</strong>
+ <strong class="text-white">Nhiệm Vụ Của Bạn Cần Làm Là:</strong>
  <ul class="mt-1 list-disc list-inside space-y-1">
  <li v-for="(r, i) in aiResult.generatedDescription.responsibilities" :key="i">{{ r }}</li>
  </ul>
  </div>
  <div>
- <strong class="text-white">Requirements:</strong>
+ <strong class="text-white">Yêu Cầu Tham Gia:</strong>
  <ul class="mt-1 list-disc list-inside space-y-1">
  <li v-for="(r, i) in aiResult.generatedDescription.requirements" :key="i">{{ r }}</li>
  </ul>
  </div>
  <div v-if="aiResult.generatedDescription.niceToHave.length">
- <strong class="text-white">Nice to Have:</strong>
+ <strong class="text-white">Điểm Thêm:</strong>
  <ul class="mt-1 list-disc list-inside space-y-1">
  <li v-for="(r, i) in aiResult.generatedDescription.niceToHave" :key="i">{{ r }}</li>
  </ul>
  </div>
  <div v-if="aiResult.generatedDescription.benefits">
- <strong class="text-white">Benefits:</strong>
+ <strong class="text-white">Lợi Ích Và Văn Hóa:</strong>
  <p class="mt-1 leading-relaxed">{{ aiResult.generatedDescription.benefits }}</p>
  </div>
  </div>
@@ -569,14 +569,14 @@ onMounted(async () => {
  @click="applyAiResult"
  class="btn-primary"
  >
- Apply to Form
+ Viết Vào Khu Vực Bảng Form Giới Thiệu
  </button>
  <button
  type="button"
  @click="aiResult = null"
  class="btn-secondary "
  >
- Discard
+ Xóa Bỏ Đóng
  </button>
  </div>
  </div>
@@ -585,13 +585,13 @@ onMounted(async () => {
  <!-- Description textarea -->
  <div>
  <label for="job-desc" class="block text-sm font-medium text-gray-700 mb-1">
- Description <span class="text-error">*</span>
+ Phần Trình Bày Mô Tả Công Việc Chi Tiết <span class="text-error">*</span>
  </label>
  <textarea
  id="job-desc"
  v-model="form.description"
  rows="12"
- placeholder="Describe the role, team, and what the candidate will be doing…"
+ placeholder="Trình bày ngắn gọn thông tin về vai trò công việc này..."
  class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition resize-y font-mono"
  :class="errors.description ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
  />
@@ -603,12 +603,12 @@ onMounted(async () => {
 
  <!-- Requirements textarea -->
  <div>
- <label for="job-req" class="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
+ <label for="job-req" class="block text-sm font-medium text-gray-700 mb-1">Yêu Cầu Từ Vị Trí Công Việc</label>
  <textarea
  id="job-req"
  v-model="form.requirements"
  rows="6"
- placeholder="List the qualifications, experience, and skills required…"
+ placeholder="Viết các tiêu chí để sàng lọc năng lực ứng viên…"
  class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition resize-y font-mono"
  :class="errors.requirements ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
  />
@@ -626,7 +626,7 @@ onMounted(async () => {
  @click="router.push('/employer/jobs')"
  class="btn-secondary"
  >
- Cancel
+ Hủy Lên Máy Chủ
  </button>
  <button
  type="submit"
@@ -634,7 +634,7 @@ onMounted(async () => {
  class="btn-primary"
  >
  <span v-if="saving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ saving ? 'Saving…' : isEditMode ? 'Save Changes' : 'Create Draft' }}
+ {{ saving ? 'Hệ thống Đang Đẩy…' : isEditMode ? 'Lưu Thông Tin ' : 'Gửi Yêu Cầu Tạo Nháp Mới' }}
  </button>
  </div>
  </form>

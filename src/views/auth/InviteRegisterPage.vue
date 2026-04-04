@@ -62,11 +62,18 @@ onMounted(() => {
 </script>
 
 <template>
- <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
- <div class="w-full max-w-md mx-auto mb-8 text-center">
- <router-link to="/" class="text-3xl font-extrabold text-teal-600 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
- </div>
+ <div class="min-h-screen flex flex-col bg-slate-50">
 
+ <!-- Auth Header -->
+ <header class="sticky top-0 z-50 flex items-center justify-center h-14 px-4 bg-white/95 backdrop-blur-md border-b border-slate-200/60 shadow-sm">
+ <router-link to="/" class="flex items-center gap-2">
+ <img src="/assets/img/vietrecruit-icon.svg" alt="VietRecruit" class="h-7 w-7" />
+ <span class="text-base font-extrabold text-[#007070] tracking-tight">VietRecruit</span>
+ </router-link>
+ </header>
+
+ <!-- Form area -->
+ <div class="flex-1 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
  <div class="w-full max-w-md mx-auto">
  <div class="premium-card shadow-xl p-8 sm:p-10 animate-fade-in">
  <div class="text-center mb-8">
@@ -145,6 +152,7 @@ onMounted(() => {
  {{ loading ? 'Joining…' : 'Join team' }}
  </button>
  </form>
+ </div>
  </div>
  </div>
  </div>
