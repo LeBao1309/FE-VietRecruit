@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import { useTheme } from '@/composables/useTheme'
+import AppHeader from '@/components/common/AppHeader.vue'
 
 const auth = useAuthStore()
-const { isDark, toggleTheme } = useTheme()
 const menuOpen = ref(false)
 
 const navItems = [
@@ -16,36 +15,18 @@ const navItems = [
 <template>
  <div class="flex flex-col md:flex-row min-h-screen">
  <!-- Mobile Header -->
- <header class="md:hidden flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
- <div class="flex items-center gap-2 text-white">
- <span class="text-xl">⚙</span>
- <span class="text-sm font-bold tracking-tight">VietRecruit Quản Trị Viên</span>
- </div>
- <div class="flex items-center gap-3">
- <button @click="toggleTheme" class="text-gray-400 hover:text-white transition" aria-label="Toggle dark mode">
- <span v-if="isDark">☀️</span>
- <span v-else>🌙</span>
- </button>
- <button @click="menuOpen = !menuOpen" class="text-gray-400 hover:text-white transition p-1" aria-label="Toggle menu">
- <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
- </button>
- </div>
- </header>
+ <AppHeader variant="dark" :menu-open="menuOpen" @toggle-menu="menuOpen = !menuOpen" />
 
  <!-- Sidebar -->
  <aside 
  :class="menuOpen ? 'flex' : 'hidden md:flex'"
  class="w-full md:w-[240px] bg-gray-900 flex-col shrink-0"
  >
- <div class="hidden md:flex items-center justify-between p-5 border-b border-white/5">
+ <div class="hidden md:flex items-center p-5 border-b border-white/5">
  <router-link to="/admin/users" class="flex items-center gap-2 hover:opacity-80 transition text-white">
  <span class="text-xl">⚙</span>
  <span class="text-sm font-bold tracking-tight">VietRecruit Quản Trị Viên</span>
  </router-link>
- <button @click="toggleTheme" class="text-gray-400 hover:text-white transition" aria-label="Toggle dark mode">
- <span v-if="isDark">☀️</span>
- <span v-else>🌙</span>
- </button>
  </div>
 
  <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">

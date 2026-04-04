@@ -196,7 +196,7 @@ onMounted(async () => {
  <p class="text-sm font-bold text-slate-900 truncate group-hover:text-teal-600 :text-teal-400 transition-colors">{{ rec.title }}</p>
  <p class="text-xs font-medium text-slate-400 mt-1">{{ rec.companyName }}</p>
  </div>
- <span class="text-sm font-black shrink-0" :class="rec.matchScore >= 70 ? 'text-emerald-500' : 'text-teal-500'">
+ <span v-if="hasCv" class="text-sm font-black shrink-0" :class="rec.matchScore >= 70 ? 'text-emerald-500' : 'text-teal-500'">
  {{ rec.matchScore }}%
  </span>
  </div>

@@ -19,6 +19,7 @@ const dragOver = ref(false)
 
 // ── AI Improvement ──
 const analyzing = ref(false)
+const analysisUsed = ref(false)
 const improvement = ref<CvImprovementResponse | null>(null)
 
 // ── Computed ──
@@ -133,6 +134,7 @@ async function runAnalysis(): Promise<void> {
  ui.toastWarning('Chưa có CV', 'Vui lòng tải lên CV trước khi phân tích.')
  return
  }
+ analysisUsed.value = true
  analyzing.value = true
  try {
  const result = await candidateService.getCvImprovement()
@@ -253,17 +255,22 @@ onMounted(loadProfile)
  <h2 class="text-lg font-bold text-slate-900 mb-1">AI Phân Tích CV</h2>
  <p class="text-sm font-medium text-slate-500 max-w-lg">Nhận các gợi ý tối ưu từ AI giúp CV của bạn vượt qua các hệ thống sàng lọc và thu hút nhà tuyển dụng.</p>
  </div>
- <button
- @click="runAnalysis"
- :disabled="analyzing || !hasCv"
- class="btn-primary py-2.5 px-6 shrink-0 flex items-center justify-center gap-2"
- >
- <span v-if="analyzing" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- <svg v-else class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
- </svg>
- {{ analyzing ? 'Đang Phân Tích…' : 'Bắt Đầu Phân Tích CV' }}
- </button>
+ <div class="flex flex-col items-end gap-1.5 shrink-0">
+  <button
+  @click="runAnalysis"
+  :disabled="analyzing || !hasCv || analysisUsed"
+  class="btn-primary py-2.5 px-6 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+  >
+  <span v-if="analyzing" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+  <svg v-else class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+  {{ analyzing ? 'Đang Phân Tích…' : 'Bắt Đầu Phân Tích CV' }}
+  </button>
+  <p v-if="analysisUsed && !analyzing" class="text-xs text-slate-400">
+  Tạm thời không khả dụng — tải lại trang để dùng lại.
+  </p>
+ </div>
  </div>
 
  <div v-if="!hasCv" class="bg-slate-50 border border-slate-200 rounded-xl p-10 text-center">

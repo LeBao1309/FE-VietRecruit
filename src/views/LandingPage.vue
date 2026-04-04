@@ -1,12 +1,12 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
 import MiniStepper from '@/components/candidate/MiniStepper.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
+import PublicNavbar from '@/components/common/PublicNavbar.vue'
 import { planService } from '@/services/subscriptionService'
 import type { PlanResponse } from '@/types/subscription'
 
 const isAnnual = ref(true)
-const auth = useAuthStore()
 
 const rawPlans = ref<PlanResponse[]>([])
 
@@ -30,13 +30,15 @@ function deriveButtonText(code: string): string {
   return 'Dùng Thử'
 }
 
+
+
 const plans = computed(() =>
   rawPlans.value.map(plan => ({
     id: plan.id,
     name: plan.name,
     desc: plan.description ?? '',
     priceMonthly: plan.priceMonthly,
-    priceAnnual: Math.round(plan.priceYearly / 12),
+    priceAnnual: Math.round(plan.priceMonthly * 0.8),
     features: deriveFeatures(plan),
     buttonText: deriveButtonText(plan.code),
     isPopular: plan.code.toUpperCase().includes('PRO'),
@@ -52,28 +54,13 @@ onMounted(async () => {
 <template>
  <div class="min-h-screen flex flex-col font-sans bg-white selection:bg-teal-100 selection:text-teal-900">
  <!-- Navbar -->
- <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
- <div class="flex items-center gap-2">
- <img src="/assets/img/vietrecruit-icon.svg" alt="VietRecruit Logo" class="h-8 w-8" />
- <span class="text-2xl font-bold text-[#008c8c] tracking-tight">VietRecruit</span>
- </div>
- <nav class="hidden md:flex items-center gap-8">
+ <PublicNavbar>
+ <template #nav>
  <a href="#features" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Tính Năng</a>
  <a href="#demo" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Sản Phẩm</a>
  <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Bảng Giá</a>
- </nav>
- <div class="flex items-center gap-4">
- <template v-if="!auth.isAuthenticated">
- <router-link to="/login" class="text-sm font-bold text-slate-700 hover:text-[#008c8c] transition-colors">Đăng Nhập</router-link>
- <router-link to="/register" class="btn-primary px-5 py-2 hover:shadow-lg transition-all rounded-full">Bắt Đầu</router-link>
  </template>
- <template v-else>
- <span class="text-sm font-bold text-slate-700">{{ auth.user?.fullName }}</span>
- </template>
- </div>
- </div>
- </header>
+ </PublicNavbar>
 
   <!-- 1. Hero Section -->
  <section class="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
@@ -341,94 +328,61 @@ onMounted(async () => {
  </div>
  </div>
 
- <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
- <div v-for="plan in plans" :key="plan.name" 
- class="relative bg-white rounded-3xl p-8 border"
- :class="plan.isPopular ? 'border-[#008c8c] shadow-2xl scale-100 md:scale-105 z-10' : 'border-slate-200 shadow-sm'">
- 
- <div v-if="plan.isPopular" class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#008c8c] text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
- Phổ biến nhất
- </div>
+ <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto">
+ <div v-for="plan in plans" :key="plan.name"
+ class="relative flex flex-col bg-white rounded-2xl p-6 border transition-all duration-300 hover:shadow-lg"
+ :class="plan.isPopular
+  ? 'border-[#008c8c] shadow-xl ring-2 ring-[#008c8c]/15 bg-gradient-to-b from-teal-50/40 to-white'
+  : 'border-slate-200 shadow-sm'">
 
- <h3 class="text-2xl font-bold text-slate-900 mb-2">{{ plan.name }}</h3>
- <p class="text-slate-500 text-sm mb-6 h-10">{{ plan.desc }}</p>
- 
- <div class="mb-8 flex items-baseline gap-1">
- <span class="text-4xl font-extrabold text-slate-900">${{ isAnnual ? plan.priceAnnual : plan.priceMonthly }}</span>
- <span class="text-slate-500 font-medium">/tháng</span>
- </div>
+  <!-- Popular badge -->
+  <div v-if="plan.isPopular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#008c8c] text-white px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
+  Phổ biến nhất
+  </div>
 
- <ul class="space-y-4 mb-8">
- <li v-for="feature in plan.features" :key="feature" class="flex items-start gap-3 text-slate-600 text-sm font-medium">
- <svg class="w-5 h-5 text-[#008c8c] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
- {{ feature }}
- </li>
- </ul>
+  <!-- Plan name + desc -->
+  <div class="mb-5">
+  <h3 class="text-lg font-bold text-slate-900 mb-1">{{ plan.name }}</h3>
+  <p class="text-slate-500 text-xs leading-relaxed min-h-[2.5rem]">{{ plan.desc }}</p>
+  </div>
 
- <router-link to="/register" 
- class="block w-full py-3.5 px-4 rounded-xl text-center font-bold transition-all"
- :class="plan.isPopular ? 'bg-[#008c8c] hover:bg-teal-700 text-white shadow-lg shadow-teal-500/25' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'">
- {{ plan.buttonText }}
- </router-link>
+  <!-- Price -->
+  <div class="mb-5">
+  <div class="flex items-baseline gap-1">
+   <span class="text-3xl font-extrabold" :class="plan.isPopular ? 'text-[#008c8c]' : 'text-slate-900'">
+   {{ (isAnnual ? plan.priceAnnual : plan.priceMonthly).toLocaleString('vi-VN') }}₫
+   </span>
+   <span class="text-slate-400 text-xs font-medium">/tháng</span>
+  </div>
+  <p v-if="isAnnual" class="text-[11px] text-slate-400 mt-0.5">
+   Thanh toán {{ (plan.priceAnnual * 12).toLocaleString('vi-VN') }}₫/năm
+  </p>
+  </div>
+
+  <!-- Features -->
+  <ul class="space-y-2.5 mb-6 flex-1">
+  <li v-for="feature in plan.features" :key="feature" class="flex items-start gap-2 text-slate-600 text-xs font-medium">
+   <svg class="w-4 h-4 text-[#008c8c] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+   </svg>
+   {{ feature }}
+  </li>
+  </ul>
+
+  <!-- CTA -->
+  <router-link to="/register"
+  class="block w-full py-2.5 px-4 rounded-xl text-center text-sm font-bold transition-all"
+  :class="plan.isPopular
+   ? 'bg-[#008c8c] hover:bg-[#007070] text-white shadow-md shadow-teal-500/20 hover:-translate-y-0.5'
+   : 'bg-slate-100 hover:bg-slate-200 text-slate-800 hover:-translate-y-0.5'">
+  {{ plan.buttonText }}
+  </router-link>
  </div>
  </div>
  </section>
 
  <!-- 5. Footer -->
- <footer class="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
- <div class="col-span-1 md:col-span-1">
- <div class="flex items-center gap-2 mb-6">
- <img src="/assets/img/vietrecruit-icon.svg" alt="VietRecruit Logo" class="h-8 w-8 brightness-0 invert" />
- <span class="text-2xl font-bold text-white tracking-tight">VietRecruit</span>
- </div>
- <p class="text-sm text-slate-400 mb-6">
- Xây dựng hệ sinh thái công cụ tuyển dụng hiện đại thế hệ mới cho các tổ chức luôn tiên phong toàn cầu.
- </p>
- <div class="flex items-center gap-4 text-slate-400">
- <a href="#" class="hover:text-white transition-colors"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
- <a href="#" class="hover:text-white transition-colors"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
- </div>
- </div>
- 
- <div class="col-span-1">
- <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Sản Phẩm</h4>
- <ul class="space-y-3 text-sm">
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Tính năng</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Bảng giá</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Bảo mật</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Changelog</a></li>
- </ul>
- </div>
-
- <div class="col-span-1">
- <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Công Ty</h4>
- <ul class="space-y-3 text-sm">
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Giới thiệu</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Tuyển dụng</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Blog</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Liên hệ</a></li>
- </ul>
- </div>
-
- <div class="col-span-1">
- <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-xs">Pháp Lý</h4>
- <ul class="space-y-3 text-sm">
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Chính sách bảo mật</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Điều khoản dịch vụ</a></li>
- <li><a href="#" class="hover:text-[#008c8c] transition-colors">Chính sách Cookie</a></li>
- </ul>
- </div>
- </div>
- 
- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-slate-800 text-xs text-slate-500 flex flex-col md:flex-row justify-between items-center gap-4">
- <p>&copy; 2026 VietRecruit, Inc. Tất cả quyền được bảo lưu.</p>
- <div class="flex items-center gap-2">
- <span class="w-2 h-2 rounded-full bg-teal-500"></span>
- Hệ thống hoạt động bình thường
- </div>
- </div>
- </footer>
+ <AppFooter />
  </div>
 </template>
 

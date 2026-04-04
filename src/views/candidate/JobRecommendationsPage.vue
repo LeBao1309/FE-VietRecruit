@@ -1,23 +1,29 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { candidateService } from '@/services/candidateService'
+import type { CandidateProfileResponse } from '@/types/candidate'
 import type { JobRecommendationResponse } from '@/types/job'
 
 const router = useRouter()
 
 // ── State ──
 const loading = ref(true)
+const profile = ref<CandidateProfileResponse | null>(null)
 const recommendations = ref<JobRecommendationResponse[]>([])
+
+const hasCv = computed(() => !!profile.value?.defaultCvUrl)
 
 // ── Load ──
 async function loadRecommendations(): Promise<void> {
  loading.value = true
  try {
- const result = await candidateService.getRecommendations(20)
- if (result.data) {
- recommendations.value = result.data
- }
+ const [profileResult, recsResult] = await Promise.all([
+  candidateService.getProfile(),
+  candidateService.getRecommendations(20),
+ ])
+ if (profileResult.data) profile.value = profileResult.data
+ if (recsResult.data) recommendations.value = recsResult.data
  } finally {
  loading.value = false
  }
@@ -83,8 +89,8 @@ onMounted(loadRecommendations)
  @click="goToJob(rec.jobId)"
  class="premium-card p-6 flex flex-col sm:flex-row sm:items-center sm:gap-6 hover:shadow-lg hover:-translate-y-0.5 hover:border-teal-500/30 :border-teal-500/30 transition-all duration-300 cursor-pointer group"
  >
- <!-- Match score -->
- <div class="relative w-16 h-16 shrink-0 mb-4 sm:mb-0 drop-shadow-sm">
+ <!-- Match score (only when CV is uploaded) -->
+ <div v-if="hasCv" class="relative w-16 h-16 shrink-0 mb-4 sm:mb-0 drop-shadow-sm">
  <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
  <circle cx="18" cy="18" r="15.5" fill="none" class="stroke-slate-200 " stroke-width="3" />
  <circle
@@ -109,7 +115,7 @@ onMounted(loadRecommendations)
  <span v-if="rec.location" class="mx-1.5 opacity-50">•</span>
  <span v-if="rec.location">{{ rec.location }}</span>
  </p>
- <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 ">
+ <div v-if="hasCv" class="bg-slate-50 p-3 rounded-lg border border-slate-100 ">
  <p class="text-xs font-medium text-slate-600 line-clamp-2 leading-relaxed">
  <span class="font-bold text-slate-700 mr-1">Lý do phù hợp:</span>{{ rec.matchReason }}
  </p>

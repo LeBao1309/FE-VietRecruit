@@ -5,8 +5,9 @@ import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
 import { jobService } from '@/services/jobService'
 import { applicationService } from '@/services/applicationService'
+import PublicNavbar from '@/components/common/PublicNavbar.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 import type { JobResponse } from '@/types/job'
-import FloatingBackButton from '@/components/common/FloatingBackButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,35 +110,9 @@ onMounted(loadJob)
 </script>
 
 <template>
- <div class="min-h-screen flex flex-col bg-slate-50 ">
- <FloatingBackButton />
+ <div class="min-h-screen flex flex-col bg-slate-50">
  <!-- Header -->
- <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-30 transition-all duration-300">
- <div class="max-w-5xl mx-auto flex items-center justify-between">
- <div class="flex items-center gap-3">
- <router-link to="/" class="text-2xl font-extrabold text-teal-600 tracking-tight transition-colors hover:text-teal-500">VietRecruit</router-link>
- </div>
- <nav class="flex items-center gap-2 sm:gap-4">
- <router-link
- to="/jobs"
- class="px-4 py-2.5 text-sm font-bold text-teal-600 bg-teal-50 rounded-xl transition-colors hover:bg-teal-100 :bg-teal-500/20"
- >
- Browse Jobs
- </router-link>
- <template v-if="!auth.isAuthenticated">
- <router-link to="/login" class="px-4 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 :text-white rounded-xl hover:bg-slate-100 :bg-slate-800 transition-colors">
- Login
- </router-link>
- <router-link to="/register" class="btn-primary py-2.5 px-5 shrink-0 shadow-sm hover:shadow-md">
- Get Started
- </router-link>
- </template>
- <template v-else>
- <span class="text-sm font-bold text-slate-500">{{ auth.user?.fullName }}</span>
- </template>
- </nav>
- </div>
- </header>
+ <PublicNavbar />
 
  <!-- Loading -->
  <main v-if="loading" class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
@@ -165,10 +140,28 @@ onMounted(loadJob)
  <!-- Job Detail -->
  <main v-else class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
  <!-- Back link -->
- <div class="mb-8">
+ <div class="mb-6">
  <router-link to="/jobs" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-teal-600 :text-teal-400 font-bold transition-colors">
  &larr; Back to Jobs
  </router-link>
+ </div>
+
+ <!-- Guest nudge banner -->
+ <div v-if="!auth.isAuthenticated" class="mb-8 flex items-center justify-between gap-4 px-5 py-4 rounded-2xl bg-teal-50 border border-teal-200">
+ <div class="flex items-center gap-3">
+ <div class="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center shrink-0 text-teal-600">
+ <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ </div>
+ <p class="text-sm font-semibold text-teal-800">Đăng nhập để xem mức lương, nhận gợi ý việc làm và nộp đơn ngay.</p>
+ </div>
+ <div class="flex items-center gap-2 shrink-0">
+ <router-link to="/login" class="px-4 py-2 text-sm font-bold text-teal-700 bg-white border border-teal-300 rounded-xl hover:bg-teal-50 transition-colors shadow-sm">
+ Đăng Nhập
+ </router-link>
+ <router-link to="/register" class="px-4 py-2 text-sm font-bold text-white bg-[#008c8c] rounded-xl hover:bg-[#007070] transition-colors shadow-sm">
+ Đăng Ký
+ </router-link>
+ </div>
  </div>
 
  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -236,11 +229,12 @@ onMounted(loadJob)
 
  <!-- Salary -->
  <div class="flex items-start gap-3">
- <div class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center shrink-0 text-teal-600 ">
+ <div class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center shrink-0 text-teal-600">
  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
  </div>
  <div>
  <span class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 leading-tight">Monthly Salary</span>
+ <template v-if="auth.isAuthenticated">
  <span class="text-sm font-extrabold text-emerald-600 mt-0.5 block">
  <template v-if="job.minSalary || job.maxSalary">
  {{ formatSalary(job.minSalary) }} – {{ formatSalary(job.maxSalary) }} {{ job.currency ?? 'VND' }}
@@ -249,6 +243,11 @@ onMounted(loadJob)
  <template v-else>Not specified</template>
  </span>
  <span v-if="job.isNegotiable" class="text-xs font-bold text-slate-400 mt-0.5 block">(Negotiable based on experience)</span>
+ </template>
+ <router-link v-else to="/login" class="inline-flex items-center gap-1.5 mt-1 px-3 py-1 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold border border-slate-200 hover:border-teal-300 hover:text-teal-600 transition-colors">
+ <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+ Đăng nhập để xem
+ </router-link>
  </div>
  </div>
 
@@ -306,11 +305,7 @@ onMounted(loadJob)
  </main>
 
  <!-- Footer -->
- <footer class="bg-white border-t border-slate-200 px-6 py-8 mt-auto">
- <div class="max-w-5xl mx-auto text-center text-sm font-bold text-slate-400">
- © {{ new Date().getFullYear() }} VietRecruit. All rights reserved.
- </div>
- </footer>
+ <AppFooter />
 
  <!-- Apply Modal -->
  <Teleport to="body">

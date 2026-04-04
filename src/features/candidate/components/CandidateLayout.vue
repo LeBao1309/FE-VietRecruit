@@ -3,7 +3,7 @@ import CandidateNavbar from './CandidateNavbar.vue'
 </script>
 
 <template>
- <div class="min-h-screen bg-surface-soft">
+ <div class="min-h-screen bg-page">
  <CandidateNavbar />
  <router-view />
  </div>

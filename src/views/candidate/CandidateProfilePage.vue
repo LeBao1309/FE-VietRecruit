@@ -258,14 +258,17 @@ onMounted(loadProfile)
  </div>
  <div>
  <label for="position-level" class="block text-sm font-bold text-slate-700 mb-2">Cấp Bậc Quan Tâm</label>
+ <div class="relative">
  <select
  id="position-level"
  v-model="form.desiredPositionLevel"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
+ class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="">— Lựa Chọn —</option>
+ <option value="" disabled>— Lựa Chọn —</option>
  <option v-for="level in positionLevels" :key="level" :value="level">{{ formatLabel(level) }}</option>
  </select>
+ <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ </div>
  </div>
  </div>
 
@@ -283,14 +286,17 @@ onMounted(loadProfile)
  </div>
  <div>
  <label for="primary-lang" class="block text-sm font-bold text-slate-700 mb-2">Ngoại Ngữ Chính</label>
+ <div class="relative">
  <select
  id="primary-lang"
  v-model="form.primaryLanguage"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
+ class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="">— Lựa Chọn —</option>
+ <option value="" disabled>— Lựa Chọn —</option>
  <option v-for="lang in languages" :key="lang" :value="lang">{{ lang }}</option>
  </select>
+ <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ </div>
  </div>
  </div>
  </div>
@@ -302,14 +308,17 @@ onMounted(loadProfile)
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
  <label for="edu-level" class="block text-sm font-bold text-slate-700 mb-2">Trình Độ Học Vấn</label>
+ <div class="relative">
  <select
  id="edu-level"
  v-model="form.educationLevel"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
+ class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="">— Lựa Chọn —</option>
+ <option value="" disabled>— Lựa Chọn —</option>
  <option v-for="level in educationLevels" :key="level" :value="level">{{ formatLabel(level) }}</option>
  </select>
+ <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ </div>
  </div>
  <div>
  <label for="edu-major" class="block text-sm font-bold text-slate-700 mb-2">Chuyên Ngành</label>
@@ -326,14 +335,17 @@ onMounted(loadProfile)
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
  <label for="work-type" class="block text-sm font-bold text-slate-700 mb-2">Hình Thức Công Việc</label>
+ <div class="relative">
  <select
  id="work-type"
  v-model="form.workType"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
+ class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="">— Lựa Chọn —</option>
+ <option value="" disabled>— Lựa Chọn —</option>
  <option v-for="t in workTypes" :key="t" :value="t">{{ formatLabel(t) }}</option>
  </select>
+ <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ </div>
  </div>
  <div>
  <label for="available-from" class="block text-sm font-bold text-slate-700 mb-2">Thời Gian Bắt Đầu Dự Kiến</label>

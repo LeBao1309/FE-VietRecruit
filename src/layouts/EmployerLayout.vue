@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/composables/useTheme";
+import AppHeader from "@/components/common/AppHeader.vue";
 
 const auth = useAuthStore();
 const { isDark, toggleTheme } = useTheme();
@@ -11,44 +12,7 @@ const menuOpen = ref(false);
 <template>
   <div class="flex flex-col md:flex-row min-h-screen">
     <!-- Mobile Header -->
-    <header
-      class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200/60 shadow-sm z-10 relative"
-    >
-      <router-link
-        to="/employer/dashboard"
-        class="text-lg font-extrabold text-[#007070] tracking-tight"
-        >VietRecruit</router-link
-      >
-      <div class="flex items-center gap-3">
-        <button
-          @click="toggleTheme"
-          class="text-slate-500 hover:text-teal-600 transition-colors p-1"
-          aria-label="Toggle dark mode"
-        >
-          <span v-if="isDark">☀️</span>
-          <span v-else>🌙</span>
-        </button>
-        <button
-          @click="menuOpen = !menuOpen"
-          class="text-slate-500 hover:text-teal-600 transition-colors p-1"
-          aria-label="Toggle menu"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            ></path>
-          </svg>
-        </button>
-      </div>
-    </header>
+    <AppHeader :menu-open="menuOpen" @toggle-menu="menuOpen = !menuOpen" />
 
     <aside
       :class="menuOpen ? 'flex' : 'hidden md:flex'"
