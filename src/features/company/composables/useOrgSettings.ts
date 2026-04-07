@@ -3,12 +3,12 @@
 // DepartmentsTab, LocationsTab, and CategoriesTab.
 
 import { storeToRefs } from 'pinia'
-import { useOrgStore } from '@/core/stores/org.store'
+import { useOrgStore } from '@/stores/orgStore'
 import type {
   DepartmentRequest,
   LocationRequest,
   CategoryRequest,
-} from '@/features/company/types/org.dto'
+} from '@/types/organization'
 
 export function useOrgSettings() {
   const store = useOrgStore()

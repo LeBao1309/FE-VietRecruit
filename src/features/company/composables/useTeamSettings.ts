@@ -2,8 +2,8 @@
 // Thin wrapper for useTeamStore — exposes state + actions to TeamManagementTab.
 
 import { storeToRefs } from 'pinia'
-import { useTeamStore } from '@/core/stores/team.store'
-import type { CreateInvitationRequest, Role } from '@/features/company/types/team.dto'
+import { useTeamStore } from '@/stores/teamStore'
+import type { CreateInvitationRequest } from '@/types/invitation'
 
 export function useTeamSettings() {
   const store = useTeamStore()
@@ -19,7 +19,7 @@ export function useTeamSettings() {
     // actions
     fetchAll:         ()                                  => store.fetchAll(),
     sendInvitation:   (p: CreateInvitationRequest)        => store.sendInvitation(p),
-    updateRole:       (memberId: string, role: Role)      => store.updateRole(memberId, role),
+    updateRole:       (memberId: string, role: string)     => store.updateRole(memberId, role),
     removeMember:     (memberId: string)                  => store.removeMember(memberId),
     revokeInvitation: (invitationId: string)              => store.revokeInvitation(invitationId),
     clearError:       ()                                  => store.clearError(),

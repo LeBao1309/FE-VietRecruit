@@ -4,7 +4,7 @@
 
 import { ref } from 'vue'
 import { aiInterviewService } from '@/features/interview/services/ai-interview.service'
-import { getErrorMessage } from '@/core/utils/error'
+import { extractError } from '@/services/api-error'
 import type { AiQuestion, QuestionDifficulty } from '@/features/interview/types/ai-interview.dto'
 
 export function useAiInterviewQuestions() {
@@ -23,7 +23,7 @@ export function useAiInterviewQuestions() {
       const data = await aiInterviewService.generateQuestions(context)
       questions.value = data.questions
     } catch (e) {
-      error.value = getErrorMessage(e)
+      error.value = extractError(e).message
     } finally {
       isGenerating.value = false
     }

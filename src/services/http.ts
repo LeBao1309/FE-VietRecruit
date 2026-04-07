@@ -1,6 +1,16 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiResponse } from '@/types/common'
 import type { TokenRefreshResponse } from '@/types/auth'
+import type { RoleCode } from '@/types/enums'
+
+export interface JwtPayload {
+  sub: string
+  roles: RoleCode[]
+  exp: number
+  iat: number
+  iss?: string
+  aud?: string
+}
 
 // ── Axios Instance ───────────────────────────────────────────────────
 const http = axios.create({
@@ -33,7 +43,7 @@ export function clearTokens(): void {
   localStorage.removeItem(REFRESH_KEY)
 }
 
-export function parseJwt(token: string): any {
+export function parseJwt(token: string): JwtPayload | null {
   try {
     const base64Url = token.split('.')[1]
     if (!base64Url) return null
@@ -44,8 +54,8 @@ export function parseJwt(token: string): any {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join(''),
     )
-    return JSON.parse(jsonPayload)
-  } catch (error) {
+    return JSON.parse(jsonPayload) as JwtPayload
+  } catch {
     return null
   }
 }
