@@ -158,7 +158,7 @@ onMounted(async () => {
  <button class="bg-white border border-slate-200 hover:border-teal-500 :border-teal-400 p-5 rounded-2xl flex items-center gap-4 text-left transition hover:shadow-md hover:-translate-y-0.5 group" @click="goToBilling">
  <span class="text-3xl shrink-0 group-hover:scale-110 transition-transform">📄</span>
  <span class="flex-1">
- <strong class="block text-sm font-bold text-slate-900 mb-0.5">Truy Suất Lịch Sử Tính Phí</strong>
+ <strong class="block text-sm font-bold text-slate-900 mb-0.5">Lịch Sử Thanh Toán</strong>
  <span class="block text-xs font-medium text-slate-500">Xem lại lưu lược hóa đơn</span>
  </span>
  <span class="text-2xl text-slate-300 group-hover:translate-x-1 transition-transform">›</span>
@@ -179,15 +179,15 @@ onMounted(async () => {
  <div v-if="showCancelConfirm" class="premium-modal-backdrop">
  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click.self="showCancelConfirm = false" />
  <div class="premium-modal-content w-full max-w-sm">
- <h2 class="text-xl font-extrabold text-slate-900 mb-3">Xác Thực Hủy Thuê Dịch Vụ?</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-3">Huỷ Gói Dịch Vụ?</h2>
  <p class="text-sm font-medium text-slate-500 mb-8 leading-relaxed">
- Gói của bạn sẽ bị tắt đi tác quyền khi hết chi kỳ duy trì. Qua đó, nhà mình sẽ không còn tham gia tính năng ưu Việt cấp cao.
+ Gói của bạn sẽ hết hiệu lực vào cuối kỳ thanh toán hiện tại. Sau đó, bạn sẽ không còn truy cập được các tính năng cao cấp.
  </p>
  <div class="flex justify-end gap-3">
- <button class="btn-secondary" @click="showCancelConfirm = false">Ra Khỏi Đây</button>
+ <button class="btn-secondary" @click="showCancelConfirm = false">Không Huỷ</button>
  <button class="btn-primary bg-rose-600 hover:bg-rose-700 shadow-sm" :disabled="cancelling" @click="confirmCancel">
  <span v-if="cancelling" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- <span v-else>Hủy Luôn Nhé</span>
+ <span v-else>Xác Nhận Huỷ</span>
  </button>
  </div>
  </div>

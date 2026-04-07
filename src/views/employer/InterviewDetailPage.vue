@@ -368,7 +368,7 @@ onBeforeUnmount(() => {
  @click="loadQuestions"
  class="text-xs text-slate-500 hover:text-slate-700 :text-slate-200 font-bold transition-colors uppercase tracking-wider"
  >
- Load Questions
+ Tải Câu Hỏi
  </button>
  <button
  @click="handleGenerateQuestions"

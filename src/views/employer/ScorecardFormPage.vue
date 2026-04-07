@@ -26,9 +26,9 @@ const averagePreview = computed(() => {
 })
 
 const resultOptions: { value: ScorecardResult; label: string; class: string; desc: string }[] = [
- { value: 'PASS', label: 'Pass', class: 'border-green-400 bg-green-50 text-green-700', desc: 'Recommend the candidate' },
- { value: 'CONSIDERING', label: 'Considering', class: 'border-amber-400 bg-amber-50 text-amber-700', desc: 'Need more evaluation' },
- { value: 'FAIL', label: 'Fail', class: 'border-red-400 bg-red-50 text-red-700', desc: 'Do not recommend' },
+ { value: 'PASS', label: 'Đạt', class: 'border-green-400 bg-green-50 text-green-700', desc: 'Đề xuất ứng viên này' },
+ { value: 'CONSIDERING', label: 'Cân Nhắc', class: 'border-amber-400 bg-amber-50 text-amber-700', desc: 'Cần đánh giá thêm' },
+ { value: 'FAIL', label: 'Không Đạt', class: 'border-red-400 bg-red-50 text-red-700', desc: 'Không đề xuất' },
 ]
 
 // ── Validation ──
@@ -58,11 +58,11 @@ async function handleSubmit(): Promise<void> {
 
 // ── Helpers ──
 function getScoreLabel(score: number): string {
- if (score >= 9) return 'Excellent'
- if (score >= 7) return 'Good'
- if (score >= 5) return 'Average'
- if (score >= 3) return 'Below Average'
- return 'Poor'
+ if (score >= 9) return 'Xuất Sắc'
+ if (score >= 7) return 'Tốt'
+ if (score >= 5) return 'Trung Bình'
+ if (score >= 3) return 'Dưới Trung Bình'
+ return 'Yếu'
 }
 
 function getScoreColor(score: number): string {
@@ -89,7 +89,7 @@ onMounted(async () => {
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.push(`/employer/interviews/${interviewId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Rút Lại Thay Đổi
+ ‹ Quay lại
  </button>
  </div>
 
@@ -98,14 +98,14 @@ onMounted(async () => {
  <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm">
  ✓
  </div>
- <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Thư Đánh Giá Đã Nghiệm Thu</h2>
- <p class="text-slate-500 mb-8">Kết quả nhận xét bạn điền đã ghi nhận lưu trên bộ nhớ.</p>
+ <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Phiếu Đánh Giá Đã Lưu</h2>
+ <p class="text-slate-500 mb-8">Nhận xét của bạn đã được ghi nhận thành công.</p>
  <div class="flex justify-center gap-3">
  <button
  @click="router.push(`/employer/interviews/${interviewId}`)"
  class="btn-primary"
  >
- Về Lại Form Điểm Chuyên Môn Ngắn Nhất
+ Về Trang Phỏng Vấn
  </button>
  </div>
  </div>
@@ -114,7 +114,7 @@ onMounted(async () => {
  <div v-else class="space-y-6">
  <!-- Header -->
  <div class="premium-card p-6 border-l-4 border-l-teal-500">
- <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Cập Nhật Bài Xếp Điểm</h1>
+ <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Điền Phiếu Đánh Giá</h1>
  <p v-if="interviewStore.currentInterview" class="text-sm font-medium text-slate-500">
  {{ interviewStore.currentInterview.title }}
  </p>
@@ -122,13 +122,13 @@ onMounted(async () => {
 
  <!-- Score Sliders -->
  <div class="premium-card p-8 space-y-8">
- <h2 class="text-lg font-bold text-slate-900 mb-2">Đấu Các Cột Tham Chiếu</h2>
+ <h2 class="text-lg font-bold text-slate-900 mb-2">Chấm Điểm Các Tiêu Chí</h2>
 
  <!-- Skill Score -->
  <div>
  <div class="flex items-center justify-between mb-2">
  <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
- Tinh Thông Nghiệp Bản Đầu Nào
+ Kỹ Năng Chuyên Môn
  </label>
  <div class="flex items-center gap-2">
  <span class="text-2xl font-bold tabular-nums" :class="getScoreColor(skillScore)">
@@ -147,11 +147,11 @@ onMounted(async () => {
  :style="{ background: getSliderBackground(skillScore) }"
  />
  <div class="flex items-center justify-between mt-1">
- <span class="text-[10px] text-gray-400">1 — Tệ Hại</span>
+ <span class="text-[10px] text-gray-400">1 — Kém</span>
  <span class="text-xs font-medium" :class="getScoreColor(skillScore)">
  {{ getScoreLabel(skillScore) }}
  </span>
- <span class="text-[10px] text-gray-400">10 — Đỉnh Lắmm</span>
+ <span class="text-[10px] text-gray-400">10 — Xuất Sắc</span>
  </div>
  <p v-if="formErrors.skill" class="text-[11px] text-error mt-1">{{ formErrors.skill }}</p>
  </div>
@@ -160,7 +160,7 @@ onMounted(async () => {
  <div>
  <div class="flex items-center justify-between mb-2">
  <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
- Chuẩn Hội Trưởng Giao Thương Văn Hóa Kỹ Năng Mềm
+ Thái Độ & Văn Hóa
  </label>
  <div class="flex items-center gap-2">
  <span class="text-2xl font-bold tabular-nums" :class="getScoreColor(attitudeScore)">
@@ -179,11 +179,11 @@ onMounted(async () => {
  :style="{ background: getSliderBackground(attitudeScore) }"
  />
  <div class="flex items-center justify-between mt-1">
- <span class="text-[10px] text-gray-400">1 — Tệ Hại</span>
+ <span class="text-[10px] text-gray-400">1 — Kém</span>
  <span class="text-xs font-medium" :class="getScoreColor(attitudeScore)">
  {{ getScoreLabel(attitudeScore) }}
  </span>
- <span class="text-[10px] text-gray-400">10 — Đỉnh Lắmm</span>
+ <span class="text-[10px] text-gray-400">10 — Xuất Sắc</span>
  </div>
  <p v-if="formErrors.attitude" class="text-[11px] text-error mt-1">{{ formErrors.attitude }}</p>
  </div>
@@ -192,7 +192,7 @@ onMounted(async () => {
  <div>
  <div class="flex items-center justify-between mb-2">
  <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
- Bắn Tiếng Anh Mượt Mà Nhường Nào
+ Trình Độ Tiếng Anh
  </label>
  <div class="flex items-center gap-2">
  <span class="text-2xl font-bold tabular-nums" :class="getScoreColor(englishScore)">
@@ -211,18 +211,18 @@ onMounted(async () => {
  :style="{ background: getSliderBackground(englishScore) }"
  />
  <div class="flex items-center justify-between mt-1">
- <span class="text-[10px] text-gray-400">1 — Tệ Hại</span>
+ <span class="text-[10px] text-gray-400">1 — Kém</span>
  <span class="text-xs font-medium" :class="getScoreColor(englishScore)">
  {{ getScoreLabel(englishScore) }}
  </span>
- <span class="text-[10px] text-gray-400">10 — Đỉnh Lắmm</span>
+ <span class="text-[10px] text-gray-400">10 — Xuất Sắc</span>
  </div>
  <p v-if="formErrors.english" class="text-[11px] text-error mt-1">{{ formErrors.english }}</p>
  </div>
 
  <!-- Average Preview -->
  <div class="pt-4 border-t border-border flex items-center justify-between">
- <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Đồng Hóa Chỉ Số Chót Cùng</span>
+ <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Điểm Trung Bình</span>
  <div class="flex items-center gap-2">
  <span class="text-3xl font-bold tabular-nums" :class="getScoreColor(averagePreview)">
  {{ averagePreview.toFixed(1) }}
@@ -234,7 +234,7 @@ onMounted(async () => {
 
  <!-- Result Selection -->
  <div class="premium-card p-8">
- <h2 class="text-lg font-bold text-slate-900 mb-5">Đánh Giá Xong Cùng Chốt Kết Quả Lại</h2>
+ <h2 class="text-lg font-bold text-slate-900 mb-5">Kết Quả Đánh Giá</h2>
  <div class="grid grid-cols-3 gap-4">
  <button
  v-for="opt in resultOptions"
@@ -256,11 +256,11 @@ onMounted(async () => {
 
  <!-- Comments -->
  <div class="premium-card p-8">
- <h2 class="text-lg font-bold text-slate-900 mb-4">Nhận Xét Nội Dung Lời Nói</h2>
+ <h2 class="text-lg font-bold text-slate-900 mb-4">Nhận Xét</h2>
  <textarea
  v-model="comments"
  rows="5"
- placeholder="Tâm tư suy nghĩ riêng của bản thân sau khi gặp trực diện ứng viên. Gợi ý nêu cái điểm cộng, điểm hạn chế hay điều kỳ lạ nhất lúc đó cảm quan thấy…"
+ placeholder="Ghi nhận điểm mạnh, điểm yếu và ấn tượng chung về ứng viên..."
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition resize-none text-slate-900 placeholder-slate-400"
  />
  </div>
@@ -271,7 +271,7 @@ onMounted(async () => {
  @click="router.push(`/employer/interviews/${interviewId}`)"
  class="btn-secondary"
  >
- Hùy Mọi Thứ Trở Lại Vòng Ngoài
+ Huỷ
  </button>
  <button
  @click="handleSubmit"
@@ -279,7 +279,7 @@ onMounted(async () => {
  class="btn-primary"
  >
  <span v-if="interviewStore.submitScorecardLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ interviewStore.submitScorecardLoading ? 'Tình Hình Mạng Đang Đẩy Rồi Vui Lòng Đợi…' : 'Chốt Bản Số' }}
+ {{ interviewStore.submitScorecardLoading ? 'Đang lưu…' : 'Lưu Đánh Giá' }}
  </button>
  </div>
  </div>

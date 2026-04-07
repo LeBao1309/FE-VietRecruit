@@ -18,16 +18,16 @@ const applicationId = computed(() => route.params.id as string)
 
 // ── Offer lifecycle steps ──
 const LIFECYCLE_STEPS: { status: OfferStatus; label: string; icon: string }[] = [
- { status: 'DRAFT', label: 'Draft', icon: '📝' },
- { status: 'SENT', label: 'Sent', icon: '📨' },
- { status: 'ACCEPTED', label: 'Accepted', icon: '✓' },
+ { status: 'DRAFT', label: 'Nháp', icon: '📝' },
+ { status: 'SENT', label: 'Đã Gửi', icon: '📨' },
+ { status: 'ACCEPTED', label: 'Đã Chấp Nhận', icon: '✓' },
 ]
 
 const STATUS_CONFIG: Record<OfferStatus, { label: string; class: string; dotClass: string }> = {
- DRAFT: { label: 'Draft', class: 'bg-gray-100 text-gray-600', dotClass: 'bg-gray-400' },
- SENT: { label: 'Sent', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- ACCEPTED: { label: 'Accepted', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- DECLINED: { label: 'Declined', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
+ DRAFT: { label: 'Nháp', class: 'bg-gray-100 text-gray-600', dotClass: 'bg-gray-400' },
+ SENT: { label: 'Đã Gửi', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ ACCEPTED: { label: 'Đã Chấp Nhận', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ DECLINED: { label: 'Đã Từ Chối', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
 
 function getStepState(stepStatus: OfferStatus, offer: { status: OfferStatus }): 'completed' | 'current' | 'upcoming' | 'declined' {
@@ -144,7 +144,7 @@ const canCreateNew = computed(() => {
 })
 
 function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+ return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  year: 'numeric',
@@ -152,7 +152,7 @@ function formatDate(iso: string): string {
 }
 
 function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+ return new Date(iso).toLocaleString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
@@ -161,7 +161,7 @@ function formatDateTime(iso: string): string {
 function formatSalary(amount: number, currency: string | null): string {
  const cur = currency ?? 'VND'
  try {
- return new Intl.NumberFormat('en-US', {
+ return new Intl.NumberFormat('vi-VN', {
  style: 'currency',
  currency: cur,
  maximumFractionDigits: 0,

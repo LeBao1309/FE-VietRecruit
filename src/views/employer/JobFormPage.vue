@@ -448,7 +448,7 @@ onMounted(async () => {
  <div>
  <label class="block text-xs font-semibold text-slate-400 mb-1">Văn Phong Môi Trường</label>
  <select v-model="aiForm.tone" class="w-full px-3 py-2 text-sm border border-slate-700 rounded-lg bg-slate-800 text-white outline-none focus:border-teal-500 transition">
- <option value="PROFESSIONAL">Theo Quy Chuẩn Chuyên Nghiệp</option>
+ <option value="PROFESSIONAL">Chuyên Nghiệp</option>
  <option value="STARTUP">Trẻ Trung Môi Trường Start-up</option>
  <option value="CORPORATE">Phong Cách Tập Đoàn</option>
  </select>
@@ -486,7 +486,7 @@ onMounted(async () => {
  />
  </div>
  <div>
- <label class="block text-xs font-semibold text-slate-400 mb-1">Số Năm Kinh Nghiệm Đạt Được</label>
+ <label class="block text-xs font-semibold text-slate-400 mb-1">Số Năm Kinh Nghiệm</label>
  <input
  v-model="aiForm.yearsOfExperience"
  type="text"
@@ -512,7 +512,7 @@ onMounted(async () => {
  @click="showAiPanel = false"
  class="px-4 py-2 text-sm text-slate-400 hover:text-white transition"
  >
- Hủy Ảo Hóa
+ Huỷ
  </button>
  </div>
 
@@ -529,7 +529,7 @@ onMounted(async () => {
  <p class="mt-1 leading-relaxed">{{ aiResult.generatedDescription.overview }}</p>
  </div>
  <div>
- <strong class="text-white">Nhiệm Vụ Của Bạn Cần Làm Là:</strong>
+ <strong class="text-white">Trách Nhiệm:</strong>
  <ul class="mt-1 list-disc list-inside space-y-1">
  <li v-for="(r, i) in aiResult.generatedDescription.responsibilities" :key="i">{{ r }}</li>
  </ul>
@@ -569,14 +569,14 @@ onMounted(async () => {
  @click="applyAiResult"
  class="btn-primary"
  >
- Viết Vào Khu Vực Bảng Form Giới Thiệu
+ Áp Dụng Nội Dung
  </button>
  <button
  type="button"
  @click="aiResult = null"
  class="btn-secondary "
  >
- Xóa Bỏ Đóng
+ Bỏ Qua
  </button>
  </div>
  </div>
@@ -585,7 +585,7 @@ onMounted(async () => {
  <!-- Description textarea -->
  <div>
  <label for="job-desc" class="block text-sm font-medium text-gray-700 mb-1">
- Phần Trình Bày Mô Tả Công Việc Chi Tiết <span class="text-error">*</span>
+ Mô Tả Công Việc <span class="text-error">*</span>
  </label>
  <textarea
  id="job-desc"
