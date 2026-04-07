@@ -83,6 +83,14 @@ const menuOpen = ref(false);
         >
           Jobs
         </router-link>
+        <router-link
+          v-if="auth.isCompanyAdmin || auth.isHR"
+          to="/employer/candidates"
+          class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 :bg-slate-800/50 hover:text-slate-900 :text-white transition-all"
+          active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
+        >
+          Tìm Ứng Viên
+        </router-link>
 
         <!-- Interviews section (Interviewer) -->
         <div v-if="auth.isInterviewer" class="mt-4 mb-1 px-3">
@@ -144,6 +152,13 @@ const menuOpen = ref(false);
           active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
         >
           Settings
+        </router-link>
+        <router-link
+          to="/employer/notifications"
+          class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 :bg-slate-800/50 hover:text-slate-900 :text-white transition-all"
+          active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
+        >
+          Thông Báo
         </router-link>
       </nav>
       <div class="px-6 py-4 border-t border-slate-200/60 bg-slate-50/50">

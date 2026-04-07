@@ -103,6 +103,13 @@ const menuOpen = ref(false)
   >
   Cài Đặt
   </router-link>
+  <router-link
+  to="/candidate/notifications"
+  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+  active-class="!bg-primary-bg !text-primary"
+  >
+  Thông Báo
+  </router-link>
   </nav>
   <div class="px-4 py-3 border-t border-border">
   <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Ứng Viên' }}</span>
