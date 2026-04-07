@@ -7,8 +7,8 @@ const auth = useAuthStore()
 const menuOpen = ref(false)
 
 const navItems = [
- { to: '/admin/users', label: 'Đội Ngũ', icon: '👥' },
- { to: '/admin/transactions', label: 'Giao Dịch', icon: '💳' },
+ { to: '/admin/users', label: 'Đội Ngũ' },
+ { to: '/admin/transactions', label: 'Giao Dịch' },
 ]
 </script>
 
@@ -29,16 +29,15 @@ const navItems = [
  </router-link>
  </div>
 
- <nav class="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
+ <nav class="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
  <router-link
  v-for="item in navItems"
  :key="item.to"
  :to="item.to"
  @click="menuOpen = false"
- class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-slate-200 transition"
- active-class="!bg-teal-500/15 !text-teal-300 font-semibold"
+ class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/8 hover:text-slate-200 transition-all border-l-2 border-transparent"
+ active-class="!bg-teal-400/20 !border-l-teal-400 !text-teal-300 !font-semibold"
  >
- <span class="text-base">{{ item.icon }}</span>
  {{ item.label }}
  </router-link>
  </nav>

@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { candidateService } from '@/services/candidateService'
 import type { CandidateSearchResponse } from '@/types/candidate'
 import type { SearchPageResponse } from '@/types/common'
-import BaseBreadcrumbs from '@/components/common/BaseBreadcrumbs.vue'
 import BaseSkeleton from '@/components/common/BaseSkeleton.vue'
 import BaseEmptyState from '@/components/common/BaseEmptyState.vue'
 import { useUiStore } from '@/stores/uiStore'
@@ -146,8 +145,7 @@ onMounted(() => search(0))
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto px-6 py-8 md:px-8">
-    <BaseBreadcrumbs />
+  <div class="max-w-6xl mx-auto px-6 pb-8 md:px-8">
 
     <!-- Header -->
     <div class="mb-6">

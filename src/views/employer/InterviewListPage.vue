@@ -141,7 +141,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Back -->
  <div class="flex items-center gap-3 mb-2">
  <button

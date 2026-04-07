@@ -23,90 +23,90 @@ const menuOpen = ref(false)
   <router-link
   @click="menuOpen = false"
   to="/candidate/dashboard"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Tổng Quan
   </router-link>
 
   <!-- Job Search section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Tìm Việc Làm</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tìm Việc Làm</span>
   </div>
   <router-link
   to="/candidate/recommendations"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Việc Làm Đề Xuất
   </router-link>
   <router-link
   to="/candidate/salary-benchmark"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Mức Lương Tham Khảo
   </router-link>
   <router-link
   to="/jobs"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   >
   Xem Việc Làm ↗
   </router-link>
 
   <!-- Applications section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Hồ Sơ Ứng Tuyển</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hồ Sơ Ứng Tuyển</span>
   </div>
   <router-link
   to="/candidate/applications"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Đơn Ứng Tuyển Của Tôi
   </router-link>
 
   <!-- Profile section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Hồ Sơ</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hồ Sơ</span>
   </div>
   <router-link
   to="/candidate/candidate-profile"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Hồ Sơ Năng Lực
   </router-link>
   <router-link
   to="/candidate/cv"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Quản Lý CV
   </router-link>
 
   <!-- Account section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Tài Khoản</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tài Khoản</span>
   </div>
   <router-link
   to="/candidate/profile"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Quản Lý Tài Khoản
   </router-link>
   <router-link
   to="/candidate/settings"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Cài Đặt
   </router-link>
   <router-link
   to="/candidate/notifications"
-  class="block px-3 py-2 rounded-md text-sm text-gray-500 hover:bg-primary-bg hover:text-primary transition"
-  active-class="!bg-primary-bg !text-primary"
+  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
+  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
   Thông Báo
   </router-link>

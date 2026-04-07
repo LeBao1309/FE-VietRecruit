@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { useJobStore } from '@/stores/jobStore'
 import BaseSkeleton from '@/components/common/BaseSkeleton.vue'
-import BaseBreadcrumbs from '@/components/common/BaseBreadcrumbs.vue'
 
 const router = useRouter()
 const subStore = useSubscriptionStore()
@@ -38,8 +37,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-6xl mx-auto px-6 py-8 md:px-8">
- <BaseBreadcrumbs />
+ <div class="max-w-6xl mx-auto px-6 pb-8 md:px-8">
  
  <div class="mb-6">
  <h1 class="text-xl font-bold text-gray-900 ">Bảng Điều Khiển Nhà Tuyển Dụng</h1>

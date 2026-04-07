@@ -17,6 +17,7 @@ export const useJobStore = defineStore('job', () => {
   const detailLoading = ref(false)
   const actionLoading = ref(false)
   const benchmarkLoading = ref(false)
+  const subscriptionRequired = ref(false)
 
   // ── Getters ────────────────────────────────────────────────────────
   const jobList = computed(() => jobs.value?.content ?? [])
@@ -66,9 +67,16 @@ export const useJobStore = defineStore('job', () => {
     const ui = useUiStore()
     const sub = useSubscriptionStore()
 
+    // Subscription guard — must have an active plan (including free tier)
+    if (!sub.hasActiveSubscription) {
+      subscriptionRequired.value = true
+      ui.toastWarning('Chưa kích hoạt gói dịch vụ', 'Vui lòng chọn một gói (kể cả gói miễn phí) để bắt đầu đăng tuyển.')
+      return false
+    }
+
     // Quota guard
     if (sub.isQuotaFull) {
-      ui.toastWarning('Quota reached', 'You have reached your active job limit. Upgrade your plan to publish more jobs.')
+      ui.toastWarning('Đã đạt giới hạn quota', 'Bạn đã đạt giới hạn tin đang hoạt động. Hãy nâng cấp gói để đăng thêm.')
       return false
     }
 
@@ -77,12 +85,18 @@ export const useJobStore = defineStore('job', () => {
       const result = await jobService.publishJob(id)
       if (result.data) {
         currentJob.value = result.data
-        ui.toastSuccess('Job published', 'The job is now live and visible to candidates.')
+        subscriptionRequired.value = false
+        ui.toastSuccess('Đăng tuyển thành công', 'Tin tuyển dụng đã hiển thị công khai tới ứng viên.')
         // Refresh quota
         await sub.fetchCurrentQuota()
         return true
       }
-      ui.toastError('Publish failed', result.error?.message)
+      if (result.error?.code === 'SUBSCRIPTION_REQUIRED') {
+        subscriptionRequired.value = true
+        ui.toastWarning('Yêu cầu gói đăng ký', result.error.message)
+      } else {
+        ui.toastError('Đăng tuyển thất bại', result.error?.message)
+      }
       return false
     } finally {
       actionLoading.value = false
@@ -126,6 +140,7 @@ export const useJobStore = defineStore('job', () => {
   function clearCurrentJob(): void {
     currentJob.value = null
     salaryBenchmark.value = null
+    subscriptionRequired.value = false
   }
 
   return {
@@ -137,6 +152,7 @@ export const useJobStore = defineStore('job', () => {
     detailLoading,
     actionLoading,
     benchmarkLoading,
+    subscriptionRequired,
     // getters
     jobList,
     totalJobs,

@@ -4,8 +4,12 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-// If you want to configure breadcrumbs explicitly, you can add them to router meta:
-// meta: { breadcrumb: [{ name: 'Home', path: '/' }, { name: 'Dashboard' }] }
+const homeLink = computed(() => {
+  if (route.path.startsWith('/employer')) return '/employer/dashboard'
+  if (route.path.startsWith('/candidate')) return '/candidate/dashboard'
+  if (route.path.startsWith('/admin')) return '/admin/users'
+  return '/'
+})
 
 export interface BreadcrumbItem {
  name: string
@@ -16,11 +20,11 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
  if (route.meta.breadcrumb) {
  return route.meta.breadcrumb as BreadcrumbItem[]
  }
- 
+
  // Fallback: auto-generate from path
  const paths = route.path.split('/').filter(Boolean)
  const items: BreadcrumbItem[] = []
- 
+
  let currentPath = ''
  for (const part of paths) {
  currentPath += `/${part}`
@@ -28,7 +32,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
  const name = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')
  items.push({ name, path: currentPath })
  }
- 
+
  return items
 })
 </script>
@@ -37,7 +41,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
  <nav class="flex text-sm text-text-secondary mb-4" aria-label="Breadcrumb">
  <ol class="inline-flex items-center space-x-1 md:space-x-3">
  <li class="inline-flex items-center">
- <router-link to="/" class="inline-flex items-center focus-visible:ring-2 focus:outline-none rounded hover:text-primary transition-colors">
+ <router-link :to="homeLink" class="inline-flex items-center focus-visible:ring-2 focus:outline-none rounded hover:text-primary transition-colors">
  Home
  </router-link>
  </li>

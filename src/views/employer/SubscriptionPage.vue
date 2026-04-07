@@ -43,7 +43,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-5xl mx-auto px-6 py-10">
+ <div class="max-w-5xl mx-auto px-6 pb-10">
  <div class="mb-8">
  <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Đăng Ký Gói Dịch Vụ</h1>
  <p class="text-sm font-medium text-slate-500">Quản lý gói sử dụng và chi tiêu tài nguyên</p>

@@ -80,14 +80,18 @@ const aiForm = ref<{
 
 // ── Load organization data ──
 async function loadOrgData(): Promise<void> {
- const [depts, locs, cats] = await Promise.all([
- departmentService.list(),
- locationService.list(),
- categoryService.list(),
- ])
- if (depts.data) departments.value = depts.data.content
- if (locs.data) locations.value = locs.data.content
- if (cats.data) categories.value = cats.data.content
+ try {
+   const [depts, locs, cats] = await Promise.all([
+   departmentService.list(),
+   locationService.list(),
+   categoryService.list(),
+   ])
+   if (depts.data) departments.value = depts.data.content ?? []
+   if (locs.data) locations.value = locs.data.content ?? []
+   if (cats.data) categories.value = cats.data.content ?? []
+ } catch {
+   // Non-critical — dropdowns stay empty, form is still usable
+ }
 }
 
 // ── Load existing job (edit mode) ──
@@ -108,8 +112,8 @@ async function loadJob(): Promise<void> {
  }
 
  form.value = {
- title: j.title,
- description: j.description,
+ title: j.title ?? '',
+ description: j.description ?? '',
  requirements: j.requirements ?? '',
  departmentId: j.departmentId ?? '',
  locationId: j.locationId ?? '',
@@ -124,6 +128,9 @@ async function loadJob(): Promise<void> {
  ui.toastError('Không Tìm Thấy Công Việc', result.error?.message)
  router.push('/employer/jobs')
  }
+ } catch {
+ ui.toastError('Có Lỗi Xảy Ra', 'Không thể tải thông tin công việc. Vui lòng thử lại.')
+ router.push('/employer/jobs')
  } finally {
  loading.value = false
  }
@@ -272,7 +279,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Header -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
@@ -597,7 +604,7 @@ onMounted(async () => {
  />
  <div class="flex items-center justify-between mt-1">
  <p v-if="errors.description" class="text-xs text-error">{{ errors.description }}</p>
- <span class="text-[10px] text-gray-400 ml-auto">{{ form.description.length.toLocaleString() }} / 50,000</span>
+ <span class="text-[10px] text-gray-400 ml-auto">{{ (form.description?.length ?? 0).toLocaleString() }} / 50,000</span>
  </div>
  </div>
 
@@ -614,7 +621,7 @@ onMounted(async () => {
  />
  <div class="flex items-center justify-between mt-1">
  <p v-if="errors.requirements" class="text-xs text-error">{{ errors.requirements }}</p>
- <span class="text-[10px] text-gray-400 ml-auto">{{ form.requirements.length.toLocaleString() }} / 50,000</span>
+ <span class="text-[10px] text-gray-400 ml-auto">{{ (form.requirements?.length ?? 0).toLocaleString() }} / 50,000</span>
  </div>
  </div>
  </div>

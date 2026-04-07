@@ -105,7 +105,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Header -->
  <div class="mb-6">
  <h1 class="text-xl font-bold text-gray-900">Phỏng Vấn Của Tôi</h1>

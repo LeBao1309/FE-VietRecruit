@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useJobStore } from '@/stores/jobStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import type { JobStatus } from '@/types/enums'
-import BaseBreadcrumbs from '@/components/common/BaseBreadcrumbs.vue'
 import BaseSkeleton from '@/components/common/BaseSkeleton.vue'
 import BaseEmptyState from '@/components/common/BaseEmptyState.vue'
 
@@ -97,8 +96,7 @@ onMounted(() => {
 </script>
 
 <template>
- <div class="max-w-6xl mx-auto px-6 py-8 md:px-8">
- <BaseBreadcrumbs />
+ <div class="max-w-6xl mx-auto px-6 pb-8 md:px-8">
  
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">

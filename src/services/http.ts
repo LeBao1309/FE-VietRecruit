@@ -2,6 +2,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiResponse } from '@/types/common'
 import type { TokenRefreshResponse } from '@/types/auth'
 import type { RoleCode } from '@/types/enums'
+import { useUiStore } from '@/stores/uiStore'
 
 export interface JwtPayload {
   sub: string
@@ -141,6 +142,33 @@ http.interceptors.response.use(
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
+      }
+    }
+
+    // Global toast for 5xx errors so the user always gets feedback
+    if (error.response && error.response.status >= 500) {
+      try {
+        useUiStore().toastError(
+          'Lỗi máy chủ',
+          'Máy chủ gặp sự cố. Vui lòng thử lại sau.',
+        )
+      } catch {
+        // Pinia may not be ready in SSR or test contexts — safe to ignore
+      }
+    }
+
+    // Redirect to company setup if user has no company association
+    if (error.response?.status === 403) {
+      const data = error.response.data as ApiResponse<unknown>
+      if (
+        data?.code === 'FORBIDDEN' &&
+        typeof data?.message === 'string' &&
+        data.message.toLowerCase().includes('not associated with any company') &&
+        window.location.pathname.startsWith('/employer') &&
+        window.location.pathname !== '/employer/company-setup'
+      ) {
+        window.location.href = '/employer/company-setup'
+        return Promise.reject(error)
       }
     }
 

@@ -2,11 +2,15 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { companyService } from '@/services/companyService'
+import { authService } from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
+import { getRefreshToken } from '@/services/http'
 import type { CompanyCreateRequest } from '@/types/company'
 
 const router = useRouter()
 const ui = useUiStore()
+const auth = useAuthStore()
 
 const step = ref(1)
 const loading = ref(false)
@@ -39,6 +43,13 @@ async function handleSubmit(): Promise<void> {
  if (result.error) {
  ui.toastError('Tạo công ty thất bại', result.error.message)
  return
+ }
+ // Backend assigns COMPANY_ADMIN role after company creation.
+ // Refresh token immediately so the new JWT contains updated roles.
+ const refreshToken = getRefreshToken()
+ if (refreshToken) {
+ await authService.refresh({ refreshToken })
+ auth.hydrate()
  }
  step.value = 2
  ui.toastSuccess('Đã tạo công ty!', `${form.value.name} đã sẵn sàng hoạt động.`)

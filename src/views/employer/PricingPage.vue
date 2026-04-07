@@ -10,11 +10,60 @@ const router = useRouter()
 const subStore = useSubscriptionStore()
 const auth = useAuthStore()
 
-const billingCycle = ref<BillingCycle>('MONTHLY')
+const billingCycle = ref<BillingCycle>('YEARLY')
 const checkoutLoading = ref<string | null>(null) // planId being checked out
 
+const FALLBACK_PLANS: PlanResponse[] = [
+  {
+    id: 'plan-free',
+    code: 'FREE',
+    name: 'Miễn Phí',
+    description: 'Phù hợp để bắt đầu tuyển dụng cơ bản.',
+    maxActiveJobs: 2,
+    jobDurationDays: 30,
+    resumeAccess: false,
+    aiMatching: false,
+    priorityListing: false,
+    priceMonthly: 0,
+    priceYearly: 0,
+    currency: 'VND',
+  },
+  {
+    id: 'plan-basic',
+    code: 'BASIC',
+    name: 'Cơ Bản',
+    description: 'Dành cho doanh nghiệp vừa và nhỏ muốn tuyển dụng hiệu quả.',
+    maxActiveJobs: 5,
+    jobDurationDays: 45,
+    resumeAccess: true,
+    aiMatching: false,
+    priorityListing: false,
+    priceMonthly: 299000,
+    priceYearly: Math.round(299000 * 12 * 0.8),
+    currency: 'VND',
+  },
+  {
+    id: 'plan-professional',
+    code: 'PROFESSIONAL',
+    name: 'Chuyên Nghiệp',
+    description: 'Tối ưu cho doanh nghiệp tăng trưởng nhanh với nhu cầu tuyển nhiều.',
+    maxActiveJobs: 20,
+    jobDurationDays: 60,
+    resumeAccess: true,
+    aiMatching: true,
+    priorityListing: true,
+    priceMonthly: 799000,
+    priceYearly: Math.round(799000 * 12 * 0.8),
+    currency: 'VND',
+  },
+]
+
+const activePlans = computed(() =>
+  subStore.plans.length > 0 ? subStore.plans : FALLBACK_PLANS,
+)
+
 const sortedPlans = computed(() =>
- [...subStore.plans].sort((a, b) => a.priceMonthly - b.priceMonthly),
+  [...activePlans.value].sort((a, b) => a.priceMonthly - b.priceMonthly),
 )
 
 function getPrice(plan: PlanResponse): number {
@@ -58,7 +107,7 @@ onMounted(() => {
 </script>
 
 <template>
- <div class="max-w-6xl mx-auto px-6 py-12">
+ <div class="max-w-6xl mx-auto px-6 pb-12">
  <!-- Header -->
  <div class="text-center mb-12">
  <h1 class="text-4xl font-extrabold text-slate-900 mb-4">Các Gói Đăng Ký</h1>

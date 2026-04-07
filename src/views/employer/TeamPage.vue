@@ -83,7 +83,7 @@ function roleBadgeClass(role: string): string {
 </script>
 
 <template>
- <div class="max-w-3xl mx-auto px-6 py-8">
+ <div class="max-w-3xl mx-auto px-6 pb-8">
  <div class="flex items-center justify-between mb-6">
  <div>
  <h1 class="text-xl font-bold text-gray-900">Nhân Sự & Đội Ngũ</h1>
@@ -129,8 +129,7 @@ function roleBadgeClass(role: string): string {
  <tbody>
  <tr v-if="sentInvites.length === 0">
  <td colspan="4" class="text-center text-sm text-slate-400 py-16">
- <div class="space-y-3">
- <span class="text-4xl">👥</span>
+ <div class="space-y-2">
  <p class="font-bold">Chưa có lời mời nào được gửi.</p>
  <p class="text-xs text-slate-400">Nhấn "Mời Đồng Nghiệp" để thêm thành viên vào nhóm.</p>
  </div>
@@ -230,11 +229,7 @@ function roleBadgeClass(role: string): string {
  class="btn-primary"
  >
  <span v-if="inviteLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-<<<<<<< HEAD
  {{ inviteLoading ? 'Đang gửi lời mời…' : 'Gửi Lời Mời' }}
-=======
- {{ inviteLoading ? 'Đang gửi…' : 'Gửi Lời Mời' }}
->>>>>>> 3315920 (style(UI): Refact language in employee)
  </button>
  </div>
  </form>

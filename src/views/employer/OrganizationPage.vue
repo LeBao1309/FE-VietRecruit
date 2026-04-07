@@ -167,7 +167,7 @@ onMounted(loadAll)
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <div class="flex items-center justify-between mb-6">
  <div>
  <h1 class="text-xl font-bold text-gray-900">Doanh Nghiệp</h1>
