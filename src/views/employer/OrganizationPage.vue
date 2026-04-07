@@ -366,7 +366,7 @@ onMounted(loadAll)
  class="px-6 py-2.5 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2"
  >
  <span v-if="deleting" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ deleting ? 'Đang Tiêu Hủy…' : 'Thực Thi Lựa Chọn' }}
+ {{ deleting ? 'Đang xóa…' : 'Xác Nhận Xóa' }}
  </button>
  </div>
  </div>

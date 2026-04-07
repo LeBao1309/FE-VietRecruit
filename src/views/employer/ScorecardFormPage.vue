@@ -260,7 +260,7 @@ onMounted(async () => {
  <textarea
  v-model="comments"
  rows="5"
- placeholder="Tâm tư suy nghĩ riêng của bản thân sau khi gặp trực diện ứng viên. Gợi ý nêu cái điểm cộng, điểm hạn chế hay điều kì lạ nhất lúc đó cảm quan thấy…"
+ placeholder="Tâm tư suy nghĩ riêng của bản thân sau khi gặp trực diện ứng viên. Gợi ý nêu cái điểm cộng, điểm hạn chế hay điều kỳ lạ nhất lúc đó cảm quan thấy…"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition resize-none text-slate-900 placeholder-slate-400"
  />
  </div>
