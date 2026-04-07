@@ -361,11 +361,11 @@ onMounted(loadProfile)
 
  <!-- Salary Expectations -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Mức Lương Kì Vọng</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">Mức Lương Kỳ Vọng</h2>
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
- <label for="salary-min" class="block text-sm font-bold text-slate-700 mb-2">Tổi Thiểu (VND)</label>
+ <label for="salary-min" class="block text-sm font-bold text-slate-700 mb-2">Tối Thiểu (VND)</label>
  <input
  id="salary-min"
  v-model="form.desiredSalaryMin"
