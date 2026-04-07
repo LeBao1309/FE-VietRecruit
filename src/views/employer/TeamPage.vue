@@ -198,7 +198,7 @@ function roleBadgeClass(role: string): string {
  : 'border-slate-200 hover:border-slate-300 :border-slate-600'"
  >
  <div class="text-sm font-bold" :class="inviteForm.role === 'INTERVIEWER' ? 'text-purple-700 ' : 'text-slate-900 '">Hội Đồng Phỏng Vấn (Interviewer)</div>
- <p class="text-xs text-slate-500 mt-1">Lên lịch gặp gửi đường dẫn họp và tổng hợp phiếu đánh giá cuối kì.</p>
+ <p class="text-xs text-slate-500 mt-1">Lên lịch gặp, gửi đường dẫn họp và tổng hợp phiếu đánh giá cuối kỳ.</p>
  </button>
  </div>
  </div>
@@ -217,7 +217,7 @@ function roleBadgeClass(role: string): string {
  class="btn-primary"
  >
  <span v-if="inviteLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ inviteLoading ? 'Đang chuyển lời…' : 'Bắt Đầu Gửi Thư' }}
+ {{ inviteLoading ? 'Đang gửi lời mời…' : 'Gửi Lời Mời' }}
  </button>
  </div>
  </form>

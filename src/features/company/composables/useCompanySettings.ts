@@ -2,8 +2,8 @@
 // Thin wrapper for useCompanyStore — exposes state + actions to SettingsProfileTab.
 
 import { storeToRefs } from 'pinia'
-import { useCompanyStore } from '@/features/company/stores/useCompanyStore'
-import type { CompanyUpdateRequest } from '@/features/company/types/company.dto'
+import { useCompanyStore } from '@/stores/companyStore'
+import type { CompanyUpdateRequest } from '@/types/company'
 
 export function useCompanySettings() {
   const store = useCompanyStore()

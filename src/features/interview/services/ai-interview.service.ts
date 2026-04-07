@@ -1,8 +1,8 @@
 // src/features/interview/services/ai-interview.service.ts
 // HTTP layer for AI interview question generation. No business logic.
 
-import { apiClient } from '@/core/api/axios.instance'
-import type { ApiResponse } from '@/core/types/api.types'
+import http from '@/services/http'
+import type { ApiResponse } from '@/types/common'
 import type {
   GenerateInterviewQuestionsRequest,
   GenerateInterviewQuestionsResponse,
@@ -18,7 +18,7 @@ export const aiInterviewService = {
   async generateQuestions(
     payload: GenerateInterviewQuestionsRequest,
   ): Promise<GenerateInterviewQuestionsResponse> {
-    const { data } = await apiClient.post<ApiResponse<GenerateInterviewQuestionsResponse>>(
+    const { data } = await http.post<ApiResponse<GenerateInterviewQuestionsResponse>>(
       BASE,
       payload,
     )

@@ -50,7 +50,7 @@ const navItems = [
  </div>
  <div class="flex flex-col truncate">
  <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Quản Trị Viên' }}</span>
- <span class="text-[10px] text-slate-500">Quản Trị Hệ Thống</span>
+ <span class="text-[10px] text-slate-500">{{ auth.isCustomerService ? 'Dịch Vụ Khách Hàng' : 'Quản Trị Hệ Thống' }}</span>
  </div>
  </div>
  <button @click="auth.logout()" class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition shrink-0" title="Đăng Xuất">

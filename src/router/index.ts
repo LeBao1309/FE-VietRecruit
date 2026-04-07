@@ -88,6 +88,14 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Job Details' },
   },
 
+  // ── Company Directory (public) ──
+  {
+    path: '/companies',
+    name: 'CompanyList',
+    component: () => import('@/views/public/CompanyListPage.vue'),
+    meta: { title: 'Khám Phá Doanh Nghiệp' },
+  },
+
   // ── Candidate ──
   {
     path: '/candidate',
@@ -152,6 +160,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/shared/SettingsPage.vue'),
         meta: { title: 'Settings' },
       },
+      {
+        path: 'notifications',
+        name: 'CandidateNotifications',
+        component: () => import('@/views/shared/NotificationsPage.vue'),
+        meta: { title: 'Thông Báo' },
+      },
     ],
   },
 
@@ -200,6 +214,12 @@ const routes: RouteRecordRaw[] = [
         name: 'EmployerSettings',
         component: () => import('@/views/shared/SettingsPage.vue'),
         meta: { title: 'Settings' },
+      },
+      {
+        path: 'notifications',
+        name: 'EmployerNotifications',
+        component: () => import('@/views/shared/NotificationsPage.vue'),
+        meta: { title: 'Thông Báo' },
       },
       {
         path: 'pricing',
@@ -257,6 +277,13 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/employer/JobDetailPage.vue'),
         meta: { title: 'Job Details', roles: ['COMPANY_ADMIN', 'HR'] },
       },
+      // ── Candidate Search ──
+      {
+        path: 'candidates',
+        name: 'EmployerCandidateSearch',
+        component: () => import('@/views/employer/CandidateSearchPage.vue'),
+        meta: { title: 'Tìm Kiếm Ứng Viên', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
       // ── Application Pipeline ──
       {
         path: 'jobs/:id/applications',
@@ -310,7 +337,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/admin',
     component: () => import('@/layouts/AdminLayout.vue'),
-    meta: { requiresAuth: true, roles: ['SYSTEM_ADMIN'] },
+    meta: { requiresAuth: true, roles: ['SYSTEM_ADMIN', 'CUSTOMER_SERVICE'] },
     children: [
       {
         path: '',
@@ -365,7 +392,7 @@ router.beforeEach(
       // Redirect to role-appropriate dashboard
       if (auth.isCandidate) return next('/candidate/dashboard')
       if (auth.isEmployer) return next('/employer/dashboard')
-      if (auth.isSystemAdmin) return next('/admin/users')
+      if (auth.isSystemAdmin || auth.isCustomerService) return next('/admin/users')
       return next('/')
     }
 
@@ -382,7 +409,7 @@ router.beforeEach(
         // Redirect to their own dashboard instead of showing 403
         if (auth.isCandidate) return next('/candidate/dashboard')
         if (auth.isEmployer) return next('/employer/dashboard')
-        if (auth.isSystemAdmin) return next('/admin/users')
+        if (auth.isSystemAdmin || auth.isCustomerService) return next('/admin/users')
         return next('/')
       }
     }
