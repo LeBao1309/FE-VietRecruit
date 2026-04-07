@@ -11,6 +11,9 @@ app.use(createPinia())
 
 const authStore = useAuthStore()
 authStore.hydrate()
+if (authStore.isAuthenticated) {
+  authStore.fetchProfile()
+}
 
 app.use(router)
 

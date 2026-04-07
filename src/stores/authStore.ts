@@ -3,10 +3,28 @@ import { ref, computed } from 'vue'
 import type { UserProfileResponse } from '@/types/user'
 import type { RoleCode } from '@/types/enums'
 import type { LoginRequest, RegisterRequest } from '@/types/auth'
-import { getAccessToken, getRefreshToken, clearTokens, parseJwt } from '@/services/http'
+import { getAccessToken, getRefreshToken, clearTokens, parseJwt, type JwtPayload } from '@/services/http'
 import { authService } from '@/services/authService'
 import { useUiStore } from './uiStore'
 import router from '@/router'
+
+const VALID_ROLES: RoleCode[] = [
+  'CANDIDATE',
+  'COMPANY_ADMIN',
+  'HR',
+  'INTERVIEWER',
+  'SYSTEM_ADMIN',
+  'CUSTOMER_SERVICE',
+]
+
+function extractRoles(payload: JwtPayload | null): RoleCode[] {
+  if (!payload || !Array.isArray(payload.roles)) return []
+  const valid = payload.roles.filter((r): r is RoleCode => VALID_ROLES.includes(r as RoleCode))
+  if (valid.length !== payload.roles.length) {
+    console.warn('[authStore] JWT contained unknown roles:', payload.roles.filter((r) => !VALID_ROLES.includes(r as RoleCode)))
+  }
+  return valid
+}
 
 export const useAuthStore = defineStore('auth', () => {
   // ── State ──
@@ -25,6 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isHR = computed(() => roles.value.includes('HR'))
   const isInterviewer = computed(() => roles.value.includes('INTERVIEWER'))
   const isSystemAdmin = computed(() => roles.value.includes('SYSTEM_ADMIN'))
+  const isCustomerService = computed(() => roles.value.includes('CUSTOMER_SERVICE'))
 
   function hasRole(role: RoleCode): boolean {
     return roles.value.includes(role)
@@ -41,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
     token: string,
   ): void {
     user.value = profile
-    roles.value = userRoles as RoleCode[]
+    roles.value = userRoles.filter((r): r is RoleCode => VALID_ROLES.includes(r as RoleCode))
     accessToken.value = token
   }
 
@@ -65,11 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
       const loginData = result.data!
       accessToken.value = loginData.accessToken
       const decodedPayload = parseJwt(loginData.accessToken)
-      if (decodedPayload && decodedPayload.roles) {
-        roles.value = decodedPayload.roles as RoleCode[]
-      } else {
-        roles.value = []
-      }
+      roles.value = extractRoles(decodedPayload)
 
       // Fetch full profile
       const profileResult = await authService.getProfile()
@@ -125,11 +140,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (token && refresh) {
       accessToken.value = token
       const decodedPayload = parseJwt(token)
-      if (decodedPayload && decodedPayload.roles) {
-        roles.value = decodedPayload.roles as RoleCode[]
-      } else {
-        roles.value = []
-      }
+      roles.value = extractRoles(decodedPayload)
     } else {
       user.value = null
       roles.value = []
@@ -150,6 +161,7 @@ export const useAuthStore = defineStore('auth', () => {
     isHR,
     isInterviewer,
     isSystemAdmin,
+    isCustomerService,
     hasRole,
     hasAnyRole,
     setAuth,
