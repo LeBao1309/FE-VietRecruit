@@ -61,8 +61,9 @@ function formatAmount(amount: number): string {
  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
 }
 
-function formatDate(dateStr: string): string {
- return new Date(dateStr).toLocaleString('en-US', {
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleString('vi-VN', {
  dateStyle: 'medium',
  timeStyle: 'short',
  })

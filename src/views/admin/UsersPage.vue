@@ -97,7 +97,7 @@ function goToPage(page: number): void {
 // ── Helpers ──
 function formatDate(dateStr: string | null): string {
  if (!dateStr) return '—'
- return new Date(dateStr).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+ return new Date(dateStr).toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 function getRoleBadgeClass(role: string): string {

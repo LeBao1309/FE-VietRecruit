@@ -157,9 +157,57 @@ function formatFileSize(bytes: number): string {
 }
 
 function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
- month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+ return new Date(iso).toLocaleDateString('vi-VN', {
+ day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
  })
+}
+
+const PRIORITY_MAP: Record<string, string> = {
+ HIGH: 'Cao',
+ MEDIUM: 'Trung bình',
+ LOW: 'Thấp',
+}
+
+const SECTION_MAP: Record<string, string> = {
+ 'Work Experience': 'Kinh Nghiệm Làm Việc',
+ 'Experience': 'Kinh Nghiệm Làm Việc',
+ 'Professional Experience': 'Kinh Nghiệm Chuyên Môn',
+ 'Skills': 'Kỹ Năng',
+ 'Technical Skills': 'Kỹ Năng Kỹ Thuật',
+ 'Soft Skills': 'Kỹ Năng Mềm',
+ 'Education': 'Học Vấn',
+ 'Summary': 'Tóm Tắt',
+ 'Professional Summary': 'Tóm Tắt Chuyên Môn',
+ 'Objective': 'Mục Tiêu Nghề Nghiệp',
+ 'Career Objective': 'Mục Tiêu Nghề Nghiệp',
+ 'Certifications': 'Chứng Chỉ',
+ 'Certificates': 'Chứng Chỉ',
+ 'Languages': 'Ngôn Ngữ',
+ 'Projects': 'Dự Án',
+ 'Achievements': 'Thành Tích',
+ 'Accomplishments': 'Thành Tích',
+ 'Awards': 'Giải Thưởng',
+ 'References': 'Tài Liệu Tham Khảo',
+ 'Contact': 'Thông Tin Liên Hệ',
+ 'Contact Information': 'Thông Tin Liên Hệ',
+ 'Hobbies': 'Sở Thích',
+ 'Interests': 'Sở Thích',
+ 'Volunteer': 'Hoạt Động Tình Nguyện',
+ 'Volunteer Experience': 'Hoạt Động Tình Nguyện',
+ 'Publications': 'Bài Đăng / Nghiên Cứu',
+ 'Overall': 'Tổng Quan',
+ 'Format': 'Định Dạng',
+ 'Formatting': 'Định Dạng',
+ 'Layout': 'Bố Cục',
+ 'Length': 'Độ Dài',
+}
+
+function translatePriority(priority: string): string {
+ return PRIORITY_MAP[priority.toUpperCase()] ?? priority
+}
+
+function translateSection(section: string): string {
+ return SECTION_MAP[section] ?? section
 }
 
 
@@ -339,9 +387,9 @@ onMounted(loadProfile)
  :class="sug.priority === 'HIGH' ? 'bg-rose-100 text-rose-700 ' :
  (sug.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700 ' : 'bg-blue-100 text-blue-700 ')"
  >
- Ưu tiên {{ sug.priority }}
+ Ưu tiên {{ translatePriority(sug.priority) }}
  </span>
- <span class="text-sm font-bold text-slate-700 ">{{ sug.section }}</span>
+ <span class="text-sm font-bold text-slate-700 ">{{ translateSection(sug.section) }}</span>
  </div>
  <p class="text-sm text-slate-600 mb-2 leading-relaxed">
  <strong class="font-bold text-slate-900 mr-1">Vấn đề:</strong> {{ sug.issue }}

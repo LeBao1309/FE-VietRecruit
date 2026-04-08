@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useJobStore } from '@/stores/jobStore'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import type { JobStatus } from '@/types/enums'
-import BaseBreadcrumbs from '@/components/common/BaseBreadcrumbs.vue'
 import BaseSkeleton from '@/components/common/BaseSkeleton.vue'
 import BaseEmptyState from '@/components/common/BaseEmptyState.vue'
 
@@ -77,13 +76,13 @@ function goToDetail(id: string): void {
 // ── Date formatting (lean → no external dep) ──
 function formatDate(iso: string): string {
  const d = new Date(iso)
- return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+ return d.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function formatSalary(min: number | null, max: number | null, currency: string | null, negotiable: boolean | null): string {
  if (!min && !max) return negotiable ? 'Thỏa thuận' : '—'
  const cur = currency ?? 'VND'
- const fmt = (n: number) => n.toLocaleString('en-US')
+ const fmt = (n: number) => n.toLocaleString('vi-VN')
  if (min && max) return `${fmt(min)} – ${fmt(max)} ${cur}`
  if (min) return `Từ ${fmt(min)} ${cur}`
  if (max) return `Lên tới ${fmt(max)} ${cur}`
@@ -97,8 +96,7 @@ onMounted(() => {
 </script>
 
 <template>
- <div class="max-w-6xl mx-auto px-6 py-8 md:px-8">
- <BaseBreadcrumbs />
+ <div class="max-w-6xl mx-auto px-6 pb-8 md:px-8">
  
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">

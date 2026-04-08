@@ -33,9 +33,9 @@ export interface ApplyDescriptionRequest {
 
 // ── Salary Benchmark ─────────────────────────────────────────────────
 export interface SalaryRange {
-  min: number
-  median: number
-  max: number
+  min: number | null
+  median: number | null
+  max: number | null
 }
 
 export interface SalaryBenchmarkResponse {
@@ -43,7 +43,7 @@ export interface SalaryBenchmarkResponse {
   location: string | null
   experienceLevel: string | null
   currency: string | null
-  range: SalaryRange
+  range: SalaryRange | null
   marketPosition: string | null
   dataPoints: number | null
   insights: string[]

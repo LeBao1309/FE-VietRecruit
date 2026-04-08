@@ -13,6 +13,7 @@ const subStore = useSubscriptionStore()
 const auth = useAuthStore()
 
 const jobId = computed(() => route.params.id as string)
+const pageReady = ref(false)
 
 // ── Confirmation modal ──
 const showConfirm = ref(false)
@@ -33,14 +34,16 @@ const benchmark = computed(() => jobStore.salaryBenchmark)
 const canPubOrClose = computed(() => auth.isCompanyAdmin || auth.isHR)
 
 // ── Format helpers ──
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  })
 }
 
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
@@ -48,7 +51,7 @@ function formatDateTime(iso: string): string {
 
 function formatSalary(n: number | null): string {
  if (n === null) return '—'
- return n.toLocaleString('en-US')
+ return n.toLocaleString('vi-VN')
 }
 
 // ── Actions ──
@@ -82,18 +85,24 @@ async function handleConfirm(): Promise<void> {
 
 onMounted(async () => {
  await jobStore.fetchJob(jobId.value)
- await subStore.fetchCurrentQuota()
- // Fetch salary benchmark
+ // Fetch subscription info in parallel (needed to gate publish button)
+ await Promise.all([
+   subStore.fetchCurrentSubscription(),
+   subStore.fetchCurrentQuota(),
+ ])
+ pageReady.value = true
+ // Fetch salary benchmark (non-blocking, may fail silently)
  jobStore.fetchSalaryBenchmark(jobId.value)
 })
 
 onBeforeUnmount(() => {
  jobStore.clearCurrentJob()
+ pageReady.value = false
 })
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Back link -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.push('/employer/jobs')" class="text-gray-400 hover:text-gray-600 transition text-sm">
@@ -102,7 +111,7 @@ onBeforeUnmount(() => {
  </div>
 
  <!-- Loading skeleton -->
- <div v-if="jobStore.detailLoading" class="space-y-4">
+ <div v-if="!pageReady" class="space-y-4">
  <div class="bg-surface border border-border rounded-lg p-6 shadow-sm animate-pulse space-y-4">
  <div class="h-6 bg-gray-100 rounded w-64" />
  <div class="h-4 bg-gray-100 rounded w-32" />
@@ -147,9 +156,8 @@ onBeforeUnmount(() => {
  <button
  v-if="jobStore.canPublish"
  @click="openPublishConfirm"
- :disabled="jobStore.actionLoading"
- class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 flex items-center gap-1.5"
- :class="{ 'opacity-50 cursor-not-allowed': subStore.isQuotaFull }"
+ :disabled="jobStore.actionLoading || !subStore.hasActiveSubscription || subStore.isQuotaFull"
+ class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
  >
  Đăng Tuyển
  </button>
@@ -174,6 +182,24 @@ onBeforeUnmount(() => {
  <span class="font-medium">⚠ Hết giới hạn quota.</span>
  <span>Bạn không thể đăng thêm công việc. Hãy đóng công việc hiện tại hoặc</span>
  <router-link to="/employer/pricing" class="font-medium underline">nâng cấp gói</router-link>.
+ </div>
+
+ <!-- Subscription required banner (proactive check OR after failed publish attempt) -->
+ <div
+ v-if="jobStore.subscriptionRequired || (jobStore.canPublish && pageReady && !subStore.hasActiveSubscription)"
+ class="mt-3 flex items-start gap-3 px-4 py-3 rounded-md bg-warning-bg border border-warning/20 text-xs"
+ >
+ <span class="text-warning mt-0.5 shrink-0 text-base">⚠</span>
+ <div class="flex-1">
+   <p class="font-semibold text-warning mb-0.5">Chưa kích hoạt gói dịch vụ</p>
+   <p class="text-warning/80">Bạn cần chọn một gói dịch vụ (kể cả gói miễn phí) để đăng tin tuyển dụng.</p>
+ </div>
+ <router-link
+   to="/employer/pricing"
+   class="shrink-0 px-3 py-1.5 text-xs font-semibold text-white bg-warning hover:bg-amber-600 rounded-md transition"
+ >
+   Chọn Gói
+ </router-link>
  </div>
 
  <!-- Salary -->
@@ -239,7 +265,7 @@ onBeforeUnmount(() => {
  </div>
 
  <!-- No data -->
- <div v-else-if="!benchmark" class="text-sm text-gray-400 text-center py-6">
+ <div v-else-if="!benchmark || !benchmark.range || benchmark.range.min == null || benchmark.range.max == null || benchmark.range.median == null" class="text-sm text-gray-400 text-center py-6">
  Chưa có dữ liệu phân tích. Bấm "Lấy Dữ Liệu" để sử dụng AI phân tích thị trường lương cho vị trí này.
  </div>
 
@@ -248,9 +274,9 @@ onBeforeUnmount(() => {
  <!-- Range visualization -->
  <div class="space-y-2">
  <div class="flex items-center justify-between text-xs text-gray-500">
- <span>{{ benchmark.range.min.toLocaleString() }}</span>
- <span class="font-medium text-gray-700">{{ benchmark.range.median.toLocaleString() }} (trung vị)</span>
- <span>{{ benchmark.range.max.toLocaleString() }}</span>
+ <span>{{ (benchmark.range.min ?? 0).toLocaleString() }}</span>
+ <span class="font-medium text-gray-700">{{ (benchmark.range.median ?? 0).toLocaleString() }} (trung vị)</span>
+ <span>{{ (benchmark.range.max ?? 0).toLocaleString() }}</span>
  </div>
  <div class="relative h-3 bg-gray-100 rounded-full overflow-hidden">
  <!-- Full range bar -->
@@ -269,7 +295,7 @@ onBeforeUnmount(() => {
  :style="{
  left: `${Math.max(0, Math.min(100, ((job.minSalary - benchmark.range.min) / (benchmark.range.max - benchmark.range.min)) * 100))}%`,
  }"
- :title="`Your min: ${job.minSalary.toLocaleString()}`"
+ :title="`Your min: ${job.minSalary?.toLocaleString() ?? ''}`"
  />
  <div
  v-if="job.maxSalary"
@@ -277,7 +303,7 @@ onBeforeUnmount(() => {
  :style="{
  left: `${Math.max(0, Math.min(100, ((job.maxSalary - benchmark.range.min) / (benchmark.range.max - benchmark.range.min)) * 100))}%`,
  }"
- :title="`Your max: ${job.maxSalary.toLocaleString()}`"
+ :title="`Your max: ${job.maxSalary?.toLocaleString() ?? ''}`"
  />
  </div>
  <div class="flex items-center gap-3 text-[10px] text-gray-400">
@@ -310,7 +336,7 @@ onBeforeUnmount(() => {
  </div>
 
  <!-- Insights -->
- <div v-if="benchmark.insights.length" class="pt-3 border-t border-border">
+ <div v-if="benchmark.insights?.length" class="pt-3 border-t border-border">
  <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Lời Khuyên & Nhận Định</span>
  <ul class="space-y-1">
  <li v-for="(insight, i) in benchmark.insights" :key="i" class="text-xs text-gray-600 flex items-start gap-1.5">

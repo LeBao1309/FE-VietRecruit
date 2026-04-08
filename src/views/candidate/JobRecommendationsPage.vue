@@ -1,32 +1,46 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUiStore } from '@/stores/uiStore'
 import { candidateService } from '@/services/candidateService'
 import type { CandidateProfileResponse } from '@/types/candidate'
 import type { JobRecommendationResponse } from '@/types/job'
 
 const router = useRouter()
+const ui = useUiStore()
 
 // ── State ──
 const loading = ref(true)
+const apiError = ref<string | null>(null)
 const profile = ref<CandidateProfileResponse | null>(null)
 const recommendations = ref<JobRecommendationResponse[]>([])
 
 const hasCv = computed(() => !!profile.value?.defaultCvUrl)
+const profileComplete = computed(() => {
+  const p = profile.value
+  if (!p) return false
+  return hasCv.value && !!(p.desiredPosition || (p.skills && p.skills.length > 0))
+})
 
 // ── Load ──
 async function loadRecommendations(): Promise<void> {
- loading.value = true
- try {
- const [profileResult, recsResult] = await Promise.all([
-  candidateService.getProfile(),
-  candidateService.getRecommendations(20),
- ])
- if (profileResult.data) profile.value = profileResult.data
- if (recsResult.data) recommendations.value = recsResult.data
- } finally {
- loading.value = false
- }
+  loading.value = true
+  apiError.value = null
+  try {
+    const [profileResult, recsResult] = await Promise.all([
+      candidateService.getProfile(),
+      candidateService.getRecommendations(20),
+    ])
+    if (profileResult.data) profile.value = profileResult.data
+    if (recsResult.data) {
+      recommendations.value = recsResult.data
+    } else if (recsResult.error) {
+      apiError.value = recsResult.error.message ?? 'Không thể tải đề xuất'
+      ui.toastError('Tải đề xuất thất bại', recsResult.error.message)
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 function goToJob(jobId: string): void {
@@ -71,14 +85,39 @@ onMounted(loadRecommendations)
  </div>
  </div>
 
- <!-- Empty state -->
- <div v-else-if="recommendations.length === 0" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+ <!-- Error state -->
+ <div v-else-if="apiError" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+ <span class="text-5xl mb-4 opacity-50">⚠️</span>
+ <p class="text-lg font-bold text-slate-900 mb-2">Không thể tải đề xuất</p>
+ <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">{{ apiError }}</p>
+ <button @click="loadRecommendations" class="btn-primary py-2.5 px-6">
+ Thử Lại
+ </button>
+ </div>
+
+ <!-- Empty state: profile incomplete -->
+ <div v-else-if="recommendations.length === 0 && !profileComplete" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
  <span class="text-5xl mb-4 opacity-50">🤖</span>
  <p class="text-lg font-bold text-slate-900 mb-2">Chưa có đề xuất nào</p>
  <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Hoàn thiện hồ sơ và tải lên CV để nhận các đề xuất việc làm từ AI.</p>
  <router-link to="/candidate/candidate-profile" class="btn-primary py-2.5 px-6">
  Hoàn Thiện Hồ Sơ Của Bạn
  </router-link>
+ </div>
+
+ <!-- Empty state: profile complete but no results -->
+ <div v-else-if="recommendations.length === 0 && profileComplete" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+ <span class="text-5xl mb-4 opacity-50">🔍</span>
+ <p class="text-lg font-bold text-slate-900 mb-2">Hiện chưa có việc làm phù hợp</p>
+ <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Hồ sơ của bạn đã đầy đủ. Hệ thống đang tìm kiếm — hãy thử lại sau hoặc khám phá tất cả việc làm.</p>
+ <div class="flex items-center gap-3">
+ <button @click="loadRecommendations" class="btn-secondary py-2.5 px-5">
+ Thử Lại
+ </button>
+ <router-link to="/jobs" class="btn-primary py-2.5 px-5">
+ Xem Tất Cả Việc Làm
+ </router-link>
+ </div>
  </div>
 
  <!-- Results -->

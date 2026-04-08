@@ -95,7 +95,7 @@ function viewAll() {
         >
           <p class="text-sm font-medium text-slate-800 leading-snug">{{ n.title }}</p>
           <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">{{ n.message }}</p>
-          <p class="text-[10px] text-slate-400 mt-1">{{ new Date(n.createdAt).toLocaleString('vi-VN') }}</p>
+          <p class="text-[10px] text-slate-400 mt-1">{{ n.createdAt ? new Date(n.createdAt).toLocaleString('vi-VN') : '—' }}</p>
         </li>
       </ul>
 

@@ -75,8 +75,9 @@ async function loadQuestions(): Promise<void> {
 }
 
 // ── Helpers ──
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  weekday: 'long',
  month: 'long',
  day: 'numeric',
@@ -94,8 +95,9 @@ function formatDuration(minutes: number | null): string {
  return m > 0 ? `${h}h ${m}m` : `${h} hour${h > 1 ? 's' : ''}`
 }
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  year: 'numeric',
@@ -136,7 +138,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
@@ -368,7 +370,7 @@ onBeforeUnmount(() => {
  @click="loadQuestions"
  class="text-xs text-slate-500 hover:text-slate-700 :text-slate-200 font-bold transition-colors uppercase tracking-wider"
  >
- Load Questions
+ Tải Câu Hỏi
  </button>
  <button
  @click="handleGenerateQuestions"

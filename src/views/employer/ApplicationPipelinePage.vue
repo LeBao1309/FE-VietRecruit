@@ -128,8 +128,9 @@ function goToDetail(appId: string): void {
 }
 
 // ── Helpers ──
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  })
@@ -153,7 +154,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-[1400px] mx-auto px-6 py-8">
+ <div class="max-w-[1400px] mx-auto px-6 pb-8">
  <!-- Header -->
  <div class="flex items-center gap-3 mb-2">
  <button @click="router.push(`/employer/jobs/${jobId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">

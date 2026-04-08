@@ -63,7 +63,7 @@ onMounted(() => {
           <p class="text-sm font-semibold text-slate-800 leading-snug">{{ n.title }}</p>
           <p class="text-sm text-slate-600 mt-0.5 leading-relaxed">{{ n.message }}</p>
           <p class="text-xs text-slate-400 mt-1.5">
-            {{ new Date(n.createdAt).toLocaleString('vi-VN') }}
+            {{ n.createdAt ? new Date(n.createdAt).toLocaleString('vi-VN') : '—' }}
           </p>
         </div>
       </li>

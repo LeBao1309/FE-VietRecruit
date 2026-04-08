@@ -18,16 +18,16 @@ const applicationId = computed(() => route.params.id as string)
 
 // ── Offer lifecycle steps ──
 const LIFECYCLE_STEPS: { status: OfferStatus; label: string; icon: string }[] = [
- { status: 'DRAFT', label: 'Draft', icon: '📝' },
- { status: 'SENT', label: 'Sent', icon: '📨' },
- { status: 'ACCEPTED', label: 'Accepted', icon: '✓' },
+ { status: 'DRAFT', label: 'Nháp', icon: '📝' },
+ { status: 'SENT', label: 'Đã Gửi', icon: '📨' },
+ { status: 'ACCEPTED', label: 'Đã Chấp Nhận', icon: '✓' },
 ]
 
 const STATUS_CONFIG: Record<OfferStatus, { label: string; class: string; dotClass: string }> = {
- DRAFT: { label: 'Draft', class: 'bg-gray-100 text-gray-600', dotClass: 'bg-gray-400' },
- SENT: { label: 'Sent', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- ACCEPTED: { label: 'Accepted', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- DECLINED: { label: 'Declined', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
+ DRAFT: { label: 'Nháp', class: 'bg-gray-100 text-gray-600', dotClass: 'bg-gray-400' },
+ SENT: { label: 'Đã Gửi', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ ACCEPTED: { label: 'Đã Chấp Nhận', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ DECLINED: { label: 'Đã Từ Chối', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
 
 function getStepState(stepStatus: OfferStatus, offer: { status: OfferStatus }): 'completed' | 'current' | 'upcoming' | 'declined' {
@@ -143,25 +143,28 @@ const canCreateNew = computed(() => {
  return !offerStore.offers.some((o) => o.status !== 'DECLINED')
 })
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  year: 'numeric',
  })
 }
 
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
 }
 
-function formatSalary(amount: number, currency: string | null): string {
+function formatSalary(amount: number | null | undefined, currency: string | null): string {
+  if (amount == null) return '—'
  const cur = currency ?? 'VND'
  try {
- return new Intl.NumberFormat('en-US', {
+ return new Intl.NumberFormat('vi-VN', {
  style: 'currency',
  currency: cur,
  maximumFractionDigits: 0,
@@ -183,7 +186,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
- <div class="max-w-3xl mx-auto px-6 py-8">
+ <div class="max-w-3xl mx-auto px-6 pb-8">
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.push(`/employer/applications/${applicationId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">

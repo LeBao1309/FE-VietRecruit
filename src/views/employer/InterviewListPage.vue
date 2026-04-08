@@ -110,8 +110,9 @@ function goToDetail(interviewId: string): void {
 }
 
 // ── Helpers ──
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  weekday: 'short',
  month: 'short',
  day: 'numeric',
@@ -141,7 +142,7 @@ onMounted(async () => {
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Back -->
  <div class="flex items-center gap-3 mb-2">
  <button

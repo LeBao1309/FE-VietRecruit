@@ -2,21 +2,30 @@
 import { ref, onMounted } from 'vue'
 import { useUiStore } from '@/stores/uiStore'
 import { departmentService, locationService, categoryService } from '@/services/organizationService'
+import { companyService } from '@/services/companyService'
 import type { DepartmentResponse } from '@/types/organization'
 import type { LocationResponse } from '@/types/organization'
 import type { CategoryResponse } from '@/types/organization'
+import type { CompanyResponse } from '@/types/company'
 
 const ui = useUiStore()
 
 // ── Active tab ──
-type Tab = 'departments' | 'locations' | 'categories'
-const activeTab = ref<Tab>('departments')
+type Tab = 'profile' | 'departments' | 'locations' | 'categories'
+const activeTab = ref<Tab>('profile')
 
 // ── Data ──
 const departments = ref<DepartmentResponse[]>([])
 const locations = ref<LocationResponse[]>([])
 const categories = ref<CategoryResponse[]>([])
 const loading = ref(true)
+
+// ── Company profile ──
+const company = ref<CompanyResponse | null>(null)
+const companyForm = ref({ name: '', domain: '', website: '' })
+const companyFormErrors = ref<Record<string, string>>({})
+const companySaving = ref(false)
+const companyLoading = ref(false)
 
 // ── Modal ──
 const showModal = ref(false)
@@ -47,6 +56,56 @@ async function loadAll(): Promise<void> {
  if (cats.data) categories.value = cats.data.content
  } finally {
  loading.value = false
+ }
+}
+
+async function loadCompany(): Promise<void> {
+ companyLoading.value = true
+ try {
+ const result = await companyService.getCompany()
+ if (result.data) {
+ company.value = result.data
+ companyForm.value = {
+ name: result.data.name,
+ domain: result.data.domain ?? '',
+ website: result.data.website ?? '',
+ }
+ }
+ } finally {
+ companyLoading.value = false
+ }
+}
+
+function validateCompanyForm(): boolean {
+ companyFormErrors.value = {}
+ if (!companyForm.value.name.trim()) {
+ companyFormErrors.value.name = 'Tên công ty là bắt buộc.'
+ } else if (companyForm.value.name.length > 255) {
+ companyFormErrors.value.name = 'Tên công ty không dài quá 255 ký tự.'
+ }
+ if (companyForm.value.website && !/^https?:\/\/.+/.test(companyForm.value.website)) {
+ companyFormErrors.value.website = 'Vui lòng nhập URL hợp lệ (https://...).'
+ }
+ return Object.keys(companyFormErrors.value).length === 0
+}
+
+async function saveCompanyProfile(): Promise<void> {
+ if (!validateCompanyForm()) return
+ companySaving.value = true
+ try {
+ const result = await companyService.updateCompany({
+ name: companyForm.value.name.trim(),
+ domain: companyForm.value.domain.trim() || undefined,
+ website: companyForm.value.website.trim() || undefined,
+ })
+ if (result.error) {
+ ui.toastError('Cập nhật thất bại', result.error.message)
+ return
+ }
+ company.value = result.data!
+ ui.toastSuccess('Đã cập nhật', 'Thông tin công ty đã được lưu.')
+ } finally {
+ companySaving.value = false
  }
 }
 
@@ -152,28 +211,33 @@ async function handleDelete(): Promise<void> {
 }
 
 const tabLabel: Record<Tab, string> = {
- departments: 'Department',
- locations: 'Location',
- categories: 'Category',
+ profile: 'Hồ Sơ',
+ departments: 'Phòng Ban',
+ locations: 'Địa Điểm',
+ categories: 'Danh Mục',
 }
 
-const extraLabel: Record<Tab, string | null> = {
- departments: 'Description',
- locations: 'Address',
+const extraLabel: Record<Exclude<Tab, 'profile'>, string | null> = {
+ departments: 'Mô Tả',
+ locations: 'Địa Chỉ',
  categories: null,
 }
 
-onMounted(loadAll)
+onMounted(() => {
+ loadCompany()
+ loadAll()
+})
 </script>
 
 <template>
- <div class="max-w-4xl mx-auto px-6 py-8">
+ <div class="max-w-4xl mx-auto px-6 pb-8">
  <div class="flex items-center justify-between mb-6">
  <div>
  <h1 class="text-xl font-bold text-gray-900">Doanh Nghiệp</h1>
- <p class="text-sm text-gray-500 mt-1">Quản trị các phòng ban, địa chỉ hoạt động và lĩnh vực tuyển</p>
+ <p class="text-sm text-gray-500 mt-1">Quản trị thông tin công ty, phòng ban, địa chỉ và lĩnh vực tuyển</p>
  </div>
  <button
+ v-if="activeTab !== 'profile'"
  @click="openCreate"
  class="btn-primary"
  >
@@ -184,7 +248,7 @@ onMounted(loadAll)
  <!-- Tabs -->
  <div class="flex gap-1 border-b border-border mb-6">
  <button
- v-for="tab in (['departments', 'locations', 'categories'] as Tab[])"
+ v-for="tab in (['profile', 'departments', 'locations', 'categories'] as Tab[])"
  :key="tab"
  @click="activeTab = tab"
  class="px-4 py-2.5 text-sm font-medium transition border-b-2 -mb-px"
@@ -193,20 +257,90 @@ onMounted(loadAll)
  : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'"
  >
  {{ tabLabel[tab] }}
- <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
+ <span v-if="tab !== 'profile'" class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
  :class="activeTab === tab ? 'bg-primary-light text-primary' : 'bg-gray-100 text-gray-400'">
  {{ tab === 'departments' ? departments.length : tab === 'locations' ? locations.length : categories.length }}
  </span>
  </button>
  </div>
 
+ <!-- ─── Profile Tab ─── -->
+ <div v-if="activeTab === 'profile'">
+ <div v-if="companyLoading" class="premium-card p-6 animate-pulse space-y-4">
+ <div v-for="i in 3" :key="i" class="h-12 bg-slate-100 rounded-lg" />
+ </div>
+ <div v-else class="premium-card p-8">
+ <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Thông Tin Công Ty</h2>
+ <form @submit.prevent="saveCompanyProfile" class="space-y-5 max-w-lg">
+ <!-- Name -->
+ <div>
+ <label for="cp-name" class="block text-sm font-medium text-slate-700 mb-1.5">
+ Tên công ty <span class="text-rose-500">*</span>
+ </label>
+ <input
+ id="cp-name"
+ v-model="companyForm.name"
+ type="text"
+ placeholder="Acme Corporation"
+ class="w-full px-4 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="companyFormErrors.name ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
+ />
+ <p v-if="companyFormErrors.name" class="text-xs text-rose-500 mt-1">{{ companyFormErrors.name }}</p>
+ </div>
+
+ <!-- Domain -->
+ <div>
+ <label for="cp-domain" class="block text-sm font-medium text-slate-700 mb-1.5">Ngành nghề / Lĩnh vực</label>
+ <input
+ id="cp-domain"
+ v-model="companyForm.domain"
+ type="text"
+ placeholder="VD: Công nghệ, Y tế, Tài chính"
+ class="w-full px-4 py-2.5 text-sm border border-slate-300 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
+ />
+ </div>
+
+ <!-- Website -->
+ <div>
+ <label for="cp-website" class="block text-sm font-medium text-slate-700 mb-1.5">Website công ty</label>
+ <input
+ id="cp-website"
+ v-model="companyForm.website"
+ type="text"
+ placeholder="https://www.example.com"
+ class="w-full px-4 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="companyFormErrors.website ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
+ />
+ <p v-if="companyFormErrors.website" class="text-xs text-rose-500 mt-1">{{ companyFormErrors.website }}</p>
+ </div>
+
+ <!-- Meta -->
+ <div v-if="company" class="pt-2 border-t border-slate-100 text-xs text-slate-400 space-y-1">
+ <p>Tạo lúc: {{ company.createdAt ? new Date(company.createdAt).toLocaleString('vi-VN') : '—' }}</p>
+ <p>Cập nhật lần cuối: {{ company.updatedAt ? new Date(company.updatedAt).toLocaleString('vi-VN') : '—' }}</p>
+ </div>
+
+ <div class="flex justify-end pt-2">
+ <button
+ type="submit"
+ :disabled="companySaving"
+ class="btn-primary"
+ >
+ <span v-if="companySaving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+ {{ companySaving ? 'Đang lưu…' : 'Lưu Thay Đổi' }}
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
+
  <!-- Loading -->
- <div v-if="loading" class="premium-card p-6 animate-pulse space-y-4">
+ <div v-if="activeTab !== 'profile' && loading" class="premium-card p-6 animate-pulse space-y-4">
  <div v-for="i in 4" :key="i" class="h-12 bg-slate-100 rounded-lg" />
  </div>
 
  <!-- Table -->
- <div v-else class="premium-card overflow-hidden">
+ <div v-else-if="activeTab !== 'profile'" class="premium-card overflow-hidden">
  <!-- Departments -->
  <table v-if="activeTab === 'departments'" class="w-full">
  <thead>
@@ -237,9 +371,9 @@ onMounted(loadAll)
  <table v-if="activeTab === 'locations'" class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên Nơi Chốn</th>
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Vị Trí Rõ Nhất</th>
- <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Các Hoạt Động</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Địa Chỉ</th>
+ <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Thao Tác</th>
  </tr>
  </thead>
  <tbody>
@@ -252,8 +386,8 @@ onMounted(loadAll)
  <td class="px-6 py-4 text-sm font-bold text-slate-900 ">{{ loc.name }}</td>
  <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ loc.address ?? '—' }}</td>
  <td class="px-6 py-4 text-right">
- <button @click="openEdit(loc)" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Sửa Lại</button>
- <button @click="confirmDelete(loc)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Bỏ Đi</button>
+ <button @click="openEdit(loc)" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Sửa</button>
+ <button @click="confirmDelete(loc)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Xóa</button>
  </td>
  </tr>
  </tbody>
@@ -263,8 +397,8 @@ onMounted(loadAll)
  <table v-if="activeTab === 'categories'" class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Chuyên Môn</th>
- <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Điều Hướng</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên</th>
+ <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Thao Tác</th>
  </tr>
  </thead>
  <tbody>
@@ -276,8 +410,8 @@ onMounted(loadAll)
  <tr v-for="cat in categories" :key="cat.id" class="border-b border-slate-100 last:border-0 hover:bg-slate-50 :bg-slate-800/50 transition-colors">
  <td class="px-6 py-4 text-sm font-bold text-slate-900 ">{{ cat.name }}</td>
  <td class="px-6 py-4 text-right">
- <button @click="openEdit({ id: cat.id, name: cat.name })" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Hiệu chỉnh</button>
- <button @click="confirmDelete(cat)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Thanh lọc</button>
+ <button @click="openEdit({ id: cat.id, name: cat.name })" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Sửa</button>
+ <button @click="confirmDelete(cat)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Xóa</button>
  </td>
  </tr>
  </tbody>
@@ -286,45 +420,53 @@ onMounted(loadAll)
 
  <!-- Create/Edit Modal -->
  <Teleport to="body">
- <div v-if="showModal" class="premium-modal-backdrop">
- <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeModal" />
+ <div v-if="showModal" class="premium-modal-backdrop" @click.self="closeModal">
  <div class="premium-modal-content w-full max-w-md">
- <h2 class="text-xl font-bold text-slate-900 mb-6">
- {{ modalMode === 'create' ? `Đăng Ký ${tabLabel[activeTab]}` : `Phép Sửa ${tabLabel[activeTab]}` }}
+ <!-- header -->
+ <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+ <h2 class="text-lg font-bold text-slate-900">
+ {{ modalMode === 'create' ? `Tạo ${tabLabel[activeTab]}` : `Chỉnh sửa ${tabLabel[activeTab]}` }}
  </h2>
+ <button type="button" @click="closeModal" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+ <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+ <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
 
- <form @submit.prevent="handleSave" class="space-y-5">
+ <!-- body -->
+ <form @submit.prevent="handleSave" class="px-6 py-5 space-y-5">
  <div>
- <label for="org-name" class="block text-sm font-bold text-slate-700 mb-1">Tên Định Danh <span class="text-rose-500">*</span></label>
+ <label for="org-name" class="block text-sm font-bold text-slate-700 mb-1">Tên <span class="text-rose-500">*</span></label>
  <input
  id="org-name"
  v-model="formName"
  type="text"
- placeholder="Gõ nhập tên"
+ placeholder="Nhập tên..."
  class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition"
  :class="formErrors.name ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
  />
  <p v-if="formErrors.name" class="text-xs text-rose-500 mt-1">{{ formErrors.name }}</p>
  </div>
 
- <div v-if="extraLabel[activeTab]">
- <label for="org-extra" class="block text-sm font-bold text-slate-700 mb-1">{{ extraLabel[activeTab] }}</label>
+ <div v-if="activeTab !== 'profile' && extraLabel[activeTab as Exclude<Tab, 'profile'>]">
+ <label for="org-extra" class="block text-sm font-bold text-slate-700 mb-1">{{ extraLabel[activeTab as Exclude<Tab, 'profile'>] }}</label>
  <input
  id="org-extra"
  v-model="formExtra"
  type="text"
- :placeholder="`Vui lòng ghi nhập ${extraLabel[activeTab]!.toLowerCase()}`"
+ :placeholder="`Vui lòng ghi nhập ${extraLabel[activeTab as Exclude<Tab, 'profile'>]!.toLowerCase()}`"
  class="w-full px-4 py-3 text-sm border border-slate-300 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
  />
  </div>
 
- <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-2">
+ <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
  <button
  type="button"
  @click="closeModal"
  class="btn-secondary"
  >
- Dừng Qua Lại
+ Huỷ
  </button>
  <button
  type="submit"
@@ -332,7 +474,7 @@ onMounted(loadAll)
  class="btn-primary"
  >
  <span v-if="modalSaving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ modalSaving ? 'Đang Đợi…' : modalMode === 'create' ? 'Tạo' : 'Lưu Vào' }}
+ {{ modalSaving ? 'Đang lưu…' : modalMode === 'create' ? 'Tạo' : 'Lưu' }}
  </button>
  </div>
  </form>
@@ -342,23 +484,22 @@ onMounted(loadAll)
 
  <!-- Delete Confirmation Modal -->
  <Teleport to="body">
- <div v-if="showDeleteConfirm" class="premium-modal-backdrop">
- <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showDeleteConfirm = false" />
+ <div v-if="showDeleteConfirm" class="premium-modal-backdrop" @click.self="showDeleteConfirm = false">
  <div class="premium-modal-content w-full max-w-sm text-center">
  <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 text-3xl font-bold mx-auto mb-5 rotate-3 shadow-sm">
  ⚠
  </div>
- <h2 class="text-xl font-extrabold text-slate-900 mb-2">Thực Hiện Xóa {{ tabLabel[activeTab] }}?</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-2">Xóa {{ tabLabel[activeTab] }}?</h2>
  <p class="text-sm font-medium text-slate-500 mb-8">
- Xác nhận bạn muốn thủ tiêu <span class="text-slate-700 font-bold">{{ deleteTarget?.name }}</span>?
- Tiến trình của nút này là vĩnh viễn và không khôi phục được.
+ Xác nhận bạn muốn xóa <span class="text-slate-700 font-bold">{{ deleteTarget?.name }}</span>?
+ Hành động này không thể hoàn tác.
  </p>
  <div class="flex justify-center gap-3">
  <button
  @click="showDeleteConfirm = false"
  class="btn-secondary"
  >
- Rút Lại Thay Đổi
+ Huỷ
  </button>
  <button
  @click="handleDelete"
@@ -366,7 +507,7 @@ onMounted(loadAll)
  class="px-6 py-2.5 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2"
  >
  <span v-if="deleting" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ deleting ? 'Đang xóa…' : 'Xác Nhận Xóa' }}
+ {{ deleting ? 'Đang xóa…' : 'Xóa' }}
  </button>
  </div>
  </div>

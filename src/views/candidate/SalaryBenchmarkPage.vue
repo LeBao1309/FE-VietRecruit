@@ -37,13 +37,15 @@ async function fetchBenchmark(): Promise<void> {
  }
 }
 
-function formatMoney(n: number): string {
- return n.toLocaleString('en-US')
+function formatMoney(n: number | null | undefined): string {
+ if (n == null) return '—'
+ return n.toLocaleString('vi-VN')
 }
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
- month: 'short', day: 'numeric', year: 'numeric',
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+ return new Date(iso).toLocaleDateString('vi-VN', {
+ day: '2-digit', month: '2-digit', year: 'numeric',
  })
 }
 </script>
@@ -108,7 +110,7 @@ function formatDate(iso: string): string {
  </div>
 
  <!-- Salary Range Visualization -->
- <div class="space-y-6">
+ <div v-if="benchmark.range && (benchmark.range.min != null || benchmark.range.median != null || benchmark.range.max != null)" class="space-y-6">
  <div class="grid grid-cols-3 text-center">
  <div class="bg-slate-50 p-4 rounded-l-xl border-y border-l border-slate-200 ">
  <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Tối Thiểu</span>
@@ -128,9 +130,10 @@ function formatDate(iso: string): string {
  <div class="relative pt-4">
  <div class="relative h-4 bg-slate-100 rounded-full overflow-visible border border-slate-200 ">
  <div class="absolute inset-y-0 rounded-full bg-gradient-to-r from-teal-500/20 via-teal-500/80 to-teal-500/20" style="left: 5%; right: 5%" />
- 
+
  <!-- Median marker -->
  <div
+ v-if="benchmark.range.max != null && benchmark.range.min != null && benchmark.range.max !== benchmark.range.min"
  class="absolute top-1/2 -translate-y-1/2 w-4 h-6 bg-teal-600 rounded-full shadow-[0_0_10px_rgba(13,148,136,0.8)] border-2 border-white z-10 transition-all duration-1000"
  :style="{
  left: `calc(${((benchmark.range.median - benchmark.range.min) / (benchmark.range.max - benchmark.range.min)) * 100}% - 8px)`,
@@ -143,6 +146,7 @@ function formatDate(iso: string): string {
  </div>
  </div>
  </div>
+ <div v-else class="py-4 text-center text-sm font-medium text-slate-400">Không có dữ liệu mức lương cho vị trí này.</div>
 
  <!-- Market Position -->
  <div v-if="benchmark.marketPosition" class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">

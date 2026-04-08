@@ -6,18 +6,28 @@ import { jobService } from '@/services/jobService'
 import { candidateService } from '@/services/candidateService'
 import PublicNavbar from '@/components/common/PublicNavbar.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import type { JobSearchResponse, JobSummaryResponse } from '@/types/job'
+import type { JobSearchResponse, JobRecommendationResponse } from '@/types/job'
 import type { SearchPageResponse, PageResponse } from '@/types/common'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-// ── CV guard: only show match scores when candidate has uploaded a CV ──
+// ── CV guard + AI recommendations map ──
 const hasCv = ref(false)
+const recommendationMap = ref(new Map<string, JobRecommendationResponse>())
+
 async function loadCvStatus(): Promise<void> {
  if (!auth.isCandidate) return
  const result = await candidateService.getProfile()
- if (result.data) hasCv.value = !!result.data.defaultCvUrl
+ if (!result.data) return
+ hasCv.value = !!result.data.defaultCvUrl
+ if (!hasCv.value) return
+ const recsResult = await candidateService.getRecommendations(50)
+ if (recsResult.data) {
+   const map = new Map<string, JobRecommendationResponse>()
+   for (const rec of recsResult.data) map.set(rec.jobId, rec)
+   recommendationMap.value = map
+ }
 }
 
 // ── Search mode ──
@@ -47,27 +57,71 @@ const currency = ref('VND')
 const currentPage = ref(0)
 const pageSize = ref(24)
 
-// ── Browse results (GET /jobs/public) ──
-const browseData = ref<PageResponse<JobSummaryResponse> | null>(null)
+// ── Browse + Search both use SearchPageResponse<JobSearchResponse> ──
+const browseData = ref<SearchPageResponse<JobSearchResponse> | null>(null)
 const browseLoading = ref(false)
-
-// ── Search results (GET /jobs/search) ──
 const searchData = ref<SearchPageResponse<JobSearchResponse> | null>(null)
 const searchLoading = ref(false)
 
 // ── Computed ──
 const isLoading = computed(() => browseLoading.value || searchLoading.value)
-const isEmpty = computed(() => {
- if (mode.value === 'browse') return browseData.value?.empty ?? true
- return searchData.value?.empty ?? true
+// Strip Vietnamese diacritics for fuzzy location matching
+function normalizeText(str: string): string {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toLowerCase()
+    .trim()
+}
+
+// Common location abbreviation expansions
+const LOCATION_ALIASES: Record<string, string[]> = {
+  'hcm': ['ho chi minh', 'sai gon', 'saigon', 'tphcm'],
+  'tphcm': ['ho chi minh', 'hcm'],
+  'hn': ['ha noi', 'hanoi'],
+  'dn': ['da nang'],
+  'hp': ['hai phong'],
+  'ct': ['can tho'],
+}
+
+function locationMatches(locationName: string | null, query: string): boolean {
+  if (!query.trim()) return true
+  if (!locationName) return true // no location info → keep
+
+  const normLoc = normalizeText(locationName)
+  const normQuery = normalizeText(query)
+
+  // Direct substring match (both directions)
+  if (normLoc.includes(normQuery) || normQuery.includes(normLoc)) return true
+
+  // Abbreviation expansion: if query matches an alias, check location contains alias targets
+  const aliases = LOCATION_ALIASES[normQuery] ?? []
+  if (aliases.some(alias => normLoc.includes(alias))) return true
+
+  // Reverse: check if location abbreviation matches query expansions
+  for (const [abbr, expansions] of Object.entries(LOCATION_ALIASES)) {
+    if (normLoc.includes(abbr) && expansions.some(e => normQuery.includes(e) || e.includes(normQuery))) return true
+  }
+
+  return false
+}
+
+const activeData = computed(() => mode.value === 'browse' ? browseData.value : searchData.value)
+
+// Client-side location filter applied only in search mode
+const activeContent = computed(() => {
+  const content = activeData.value?.content ?? []
+  if (mode.value !== 'search' || !locationQuery.value.trim()) return content
+  return content.filter(job => locationMatches(job.locationName, locationQuery.value))
 })
-const totalPages = computed(() => {
- if (mode.value === 'browse') return browseData.value?.totalPages ?? 0
- return searchData.value?.totalPages ?? 0
-})
+
+const isEmpty = computed(() => activeContent.value.length === 0)
+const totalPages = computed(() => activeData.value?.totalPages ?? 0)
+// Show filtered count when location filter is active, otherwise backend count
 const totalElements = computed(() => {
- if (mode.value === 'browse') return browseData.value?.totalElements ?? 0
- return searchData.value?.totalElements ?? 0
+  if (mode.value === 'search' && locationQuery.value.trim()) return activeContent.value.length
+  return activeData.value?.totalElements ?? 0
 })
 const canGoPrev = computed(() => currentPage.value > 0)
 const canGoNext = computed(() => currentPage.value < totalPages.value - 1)
@@ -83,18 +137,17 @@ const pageNumbers = computed<(number | '...')[]>(() => {
   return pages
 })
 
-// ── Browse: load published jobs ──
+// ── Browse: load all published jobs via search engine (no query) ──
 async function loadPublicJobs(): Promise<void> {
  browseLoading.value = true
  try {
- const result = await jobService.listPublicJobs({
- page: currentPage.value,
- size: pageSize.value,
- sort: 'createdAt,desc',
- })
- if (result.data) browseData.value = result.data
+   const result = await jobService.searchJobs({
+     page: currentPage.value,
+     size: pageSize.value,
+   })
+   if (result.data) browseData.value = result.data
  } finally {
- browseLoading.value = false
+   browseLoading.value = false
  }
 }
 
@@ -209,15 +262,16 @@ function goToJob(id: string): void {
 function formatSalary(min: number | null, max: number | null, cur: string | null, negotiable: boolean | null): string {
  if (!min && !max) return negotiable ? 'Thỏa thuận' : '—'
  const c = cur ?? 'VND'
- const fmt = (n: number) => n.toLocaleString('en-US')
+ const fmt = (n: number) => n.toLocaleString('vi-VN')
  if (min && max) return `${fmt(min)} – ${fmt(max)} ${c}`
  if (min) return `Từ ${fmt(min)} ${c}`
  if (max) return `Đến ${fmt(max)} ${c}`
  return '—'
 }
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' })
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function timeAgo(iso: string): string {
@@ -243,6 +297,29 @@ function scoreDotColor(pct: number): string {
   if (pct >= 70) return 'bg-emerald-500'
   if (pct >= 40) return 'bg-amber-500'
   return 'bg-rose-500'
+}
+
+// Only use AI recommendation score — never use search relevance score as match %
+function getScore(jobId: string): number | null {
+  return recommendationMap.value.get(jobId)?.matchScore ?? null
+}
+
+// Filter out low-quality highlights (bare tokens with no surrounding context)
+function isUsefulHighlight(raw: string): boolean {
+  const fullText = raw.replace(/<[^>]+>/g, '').trim()
+  const highlightedText = [...raw.matchAll(/<em>(.*?)<\/em>/g)]
+    .map(m => m[1]).join('')
+  const context = fullText.replace(highlightedText, '').trim()
+  // Require at least 4 chars of surrounding context and total text >= 6 chars
+  return context.length >= 4 && fullText.length >= 6
+}
+
+// Replace Elasticsearch <em> tags with styled highlight spans
+function formatHighlight(raw: string): string {
+  return raw
+    .replace(/<em>/g, '<mark>')
+    .replace(/<\/em>/g, '</mark>')
+    .trim()
 }
 
 onMounted(() => {
@@ -401,7 +478,7 @@ onUnmounted(() => {
  <template v-else-if="mode === 'browse' && browseData">
  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
  <div
- v-for="job in browseData.content"
+ v-for="job in activeContent"
  :key="job.id"
  @click="goToJob(job.id)"
  class="premium-card p-6 border-slate-200 transition-all duration-300 cursor-pointer group flex flex-col h-full bg-white hover:-translate-y-1 hover:shadow-[0_12px_24px_-10px_rgba(20,184,166,0.3)] hover:border-teal-400/50"
@@ -410,23 +487,35 @@ onUnmounted(() => {
  <h3 class="text-lg font-bold text-slate-900 group-hover:text-teal-600 transition-colors line-clamp-2 leading-snug">
  {{ job.title }}
  </h3>
- <p class="text-xs font-bold text-slate-400 mt-2 flex items-center gap-1.5">
- <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1.5">
+ <span v-if="job.companyName" class="text-xs font-semibold text-slate-600">{{ job.companyName }}</span>
+ <span v-if="job.companyName && job.locationName" class="text-slate-300 text-xs">·</span>
+ <span v-if="job.locationName" class="text-xs font-medium text-slate-400">{{ job.locationName }}</span>
+ </div>
+ <p class="text-xs font-bold text-slate-400 mt-1.5 flex items-center gap-1.5">
+ <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
  {{ timeAgo(job.createdAt) }}
  </p>
  </div>
- <div class="space-y-3 mt-auto pt-4 border-t border-slate-100">
- <div class="flex items-center justify-between">
- <span v-if="auth.isAuthenticated" class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-bold border border-emerald-100">
+ <div class="space-y-2 mt-auto pt-4 border-t border-slate-100">
+ <div class="flex items-center justify-between gap-2">
+ <span v-if="auth.isAuthenticated" class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-bold border border-emerald-100 truncate">
  {{ formatSalary(job.minSalary, job.maxSalary, job.currency, job.isNegotiable) }}
  </span>
  <router-link v-else to="/login" @click.stop class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold border border-slate-200 hover:border-teal-300 hover:text-teal-600 transition-colors">
  <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
  Đăng nhập để xem mức lương
  </router-link>
+ <div v-if="hasCv && getScore(job.id) !== null" class="shrink-0">
+ <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wide"
+   :class="scoreColorClass(getScore(job.id)!)">
+   <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="scoreDotColor(getScore(job.id)!)"></span>
+   {{ getScore(job.id) }}%
+ </span>
  </div>
- <div v-if="job.deadline" class="text-xs font-medium text-rose-500/80 flex items-center gap-1.5 pt-1">
- <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+ </div>
+ <div v-if="job.deadline" class="text-xs font-medium text-rose-500/80 flex items-center gap-1.5">
+ <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
  Hạn: {{ formatDate(job.deadline) }}
  </div>
  </div>
@@ -438,7 +527,7 @@ onUnmounted(() => {
  <template v-else-if="mode === 'search' && searchData">
  <div class="space-y-4">
  <div
- v-for="job in searchData.content"
+ v-for="job in activeContent"
  :key="job.id"
  @click="goToJob(job.id)"
  class="premium-card p-6 md:p-8 hover:-translate-y-1 hover:shadow-[0_12px_24px_-10px_rgba(20,184,166,0.3)] hover:border-teal-400/50 transition-all duration-300 cursor-pointer group bg-white"
@@ -470,10 +559,10 @@ onUnmounted(() => {
  <div v-if="job.highlights" class="flex flex-wrap gap-1.5 mt-auto">
  <template v-for="(values, field) in job.highlights" :key="field">
  <span
- v-for="(val, i) in values.slice(0, 3)"
+ v-for="(val, i) in values.filter(isUsefulHighlight).slice(0, 3)"
  :key="`${field}-${i}`"
- class="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold bg-teal-50 text-teal-700 rounded-md border border-teal-100 max-w-[260px] truncate"
- v-html="val"
+ class="job-highlight inline-block px-2 py-0.5 text-[11px] font-semibold bg-teal-50 text-teal-700 rounded-md border border-teal-100 max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap leading-5"
+ v-html="formatHighlight(val)"
  />
  </template>
  </div>
@@ -490,12 +579,11 @@ onUnmounted(() => {
  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
  {{ timeAgo(job.createdAt) }}
  </p>
- <div v-if="hasCv && job.score !== null && job.score !== undefined" class="mt-2 text-right">
+ <div v-if="hasCv && getScore(job.id) !== null" class="mt-2 text-right">
  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wide"
- :class="scoreColorClass(normalizeScore(job.score))"
- >
- <span class="w-1.5 h-1.5 rounded-full" :class="scoreDotColor(normalizeScore(job.score))"></span>
- {{ normalizeScore(job.score) }}% phù hợp
+ :class="scoreColorClass(getScore(job.id)!)">
+ <span class="w-1.5 h-1.5 rounded-full" :class="scoreDotColor(getScore(job.id)!)"></span>
+ {{ getScore(job.id) }}% phù hợp
  </span>
  </div>
  </div>
@@ -545,3 +633,13 @@ onUnmounted(() => {
  <AppFooter />
  </div>
 </template>
+
+<style scoped>
+.job-highlight :deep(mark) {
+  background-color: #fef08a;
+  color: #78350f;
+  font-style: normal;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+</style>

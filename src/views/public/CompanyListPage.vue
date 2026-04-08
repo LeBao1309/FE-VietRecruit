@@ -157,7 +157,7 @@ onMounted(() => search(0))
           <!-- Footer -->
           <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] text-slate-400 font-medium">
-              Tham gia {{ new Date(company.createdAt).toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }) }}
+              Tham gia {{ company.createdAt ? new Date(company.createdAt).toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }) : '—' }}
             </span>
             <a
               :href="`/jobs?company=${company.id}`"

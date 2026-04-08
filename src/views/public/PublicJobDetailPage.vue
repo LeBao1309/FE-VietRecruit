@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useUiStore } from '@/stores/uiStore'
 import { jobService } from '@/services/jobService'
 import { applicationService } from '@/services/applicationService'
+import { candidateService } from '@/services/candidateService'
 import PublicNavbar from '@/components/common/PublicNavbar.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import type { JobResponse } from '@/types/job'
@@ -20,6 +21,45 @@ const jobId = computed(() => route.params.id as string)
 const job = ref<JobResponse | null>(null)
 const loading = ref(true)
 const notFound = ref(false)
+
+// ── AI Match score ──
+const aiMatchScore = ref<number | null>(null)
+const aiMatchReason = ref<string | null>(null)
+
+async function loadAiMatch(): Promise<void> {
+ if (!auth.isCandidate) return
+ const profileResult = await candidateService.getProfile()
+ if (!profileResult.data?.defaultCvUrl) return
+ const recsResult = await candidateService.getRecommendations(50)
+ if (recsResult.data) {
+   const match = recsResult.data.find(r => r.jobId === jobId.value)
+   if (match) {
+     aiMatchScore.value = match.matchScore
+     aiMatchReason.value = match.matchReason
+   }
+ }
+}
+
+function scoreBorderClass(score: number): string {
+ if (score >= 70) return 'border-emerald-200'
+ if (score >= 40) return 'border-amber-200'
+ return 'border-rose-200'
+}
+function scoreTextClass(score: number): string {
+ if (score >= 70) return 'text-emerald-700'
+ if (score >= 40) return 'text-amber-700'
+ return 'text-rose-700'
+}
+function scoreBgClass(score: number): string {
+ if (score >= 70) return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+ if (score >= 40) return 'bg-amber-50 text-amber-700 border-amber-200'
+ return 'bg-rose-50 text-rose-700 border-rose-200'
+}
+function scoreDotColor(score: number): string {
+ if (score >= 70) return 'bg-emerald-500'
+ if (score >= 40) return 'bg-amber-500'
+ return 'bg-rose-500'
+}
 
 // ── Apply modal ──
 const showApplyModal = ref(false)
@@ -43,16 +83,23 @@ async function loadJob(): Promise<void> {
  }
 }
 
+async function checkAlreadyApplied(): Promise<void> {
+ if (!auth.isCandidate) return
+ const result = await applicationService.listMyApplications({ page: 0, size: 200 })
+ if (result.data) {
+   applied.value = result.data.content.some(a => a.jobId === jobId.value)
+ }
+}
+
 // ── Apply button logic ──
 function handleApplyClick(): void {
  if (!auth.isAuthenticated) {
- // Redirect to login with return URL
- router.push({ path: '/login', query: { redirect: route.fullPath } })
- return
+   router.push({ path: '/login', query: { redirect: route.fullPath } })
+   return
  }
  if (!auth.isCandidate) {
- ui.toastWarning('Candidate only', 'Only candidates can apply to jobs.')
- return
+   ui.toastWarning('Chỉ dành cho ứng viên', 'Chỉ ứng viên mới có thể ứng tuyển.')
+   return
  }
  showApplyModal.value = true
 }
@@ -65,28 +112,30 @@ async function submitApplication(): Promise<void> {
  coverLetter: coverLetter.value.trim() || undefined,
  })
  if (result.error) {
- ui.toastError('Application failed', result.error.message)
- return
+   if (result.error.code === 'APPLICATION_ALREADY_EXISTS') applied.value = true
+   ui.toastError('Ứng tuyển thất bại', result.error.message)
+   return
  }
  applied.value = true
  showApplyModal.value = false
  coverLetter.value = ''
- ui.toastSuccess('Application submitted!', 'You will be notified about updates to your application.')
+ ui.toastSuccess('Ứng tuyển thành công!', 'Bạn sẽ nhận được thông báo khi có cập nhật.')
  } finally {
  applying.value = false
  }
 }
 
 // ── Formatting ──
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'long', day: 'numeric', year: 'numeric',
  })
 }
 
 function formatSalary(n: number | null): string {
  if (n === null) return '—'
- return n.toLocaleString('en-US')
+ return n.toLocaleString('vi-VN')
 }
 
 function timeAgo(iso: string): string {
@@ -106,7 +155,11 @@ function copyLink(): void {
  }
 }
 
-onMounted(loadJob)
+onMounted(() => {
+ loadJob()
+ loadAiMatch()
+ checkAlreadyApplied()
+})
 </script>
 
 <template>
@@ -196,6 +249,26 @@ onMounted(loadJob)
 
  <!-- Sidebar -->
  <div class="space-y-6 lg:sticky lg:top-28 self-start">
+ <!-- AI Match Score (candidate with CV only) -->
+ <div v-if="aiMatchScore !== null" class="premium-card p-5 border" :class="scoreBorderClass(aiMatchScore)">
+ <div class="flex items-center gap-3 mb-3">
+ <div class="flex items-center justify-center w-12 h-12 rounded-full border-2 font-black text-base shrink-0"
+   :class="scoreBgClass(aiMatchScore)">
+   {{ aiMatchScore }}%
+ </div>
+ <div>
+   <p class="text-xs font-extrabold uppercase tracking-wider" :class="scoreTextClass(aiMatchScore)">Độ Phù Hợp AI</p>
+   <div class="flex items-center gap-1 mt-0.5">
+   <span class="w-1.5 h-1.5 rounded-full" :class="scoreDotColor(aiMatchScore)"></span>
+   <span class="text-xs font-bold text-slate-600">
+     {{ aiMatchScore >= 70 ? 'Rất phù hợp' : aiMatchScore >= 40 ? 'Khá phù hợp' : 'Ít phù hợp' }}
+   </span>
+   </div>
+ </div>
+ </div>
+ <p v-if="aiMatchReason" class="text-xs font-medium text-slate-600 leading-relaxed border-t border-slate-100 pt-3 mt-1">{{ aiMatchReason }}</p>
+ </div>
+
  <!-- Apply CTA -->
  <div class="premium-card p-6 shadow-xl shadow-teal-900/5 border border-teal-100 ">
  <button
@@ -203,20 +276,20 @@ onMounted(loadJob)
  @click="handleApplyClick"
  class="btn-primary w-full py-4 flex items-center justify-center gap-2 text-lg font-bold shadow-teal-500/30 hover:shadow-teal-500/50 hover:-translate-y-0.5 transition-all"
  >
- Apply Now
+ Ứng Tuyển
  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
  </button>
- <div v-else class="text-center py-4 bg-emerald-50 rounded-2xl border border-emerald-100 ">
+ <div v-else class="text-center py-4 bg-emerald-50 rounded-2xl border border-emerald-100">
  <span class="flex flex-col items-center gap-2 text-sm text-emerald-700 font-extrabold">
  <span class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-1">
  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
  </span>
- Application Submitted
+ Đã Ứng Tuyển
  </span>
- <p class="text-xs font-bold text-emerald-600/70 mt-2 px-4">You'll be notified about updates to your status.</p>
+ <p class="text-xs font-bold text-emerald-600/70 mt-2 px-4">Bạn sẽ nhận thông báo khi có cập nhật về đơn ứng tuyển.</p>
  </div>
  <p v-if="!auth.isAuthenticated" class="text-xs font-bold text-slate-400 text-center mt-4">
- You will be prompted to log in to apply.
+ Bạn sẽ được yêu cầu đăng nhập để ứng tuyển.
  </p>
  </div>
 
@@ -312,32 +385,32 @@ onMounted(loadJob)
  <div v-if="showApplyModal" class="fixed inset-0 z-50 flex items-center justify-center">
  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showApplyModal = false" />
  <div class="relative premium-card w-full max-w-lg p-8 animate-slide-up mx-4 shadow-2xl">
- <h2 class="text-xl font-extrabold text-slate-900 mb-2">Apply to <span class="text-teal-600 ">{{ job?.title }}</span></h2>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-2">Ứng tuyển vào <span class="text-teal-600">{{ job?.title }}</span></h2>
  <p class="text-sm font-medium text-slate-500 mb-6">
- Your default CV on file will be attached automatically.
+ CV mặc định của bạn sẽ được đính kèm tự động.
  </p>
 
  <form @submit.prevent="submitApplication" class="space-y-6">
  <div>
  <label for="cover-letter" class="block text-sm font-bold text-slate-700 mb-2">
- Cover Letter <span class="text-slate-400 font-medium ml-1">(optional)</span>
+ Thư Xin Việc <span class="text-slate-400 font-medium ml-1">(không bắt buộc)</span>
  </label>
  <textarea
  id="cover-letter"
  v-model="coverLetter"
  rows="6"
- placeholder="Write a brief cover letter to introduce yourself and explain why you're a great fit…"
+ placeholder="Viết thư xin việc ngắn gọn để giới thiệu bản thân và lý do bạn phù hợp với vị trí này…"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y"
  />
  </div>
 
- <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 ">
+ <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
  <button
  type="button"
  @click="showApplyModal = false"
- class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 :bg-slate-700 transition-colors"
+ class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
  >
- Cancel
+ Hủy
  </button>
  <button
  type="submit"
@@ -345,7 +418,7 @@ onMounted(loadJob)
  class="btn-primary py-2.5 px-6 flex items-center justify-center gap-2 min-w-[150px]"
  >
  <span v-if="applying" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ applying ? 'Submitting…' : 'Submit Application' }}
+ {{ applying ? 'Đang gửi…' : 'Nộp Đơn Ứng Tuyển' }}
  </button>
  </div>
  </form>

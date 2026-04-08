@@ -10,15 +10,72 @@ const router = useRouter()
 const subStore = useSubscriptionStore()
 const auth = useAuthStore()
 
-const billingCycle = ref<BillingCycle>('MONTHLY')
+const billingCycle = ref<BillingCycle>('YEARLY')
 const checkoutLoading = ref<string | null>(null) // planId being checked out
 
-const sortedPlans = computed(() =>
- [...subStore.plans].sort((a, b) => a.priceMonthly - b.priceMonthly),
+const FALLBACK_PLANS: PlanResponse[] = [
+  {
+    id: 'plan-free',
+    code: 'FREE',
+    name: 'Miễn Phí',
+    description: 'Phù hợp để bắt đầu tuyển dụng cơ bản.',
+    maxActiveJobs: 2,
+    jobDurationDays: 30,
+    resumeAccess: false,
+    aiMatching: false,
+    priorityListing: false,
+    priceMonthly: 0,
+    priceYearly: 0,
+    currency: 'VND',
+  },
+  {
+    id: 'plan-basic',
+    code: 'BASIC',
+    name: 'Cơ Bản',
+    description: 'Dành cho doanh nghiệp vừa và nhỏ muốn tuyển dụng hiệu quả.',
+    maxActiveJobs: 5,
+    jobDurationDays: 45,
+    resumeAccess: true,
+    aiMatching: false,
+    priorityListing: false,
+    priceMonthly: 299000,
+    priceYearly: 0, // computed by getYearlyPrice (20% off)
+    currency: 'VND',
+  },
+  {
+    id: 'plan-professional',
+    code: 'PROFESSIONAL',
+    name: 'Chuyên Nghiệp',
+    description: 'Tối ưu cho doanh nghiệp tăng trưởng nhanh với nhu cầu tuyển nhiều.',
+    maxActiveJobs: 20,
+    jobDurationDays: 60,
+    resumeAccess: true,
+    aiMatching: true,
+    priorityListing: true,
+    priceMonthly: 799000,
+    priceYearly: 0, // computed by getYearlyPrice (20% off)
+    currency: 'VND',
+  },
+]
+
+const activePlans = computed(() =>
+  subStore.plans.length > 0 ? subStore.plans : FALLBACK_PLANS,
 )
 
+const sortedPlans = computed(() =>
+  [...activePlans.value].sort((a, b) => a.priceMonthly - b.priceMonthly),
+)
+
+function getYearlyPrice(plan: PlanResponse): number {
+ // If BE hasn't set priceYearly (0 or same as monthly*12), fall back to 20% off
+ if (!plan.priceYearly || plan.priceYearly >= plan.priceMonthly * 12) {
+  return Math.round(plan.priceMonthly * 12 * 0.8)
+ }
+ return plan.priceYearly
+}
+
 function getPrice(plan: PlanResponse): number {
- return billingCycle.value === 'YEARLY' ? plan.priceYearly : plan.priceMonthly
+ return billingCycle.value === 'YEARLY' ? getYearlyPrice(plan) : plan.priceMonthly
 }
 
 function formatPrice(amount: number, currency: string): string {
@@ -26,29 +83,29 @@ function formatPrice(amount: number, currency: string): string {
 }
 
 function getPeriodLabel(): string {
- return billingCycle.value === 'YEARLY' ? '/year' : '/month'
+ return billingCycle.value === 'YEARLY' ? '/năm' : '/tháng'
 }
 
 function getSavingsPercent(plan: PlanResponse): number {
  if (plan.priceMonthly === 0) return 0
  const monthlyTotal = plan.priceMonthly * 12
- if (monthlyTotal === 0) return 0
- return Math.round(((monthlyTotal - plan.priceYearly) / monthlyTotal) * 100)
+ const yearlyPrice = getYearlyPrice(plan)
+ return Math.round(((monthlyTotal - yearlyPrice) / monthlyTotal) * 100)
 }
 
 async function handleCheckout(plan: PlanResponse): Promise<void> {
  if (!auth.isAuthenticated) {
- await router.push({ name: 'Login', query: { redirect: '/employer/pricing' } })
- return
+  await router.push({ name: 'Login', query: { redirect: '/employer/pricing' } })
+  return
  }
  checkoutLoading.value = plan.id
  try {
- const checkoutUrl = await subStore.checkout(plan.id, billingCycle.value)
- if (checkoutUrl) {
- window.location.href = checkoutUrl
- }
+  const checkoutUrl = await subStore.checkout(plan.id, billingCycle.value)
+  if (checkoutUrl) {
+   window.location.href = checkoutUrl
+  }
  } finally {
- checkoutLoading.value = null
+  checkoutLoading.value = null
  }
 }
 
@@ -58,7 +115,7 @@ onMounted(() => {
 </script>
 
 <template>
- <div class="max-w-6xl mx-auto px-6 py-12">
+ <div class="max-w-6xl mx-auto px-6 pb-12">
  <!-- Header -->
  <div class="text-center mb-12">
  <h1 class="text-4xl font-extrabold text-slate-900 mb-4">Các Gói Đăng Ký</h1>
@@ -110,12 +167,18 @@ onMounted(() => {
  </div>
 
  <div class="mb-8 pb-6 border-b border-slate-200 ">
+ <div
+ v-if="billingCycle === 'YEARLY' && plan.priceMonthly > 0"
+ class="text-sm font-medium text-slate-400 line-through mb-1"
+ >
+ {{ formatPrice(plan.priceMonthly * 12, plan.currency) }}/năm
+ </div>
  <div class="flex items-baseline gap-1">
  <span class="text-4xl font-black text-slate-900 tabular-nums tracking-tight">{{ formatPrice(getPrice(plan), plan.currency) }}</span>
  <span class="text-sm font-bold text-slate-400">{{ getPeriodLabel() }}</span>
  </div>
  <div
- v-if="billingCycle === 'YEARLY' && getSavingsPercent(plan) > 0"
+ v-if="billingCycle === 'YEARLY' && plan.priceMonthly > 0"
  class="mt-2 text-sm font-bold text-emerald-500"
  >
  Tiết Kiệm {{ getSavingsPercent(plan) }}%

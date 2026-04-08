@@ -43,8 +43,9 @@ const statusColors: Record<string, string> = {
  WITHDRAWN: 'bg-slate-100 text-slate-600 border border-slate-200 ',
 }
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })
 }
 
 function formatStatus(s: string): string {

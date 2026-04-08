@@ -284,6 +284,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/employer/CandidateSearchPage.vue'),
         meta: { title: 'Tìm Kiếm Ứng Viên', roles: ['COMPANY_ADMIN', 'HR'] },
       },
+      {
+        path: 'candidates/:id',
+        name: 'EmployerCandidateDetail',
+        component: () => import('@/views/employer/CandidateDetailPage.vue'),
+        meta: { title: 'Hồ Sơ Ứng Viên', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
       // ── Application Pipeline ──
       {
         path: 'jobs/:id/applications',

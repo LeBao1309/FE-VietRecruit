@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 
 const auth = useAuthStore()
 const userMenuOpen = ref(false)
 
-function getDashboardPath(): string {
+const dashboardPath = computed(() => {
   if (auth.isCandidate) return '/candidate/dashboard'
   if (auth.isEmployer) return '/employer/dashboard'
   if (auth.isSystemAdmin) return '/admin/users'
   return '/'
-}
+})
 
-function getDashboardLabel(): string {
+const dashboardLabel = computed(() => {
   if (auth.isCandidate) return 'Bảng Điều Khiển Ứng Viên'
   if (auth.isEmployer) return 'Bảng Điều Khiển Nhà Tuyển Dụng'
   if (auth.isSystemAdmin) return 'Quản Trị Hệ Thống'
   return 'Trang Chủ'
-}
+})
 </script>
 
 <template>
@@ -25,7 +25,7 @@ function getDashboardLabel(): string {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
 
       <!-- Logo -->
-      <router-link to="/" class="flex items-center gap-2 shrink-0">
+      <router-link :to="dashboardPath" class="flex items-center gap-2 shrink-0">
         <img src="/assets/img/vietrecruit-icon.svg" alt="VietRecruit" class="h-8 w-8" />
         <span class="text-xl font-extrabold text-[#008c8c] tracking-tight">VietRecruit</span>
       </router-link>
@@ -82,11 +82,11 @@ function getDashboardLabel(): string {
                 <p class="text-sm font-bold text-slate-900 truncate">{{ auth.user?.fullName }}</p>
                 <p class="text-xs text-slate-400 truncate">{{ auth.user?.email }}</p>
               </div>
-              <router-link :to="getDashboardPath()" @click="userMenuOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+              <router-link :to="dashboardPath" @click="userMenuOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
-                {{ getDashboardLabel() }}
+                {{ dashboardLabel }}
               </router-link>
               <router-link to="/jobs" @click="userMenuOpen = false" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
