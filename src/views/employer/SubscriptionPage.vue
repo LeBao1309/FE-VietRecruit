@@ -8,8 +8,9 @@ const subStore = useSubscriptionStore()
 const showCancelConfirm = ref(false)
 const cancelling = ref(false)
 
-function formatDate(dateStr: string): string {
- return new Date(dateStr).toLocaleDateString('en-US', { dateStyle: 'medium' })
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('vi-VN', { dateStyle: 'medium' })
 }
 
 

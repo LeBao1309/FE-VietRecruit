@@ -128,8 +128,9 @@ function goToDetail(appId: string): void {
 }
 
 // ── Helpers ──
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  })

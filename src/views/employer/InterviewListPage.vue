@@ -110,8 +110,9 @@ function goToDetail(interviewId: string): void {
 }
 
 // ── Helpers ──
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  weekday: 'short',
  month: 'short',
  day: 'numeric',

@@ -350,12 +350,12 @@ onMounted(async () => {
   <div class="mb-5">
   <div class="flex items-baseline gap-1">
    <span class="text-3xl font-extrabold" :class="plan.isPopular ? 'text-[#008c8c]' : 'text-slate-900'">
-   {{ (isAnnual ? plan.priceAnnual : plan.priceMonthly).toLocaleString('vi-VN') }}₫
+   {{ ((isAnnual ? plan.priceAnnual : plan.priceMonthly) ?? 0).toLocaleString('vi-VN') }}₫
    </span>
    <span class="text-slate-400 text-xs font-medium">/tháng</span>
   </div>
   <p v-if="isAnnual" class="text-[11px] text-slate-400 mt-0.5">
-   Thanh toán {{ (plan.priceAnnual * 12).toLocaleString('vi-VN') }}₫/năm
+   Thanh toán {{ ((plan.priceAnnual ?? 0) * 12).toLocaleString('vi-VN') }}₫/năm
   </p>
   </div>
 

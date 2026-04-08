@@ -123,8 +123,9 @@ const canManage = computed(() => auth.isCompanyAdmin || auth.isHR)
 
 // formatDate removed — all usages use formatDateTime instead
 
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })

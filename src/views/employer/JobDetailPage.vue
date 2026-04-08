@@ -34,14 +34,16 @@ const benchmark = computed(() => jobStore.salaryBenchmark)
 const canPubOrClose = computed(() => auth.isCompanyAdmin || auth.isHR)
 
 // ── Format helpers ──
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  })
 }
 
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
@@ -49,7 +51,7 @@ function formatDateTime(iso: string): string {
 
 function formatSalary(n: number | null): string {
  if (n === null) return '—'
- return n.toLocaleString('en-US')
+ return n.toLocaleString('vi-VN')
 }
 
 // ── Actions ──
@@ -263,7 +265,7 @@ onBeforeUnmount(() => {
  </div>
 
  <!-- No data -->
- <div v-else-if="!benchmark || !benchmark.range" class="text-sm text-gray-400 text-center py-6">
+ <div v-else-if="!benchmark || !benchmark.range || benchmark.range.min == null || benchmark.range.max == null || benchmark.range.median == null" class="text-sm text-gray-400 text-center py-6">
  Chưa có dữ liệu phân tích. Bấm "Lấy Dữ Liệu" để sử dụng AI phân tích thị trường lương cho vị trí này.
  </div>
 
@@ -272,9 +274,9 @@ onBeforeUnmount(() => {
  <!-- Range visualization -->
  <div class="space-y-2">
  <div class="flex items-center justify-between text-xs text-gray-500">
- <span>{{ benchmark.range.min.toLocaleString() }}</span>
- <span class="font-medium text-gray-700">{{ benchmark.range.median.toLocaleString() }} (trung vị)</span>
- <span>{{ benchmark.range.max.toLocaleString() }}</span>
+ <span>{{ (benchmark.range.min ?? 0).toLocaleString() }}</span>
+ <span class="font-medium text-gray-700">{{ (benchmark.range.median ?? 0).toLocaleString() }} (trung vị)</span>
+ <span>{{ (benchmark.range.max ?? 0).toLocaleString() }}</span>
  </div>
  <div class="relative h-3 bg-gray-100 rounded-full overflow-hidden">
  <!-- Full range bar -->
@@ -293,7 +295,7 @@ onBeforeUnmount(() => {
  :style="{
  left: `${Math.max(0, Math.min(100, ((job.minSalary - benchmark.range.min) / (benchmark.range.max - benchmark.range.min)) * 100))}%`,
  }"
- :title="`Your min: ${job.minSalary.toLocaleString()}`"
+ :title="`Your min: ${job.minSalary?.toLocaleString() ?? ''}`"
  />
  <div
  v-if="job.maxSalary"
@@ -301,7 +303,7 @@ onBeforeUnmount(() => {
  :style="{
  left: `${Math.max(0, Math.min(100, ((job.maxSalary - benchmark.range.min) / (benchmark.range.max - benchmark.range.min)) * 100))}%`,
  }"
- :title="`Your max: ${job.maxSalary.toLocaleString()}`"
+ :title="`Your max: ${job.maxSalary?.toLocaleString() ?? ''}`"
  />
  </div>
  <div class="flex items-center gap-3 text-[10px] text-gray-400">
@@ -334,7 +336,7 @@ onBeforeUnmount(() => {
  </div>
 
  <!-- Insights -->
- <div v-if="benchmark.insights.length" class="pt-3 border-t border-border">
+ <div v-if="benchmark.insights?.length" class="pt-3 border-t border-border">
  <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Lời Khuyên & Nhận Định</span>
  <ul class="space-y-1">
  <li v-for="(insight, i) in benchmark.insights" :key="i" class="text-xs text-gray-600 flex items-start gap-1.5">

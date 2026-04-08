@@ -67,8 +67,9 @@ async function handleInvite(): Promise<void> {
  }
 }
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('vi-VN', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  year: 'numeric',

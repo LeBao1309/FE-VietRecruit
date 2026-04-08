@@ -76,13 +76,13 @@ function goToDetail(id: string): void {
 // ── Date formatting (lean → no external dep) ──
 function formatDate(iso: string): string {
  const d = new Date(iso)
- return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+ return d.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function formatSalary(min: number | null, max: number | null, currency: string | null, negotiable: boolean | null): string {
  if (!min && !max) return negotiable ? 'Thỏa thuận' : '—'
  const cur = currency ?? 'VND'
- const fmt = (n: number) => n.toLocaleString('en-US')
+ const fmt = (n: number) => n.toLocaleString('vi-VN')
  if (min && max) return `${fmt(min)} – ${fmt(max)} ${cur}`
  if (min) return `Từ ${fmt(min)} ${cur}`
  if (max) return `Lên tới ${fmt(max)} ${cur}`

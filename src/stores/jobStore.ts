@@ -18,6 +18,8 @@ export const useJobStore = defineStore('job', () => {
   const actionLoading = ref(false)
   const benchmarkLoading = ref(false)
   const subscriptionRequired = ref(false)
+  // Track last fetch params so actions can refresh the list
+  const _lastFetchParams = ref<(PaginationParams & { status?: string }) | undefined>(undefined)
 
   // ── Getters ────────────────────────────────────────────────────────
   const jobList = computed(() => jobs.value?.content ?? [])
@@ -33,6 +35,7 @@ export const useJobStore = defineStore('job', () => {
 
   // ── Actions ────────────────────────────────────────────────────────
   async function fetchJobs(params?: PaginationParams & { status?: string }): Promise<void> {
+    _lastFetchParams.value = params
     loading.value = true
     try {
       const result = await jobService.listJobs(params)
@@ -83,21 +86,26 @@ export const useJobStore = defineStore('job', () => {
     actionLoading.value = true
     try {
       const result = await jobService.publishJob(id)
-      if (result.data) {
-        currentJob.value = result.data
-        subscriptionRequired.value = false
-        ui.toastSuccess('Đăng tuyển thành công', 'Tin tuyển dụng đã hiển thị công khai tới ứng viên.')
-        // Refresh quota
-        await sub.fetchCurrentQuota()
-        return true
+      if (result.error) {
+        if (result.error.code === 'SUBSCRIPTION_REQUIRED') {
+          subscriptionRequired.value = true
+          ui.toastWarning('Yêu cầu gói đăng ký', result.error.message)
+        } else {
+          ui.toastError('Đăng tuyển thất bại', result.error.message)
+        }
+        return false
       }
-      if (result.error?.code === 'SUBSCRIPTION_REQUIRED') {
-        subscriptionRequired.value = true
-        ui.toastWarning('Yêu cầu gói đăng ký', result.error.message)
-      } else {
-        ui.toastError('Đăng tuyển thất bại', result.error?.message)
-      }
-      return false
+      // Success — update currentJob if backend returned the full object
+      if (result.data) currentJob.value = result.data
+      subscriptionRequired.value = false
+      ui.toastSuccess('Đăng tuyển thành công', 'Tin tuyển dụng đã hiển thị công khai tới ứng viên.')
+      // Re-fetch the job to get the latest status, then refresh the list
+      await Promise.all([
+        fetchJob(id),
+        sub.fetchCurrentQuota(),
+        fetchJobs({ size: 100, page: 0 }),
+      ])
+      return true
     } finally {
       actionLoading.value = false
     }
@@ -108,16 +116,21 @@ export const useJobStore = defineStore('job', () => {
     actionLoading.value = true
     try {
       const result = await jobService.closeJob(id)
-      if (result.data) {
-        currentJob.value = result.data
-        ui.toastSuccess('Job closed', 'The job listing has been closed.')
-        // Refresh quota (slot released)
-        const sub = useSubscriptionStore()
-        await sub.fetchCurrentQuota()
-        return true
+      if (result.error) {
+        ui.toastError('Đóng tin thất bại', result.error.message)
+        return false
       }
-      ui.toastError('Close failed', result.error?.message)
-      return false
+      // Success — update currentJob if backend returned the full object
+      if (result.data) currentJob.value = result.data
+      ui.toastSuccess('Đã đóng tin tuyển dụng', 'Tin tuyển dụng đã được đóng lại.')
+      // Re-fetch the job to get the latest status, then refresh the list
+      const sub = useSubscriptionStore()
+      await Promise.all([
+        fetchJob(id),
+        sub.fetchCurrentQuota(),
+        fetchJobs({ size: 100, page: 0 }),
+      ])
+      return true
     } finally {
       actionLoading.value = false
     }

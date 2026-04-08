@@ -75,8 +75,9 @@ async function loadQuestions(): Promise<void> {
 }
 
 // ── Helpers ──
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('en-US', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  weekday: 'long',
  month: 'long',
  day: 'numeric',
@@ -94,8 +95,9 @@ function formatDuration(minutes: number | null): string {
  return m > 0 ? `${h}h ${m}m` : `${h} hour${h > 1 ? 's' : ''}`
 }
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  year: 'numeric',

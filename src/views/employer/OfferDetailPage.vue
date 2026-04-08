@@ -143,22 +143,25 @@ const canCreateNew = computed(() => {
  return !offerStore.offers.some((o) => o.status !== 'DECLINED')
 })
 
-function formatDate(iso: string): string {
- return new Date(iso).toLocaleDateString('vi-VN', {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('vi-VN', {
  month: 'short',
  day: 'numeric',
  year: 'numeric',
  })
 }
 
-function formatDateTime(iso: string): string {
- return new Date(iso).toLocaleString('vi-VN', {
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('vi-VN', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
 }
 
-function formatSalary(amount: number, currency: string | null): string {
+function formatSalary(amount: number | null | undefined, currency: string | null): string {
+  if (amount == null) return '—'
  const cur = currency ?? 'VND'
  try {
  return new Intl.NumberFormat('vi-VN', {
