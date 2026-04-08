@@ -13,6 +13,9 @@ app.use(createPinia())
 
 const authStore = useAuthStore()
 authStore.hydrate()
+if (authStore.isAuthenticated) {
+  authStore.fetchProfile()
+}
 
 if (authStore.isAuthenticated) {
   // Refresh token on every app load so roles in JWT always reflect current backend state
