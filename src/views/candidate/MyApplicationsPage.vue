@@ -17,13 +17,13 @@ const statusFilter = ref<string>('')
 import MiniStepper from '@/components/candidate/MiniStepper.vue'
 
 const STATUS_FILTERS: { label: string; value: string }[] = [
- { label: 'Tất Cả', value: '' },
- { label: 'Ứng Tuyển', value: 'NEW' },
- { label: 'Sàng Lọc', value: 'SCREENING' },
- { label: 'Phỏng Vấn', value: 'INTERVIEW' },
- { label: 'Thư Mời', value: 'OFFER' },
- { label: 'Đã Tuyển', value: 'HIRED' },
- { label: 'Bị Từ Chối', value: 'REJECTED' },
+ { label: 'All', value: '' },
+ { label: 'Applied', value: 'NEW' },
+ { label: 'Screening', value: 'SCREENING' },
+ { label: 'Interview', value: 'INTERVIEW' },
+ { label: 'Offer', value: 'OFFER' },
+ { label: 'Hired', value: 'HIRED' },
+ { label: 'Rejected', value: 'REJECTED' },
 ]
 
 // ── Computed ──
@@ -74,14 +74,14 @@ onMounted(() => loadApplications())
  <div class="max-w-4xl mx-auto px-6 py-10">
  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
  <div>
- <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Đơn Ứng Tuyển</h1>
- <p class="text-sm font-medium text-slate-500">Theo dõi tiến độ các đơn ứng tuyển của bạn.</p>
+ <h1 class="text-3xl font-extrabold text-slate-900 mb-2">My Applications</h1>
+ <p class="text-sm font-medium text-slate-500">Track the progress of your job applications.</p>
  </div>
  <router-link
  to="/jobs"
  class="btn-primary py-2.5 px-6 shrink-0"
  >
- Tìm Việc Mới
+ Find New Jobs
  </router-link>
  </div>
 
@@ -117,13 +117,13 @@ onMounted(() => loadApplications())
  <!-- Empty -->
  <div v-else-if="appList.length === 0" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
  <span class="text-5xl mb-4 opacity-50">📋</span>
- <h2 class="text-lg font-bold text-slate-900 mb-2">Chưa Có Đơn Ứng Tuyển Nào</h2>
- <p class="text-sm font-medium text-slate-500 mb-6">Bắt đầu ứng tuyển để theo dõi tiến độ của bạn tại đây.</p>
+ <h2 class="text-lg font-bold text-slate-900 mb-2">No Applications Yet</h2>
+ <p class="text-sm font-medium text-slate-500 mb-6">Start applying to jobs and track your progress here.</p>
  <router-link
  to="/jobs"
  class="btn-primary py-2.5 px-8"
  >
- Tìm Việc Mới
+ Find New Jobs
  </router-link>
  </div>
 
@@ -141,7 +141,7 @@ onMounted(() => loadApplications())
  {{ app.jobTitle }}
  </h3>
  <p class="text-xs font-medium text-slate-500">
- Đã ứng tuyển {{ formatDate(app.createdAt) }}
+ Applied {{ formatDate(app.createdAt) }}
  </p>
  </div>
  <div class="shrink-0 flex items-center">
@@ -160,7 +160,7 @@ onMounted(() => loadApplications())
  <!-- Pagination -->
  <div v-if="totalPages > 1" class="flex items-center justify-between pt-6 border-t border-slate-100 ">
  <span class="text-xs font-medium text-slate-500">
- Hiển thị <span class="font-bold">{{ totalElements }}</span> đơn ứng tuyển
+ Showing <span class="font-bold">{{ totalElements }}</span> application{{ totalElements !== 1 ? 's' : '' }}
  </span>
  <div class="flex items-center gap-1.5">
  <button
@@ -168,7 +168,7 @@ onMounted(() => loadApplications())
  :disabled="page === 0"
  class="px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 :bg-slate-700 hover:border-slate-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
  >
- &larr; Trước
+ &larr; Prev
  </button>
  <button
  v-for="p in totalPages"
@@ -186,7 +186,7 @@ onMounted(() => loadApplications())
  :disabled="page >= totalPages - 1"
  class="px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 :bg-slate-700 hover:border-slate-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
  >
- Tiếp &rarr;
+ Next &rarr;
  </button>
  </div>
  </div>
