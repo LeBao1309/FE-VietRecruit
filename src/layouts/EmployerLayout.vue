@@ -33,26 +33,26 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Tổng Quan
+          Overview
         </router-link>
         <router-link
           to="/employer/notifications"
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Thông Báo
+          Notifications
         </router-link>
 
         <!-- Employer Onboarding section -->
         <div class="mt-4 mb-1 px-3">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Công Ty</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Company</span>
         </div>
         <router-link
           to="/employer/organization"
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Tổ Chức
+          Organization
         </router-link>
         <router-link
           v-if="auth.isCompanyAdmin"
@@ -60,12 +60,12 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Nhân Sự & Đội Ngũ
+          Team & Staff
         </router-link>
 
         <!-- Recruitment section -->
         <div v-if="auth.isCompanyAdmin || auth.isHR" class="mt-4 mb-1 px-3">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tuyển Dụng</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recruitment</span>
         </div>
         <router-link
           v-if="auth.isCompanyAdmin || auth.isHR"
@@ -73,7 +73,7 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Tin Tuyển Dụng
+          Job Listings
         </router-link>
         <router-link
           v-if="auth.isCompanyAdmin || auth.isHR"
@@ -81,7 +81,7 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Tìm Ứng Viên
+          Applications
         </router-link>
         <router-link
           v-if="auth.isCompanyAdmin || auth.isHR"
@@ -89,12 +89,12 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 :bg-slate-800/50 hover:text-slate-900 :text-white transition-all"
           active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
         >
-          Tìm Ứng Viên
+          Applications
         </router-link>
 
         <!-- Interviews section (Interviewer) -->
         <div v-if="auth.isInterviewer" class="mt-4 mb-1 px-3">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Phỏng Vấn</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Interviews</span>
         </div>
         <router-link
           v-if="auth.isInterviewer"
@@ -102,12 +102,12 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Lịch Phỏng Vấn Của Tôi
+          My Interview Schedule
         </router-link>
 
         <!-- Billing section -->
         <div v-if="auth.isCompanyAdmin" class="mt-4 mb-1 px-3">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thanh Toán</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Billing</span>
         </div>
         <router-link
           v-if="auth.isCompanyAdmin"
@@ -115,7 +115,7 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Gói Dịch Vụ
+          Subscription Plan
         </router-link>
         <router-link
           v-if="auth.isCompanyAdmin"
@@ -123,33 +123,33 @@ const menuOpen = ref(false);
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Lịch Sử Thanh Toán
+          Billing History
         </router-link>
 
         <!-- Account section -->
         <div class="mt-4 mb-1 px-3">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tài Khoản</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Account</span>
         </div>
         <router-link
           to="/employer/profile"
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Hồ Sơ Của Tôi
+          My Profile
         </router-link>
         <router-link
           to="/employer/settings"
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
-          Cài Đặt
+          Settings
         </router-link>
         <router-link
           to="/employer/notifications"
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 :bg-slate-800/50 hover:text-slate-900 :text-white transition-all"
           active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
         >
-          Thông Báo
+          Notifications
         </router-link>
       </nav>
       <div class="px-6 py-4 border-t border-slate-200/60 bg-slate-50/50">
@@ -160,7 +160,7 @@ const menuOpen = ref(false);
           @click="auth.logout()"
           class="block text-xs font-medium text-slate-500 hover:text-rose-500 mt-1 transition-colors"
         >
-          Đăng Xuất
+          Sign Out
         </button>
       </div>
     </aside>

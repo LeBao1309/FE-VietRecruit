@@ -7,8 +7,8 @@ const auth = useAuthStore()
 const menuOpen = ref(false)
 
 const navItems = [
- { to: '/admin/users', label: 'Đội Ngũ' },
- { to: '/admin/transactions', label: 'Giao Dịch' },
+ { to: '/admin/users', label: 'Users' },
+ { to: '/admin/transactions', label: 'Transactions' },
 ]
 </script>
 
@@ -25,7 +25,7 @@ const navItems = [
  <div class="hidden md:flex items-center p-5 border-b border-white/5">
  <router-link to="/admin/users" class="flex items-center gap-2 hover:opacity-80 transition text-white">
  <span class="text-xl">⚙</span>
- <span class="text-sm font-bold tracking-tight">VietRecruit Quản Trị Viên</span>
+ <span class="text-sm font-bold tracking-tight">VietRecruit Administrator</span>
  </router-link>
  </div>
 
@@ -48,11 +48,11 @@ const navItems = [
  {{ auth.user?.fullName?.charAt(0)?.toUpperCase() ?? 'A' }}
  </div>
  <div class="flex flex-col truncate">
- <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Quản Trị Viên' }}</span>
- <span class="text-[10px] text-slate-500">{{ auth.isCustomerService ? 'Dịch Vụ Khách Hàng' : 'Quản Trị Hệ Thống' }}</span>
+ <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Administrator' }}</span>
+ <span class="text-[10px] text-slate-500">{{ auth.isCustomerService ? 'Customer Service' : 'System Administrator' }}</span>
  </div>
  </div>
- <button @click="auth.logout()" class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition shrink-0" title="Đăng Xuất">
+ <button @click="auth.logout()" class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition shrink-0" title="Sign Out">
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
  <polyline points="16 17 21 12 16 7" />

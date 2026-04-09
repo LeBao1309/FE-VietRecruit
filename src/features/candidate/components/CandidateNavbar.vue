@@ -6,9 +6,9 @@ const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
 
 const navItems = [
-  { to: '/jobs', label: 'Tìm Việc' },
-  { to: '/candidate/applications', label: 'Đơn Ứng Tuyển' },
-  { to: '/candidate/candidate-profile', label: 'Hồ Sơ' },
+  { to: '/jobs', label: 'Find Jobs' },
+  { to: '/candidate/applications', label: 'My Applications' },
+  { to: '/candidate/candidate-profile', label: 'Profile' },
 ] as const
 
 async function handleLogout() {
@@ -61,7 +61,7 @@ function getInitials(name: string | undefined | null): string {
               {{ getInitials(authStore.user?.fullName) }}
             </div>
             <span class="text-sm text-slate-600 max-w-[120px] truncate">
-              {{ authStore.user?.fullName || 'Ứng Viên' }}
+              {{ authStore.user?.fullName || 'Candidate' }}
             </span>
           </div>
 
@@ -69,7 +69,7 @@ function getInitials(name: string | undefined | null): string {
             @click="handleLogout"
             class="text-xs text-slate-500 hover:text-rose-600 font-medium px-2 py-1.5 rounded-lg hover:bg-rose-50 transition-colors hidden sm:block"
           >
-            Đăng Xuất
+            Sign Out
           </button>
 
           <!-- Mobile menu toggle -->
@@ -112,7 +112,7 @@ function getInitials(name: string | undefined | null): string {
             @click="handleLogout"
             class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors"
           >
-            Đăng Xuất
+            Sign Out
           </button>
         </div>
       </div>
