@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useApplicationStore } from '@/stores/applicationStore'
+import { useApplicationStore, VALID_TRANSITIONS } from '@/stores/applicationStore'
 import { useJobStore } from '@/stores/jobStore'
+import { useUiStore } from '@/stores/uiStore'
 import type { ApplicationStatus } from '@/types/enums'
-// types used implicitly via store getters
+import type { ApplicationSummaryResponse } from '@/types/application'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useApplicationStore()
 const jobStore = useJobStore()
+const ui = useUiStore()
 
 const jobId = computed(() => route.params.id as string)
 
@@ -23,6 +25,176 @@ const statusFilter = ref<ApplicationStatus | ''>('')
 
 // ── Screening panel ──
 const showScreening = ref(false)
+
+// ── Stage-specific modal config ──
+interface StageModalConfig {
+  icon: string
+  iconBg: string
+  iconColor: string
+  title: string
+  description: string
+  noteLabel: string
+  notePlaceholder: string
+  confirmLabel: string
+  confirmClass: string
+  showRejectionReason: boolean
+  showInterviewReminder: boolean
+}
+const STAGE_MODAL_CONFIG: Record<ApplicationStatus, StageModalConfig> = {
+  SCREENING: {
+    icon: '🔍', iconBg: 'bg-amber-50', iconColor: 'text-amber-500',
+    title: 'Move to Screening?',
+    description: 'The candidate will enter the screening stage for initial evaluation.',
+    noteLabel: 'Screening Notes', notePlaceholder: 'What criteria will you screen on? (optional)',
+    confirmLabel: 'Start Screening', confirmClass: 'bg-amber-500 hover:bg-amber-600 text-white',
+    showRejectionReason: false, showInterviewReminder: false,
+  },
+  INTERVIEW: {
+    icon: '📅', iconBg: 'bg-purple-50', iconColor: 'text-purple-600',
+    title: 'Move to Interview?',
+    description: 'The candidate passed screening. Schedule the interview after confirming.',
+    noteLabel: 'Focus Areas', notePlaceholder: 'What should the interview focus on? (optional)',
+    confirmLabel: 'Move to Interview', confirmClass: 'bg-purple-600 hover:bg-purple-700 text-white',
+    showRejectionReason: false, showInterviewReminder: true,
+  },
+  OFFER: {
+    icon: '🤝', iconBg: 'bg-teal-50', iconColor: 'text-teal-600',
+    title: 'Proceed to Offer Stage?',
+    description: 'Great candidate! Draft the offer letter after confirming this move.',
+    noteLabel: 'Offer Notes', notePlaceholder: 'Any notes on compensation or start date? (optional)',
+    confirmLabel: 'Proceed to Offer', confirmClass: 'bg-teal-600 hover:bg-teal-700 text-white',
+    showRejectionReason: false, showInterviewReminder: false,
+  },
+  REJECTED: {
+    icon: '✕', iconBg: 'bg-red-50', iconColor: 'text-red-500',
+    title: 'Reject this Candidate?',
+    description: 'This application will be marked Rejected. This action cannot be undone.',
+    noteLabel: 'Additional Notes', notePlaceholder: 'Any additional feedback... (optional)',
+    confirmLabel: 'Confirm Rejection', confirmClass: 'bg-red-600 hover:bg-red-700 text-white',
+    showRejectionReason: true, showInterviewReminder: false,
+  },
+  NEW: { icon: '', iconBg: '', iconColor: '', title: '', description: '', noteLabel: '', notePlaceholder: '', confirmLabel: '', confirmClass: '', showRejectionReason: false, showInterviewReminder: false },
+  HIRED: { icon: '', iconBg: '', iconColor: '', title: '', description: '', noteLabel: '', notePlaceholder: '', confirmLabel: '', confirmClass: '', showRejectionReason: false, showInterviewReminder: false },
+}
+
+const REJECTION_REASONS = [
+  'Insufficient experience',
+  'Skills do not match requirements',
+  'Salary expectations too high',
+  'Did not pass technical assessment',
+  'Position filled internally',
+  'Candidate withdrew application',
+  'Other',
+]
+
+// ── Drag & Drop ──
+interface PendingMove {
+  app: ApplicationSummaryResponse
+  fromStatus: ApplicationStatus
+  toStatus: ApplicationStatus
+}
+const draggingApp = ref<ApplicationSummaryResponse | null>(null)
+const dragOverStatus = ref<ApplicationStatus | null>(null)
+const pendingMove = ref<PendingMove | null>(null)
+const showConfirm = ref(false)
+const confirmNotes = ref('')
+const rejectionReason = ref('')
+
+const stageConfig = computed<StageModalConfig | null>(() =>
+  pendingMove.value ? STAGE_MODAL_CONFIG[pendingMove.value.toStatus] : null,
+)
+
+function resetConfirmForm(): void {
+  confirmNotes.value = ''
+  rejectionReason.value = ''
+}
+
+// Optimistic: move card visually into target column immediately
+function applyOptimisticMove(id: string, toStatus: ApplicationStatus): void {
+  if (!appStore.applications) return
+  const idx = appStore.applications.content.findIndex((a) => a.id === id)
+  if (idx !== -1) {
+    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: toStatus }
+  }
+}
+
+// Revert if user cancels or API fails
+function revertOptimisticMove(id: string, fromStatus: ApplicationStatus): void {
+  if (!appStore.applications) return
+  const idx = appStore.applications.content.findIndex((a) => a.id === id)
+  if (idx !== -1) {
+    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: fromStatus }
+  }
+}
+
+function onDragStart(app: ApplicationSummaryResponse): void {
+  draggingApp.value = app
+}
+
+function onDragEnd(): void {
+  draggingApp.value = null
+  dragOverStatus.value = null
+}
+
+function onDragEnter(status: ApplicationStatus): void {
+  if (!draggingApp.value) return
+  dragOverStatus.value = status
+}
+
+function onDragLeave(e: DragEvent): void {
+  const target = e.currentTarget as HTMLElement
+  if (!target.contains(e.relatedTarget as Node)) {
+    dragOverStatus.value = null
+  }
+}
+
+function onDrop(toStatus: ApplicationStatus): void {
+  dragOverStatus.value = null
+  if (!draggingApp.value) return
+  const app = draggingApp.value
+  draggingApp.value = null
+  if (app.status === toStatus) return
+  const allowed = VALID_TRANSITIONS[app.status] ?? []
+  if (!allowed.includes(toStatus)) {
+    ui.toastError('Invalid move', `Cannot move ${app.candidateName} from ${app.status} to ${toStatus}.`)
+    return
+  }
+  // Move card visually to target column before showing modal
+  applyOptimisticMove(app.id, toStatus)
+  pendingMove.value = { app, fromStatus: app.status, toStatus }
+  resetConfirmForm()
+  showConfirm.value = true
+}
+
+async function confirmMove(): Promise<void> {
+  if (!pendingMove.value) return
+  const { app, fromStatus, toStatus } = pendingMove.value
+  const notes = [
+    rejectionReason.value ? `Reason: ${rejectionReason.value}` : '',
+    confirmNotes.value.trim(),
+  ].filter(Boolean).join(' — ') || undefined
+
+  const success = await appStore.kanbanMove(app.id, fromStatus, toStatus, notes)
+  if (success) {
+    pendingMove.value = null
+    showConfirm.value = false
+    resetConfirmForm()
+  } else {
+    revertOptimisticMove(app.id, fromStatus)
+    pendingMove.value = null
+    showConfirm.value = false
+    resetConfirmForm()
+  }
+}
+
+function cancelConfirm(): void {
+  if (pendingMove.value) {
+    revertOptimisticMove(pendingMove.value.app.id, pendingMove.value.fromStatus)
+  }
+  pendingMove.value = null
+  showConfirm.value = false
+  resetConfirmForm()
+}
 
 // ── Kanban column config ──
 const PIPELINE_COLUMNS: { status: ApplicationStatus; label: string; color: string; dotClass: string }[] = [
@@ -124,7 +296,7 @@ function getScoreBarColor(score: number | null): string {
 
 // ── Navigation ──
 function goToDetail(appId: string): void {
- router.push(`/employer/applications/${appId}`)
+ router.push(`/employer/jobs/${jobId}/applications/${appId}`)
 }
 
 // ── Helpers ──
@@ -223,12 +395,13 @@ onMounted(async () => {
  </div>
 
  <!-- ─── KANBAN VIEW ─── -->
- <div v-else-if="viewMode === 'kanban'" class="flex gap-5 overflow-x-auto pb-6" style="min-height: 400px">
+ <template v-else-if="viewMode === 'kanban'">
+ <div class="flex gap-5 overflow-x-auto pb-6" style="min-height: 400px">
  <div
  v-for="col in PIPELINE_COLUMNS"
  :key="col.status"
- class="flex-shrink-0 w-72 bg-slate-50 rounded-2xl border border-slate-200/60 flex flex-col max-h-[750px] shadow-sm"
- :class="col.color"
+ class="flex-shrink-0 w-72 bg-slate-50 rounded-2xl border border-slate-200/60 flex flex-col max-h-[750px] shadow-sm transition-colors duration-150"
+ :class="[col.color, dragOverStatus === col.status ? 'bg-teal-50 border-teal-300' : '']"
  style="border-top-width: 4px"
  >
  <!-- Column Header -->
@@ -242,20 +415,35 @@ onMounted(async () => {
  </span>
  </div>
 
- <!-- Column Cards -->
- <div class="px-3 pb-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar">
+ <!-- Drop zone -->
+ <div
+ class="px-3 pb-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar rounded-b-2xl transition-colors duration-150"
+ :class="dragOverStatus === col.status ? 'ring-2 ring-teal-400 ring-inset' : ''"
+ @dragover.prevent
+ @dragenter.prevent="onDragEnter(col.status)"
+ @dragleave="onDragLeave"
+ @drop.prevent="onDrop(col.status)"
+ >
  <div
  v-for="app in appStore.applicationsByStatus[col.status]"
  :key="app.id"
+ draggable="true"
+ @dragstart="onDragStart(app)"
+ @dragend="onDragEnd"
  @click="goToDetail(app.id)"
- class="premium-card p-4 cursor-pointer group hover:border-teal-400 :border-teal-500 block"
+ class="premium-card p-4 cursor-grab active:cursor-grabbing group hover:border-teal-400 block select-none transition-opacity duration-150"
+ :class="draggingApp?.id === app.id ? 'opacity-40' : 'opacity-100'"
  >
  <div class="flex items-start justify-between mb-3">
- <span class="text-sm font-bold text-slate-900 leading-tight group-hover:text-teal-600 :text-teal-400 transition-colors">
+ <span class="text-sm font-bold text-slate-900 leading-tight group-hover:text-teal-600 transition-colors flex-1 min-w-0 truncate">
  {{ app.candidateName }}
  </span>
+ <!-- Drag handle hint -->
+ <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 shrink-0 ml-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+ </svg>
  </div>
- <div class="flex items-center justify-between pt-2 border-t border-slate-100 ">
+ <div class="flex items-center justify-between pt-2 border-t border-slate-100">
  <span class="text-xs font-medium text-slate-400">{{ formatDate(app.createdAt) }}</span>
  <span class="text-teal-600 text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
  Details →
@@ -263,13 +451,20 @@ onMounted(async () => {
  </div>
  </div>
 
- <!-- Empty column -->
- <div v-if="columnCount(col.status) === 0" class="py-8 text-center">
- <p class="text-[11px] text-gray-400">No candidates</p>
+ <!-- Empty column / drop hint -->
+ <div
+ v-if="columnCount(col.status) === 0"
+ class="py-8 text-center rounded-xl border-2 border-dashed transition-colors duration-150"
+ :class="dragOverStatus === col.status ? 'border-teal-400 bg-teal-50/50' : 'border-slate-200'"
+ >
+ <p class="text-[11px] text-gray-400">
+ {{ dragOverStatus === col.status ? 'Drop here' : 'No candidates' }}
+ </p>
  </div>
  </div>
  </div>
  </div>
+ </template>
 
  <!-- ─── TABLE VIEW ─── -->
  <div v-else>
@@ -349,6 +544,121 @@ onMounted(async () => {
  </div>
  </div>
  </div>
+
+ <!-- ─── MOVE CONFIRMATION MODAL ─── -->
+ <Teleport to="body">
+ <div v-if="showConfirm && pendingMove && stageConfig" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+ <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="cancelConfirm" />
+ <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md animate-fade-in overflow-hidden">
+
+ <!-- Stage colour bar -->
+ <div
+ class="h-1 w-full"
+ :class="{
+ 'bg-amber-400': pendingMove.toStatus === 'SCREENING',
+ 'bg-purple-500': pendingMove.toStatus === 'INTERVIEW',
+ 'bg-teal-500': pendingMove.toStatus === 'OFFER',
+ 'bg-red-500': pendingMove.toStatus === 'REJECTED',
+ }"
+ />
+
+ <!-- Header -->
+ <div class="flex items-start gap-4 px-6 pt-5 pb-4 border-b border-slate-100">
+ <div
+ class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+ :class="stageConfig.iconBg"
+ >{{ stageConfig.icon }}</div>
+ <div class="flex-1 min-w-0">
+ <h3 class="text-base font-bold text-slate-900">{{ stageConfig.title }}</h3>
+ <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">{{ stageConfig.description }}</p>
+ </div>
+ <button
+ @click="cancelConfirm"
+ class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
+ aria-label="Close"
+ >
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+ </button>
+ </div>
+
+ <div class="px-6 py-5 space-y-4">
+ <!-- Candidate pill + transition arrow -->
+ <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+ <div class="flex-1 min-w-0">
+ <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Candidate</p>
+ <p class="text-sm font-bold text-slate-900 truncate">{{ pendingMove.app.candidateName }}</p>
+ </div>
+ <div class="flex items-center gap-2 shrink-0">
+ <span class="px-2 py-0.5 text-xs font-bold rounded-md" :class="statusBadgeConfig[pendingMove.fromStatus].class">
+ {{ statusBadgeConfig[pendingMove.fromStatus].label }}
+ </span>
+ <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+ </svg>
+ <span class="px-2 py-0.5 text-xs font-bold rounded-md" :class="statusBadgeConfig[pendingMove.toStatus].class">
+ {{ statusBadgeConfig[pendingMove.toStatus].label }}
+ </span>
+ </div>
+ </div>
+
+ <!-- REJECTION: reason dropdown -->
+ <div v-if="stageConfig.showRejectionReason">
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">
+ Rejection Reason <span class="text-red-500">*</span>
+ </label>
+ <select
+ v-model="rejectionReason"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/10 transition-all bg-white"
+ >
+ <option value="" disabled>Select a reason…</option>
+ <option v-for="r in REJECTION_REASONS" :key="r" :value="r">{{ r }}</option>
+ </select>
+ </div>
+
+ <!-- INTERVIEW: schedule reminder -->
+ <div v-if="stageConfig.showInterviewReminder" class="flex items-start gap-3 p-3 bg-purple-50 border border-purple-100 rounded-xl">
+ <span class="text-purple-500 text-base shrink-0 mt-px">ℹ️</span>
+ <p class="text-xs text-purple-700 leading-relaxed">
+ After confirming, go to the <strong>Application detail → Interview</strong> button to schedule the interview session.
+ </p>
+ </div>
+
+ <!-- Notes -->
+ <div>
+ <label class="block text-sm font-bold text-slate-700 mb-1.5">
+ {{ stageConfig.noteLabel }}
+ <span class="text-xs font-normal text-slate-400 ml-1">optional</span>
+ </label>
+ <textarea
+ v-model="confirmNotes"
+ rows="3"
+ :placeholder="stageConfig.notePlaceholder"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 resize-none transition-all"
+ />
+ </div>
+ </div>
+
+ <!-- Actions -->
+ <div class="flex gap-3 px-6 pb-6">
+ <button
+ @click="cancelConfirm"
+ class="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+ >
+ Cancel
+ </button>
+ <button
+ @click="confirmMove"
+ :disabled="appStore.statusLoading || (stageConfig.showRejectionReason && !rejectionReason)"
+ class="flex-1 px-4 py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors flex items-center justify-center gap-2"
+ :class="stageConfig.confirmClass"
+ >
+ <span v-if="appStore.statusLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+ {{ appStore.statusLoading ? 'Moving…' : stageConfig.confirmLabel }}
+ </button>
+ </div>
+ </div>
+ </div>
+ </Teleport>
 
  <!-- ─── SCREENING RESULTS PANEL ─── -->
  <Teleport to="body">

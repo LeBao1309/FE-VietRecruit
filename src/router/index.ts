@@ -160,12 +160,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/shared/SettingsPage.vue'),
         meta: { title: 'Settings' },
       },
-      {
-        path: 'notifications',
-        name: 'CandidateNotifications',
-        component: () => import('@/views/shared/NotificationsPage.vue'),
-        meta: { title: 'Notifications' },
-      },
     ],
   },
 
@@ -214,12 +208,6 @@ const routes: RouteRecordRaw[] = [
         name: 'EmployerSettings',
         component: () => import('@/views/shared/SettingsPage.vue'),
         meta: { title: 'Settings' },
-      },
-      {
-        path: 'notifications',
-        name: 'EmployerNotifications',
-        component: () => import('@/views/shared/NotificationsPage.vue'),
-        meta: { title: 'Notifications' },
       },
       {
         path: 'pricing',
@@ -298,8 +286,14 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Application Pipeline', roles: ['COMPANY_ADMIN', 'HR'] },
       },
       {
-        path: 'applications/:id',
+        path: 'jobs/:jobId/applications/:id',
         name: 'EmployerApplicationDetail',
+        component: () => import('@/views/employer/ApplicationDetailPage.vue'),
+        meta: { title: 'Application Details', roles: ['COMPANY_ADMIN', 'HR'] },
+      },
+      {
+        path: 'applications/:id',
+        name: 'EmployerApplicationDetailFlat',
         component: () => import('@/views/employer/ApplicationDetailPage.vue'),
         meta: { title: 'Application Details', roles: ['COMPANY_ADMIN', 'HR'] },
       },

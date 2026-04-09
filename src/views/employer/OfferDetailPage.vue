@@ -187,12 +187,24 @@ onBeforeUnmount(() => {
 
 <template>
  <div class="max-w-3xl mx-auto px-6 pb-8">
- <!-- Back -->
- <div class="flex items-center gap-3 mb-6">
- <button @click="router.push(`/employer/applications/${applicationId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back to Profile
- </button>
- </div>
+ <!-- Breadcrumb -->
+ <nav class="flex items-center gap-1.5 mb-6 text-sm text-gray-400 flex-wrap">
+  <router-link to="/employer/jobs" class="hover:text-gray-600 transition">Jobs</router-link>
+  <span>›</span>
+  <router-link
+   v-if="appStore.currentApplication?.jobId"
+   :to="`/employer/jobs/${appStore.currentApplication.jobId}/applications`"
+   class="hover:text-gray-600 transition"
+  >Applications</router-link>
+  <span v-else>Applications</span>
+  <span>›</span>
+  <router-link
+   :to="`/employer/applications/${applicationId}`"
+   class="hover:text-gray-600 transition truncate max-w-[140px]"
+  >{{ appStore.currentApplication?.candidateName ?? 'Application' }}</router-link>
+  <span>›</span>
+  <span class="text-gray-700 font-medium">Offer</span>
+ </nav>
 
  <!-- Loading -->
  <div v-if="offerStore.listLoading" class="space-y-4">

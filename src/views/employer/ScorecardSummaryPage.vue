@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useInterviewStore } from '@/stores/interviewStore'
 import type { ScorecardResult } from '@/types/enums'
 
 const route = useRoute()
-const router = useRouter()
 const interviewStore = useInterviewStore()
 
 const interviewId = computed(() => route.params.id as string)
@@ -181,12 +180,15 @@ onMounted(async () => {
 
 <template>
  <div class="max-w-4xl mx-auto px-6 pb-8">
- <!-- Back -->
- <div class="flex items-center gap-3 mb-6">
- <button @click="router.push(`/employer/interviews/${interviewId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back
- </button>
- </div>
+ <!-- Breadcrumb -->
+ <nav class="flex items-center gap-1.5 mb-6 text-sm text-gray-400 flex-wrap">
+  <router-link
+   :to="`/employer/interviews/${interviewId}`"
+   class="hover:text-gray-600 transition"
+  >{{ interviewStore.currentInterview?.title ?? 'Interview' }}</router-link>
+  <span>›</span>
+  <span class="text-gray-700 font-medium">Scorecard Summary</span>
+ </nav>
 
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">

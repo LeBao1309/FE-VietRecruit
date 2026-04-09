@@ -102,9 +102,9 @@ export const jobService = {
   },
 
   /** GET /jobs/public — Published jobs list (no auth) */
-  async listPublicJobs(params?: PaginationParams): Promise<ServiceResult<PageResponse<JobSummaryResponse>>> {
+  async listPublicJobs(params?: PaginationParams): Promise<ServiceResult<PageResponse<JobSearchResponse>>> {
     try {
-      const { data } = await http.get<ApiResponse<SpringPageResponse<JobSummaryResponse>>>('/jobs/public', { params })
+      const { data } = await http.get<ApiResponse<SpringPageResponse<JobSearchResponse>>>('/jobs/public', { params })
       return ok(normalizeSpringPage(data.data))
     } catch (error) {
       return fail(error)

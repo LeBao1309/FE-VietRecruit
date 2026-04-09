@@ -15,9 +15,11 @@ const form = ref<LoginRequest>({
 
 const showPassword = ref(false)
 const errors = ref<Record<string, string>>({})
+const apiError = ref('')
 
 function validate(): boolean {
  errors.value = {}
+ apiError.value = ''
  if (!form.value.email.trim()) {
  errors.value.email = 'Email is required.'
  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
@@ -35,6 +37,9 @@ async function handleSubmit(): Promise<void> {
  if (success) {
  const redirect = (route.query.redirect as string) || getDefaultRoute()
  await router.push(redirect)
+ } else {
+ apiError.value = 'Invalid email or password. Please try again.'
+ form.value.password = ''
  }
 }
 
@@ -139,6 +144,12 @@ function goBack(): void {
  </button>
  </div>
  <p v-if="errors.password" class="text-xs font-bold text-rose-500 mt-1.5">{{ errors.password }}</p>
+ </div>
+
+ <!-- API error -->
+ <div v-if="apiError" class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium">
+ <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+ {{ apiError }}
  </div>
 
  <!-- Submit -->

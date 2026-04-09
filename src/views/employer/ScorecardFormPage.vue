@@ -86,12 +86,15 @@ onMounted(async () => {
 
 <template>
  <div class="max-w-2xl mx-auto px-6 pb-8">
- <!-- Back -->
- <div class="flex items-center gap-3 mb-6">
- <button @click="router.push(`/employer/interviews/${interviewId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back
- </button>
- </div>
+ <!-- Breadcrumb -->
+ <nav class="flex items-center gap-1.5 mb-6 text-sm text-gray-400 flex-wrap">
+  <router-link
+   :to="`/employer/interviews/${interviewId}`"
+   class="hover:text-gray-600 transition"
+  >{{ interviewStore.currentInterview?.title ?? 'Interview' }}</router-link>
+  <span>›</span>
+  <span class="text-gray-700 font-medium">Submit Scorecard</span>
+ </nav>
 
  <!-- Success state -->
  <div v-if="submitted" class="premium-card p-12 text-center max-w-lg mx-auto mt-12">

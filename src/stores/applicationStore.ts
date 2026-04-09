@@ -16,7 +16,7 @@ import { useUiStore } from './uiStore'
 // SCREENING → INTERVIEW | REJECTED
 // INTERVIEW → OFFER | REJECTED
 // OFFER → (auto via candidate accept/decline)
-const VALID_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
+export const VALID_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
   NEW: ['SCREENING', 'REJECTED'],
   SCREENING: ['INTERVIEW', 'REJECTED'],
   INTERVIEW: ['OFFER', 'REJECTED'],
@@ -211,6 +211,42 @@ export const useApplicationStore = defineStore('application', () => {
     }
   }
 
+  /** Move a card on the Kanban board — validates transition and updates in-place */
+  async function kanbanMove(
+    appId: string,
+    fromStatus: ApplicationStatus,
+    toStatus: ApplicationStatus,
+    notes?: string,
+  ): Promise<boolean> {
+    const ui = useUiStore()
+    const allowed = VALID_TRANSITIONS[fromStatus] ?? []
+    if (!allowed.includes(toStatus)) {
+      ui.toastError('Invalid move', `Cannot move from ${fromStatus} to ${toStatus}.`)
+      return false
+    }
+    statusLoading.value = true
+    try {
+      const result = await applicationService.updateStatus(appId, { status: toStatus, notes })
+      if (result.data) {
+        if (applications.value) {
+          const idx = applications.value.content.findIndex((a) => a.id === appId)
+          if (idx !== -1) {
+            applications.value.content[idx] = {
+              ...applications.value.content[idx],
+              status: toStatus,
+            }
+          }
+        }
+        ui.toastSuccess('Candidate moved', `${fromStatus} → ${toStatus}`)
+        return true
+      }
+      ui.toastError('Move failed', result.error?.message)
+      return false
+    } finally {
+      statusLoading.value = false
+    }
+  }
+
   /** Clear current detail state */
   function clearCurrent(): void {
     currentApplication.value = null
@@ -241,6 +277,7 @@ export const useApplicationStore = defineStore('application', () => {
     fetchAllForJob,
     fetchApplication,
     updateStatus,
+    kanbanMove,
     fetchStatusHistory,
     fetchScreeningResults,
     triggerScreening,
