@@ -143,15 +143,24 @@ onMounted(async () => {
 
 <template>
  <div class="max-w-4xl mx-auto px-6 pb-8">
- <!-- Back -->
- <div class="flex items-center gap-3 mb-2">
- <button
- @click="router.push(`/employer/applications/${applicationId}`)"
- class="text-gray-400 hover:text-gray-600 transition text-sm"
- >
- ‹ Back to Application
- </button>
- </div>
+ <!-- Breadcrumb -->
+ <nav class="flex items-center gap-1.5 mb-6 text-sm text-gray-400 flex-wrap">
+  <router-link to="/employer/jobs" class="hover:text-gray-600 transition">Jobs</router-link>
+  <span>›</span>
+  <router-link
+   v-if="appStore.currentApplication?.jobId"
+   :to="`/employer/jobs/${appStore.currentApplication.jobId}`"
+   class="hover:text-gray-600 transition truncate max-w-[120px]"
+  >{{ appStore.currentApplication.jobTitle ?? '…' }}</router-link>
+  <span v-else>…</span>
+  <span>›</span>
+  <router-link
+   :to="`/employer/applications/${applicationId}`"
+   class="hover:text-gray-600 transition truncate max-w-[120px]"
+  >{{ appStore.currentApplication?.candidateName ?? 'Application' }}</router-link>
+  <span>›</span>
+  <span class="text-gray-700 font-medium">Interviews</span>
+ </nav>
 
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">

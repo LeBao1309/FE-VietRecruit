@@ -139,12 +139,26 @@ onBeforeUnmount(() => {
 
 <template>
  <div class="max-w-4xl mx-auto px-6 pb-8">
- <!-- Back -->
- <div class="flex items-center gap-3 mb-6">
- <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back
- </button>
- </div>
+ <!-- Breadcrumb -->
+ <nav class="flex items-center gap-1.5 mb-6 text-sm text-gray-400 flex-wrap">
+  <router-link to="/employer/jobs" class="hover:text-gray-600 transition">Jobs</router-link>
+  <span>›</span>
+  <router-link
+   v-if="interview?.applicationId"
+   :to="`/employer/applications/${interview.applicationId}`"
+   class="hover:text-gray-600 transition"
+  >Application</router-link>
+  <span v-else>Application</span>
+  <span>›</span>
+  <router-link
+   v-if="interview?.applicationId"
+   :to="`/employer/applications/${interview.applicationId}/interviews`"
+   class="hover:text-gray-600 transition"
+  >Interviews</router-link>
+  <span v-else>Interviews</span>
+  <span>›</span>
+  <span class="text-gray-700 font-medium truncate max-w-[180px]">{{ interview?.title ?? '…' }}</span>
+ </nav>
 
  <!-- Loading -->
  <div v-if="interviewStore.detailLoading" class="space-y-6">

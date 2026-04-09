@@ -7,7 +7,7 @@ import { candidateService } from '@/services/candidateService'
 import PublicNavbar from '@/components/common/PublicNavbar.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import type { JobSearchResponse, JobRecommendationResponse } from '@/types/job'
-import type { SearchPageResponse } from '@/types/common'
+import type { PageResponse, SearchPageResponse } from '@/types/common'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -57,8 +57,8 @@ const currency = ref('VND')
 const currentPage = ref(0)
 const pageSize = ref(24)
 
-// ── Browse + Search both use SearchPageResponse<JobSearchResponse> ──
-const browseData = ref<SearchPageResponse<JobSearchResponse> | null>(null)
+// ── Browse uses the DB-backed public endpoint; Search uses the search engine ──
+const browseData = ref<PageResponse<JobSearchResponse> | null>(null)
 const browseLoading = ref(false)
 const searchData = ref<SearchPageResponse<JobSearchResponse> | null>(null)
 const searchLoading = ref(false)
@@ -137,11 +137,11 @@ const pageNumbers = computed<(number | '...')[]>(() => {
   return pages
 })
 
-// ── Browse: load all published jobs via search engine (no query) ──
+// ── Browse: load all published jobs from DB (not search index) ──
 async function loadPublicJobs(): Promise<void> {
  browseLoading.value = true
  try {
-   const result = await jobService.searchJobs({
+   const result = await jobService.listPublicJobs({
      page: currentPage.value,
      size: pageSize.value,
    })

@@ -3,7 +3,9 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useAuthStore } from '@/stores/authStore'
+import { applicationService } from '@/services/applicationService'
 import type { ApplicationStatus } from '@/types/enums'
+import type { ApplicationScreeningResponse } from '@/types/application'
 
 const route = useRoute()
 const router = useRouter()
@@ -131,11 +133,42 @@ function formatDateTime(iso: string | null | undefined): string {
  })
 }
 
+// ── AI Match Score ──
+const matchScore = ref<ApplicationScreeningResponse | null>(null)
+const matchLoading = ref(false)
+
+function getScoreColor(score: number | null): string {
+  if (score === null) return 'text-gray-400'
+  if (score >= 80) return 'text-green-600'
+  if (score >= 60) return 'text-amber-600'
+  return 'text-red-500'
+}
+function getScoreBarColor(score: number | null): string {
+  if (score === null) return 'bg-gray-200'
+  if (score >= 80) return 'bg-green-400'
+  if (score >= 60) return 'bg-amber-400'
+  return 'bg-red-400'
+}
+
+async function loadMatchScore(jobId: string, candidateId: string): Promise<void> {
+  matchLoading.value = true
+  try {
+    const result = await applicationService.getScreeningResults(jobId)
+    if (result.data) {
+      matchScore.value = result.data.find((r) => r.candidateId === candidateId) ?? null
+    }
+  } finally {
+    matchLoading.value = false
+  }
+}
+
 // ── Init ──
 onMounted(async () => {
  const loaded = await appStore.fetchApplication(applicationId.value)
  if (loaded) {
- appStore.fetchStatusHistory(applicationId.value)
+   appStore.fetchStatusHistory(applicationId.value)
+   const app = appStore.currentApplication
+   if (app) loadMatchScore(app.jobId, app.candidateId)
  }
 })
 
@@ -146,12 +179,28 @@ onBeforeUnmount(() => {
 
 <template>
  <div class="max-w-4xl mx-auto px-6 pb-8">
- <!-- Back -->
- <div class="flex items-center gap-3 mb-6">
- <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Back
- </button>
- </div>
+ <!-- Breadcrumb -->
+ <nav class="flex items-center gap-1.5 mb-6 text-sm text-gray-400 flex-wrap">
+  <router-link to="/employer/jobs" class="hover:text-gray-600 transition">Jobs</router-link>
+  <span>›</span>
+  <router-link
+   v-if="appStore.currentApplication?.jobId"
+   :to="`/employer/jobs/${appStore.currentApplication.jobId}`"
+   class="hover:text-gray-600 transition truncate max-w-[140px]"
+  >{{ appStore.currentApplication.jobTitle ?? '…' }}</router-link>
+  <span v-else>…</span>
+  <span>›</span>
+  <router-link
+   v-if="appStore.currentApplication?.jobId"
+   :to="`/employer/jobs/${appStore.currentApplication.jobId}/applications`"
+   class="hover:text-gray-600 transition"
+  >Applications</router-link>
+  <span v-else>Applications</span>
+  <span>›</span>
+  <span class="text-gray-700 font-medium truncate max-w-[160px]">
+   {{ appStore.currentApplication?.candidateName ?? '…' }}
+  </span>
+ </nav>
 
  <!-- Loading skeleton -->
  <div v-if="appStore.detailLoading" class="space-y-4">
@@ -333,6 +382,118 @@ onBeforeUnmount(() => {
  View CV
  <span class="text-xs text-gray-400">↗</span>
  </a>
+ </div>
+ </div>
+
+ <!-- ─── AI Match Score ─── -->
+ <div class="bg-surface border border-border rounded-lg p-6 shadow-sm">
+ <h2 class="text-sm font-semibold text-gray-900 mb-4">AI Match Score</h2>
+
+ <!-- Loading -->
+ <div v-if="matchLoading" class="animate-pulse space-y-3">
+ <div class="flex items-center gap-4">
+ <div class="w-16 h-16 bg-gray-100 rounded-full" />
+ <div class="flex-1 space-y-2">
+ <div class="h-3 bg-gray-100 rounded w-48" />
+ <div class="h-2 bg-gray-100 rounded w-full" />
+ </div>
+ </div>
+ </div>
+
+ <!-- No results yet -->
+ <div v-else-if="!matchScore" class="text-center py-6">
+ <p class="text-sm text-gray-400 mb-1">No AI analysis for this application yet.</p>
+ <p class="text-xs text-gray-400">
+ Run <span class="font-semibold">AI Screen</span> from the pipeline to generate match scores.
+ </p>
+ </div>
+
+ <!-- Score display -->
+ <div v-else class="space-y-4">
+ <!-- Score header -->
+ <div class="flex items-center gap-5">
+ <!-- AI Score circle -->
+ <div class="relative w-16 h-16 shrink-0">
+ <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+ <circle cx="18" cy="18" r="15.5" fill="none" class="stroke-gray-100" stroke-width="3" />
+ <circle
+ cx="18" cy="18" r="15.5" fill="none" stroke-width="3" stroke-linecap="round"
+ :stroke-dasharray="`${((matchScore.aiScore ?? 0) / 100) * 97.4} 97.4`"
+ :class="{
+ 'stroke-green-500': (matchScore.aiScore ?? 0) >= 80,
+ 'stroke-amber-400': (matchScore.aiScore ?? 0) >= 60 && (matchScore.aiScore ?? 0) < 80,
+ 'stroke-red-400': (matchScore.aiScore ?? 0) < 60,
+ }"
+ />
+ </svg>
+ <span
+ class="absolute inset-0 flex items-center justify-center text-sm font-black"
+ :class="getScoreColor(matchScore.aiScore)"
+ >
+ {{ matchScore.aiScore ?? '—' }}
+ </span>
+ </div>
+ <div class="flex-1 min-w-0">
+ <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">AI Score</p>
+ <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+ <div
+ class="h-full rounded-full transition-all duration-500"
+ :class="getScoreBarColor(matchScore.aiScore)"
+ :style="{ width: `${Math.min(100, matchScore.aiScore ?? 0)}%` }"
+ />
+ </div>
+ <div v-if="matchScore.similarityScore !== null" class="mt-1.5 text-xs text-gray-500">
+ Similarity: <span class="font-semibold" :class="getScoreColor(matchScore.similarityScore)">{{ matchScore.similarityScore }}%</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- Score breakdown -->
+ <div v-if="matchScore.scoreBreakdown" class="grid grid-cols-3 gap-2">
+ <div
+ v-for="(score, key) in matchScore.scoreBreakdown"
+ :key="key"
+ class="text-center bg-gray-50 rounded-lg py-2.5 border border-gray-100"
+ >
+ <span class="block text-sm font-bold text-gray-800">{{ score }}</span>
+ <span class="block text-[10px] text-gray-400 capitalize mt-0.5">{{ key }}</span>
+ </div>
+ </div>
+
+ <!-- Strengths & Gaps -->
+ <div class="grid grid-cols-2 gap-4">
+ <div v-if="matchScore.strengths?.length">
+ <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Strengths</p>
+ <ul class="space-y-1">
+ <li
+ v-for="(s, i) in matchScore.strengths"
+ :key="i"
+ class="flex items-start gap-1.5 text-xs text-gray-700"
+ >
+ <span class="text-green-500 shrink-0 mt-px font-bold">✓</span>
+ {{ s }}
+ </li>
+ </ul>
+ </div>
+ <div v-if="matchScore.gaps?.length">
+ <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Gaps</p>
+ <ul class="space-y-1">
+ <li
+ v-for="(g, i) in matchScore.gaps"
+ :key="i"
+ class="flex items-start gap-1.5 text-xs text-gray-700"
+ >
+ <span class="text-red-400 shrink-0 mt-px font-bold">✗</span>
+ {{ g }}
+ </li>
+ </ul>
+ </div>
+ </div>
+
+ <!-- Summary -->
+ <p v-if="matchScore.summary" class="text-xs text-gray-500 italic bg-gray-50 rounded-lg p-3 border border-gray-100 leading-relaxed">
+ {{ matchScore.summary }}
+ </p>
  </div>
  </div>
 

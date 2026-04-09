@@ -35,14 +35,6 @@ const menuOpen = ref(false);
         >
           Overview
         </router-link>
-        <router-link
-          to="/employer/notifications"
-          class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
-          active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
-        >
-          Notifications
-        </router-link>
-
         <!-- Employer Onboarding section -->
         <div class="mt-4 mb-1 px-3">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Company</span>
@@ -80,14 +72,6 @@ const menuOpen = ref(false);
           to="/employer/candidates"
           class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
-        >
-          Applications
-        </router-link>
-        <router-link
-          v-if="auth.isCompanyAdmin || auth.isHR"
-          to="/employer/candidates"
-          class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 :bg-slate-800/50 hover:text-slate-900 :text-white transition-all"
-          active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
         >
           Applications
         </router-link>
@@ -143,13 +127,6 @@ const menuOpen = ref(false);
           active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
         >
           Settings
-        </router-link>
-        <router-link
-          to="/employer/notifications"
-          class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 :bg-slate-800/50 hover:text-slate-900 :text-white transition-all"
-          active-class="!bg-teal-50 dark:!bg-teal-900/30 !text-teal-700 dark:!text-teal-400 font-semibold"
-        >
-          Notifications
         </router-link>
       </nav>
       <div class="px-6 py-4 border-t border-slate-200/60 bg-slate-50/50">

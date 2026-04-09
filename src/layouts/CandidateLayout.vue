@@ -103,13 +103,6 @@ const menuOpen = ref(false)
   >
   Settings
   </router-link>
-  <router-link
-  to="/candidate/notifications"
-  class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
-  active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
-  >
-  Notifications
-  </router-link>
   </nav>
   <div class="px-4 py-3 border-t border-border">
   <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Candidate' }}</span>
