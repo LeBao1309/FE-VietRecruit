@@ -149,8 +149,8 @@ http.interceptors.response.use(
     if (error.response && error.response.status >= 500) {
       try {
         useUiStore().toastError(
-          'Lỗi máy chủ',
-          'Máy chủ gặp sự cố. Vui lòng thử lại sau.',
+          'Server Error',
+          'The server encountered an error. Please try again later.',
         )
       } catch {
         // Pinia may not be ready in SSR or test contexts — safe to ignore

@@ -37,6 +37,6 @@ export function formatSalaryRange(
   const cur = currency ?? 'VND'
   const fmt = (n: number) => n.toLocaleString('vi-VN')
   if (min && max) return `${fmt(min)} – ${fmt(max)} ${cur}`
-  if (min) return `Từ ${fmt(min)} ${cur}`
-  return `Đến ${fmt(max!)} ${cur}`
+  if (min) return `From ${fmt(min)} ${cur}`
+  return `Up to ${fmt(max!)} ${cur}`
 }
