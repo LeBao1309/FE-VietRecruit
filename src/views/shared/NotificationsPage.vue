@@ -14,13 +14,13 @@ onMounted(() => {
 <template>
   <div class="max-w-2xl mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-slate-900">Thông Báo</h1>
+      <h1 class="text-2xl font-bold text-slate-900">Notifications</h1>
       <button
         v-if="notificationStore.unreadCount > 0"
         @click="notificationStore.markAllAsRead()"
         class="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
       >
-        Đánh dấu tất cả đã đọc
+        Mark All as Read
       </button>
     </div>
 
@@ -32,8 +32,8 @@ onMounted(() => {
     <!-- Empty state -->
     <BaseEmptyState
       v-else-if="notificationStore.notifications.length === 0"
-      title="Không có thông báo"
-      description="Bạn chưa có thông báo nào. Hệ thống sẽ gửi thông báo khi có cập nhật về đơn ứng tuyển hoặc lịch phỏng vấn."
+      title="No notifications yet"
+      description="You have no notifications. The system will notify you when there are updates on your applications or interview schedule."
       icon="🔔"
     />
 
@@ -76,8 +76,8 @@ onMounted(() => {
         :disabled="notificationStore.loading"
         class="px-5 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
       >
-        <span v-if="notificationStore.loading">Đang tải...</span>
-        <span v-else>Tải thêm</span>
+        <span v-if="notificationStore.loading">Loading...</span>
+        <span v-else>Load More</span>
       </button>
     </div>
   </div>
