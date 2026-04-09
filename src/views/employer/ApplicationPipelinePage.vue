@@ -114,7 +114,7 @@ function applyOptimisticMove(id: string, toStatus: ApplicationStatus): void {
   if (!appStore.applications) return
   const idx = appStore.applications.content.findIndex((a) => a.id === id)
   if (idx !== -1) {
-    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: toStatus }
+    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: toStatus } as ApplicationSummaryResponse
   }
 }
 
@@ -123,7 +123,7 @@ function revertOptimisticMove(id: string, fromStatus: ApplicationStatus): void {
   if (!appStore.applications) return
   const idx = appStore.applications.content.findIndex((a) => a.id === id)
   if (idx !== -1) {
-    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: fromStatus }
+    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: fromStatus } as ApplicationSummaryResponse
   }
 }
 

@@ -234,7 +234,7 @@ export const useApplicationStore = defineStore('application', () => {
             applications.value.content[idx] = {
               ...applications.value.content[idx],
               status: toStatus,
-            }
+            } as ApplicationSummaryResponse
           }
         }
         ui.toastSuccess('Candidate moved', `${fromStatus} → ${toStatus}`)
