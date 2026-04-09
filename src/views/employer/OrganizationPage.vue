@@ -79,12 +79,12 @@ async function loadCompany(): Promise<void> {
 function validateCompanyForm(): boolean {
  companyFormErrors.value = {}
  if (!companyForm.value.name.trim()) {
- companyFormErrors.value.name = 'Tên công ty là bắt buộc.'
+ companyFormErrors.value.name = 'Company name is required.'
  } else if (companyForm.value.name.length > 255) {
- companyFormErrors.value.name = 'Tên công ty không dài quá 255 ký tự.'
+ companyFormErrors.value.name = 'Company name must not exceed 255 characters.'
  }
  if (companyForm.value.website && !/^https?:\/\/.+/.test(companyForm.value.website)) {
- companyFormErrors.value.website = 'Vui lòng nhập URL hợp lệ (https://...).'
+ companyFormErrors.value.website = 'Please enter a valid URL (https://...).'
  }
  return Object.keys(companyFormErrors.value).length === 0
 }
@@ -99,11 +99,11 @@ async function saveCompanyProfile(): Promise<void> {
  website: companyForm.value.website.trim() || undefined,
  })
  if (result.error) {
- ui.toastError('Cập nhật thất bại', result.error.message)
+ ui.toastError('Update Failed', result.error.message)
  return
  }
  company.value = result.data!
- ui.toastSuccess('Đã cập nhật', 'Thông tin công ty đã được lưu.')
+ ui.toastSuccess('Updated', 'Company information has been saved.')
  } finally {
  companySaving.value = false
  }
@@ -135,9 +135,9 @@ function closeModal(): void {
 function validate(): boolean {
  formErrors.value = {}
  if (!formName.value.trim()) {
- formErrors.value.name = 'Tên không được bỏ trống.'
+ formErrors.value.name = 'Name is required.'
  } else if (formName.value.length > 255) {
- formErrors.value.name = 'Tên không dài quá 255 ký tự.'
+ formErrors.value.name = 'Name must not exceed 255 characters.'
  }
  return Object.keys(formErrors.value).length === 0
 }
@@ -153,22 +153,22 @@ async function handleSave(): Promise<void> {
  const result = modalMode.value === 'create'
  ? await departmentService.create(body)
  : await departmentService.update(editId.value!, body)
- if (result.error) { ui.toastError('Xảy ra lỗi', result.error.message); return }
- ui.toastSuccess(modalMode.value === 'create' ? 'Đã tạo xong' : 'Đã cập nhật')
+ if (result.error) { ui.toastError('An Error Occurred', result.error.message); return }
+ ui.toastSuccess(modalMode.value === 'create' ? 'Created' : 'Updated')
  } else if (tab === 'locations') {
  const body = { name: formName.value.trim(), address: formExtra.value.trim() || undefined }
  const result = modalMode.value === 'create'
  ? await locationService.create(body)
  : await locationService.update(editId.value!, body)
- if (result.error) { ui.toastError('Xảy ra lỗi', result.error.message); return }
- ui.toastSuccess(modalMode.value === 'create' ? 'Đã tạo xong' : 'Đã cập nhật')
+ if (result.error) { ui.toastError('An Error Occurred', result.error.message); return }
+ ui.toastSuccess(modalMode.value === 'create' ? 'Created' : 'Updated')
  } else {
  const body = { name: formName.value.trim() }
  const result = modalMode.value === 'create'
  ? await categoryService.create(body)
  : await categoryService.update(editId.value!, body)
- if (result.error) { ui.toastError('Xảy ra lỗi', result.error.message); return }
- ui.toastSuccess(modalMode.value === 'create' ? 'Đã tạo xong' : 'Đã cập nhật')
+ if (result.error) { ui.toastError('An Error Occurred', result.error.message); return }
+ ui.toastSuccess(modalMode.value === 'create' ? 'Created' : 'Updated')
  }
 
  closeModal()
@@ -198,10 +198,10 @@ async function handleDelete(): Promise<void> {
  : await categoryService.delete(id)
 
  if (result.error) {
- ui.toastError('Xóa Thất Bại', result.error.message)
+ ui.toastError('Delete Failed', result.error.message)
  return
  }
- ui.toastSuccess('Xóa Xong', `${deleteTarget.value.name} đã được dọn khỏi hệ thống.`)
+ ui.toastSuccess('Deleted', `${deleteTarget.value.name} has been removed from the system.`)
  showDeleteConfirm.value = false
  deleteTarget.value = null
  await loadAll()
@@ -211,15 +211,15 @@ async function handleDelete(): Promise<void> {
 }
 
 const tabLabel: Record<Tab, string> = {
- profile: 'Hồ Sơ',
- departments: 'Phòng Ban',
- locations: 'Địa Điểm',
- categories: 'Danh Mục',
+ profile: 'Profile',
+ departments: 'Departments',
+ locations: 'Locations',
+ categories: 'Categories',
 }
 
 const extraLabel: Record<Exclude<Tab, 'profile'>, string | null> = {
- departments: 'Mô Tả',
- locations: 'Địa Chỉ',
+ departments: 'Description',
+ locations: 'Address',
  categories: null,
 }
 
@@ -233,15 +233,15 @@ onMounted(() => {
  <div class="max-w-4xl mx-auto px-6 pb-8">
  <div class="flex items-center justify-between mb-6">
  <div>
- <h1 class="text-xl font-bold text-gray-900">Doanh Nghiệp</h1>
- <p class="text-sm text-gray-500 mt-1">Quản trị thông tin công ty, phòng ban, địa chỉ và lĩnh vực tuyển</p>
+ <h1 class="text-xl font-bold text-gray-900">Enterprise</h1>
+ <p class="text-sm text-gray-500 mt-1">Manage company information, departments, locations, and recruitment domains</p>
  </div>
  <button
  v-if="activeTab !== 'profile'"
  @click="openCreate"
  class="btn-primary"
  >
- <span class="text-lg leading-none">+</span> Tạo {{ tabLabel[activeTab] }}
+ <span class="text-lg leading-none">+</span> Create {{ tabLabel[activeTab] }}
  </button>
  </div>
 
@@ -270,12 +270,12 @@ onMounted(() => {
  <div v-for="i in 3" :key="i" class="h-12 bg-slate-100 rounded-lg" />
  </div>
  <div v-else class="premium-card p-8">
- <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Thông Tin Công Ty</h2>
+ <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Company Information</h2>
  <form @submit.prevent="saveCompanyProfile" class="space-y-5 max-w-lg">
  <!-- Name -->
  <div>
  <label for="cp-name" class="block text-sm font-medium text-slate-700 mb-1.5">
- Tên công ty <span class="text-rose-500">*</span>
+ Company Name <span class="text-rose-500">*</span>
  </label>
  <input
  id="cp-name"
@@ -290,19 +290,19 @@ onMounted(() => {
 
  <!-- Domain -->
  <div>
- <label for="cp-domain" class="block text-sm font-medium text-slate-700 mb-1.5">Ngành nghề / Lĩnh vực</label>
+ <label for="cp-domain" class="block text-sm font-medium text-slate-700 mb-1.5">Industry / Domain</label>
  <input
  id="cp-domain"
  v-model="companyForm.domain"
  type="text"
- placeholder="VD: Công nghệ, Y tế, Tài chính"
+ placeholder="E.g., Technology, Healthcare, Finance"
  class="w-full px-4 py-2.5 text-sm border border-slate-300 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
  />
  </div>
 
  <!-- Website -->
  <div>
- <label for="cp-website" class="block text-sm font-medium text-slate-700 mb-1.5">Website công ty</label>
+ <label for="cp-website" class="block text-sm font-medium text-slate-700 mb-1.5">Company Website</label>
  <input
  id="cp-website"
  v-model="companyForm.website"
@@ -316,8 +316,8 @@ onMounted(() => {
 
  <!-- Meta -->
  <div v-if="company" class="pt-2 border-t border-slate-100 text-xs text-slate-400 space-y-1">
- <p>Tạo lúc: {{ company.createdAt ? new Date(company.createdAt).toLocaleString('vi-VN') : '—' }}</p>
- <p>Cập nhật lần cuối: {{ company.updatedAt ? new Date(company.updatedAt).toLocaleString('vi-VN') : '—' }}</p>
+ <p>Created at: {{ company.createdAt ? new Date(company.createdAt).toLocaleString('vi-VN') : '—' }}</p>
+ <p>Last updated: {{ company.updatedAt ? new Date(company.updatedAt).toLocaleString('vi-VN') : '—' }}</p>
  </div>
 
  <div class="flex justify-end pt-2">
@@ -327,7 +327,7 @@ onMounted(() => {
  class="btn-primary"
  >
  <span v-if="companySaving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ companySaving ? 'Đang lưu…' : 'Lưu Thay Đổi' }}
+ {{ companySaving ? 'Saving…' : 'Save Changes' }}
  </button>
  </div>
  </form>
@@ -345,23 +345,23 @@ onMounted(() => {
  <table v-if="activeTab === 'departments'" class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên</th>
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Giới Thiệu</th>
- <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Thao Tác</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Name</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Description</th>
+ <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Actions</th>
  </tr>
  </thead>
  <tbody>
  <tr v-if="departments.length === 0">
  <td colspan="3" class="text-center text-sm text-slate-400 py-16">
- Chưa khai báo Phòng Ban nào. Mời bạn tiến hành tạo.
+ No departments have been defined yet. Please create one.
  </td>
  </tr>
  <tr v-for="dept in departments" :key="dept.id" class="border-b border-slate-100 last:border-0 hover:bg-slate-50 :bg-slate-800/50 transition-colors">
  <td class="px-6 py-4 text-sm font-bold text-slate-900 ">{{ dept.name }}</td>
  <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ dept.description ?? '—' }}</td>
  <td class="px-6 py-4 text-right">
- <button @click="openEdit(dept)" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Sửa</button>
- <button @click="confirmDelete(dept)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Xóa</button>
+ <button @click="openEdit(dept)" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Edit</button>
+ <button @click="confirmDelete(dept)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Delete</button>
  </td>
  </tr>
  </tbody>
@@ -371,23 +371,23 @@ onMounted(() => {
  <table v-if="activeTab === 'locations'" class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên</th>
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Địa Chỉ</th>
- <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Thao Tác</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Name</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Address</th>
+ <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Actions</th>
  </tr>
  </thead>
  <tbody>
  <tr v-if="locations.length === 0">
  <td colspan="3" class="text-center text-sm text-slate-400 py-16">
- Chưa cấu hình địa chỉ nào. Xin vui lòng tạo mới.
+ No locations have been configured yet. Please create one.
  </td>
  </tr>
  <tr v-for="loc in locations" :key="loc.id" class="border-b border-slate-100 last:border-0 hover:bg-slate-50 :bg-slate-800/50 transition-colors">
  <td class="px-6 py-4 text-sm font-bold text-slate-900 ">{{ loc.name }}</td>
  <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ loc.address ?? '—' }}</td>
  <td class="px-6 py-4 text-right">
- <button @click="openEdit(loc)" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Sửa</button>
- <button @click="confirmDelete(loc)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Xóa</button>
+ <button @click="openEdit(loc)" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Edit</button>
+ <button @click="confirmDelete(loc)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Delete</button>
  </td>
  </tr>
  </tbody>
@@ -397,21 +397,21 @@ onMounted(() => {
  <table v-if="activeTab === 'categories'" class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Tên</th>
- <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Thao Tác</th>
+ <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Name</th>
+ <th class="text-right text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4 w-32">Actions</th>
  </tr>
  </thead>
  <tbody>
  <tr v-if="categories.length === 0">
  <td colspan="2" class="text-center text-sm text-slate-400 py-16">
- Vẫn chưa có cấu hình ngành nghề / kỹ năng nào. Vui lòng cập nhật.
+ No industry or skill categories have been configured yet. Please add one.
  </td>
  </tr>
  <tr v-for="cat in categories" :key="cat.id" class="border-b border-slate-100 last:border-0 hover:bg-slate-50 :bg-slate-800/50 transition-colors">
  <td class="px-6 py-4 text-sm font-bold text-slate-900 ">{{ cat.name }}</td>
  <td class="px-6 py-4 text-right">
- <button @click="openEdit({ id: cat.id, name: cat.name })" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Sửa</button>
- <button @click="confirmDelete(cat)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Xóa</button>
+ <button @click="openEdit({ id: cat.id, name: cat.name })" class="text-xs text-teal-600 hover:text-teal-700 mr-4 font-bold uppercase tracking-wider">Edit</button>
+ <button @click="confirmDelete(cat)" class="text-xs text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider">Delete</button>
  </td>
  </tr>
  </tbody>
@@ -425,7 +425,7 @@ onMounted(() => {
  <!-- header -->
  <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
  <h2 class="text-lg font-bold text-slate-900">
- {{ modalMode === 'create' ? `Tạo ${tabLabel[activeTab]}` : `Chỉnh sửa ${tabLabel[activeTab]}` }}
+ {{ modalMode === 'create' ? `Create ${tabLabel[activeTab]}` : `Edit ${tabLabel[activeTab]}` }}
  </h2>
  <button type="button" @click="closeModal" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -437,12 +437,12 @@ onMounted(() => {
  <!-- body -->
  <form @submit.prevent="handleSave" class="px-6 py-5 space-y-5">
  <div>
- <label for="org-name" class="block text-sm font-bold text-slate-700 mb-1">Tên <span class="text-rose-500">*</span></label>
+ <label for="org-name" class="block text-sm font-bold text-slate-700 mb-1">Name <span class="text-rose-500">*</span></label>
  <input
  id="org-name"
  v-model="formName"
  type="text"
- placeholder="Nhập tên..."
+ placeholder="Enter name..."
  class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition"
  :class="formErrors.name ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
  />
@@ -455,7 +455,7 @@ onMounted(() => {
  id="org-extra"
  v-model="formExtra"
  type="text"
- :placeholder="`Vui lòng ghi nhập ${extraLabel[activeTab as Exclude<Tab, 'profile'>]!.toLowerCase()}`"
+ :placeholder="`Enter ${extraLabel[activeTab as Exclude<Tab, 'profile'>]!.toLowerCase()}...`"
  class="w-full px-4 py-3 text-sm border border-slate-300 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
  />
  </div>
@@ -466,7 +466,7 @@ onMounted(() => {
  @click="closeModal"
  class="btn-secondary"
  >
- Huỷ
+ Cancel
  </button>
  <button
  type="submit"
@@ -474,7 +474,7 @@ onMounted(() => {
  class="btn-primary"
  >
  <span v-if="modalSaving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ modalSaving ? 'Đang lưu…' : modalMode === 'create' ? 'Tạo' : 'Lưu' }}
+ {{ modalSaving ? 'Saving…' : modalMode === 'create' ? 'Create' : 'Save' }}
  </button>
  </div>
  </form>
@@ -489,17 +489,17 @@ onMounted(() => {
  <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 text-3xl font-bold mx-auto mb-5 rotate-3 shadow-sm">
  ⚠
  </div>
- <h2 class="text-xl font-extrabold text-slate-900 mb-2">Xóa {{ tabLabel[activeTab] }}?</h2>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-2">Delete {{ tabLabel[activeTab] }}?</h2>
  <p class="text-sm font-medium text-slate-500 mb-8">
- Xác nhận bạn muốn xóa <span class="text-slate-700 font-bold">{{ deleteTarget?.name }}</span>?
- Hành động này không thể hoàn tác.
+ Confirm you want to delete <span class="text-slate-700 font-bold">{{ deleteTarget?.name }}</span>?
+ This action cannot be undone.
  </p>
  <div class="flex justify-center gap-3">
  <button
  @click="showDeleteConfirm = false"
  class="btn-secondary"
  >
- Huỷ
+ Cancel
  </button>
  <button
  @click="handleDelete"
@@ -507,7 +507,7 @@ onMounted(() => {
  class="px-6 py-2.5 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2"
  >
  <span v-if="deleting" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ deleting ? 'Đang xóa…' : 'Xóa' }}
+ {{ deleting ? 'Deleting…' : 'Delete' }}
  </button>
  </div>
  </div>

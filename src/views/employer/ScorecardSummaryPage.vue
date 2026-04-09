@@ -12,9 +12,9 @@ const interviewId = computed(() => route.params.id as string)
 
 // ── Status config ──
 const resultConfig: Record<ScorecardResult, { label: string; class: string }> = {
- PASS: { label: 'Đạt', class: 'bg-success-bg text-success' },
- FAIL: { label: 'Không Đạt', class: 'bg-error-bg text-error' },
- CONSIDERING: { label: 'Cân Nhắc', class: 'bg-amber-50 text-amber-600' },
+ PASS: { label: 'Pass', class: 'bg-success-bg text-success' },
+ FAIL: { label: 'Fail', class: 'bg-error-bg text-error' },
+ CONSIDERING: { label: 'Under Consideration', class: 'bg-amber-50 text-amber-600' },
 }
 
 // ── Radar chart ──
@@ -39,7 +39,7 @@ function drawRadarChart(): void {
  const cy = size / 2
  const radius = 90
 
- const labels = ['Kỹ Thuật', 'Văn Hóa', 'Ngoại Ngữ']
+ const labels = ['Technical', 'Culture', 'Language Proficiency']
  const values = [
  interviewStore.avgSkill,
  interviewStore.avgAttitude,
@@ -184,25 +184,25 @@ onMounted(async () => {
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.push(`/employer/interviews/${interviewId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Quay lại
+ ‹ Back
  </button>
  </div>
 
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">
  <div>
- <h1 class="text-xl font-bold text-gray-900">Tổng Hợp Phiếu Đánh Giá</h1>
+ <h1 class="text-xl font-bold text-gray-900">Evaluation Scorecard Summary</h1>
  <p v-if="interviewStore.currentInterview" class="text-sm text-gray-500 mt-1">
  {{ interviewStore.currentInterview.title }}
  <span class="text-gray-300 mx-1">·</span>
- {{ interviewStore.scorecards.length }} báo cáo đánh giá
+ {{ interviewStore.scorecards.length }} evaluation report(s)
  </p>
  </div>
  <router-link
  :to="`/employer/interviews/${interviewId}/scorecard`"
  class="btn-primary"
  >
- + Thêm Đánh Giá
+ + Add Evaluation
  </router-link>
  </div>
 
@@ -227,13 +227,13 @@ onMounted(async () => {
  class="premium-card p-16 text-center max-w-2xl mx-auto mt-8"
  >
  <div class="text-4xl mb-4 text-slate-300">📊</div>
- <p class="text-lg font-bold text-slate-900 mb-2">Chưa ai nộp kết luận điểm</p>
- <p class="text-sm font-medium text-slate-500 mb-6">Người phỏng vấn tham gia buổi này có thể điền phiếu đánh giá tại đây.</p>
+ <p class="text-lg font-bold text-slate-900 mb-2">No evaluation submitted yet</p>
+ <p class="text-sm font-medium text-slate-500 mb-6">Interviewers assigned to this session may submit their evaluation form here.</p>
  <router-link
  :to="`/employer/interviews/${interviewId}/scorecard`"
  class="inline-flex items-center text-teal-600 hover:text-teal-700 font-bold transition-colors"
  >
- + Thêm Đánh Giá
+ + Add Evaluation
  </router-link>
  </div>
 
@@ -251,7 +251,7 @@ onMounted(async () => {
  <!-- Overall average -->
  <div class="text-center sm:text-left">
  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
- Điểm Trung Bình
+ Average Score
  </span>
  <span
  class="text-5xl font-black tabular-nums tracking-tight"
@@ -265,9 +265,9 @@ onMounted(async () => {
  <!-- Per-dimension bars -->
  <div class="space-y-4">
  <div v-for="{ label, value } in [
- { label: 'Kỹ Năng', value: interviewStore.avgSkill },
- { label: 'Thái Độ', value: interviewStore.avgAttitude },
- { label: 'Tiếng Anh', value: interviewStore.avgEnglish },
+ { label: 'Skills', value: interviewStore.avgSkill },
+ { label: 'Attitude', value: interviewStore.avgAttitude },
+ { label: 'English Proficiency', value: interviewStore.avgEnglish },
  ]" :key="label" class="flex items-center gap-4">
  <span class="text-sm font-bold text-slate-600 w-20 shrink-0">{{ label }}</span>
  <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
@@ -286,22 +286,22 @@ onMounted(async () => {
  <!-- Result distribution -->
  <div class="pt-6 border-t border-slate-200 ">
  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-3">
- Phân Bổ Kết Quả
+ Result Distribution
  </span>
  <div class="flex items-center gap-4">
  <div class="flex items-center gap-1.5">
  <span class="w-3 h-3 rounded-full bg-green-400" />
- <span class="text-xs text-gray-600">Đạt</span>
+ <span class="text-xs text-gray-600">Pass</span>
  <span class="text-sm font-bold text-gray-900 ml-1">{{ interviewStore.resultCounts.PASS }}</span>
  </div>
  <div class="flex items-center gap-1.5">
  <span class="w-3 h-3 rounded-full bg-amber-400" />
- <span class="text-xs text-gray-600">Cân Nhắc</span>
+ <span class="text-xs text-gray-600">Under Consideration</span>
  <span class="text-sm font-bold text-gray-900 ml-1">{{ interviewStore.resultCounts.CONSIDERING }}</span>
  </div>
  <div class="flex items-center gap-1.5">
  <span class="w-3 h-3 rounded-full bg-red-400" />
- <span class="text-xs text-gray-600">Không Đạt</span>
+ <span class="text-xs text-gray-600">Fail</span>
  <span class="text-sm font-bold text-gray-900 ml-1">{{ interviewStore.resultCounts.FAIL }}</span>
  </div>
  </div>
@@ -313,7 +313,7 @@ onMounted(async () => {
  <!-- ─── Individual Scorecards ─── -->
  <div class="premium-card p-8">
  <h2 class="text-lg font-bold text-slate-900 mb-6">
- Đánh Giá Từng Người ({{ interviewStore.scorecards.length }})
+ Individual Evaluations ({{ interviewStore.scorecards.length }})
  </h2>
 
  <div class="space-y-4">
@@ -349,9 +349,9 @@ onMounted(async () => {
  <!-- Score bars -->
  <div class="space-y-2.5 mt-4">
  <div v-for="{ label, value } in [
- { label: 'Kỹ năng', value: sc.skillScore },
- { label: 'Thái độ', value: sc.attitudeScore },
- { label: 'Tiếng Anh', value: sc.englishScore },
+ { label: 'Skills', value: sc.skillScore },
+ { label: 'Attitude', value: sc.attitudeScore },
+ { label: 'English Proficiency', value: sc.englishScore },
  ]" :key="label" class="flex items-center gap-3">
  <span class="text-xs font-bold text-slate-500 w-16 shrink-0">{{ label }}</span>
  <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
