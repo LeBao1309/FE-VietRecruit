@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useOfferStore } from '@/stores/offerStore'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -8,7 +8,7 @@ import type { OfferStatus } from '@/types/enums'
 import type { OfferCreateRequest } from '@/types/application'
 
 const route = useRoute()
-const router = useRouter()
+// useRouter not needed — navigation uses <router-link> in template
 const offerStore = useOfferStore()
 const appStore = useApplicationStore()
 const auth = useAuthStore()
