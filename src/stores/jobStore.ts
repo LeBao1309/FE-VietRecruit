@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { JobResponse, JobSummaryResponse } from '@/types/job'
 import type { PageResponse, PaginationParams } from '@/types/common'
-import type { JobStatus } from '@/types/enums'
 import type { SalaryBenchmarkResponse } from '@/types/ai'
 import { jobService } from '@/services/jobService'
 import { useUiStore } from './uiStore'
@@ -73,13 +72,13 @@ export const useJobStore = defineStore('job', () => {
     // Subscription guard — must have an active plan (including free tier)
     if (!sub.hasActiveSubscription) {
       subscriptionRequired.value = true
-      ui.toastWarning('Chưa kích hoạt gói dịch vụ', 'Vui lòng chọn một gói (kể cả gói miễn phí) để bắt đầu đăng tuyển.')
+      ui.toastWarning('No Active Subscription', 'Please select a plan (including the free plan) to begin posting jobs.')
       return false
     }
 
     // Quota guard
     if (sub.isQuotaFull) {
-      ui.toastWarning('Đã đạt giới hạn quota', 'Bạn đã đạt giới hạn tin đang hoạt động. Hãy nâng cấp gói để đăng thêm.')
+      ui.toastWarning('Quota Limit Reached', 'You have reached the active listing limit. Upgrade your plan to post more.')
       return false
     }
 
@@ -89,16 +88,16 @@ export const useJobStore = defineStore('job', () => {
       if (result.error) {
         if (result.error.code === 'SUBSCRIPTION_REQUIRED') {
           subscriptionRequired.value = true
-          ui.toastWarning('Yêu cầu gói đăng ký', result.error.message)
+          ui.toastWarning('Subscription Required', result.error.message)
         } else {
-          ui.toastError('Đăng tuyển thất bại', result.error.message)
+          ui.toastError('Publish Failed', result.error.message)
         }
         return false
       }
       // Success — update currentJob if backend returned the full object
       if (result.data) currentJob.value = result.data
       subscriptionRequired.value = false
-      ui.toastSuccess('Đăng tuyển thành công', 'Tin tuyển dụng đã hiển thị công khai tới ứng viên.')
+      ui.toastSuccess('Published Successfully', 'The job listing is now publicly visible to candidates.')
       // Re-fetch the job to get the latest status, then refresh the list
       await Promise.all([
         fetchJob(id),
@@ -117,12 +116,12 @@ export const useJobStore = defineStore('job', () => {
     try {
       const result = await jobService.closeJob(id)
       if (result.error) {
-        ui.toastError('Đóng tin thất bại', result.error.message)
+        ui.toastError('Close Listing Failed', result.error.message)
         return false
       }
       // Success — update currentJob if backend returned the full object
       if (result.data) currentJob.value = result.data
-      ui.toastSuccess('Đã đóng tin tuyển dụng', 'Tin tuyển dụng đã được đóng lại.')
+      ui.toastSuccess('Listing Closed', 'The job listing has been closed.')
       // Re-fetch the job to get the latest status, then refresh the list
       const sub = useSubscriptionStore()
       await Promise.all([
