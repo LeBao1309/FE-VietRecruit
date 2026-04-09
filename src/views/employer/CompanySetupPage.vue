@@ -25,12 +25,12 @@ const form = ref<CompanyCreateRequest>({
 function validate(): boolean {
  errors.value = {}
  if (!form.value.name.trim()) {
- errors.value.name = 'Tên công ty là bắt buộc.'
+ errors.value.name = 'Company name is required.'
  } else if (form.value.name.length > 255) {
- errors.value.name = 'Tên công ty phải từ 255 ký tự trở xuống.'
+ errors.value.name = 'Company name must not exceed 255 characters.'
  }
  if (form.value.website && !/^https?:\/\/.+/.test(form.value.website)) {
- errors.value.website = 'Vui lòng nhập một URL hợp lệ (https://...).'
+ errors.value.website = 'Please enter a valid URL (https://...).'
  }
  return Object.keys(errors.value).length === 0
 }
@@ -41,7 +41,7 @@ async function handleSubmit(): Promise<void> {
  try {
  const result = await companyService.createCompany(form.value)
  if (result.error) {
- ui.toastError('Tạo công ty thất bại', result.error.message)
+ ui.toastError('Company Creation Failed', result.error.message)
  return
  }
  // Backend assigns COMPANY_ADMIN role after company creation.
@@ -52,7 +52,7 @@ async function handleSubmit(): Promise<void> {
  auth.hydrate()
  }
  step.value = 2
- ui.toastSuccess('Đã tạo công ty!', `${form.value.name} đã sẵn sàng hoạt động.`)
+ ui.toastSuccess('Company Created!', `${form.value.name} is now ready.`)
  } finally {
  loading.value = false
  }
@@ -97,15 +97,15 @@ function goToTeam(): void {
  <div class="w-14 h-14 bg-primary-light rounded-full flex items-center justify-center text-primary text-2xl mx-auto mb-4">
  🏢
  </div>
- <h1 class="text-2xl font-bold text-gray-900">Thiết lập công ty</h1>
- <p class="text-sm text-gray-500 mt-1">Cung cấp một vài thông tin về tổ chức của bạn để bắt đầu</p>
+ <h1 class="text-2xl font-bold text-gray-900">Company Setup</h1>
+ <p class="text-sm text-gray-500 mt-1">Provide a few details about your organization to get started</p>
  </div>
 
  <form @submit.prevent="handleSubmit" class="space-y-4">
  <!-- Company name -->
  <div>
  <label for="co-name" class="block text-sm font-medium text-gray-700 mb-1">
- Tên công ty <span class="text-error">*</span>
+ Company Name <span class="text-error">*</span>
  </label>
  <input
  id="co-name"
@@ -120,19 +120,19 @@ function goToTeam(): void {
 
  <!-- Domain -->
  <div>
- <label for="co-domain" class="block text-sm font-medium text-gray-700 mb-1">Ngành nghề / Lĩnh vực</label>
+ <label for="co-domain" class="block text-sm font-medium text-gray-700 mb-1">Industry / Domain</label>
  <input
  id="co-domain"
  v-model="form.domain"
  type="text"
- placeholder="VD: Công nghệ, Y tế, Tài chính"
+ placeholder="E.g., Technology, Healthcare, Finance"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  />
  </div>
 
  <!-- Website -->
  <div>
- <label for="co-website" class="block text-sm font-medium text-gray-700 mb-1">Website công ty</label>
+ <label for="co-website" class="block text-sm font-medium text-gray-700 mb-1">Company Website</label>
  <input
  id="co-website"
  v-model="form.website"
@@ -150,7 +150,7 @@ function goToTeam(): void {
  class="w-full py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
  >
  <span v-if="loading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ loading ? 'Đang khởi tạo…' : 'Tạo công ty' }}
+ {{ loading ? 'Initializing…' : 'Create Company' }}
  </button>
  </form>
  </div>
@@ -161,8 +161,8 @@ function goToTeam(): void {
  <div class="w-14 h-14 bg-success-bg rounded-full flex items-center justify-center text-success text-2xl mx-auto mb-4">
  ✓
  </div>
- <h1 class="text-2xl font-bold text-gray-900">Hoàn tất!</h1>
- <p class="text-sm text-gray-500 mt-1">Hồ sơ công ty của bạn đã sẵn sàng. Bạn muốn làm gì tiếp theo:</p>
+ <h1 class="text-2xl font-bold text-gray-900">Complete!</h1>
+ <p class="text-sm text-gray-500 mt-1">Your company profile is ready. What would you like to do next:</p>
  </div>
 
  <div class="space-y-3 mb-6">
@@ -171,10 +171,10 @@ function goToTeam(): void {
  class="w-full p-4 border border-border rounded-lg text-left hover:border-primary hover:bg-primary-bg transition group"
  >
  <div class="font-semibold text-gray-900 group-hover:text-primary transition">
- 📊 Thiết lập phòng ban & cơ sở
+ 📊 Set Up Departments & Facilities
  </div>
  <p class="text-sm text-gray-500 mt-1">
- Thiết lập cơ cấu tổ chức để quản lý công việc hiệu quả hơn
+ Configure your organizational structure for more effective workforce management
  </p>
  </button>
 
@@ -183,10 +183,10 @@ function goToTeam(): void {
  class="w-full p-4 border border-border rounded-lg text-left hover:border-primary hover:bg-primary-bg transition group"
  >
  <div class="font-semibold text-gray-900 group-hover:text-primary transition">
- 👥 Mời thành viên mới
+ 👥 Invite New Members
  </div>
  <p class="text-sm text-gray-500 mt-1">
- Thêm quản lý nhân sự và người phỏng vấn để phối hợp tuyển dụng
+ Add HR managers and interviewers to collaborate on recruitment
  </p>
  </button>
 
@@ -195,10 +195,10 @@ function goToTeam(): void {
  class="w-full p-4 border border-border rounded-lg text-left hover:border-primary hover:bg-primary-bg transition group"
  >
  <div class="font-semibold text-gray-900 group-hover:text-primary transition">
- 🚀 Bảng điều khiển
+ 🚀 Dashboard
  </div>
  <p class="text-sm text-gray-500 mt-1">
- Bỏ qua và bắt đầu sử dụng hệ thống ngay lập tức
+ Skip and start using the system immediately
  </p>
  </button>
  </div>

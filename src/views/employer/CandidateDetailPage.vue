@@ -25,8 +25,8 @@ function formatSalary(min: number | null, max: number | null): string {
   if (!min && !max) return '—'
   const fmt = (n: number) => n.toLocaleString('vi-VN') + '₫'
   if (min && max) return `${fmt(min)} – ${fmt(max)}`
-  if (min) return `Từ ${fmt(min)}`
-  if (max) return `Đến ${fmt(max)}`
+  if (min) return `From ${fmt(min)}`
+  if (max) return `Up to ${fmt(max)}`
   return '—'
 }
 
@@ -37,8 +37,8 @@ function formatDate(iso: string | null): string {
 
 function formatExperience(years: number | null): string {
   if (years === null) return '—'
-  if (years === 0) return 'Mới ra trường'
-  return `${years} năm`
+  if (years === 0) return 'Fresh Graduate'
+  return `${years} yr${years === 1 ? '' : 's'}`
 }
 </script>
 
@@ -54,9 +54,9 @@ function formatExperience(years: number | null): string {
 
     <!-- Not found -->
     <div v-else-if="notFound" class="text-center py-24">
-      <p class="text-lg font-bold text-slate-700">Không tìm thấy ứng viên</p>
-      <p class="text-sm text-slate-400 mt-1">Hồ sơ có thể đã bị xoá hoặc bạn không có quyền truy cập.</p>
-      <button @click="router.back()" class="mt-6 btn-secondary">← Quay lại</button>
+      <p class="text-lg font-bold text-slate-700">Candidate not found</p>
+      <p class="text-sm text-slate-400 mt-1">This profile may have been deleted or you do not have access.</p>
+      <button @click="router.back()" class="mt-6 btn-secondary">← Back</button>
     </div>
 
     <!-- Content -->
@@ -65,7 +65,7 @@ function formatExperience(years: number | null): string {
       <div class="flex items-start justify-between gap-4">
         <div>
           <h1 class="text-xl font-bold text-slate-900">
-            {{ candidate.desiredPosition ?? 'Chưa cập nhật vị trí' }}
+            {{ candidate.desiredPosition ?? 'Position not specified' }}
           </h1>
           <p v-if="candidate.desiredPositionLevel" class="text-sm text-slate-500 mt-0.5">
             {{ candidate.desiredPositionLevel }}
@@ -78,48 +78,48 @@ function formatExperience(years: number | null): string {
           v-if="candidate.isOpenToWork"
           class="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-200"
         >
-          Đang tìm việc
+          Open to Work
         </span>
       </div>
 
       <!-- Summary -->
       <div v-if="candidate.summary" class="bg-slate-50 border border-slate-200/60 rounded-xl p-5">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Giới Thiệu</h2>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Summary</h2>
         <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ candidate.summary }}</p>
       </div>
 
       <!-- Key info grid -->
       <div class="bg-white border border-slate-200/60 rounded-xl p-5">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Thông Tin Chung</h2>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">General Info</h2>
         <div class="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
           <div>
-            <span class="text-slate-400 text-xs">Kinh nghiệm</span>
+            <span class="text-slate-400 text-xs">Experience</span>
             <p class="font-semibold text-slate-800 mt-0.5">{{ formatExperience(candidate.yearsOfExperience) }}</p>
           </div>
           <div>
-            <span class="text-slate-400 text-xs">Hình thức làm việc</span>
+            <span class="text-slate-400 text-xs">Work Type</span>
             <p class="font-semibold text-slate-800 mt-0.5">{{ candidate.workType ?? '—' }}</p>
           </div>
           <div>
-            <span class="text-slate-400 text-xs">Học vấn</span>
+            <span class="text-slate-400 text-xs">Education</span>
             <p class="font-semibold text-slate-800 mt-0.5">{{ candidate.educationLevel ?? '—' }}</p>
           </div>
           <div v-if="candidate.educationMajor">
-            <span class="text-slate-400 text-xs">Chuyên ngành</span>
+            <span class="text-slate-400 text-xs">Major</span>
             <p class="font-semibold text-slate-800 mt-0.5">{{ candidate.educationMajor }}</p>
           </div>
           <div>
-            <span class="text-slate-400 text-xs">Lương mong muốn</span>
+            <span class="text-slate-400 text-xs">Expected Salary</span>
             <p class="font-semibold text-slate-800 mt-0.5">
               {{ formatSalary(candidate.desiredSalaryMin, candidate.desiredSalaryMax) }}
             </p>
           </div>
           <div v-if="candidate.primaryLanguage">
-            <span class="text-slate-400 text-xs">Ngôn ngữ</span>
+            <span class="text-slate-400 text-xs">Language</span>
             <p class="font-semibold text-slate-800 mt-0.5">{{ candidate.primaryLanguage }}</p>
           </div>
           <div v-if="candidate.availableFrom">
-            <span class="text-slate-400 text-xs">Có thể bắt đầu từ</span>
+            <span class="text-slate-400 text-xs">Available From</span>
             <p class="font-semibold text-slate-800 mt-0.5">{{ formatDate(candidate.availableFrom) }}</p>
           </div>
         </div>
@@ -127,7 +127,7 @@ function formatExperience(years: number | null): string {
 
       <!-- Skills -->
       <div v-if="candidate.skills && candidate.skills.length > 0" class="bg-white border border-slate-200/60 rounded-xl p-5">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Kỹ Năng</h2>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Skills</h2>
         <div class="flex flex-wrap gap-2">
           <span
             v-for="skill in candidate.skills"
@@ -141,7 +141,7 @@ function formatExperience(years: number | null): string {
 
       <!-- CV view -->
       <div v-if="candidate.defaultCvUrl" class="bg-white border border-slate-200/60 rounded-xl p-5">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">CV Đính Kèm</h2>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Attached CV</h2>
         <a
           :href="candidate.defaultCvUrl"
           target="_blank"
@@ -151,14 +151,14 @@ function formatExperience(years: number | null): string {
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
           </svg>
-          {{ candidate.cvOriginalFilename ?? 'Xem CV' }}
+          {{ candidate.cvOriginalFilename ?? 'View CV' }}
         </a>
       </div>
 
       <!-- Back -->
       <div class="pt-2">
         <button @click="router.back()" class="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
-          ← Quay lại danh sách
+          ← Back to List
         </button>
       </div>
     </div>
