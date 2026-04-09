@@ -19,15 +19,15 @@ const canSubmitScorecard = computed(() =>
 
 // ── Status config ──
 const statusConfig: Record<InterviewStatus, { label: string; class: string; dotClass: string }> = {
- SCHEDULED: { label: 'Đã Lên Lịch', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- COMPLETED: { label: 'Đã Hoàn Thành', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- CANCELED: { label: 'Đã Hủy', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
+ SCHEDULED: { label: 'Scheduled', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ COMPLETED: { label: 'Completed', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ CANCELED: { label: 'Cancelled', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
 }
 
 const resultConfig: Record<ScorecardResult, { label: string; class: string }> = {
- PASS: { label: 'Đạt', class: 'bg-success-bg text-success' },
- FAIL: { label: 'Không Đạt', class: 'bg-error-bg text-error' },
- CONSIDERING: { label: 'Cần Cân Nhắc', class: 'bg-amber-50 text-amber-600' },
+ PASS: { label: 'Pass', class: 'bg-success-bg text-success' },
+ FAIL: { label: 'Fail', class: 'bg-error-bg text-error' },
+ CONSIDERING: { label: 'Under Consideration', class: 'bg-amber-50 text-amber-600' },
 }
 
 // ── Confirmation modal ──
@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
  <!-- Back -->
  <div class="flex items-center gap-3 mb-6">
  <button @click="router.back()" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Quay Lại
+ ‹ Back
  </button>
  </div>
 
@@ -184,14 +184,14 @@ onBeforeUnmount(() => {
  :disabled="interviewStore.statusLoading"
  class="px-5 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
  >
- Đánh Dấu Hoàn Thành
+ Mark as Completed
  </button>
  <button
  @click="openConfirm('cancel')"
  :disabled="interviewStore.statusLoading"
  class="btn-secondary"
  >
- Hủy Phỏng Vấn
+ Cancel Interview
  </button>
  </div>
  <!-- Scorecard CTA (INTERVIEWER) -->
@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
  :to="`/employer/interviews/${interviewId}/scorecard`"
  class="btn-primary"
  >
- 📝 Nộp Đánh Giá
+ 📝 Submit Evaluation
  </router-link>
  </div>
  </div>
@@ -208,19 +208,19 @@ onBeforeUnmount(() => {
  <!-- Details grid -->
  <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-slate-100 mt-2">
  <div>
- <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Thời Gian</span>
+ <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Time</span>
  <span class="text-sm font-bold text-slate-800 ">{{ formatDateTime(interview.scheduledAt) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Thời Lượng</span>
+ <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Duration</span>
  <span class="text-sm font-bold text-slate-800 ">{{ formatDuration(interview.durationMinutes) }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Hình Thức</span>
+ <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Format</span>
  <span class="text-sm font-bold text-slate-800 ">{{ interview.interviewType ?? '—' }}</span>
  </div>
  <div>
- <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Địa Điểm / Liên Kết</span>
+ <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Location / Link</span>
  <a
  v-if="interview.locationOrLink && interview.locationOrLink.startsWith('http')"
  :href="interview.locationOrLink"
@@ -241,14 +241,14 @@ onBeforeUnmount(() => {
  :to="`/employer/applications/${interview.applicationId}`"
  class="text-xs text-primary hover:text-primary-hover font-medium transition"
  >
- ← Xem Hồ Sơ Ứng Tuyển
+ ← View Application
  </router-link>
  <router-link
  v-if="auth.isInterviewer"
  to="/employer/my-interviews"
  class="text-xs text-gray-400 hover:text-gray-600 font-medium transition"
  >
- ← Về Trang Phỏng Vấn Của Tôi
+ ← My Interviews
  </router-link>
  </div>
  </div>
@@ -256,7 +256,7 @@ onBeforeUnmount(() => {
  <!-- ─── Interviewers ─── -->
  <div class="premium-card p-8">
  <h2 class="text-lg font-bold text-slate-900 mb-5">
- Người Phỏng Vấn ({{ interview.interviewers.length }})
+ Interviewers ({{ interview.interviewers.length }})
  </h2>
  <div class="space-y-3">
  <div
@@ -279,10 +279,10 @@ onBeforeUnmount(() => {
  <div class="premium-card p-8">
  <div class="flex items-center justify-between mb-6">
  <h2 class="text-lg font-bold text-slate-900 ">
- Bảng Đánh Giá ({{ interviewStore.scorecards.length }})
+ Scorecards ({{ interviewStore.scorecards.length }})
  </h2>
  <div v-if="interviewStore.averageScore !== null" class="flex items-center gap-2">
- <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Điểm TB</span>
+ <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Avg Score</span>
  <span class="text-2xl font-black tabular-nums tracking-tight" :class="getScoreColor(interviewStore.averageScore)">
  {{ interviewStore.averageScore }}
  </span>
@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
 
  <!-- Empty -->
  <div v-else-if="interviewStore.scorecards.length === 0" class="text-sm font-medium text-slate-500 text-center py-12">
- Chưa có bảng đánh giá nào được gửi. Người phỏng vấn sẽ nộp các đánh giá của họ tại đây.
+ No scorecards have been submitted yet. Interviewers will submit their evaluations here.
  </div>
 
  <!-- Scorecard cards -->
@@ -334,9 +334,9 @@ onBeforeUnmount(() => {
  <!-- Score bars -->
  <div class="space-y-2">
  <div v-for="{ label, value } in [
- { label: 'Kỹ Năng', value: sc.skillScore },
- { label: 'Thái Độ', value: sc.attitudeScore },
- { label: 'Ngoại Ngữ', value: sc.englishScore },
+ { label: 'Skills', value: sc.skillScore },
+ { label: 'Attitude', value: sc.attitudeScore },
+ { label: 'Language', value: sc.englishScore },
  ]" :key="label" class="flex items-center gap-2">
  <span class="text-[10px] font-medium text-gray-400 w-14 shrink-0">{{ label }}</span>
  <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -363,14 +363,14 @@ onBeforeUnmount(() => {
  <!-- ─── AI Interview Questions ─── -->
  <div class="premium-card p-8 border-t-4 border-t-amber-400">
  <div class="flex items-center justify-between mb-6">
- <h2 class="text-lg font-bold text-slate-900 ">Câu Hỏi Phỏng Vấn Trợ Lý AI</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">AI-Suggested Interview Questions</h2>
  <div class="flex items-center gap-3">
  <button
  v-if="!interviewStore.aiQuestions"
  @click="loadQuestions"
  class="text-xs text-slate-500 hover:text-slate-700 :text-slate-200 font-bold transition-colors uppercase tracking-wider"
  >
- Tải Câu Hỏi
+ Load Questions
  </button>
  <button
  @click="handleGenerateQuestions"
@@ -379,7 +379,7 @@ onBeforeUnmount(() => {
  >
  <span v-if="interviewStore.generateQuestionsLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
  <template v-else>⚡</template>
- {{ interviewStore.aiQuestions ? 'Làm Mới' : 'Tạo Mới' }}
+ {{ interviewStore.aiQuestions ? 'Regenerate' : 'Generate' }}
  </button>
  </div>
  </div>
@@ -391,7 +391,7 @@ onBeforeUnmount(() => {
 
  <!-- Empty -->
  <div v-else-if="!interviewStore.aiQuestions" class="text-sm text-gray-400 text-center py-8">
- Chưa có danh sách câu hỏi. Bấm "Tạo Mới" để trợ lý AI tạo ra các câu hỏi gợi ý cho ứng viên này.
+ No questions yet. Click "Generate" to have the AI assistant create suggested questions for this candidate.
  </div>
 
  <!-- Questions list -->
@@ -438,9 +438,9 @@ onBeforeUnmount(() => {
 
  <!-- Not found -->
  <div v-else-if="!interviewStore.detailLoading" class="bg-surface border border-border rounded-lg p-12 shadow-sm text-center">
- <p class="text-gray-400 text-sm">Không tìm thấy thông tin phỏng vấn này hoặc bạn không có quyền xem.</p>
+ <p class="text-gray-400 text-sm">Interview not found or you do not have permission to view it.</p>
  <button @click="router.back()" class="mt-3 text-primary hover:text-primary-hover text-sm font-medium transition">
- ← Quay Lại
+ ← Back
  </button>
  </div>
 
@@ -456,14 +456,14 @@ onBeforeUnmount(() => {
  {{ confirmAction === 'complete' ? '✓' : '✕' }}
  </div>
  <h2 class="text-xl font-extrabold text-slate-900 mb-2">
- {{ confirmAction === 'complete' ? 'Đánh Dấu Là Hoàn Thành?' : 'Hủy Cuộc Phỏng Vấn?' }}
+ {{ confirmAction === 'complete' ? 'Mark as Completed?' : 'Cancel Interview?' }}
  </h2>
  <p class="text-sm font-medium text-slate-500 mb-8">
  <template v-if="confirmAction === 'complete'">
- Thao tác này sẽ ghi nhận cuộc phỏng vấn đã được tiến hành. Mọi người vẫn có thể nộp đánh giá sau bước này.
+ This action will record the interview as completed. Evaluations can still be submitted after this step.
  </template>
  <template v-else>
- Thao tác này sẽ hủy lên lịch cuộc phỏng vấn này và không thể hoàn tác.
+ This action will cancel the scheduled interview and cannot be undone.
  </template>
  </p>
  <div class="flex justify-center gap-3">
@@ -471,7 +471,7 @@ onBeforeUnmount(() => {
  @click="showConfirm = false"
  class="btn-secondary"
  >
- Hủy Bỏ
+ Cancel
  </button>
  <button
  @click="handleConfirm"
@@ -480,7 +480,7 @@ onBeforeUnmount(() => {
  :class="confirmAction === 'complete' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'"
  >
  <span v-if="confirmProcessing" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ confirmProcessing ? 'Đang xử lý…' : confirmAction === 'complete' ? 'Xác Nhận' : 'Hủy Phỏng Vấn' }}
+ {{ confirmProcessing ? 'Processing…' : confirmAction === 'complete' ? 'Confirm' : 'Cancel Interview' }}
  </button>
  </div>
  </div>

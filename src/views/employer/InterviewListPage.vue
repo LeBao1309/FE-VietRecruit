@@ -18,9 +18,9 @@ const canManage = computed(() => auth.isCompanyAdmin || auth.isHR)
 
 // ── Status config ──
 const statusConfig: Record<InterviewStatus, { label: string; class: string; dotClass: string }> = {
- SCHEDULED: { label: 'Đã Lên Lịch', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
- COMPLETED: { label: 'Đã Hoàn Thành', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
- CANCELED: { label: 'Đã Hủy', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
+ SCHEDULED: { label: 'Scheduled', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400' },
+ COMPLETED: { label: 'Completed', class: 'bg-success-bg text-success', dotClass: 'bg-green-500' },
+ CANCELED: { label: 'Cancelled', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400' },
 }
 
 // ── Schedule dialog state ──
@@ -45,15 +45,15 @@ const formErrors = ref<Record<string, string>>({})
 
 function validateForm(): boolean {
  const errors: Record<string, string> = {}
- if (!form.value.title.trim()) errors.title = 'Vui lòng nhập tiêu đề'
- if (!form.value.scheduledAt) errors.scheduledAt = 'Vui lòng chọn ngày & giờ'
- if (form.value.interviewerIds.length === 0) errors.interviewerIds = 'Vui lòng chọn ít nhất một người phỏng vấn'
+ if (!form.value.title.trim()) errors.title = 'Please enter a title'
+ if (!form.value.scheduledAt) errors.scheduledAt = 'Please select a date & time'
+ if (form.value.interviewerIds.length === 0) errors.interviewerIds = 'Please select at least one interviewer'
 
  // Check datetime is in the future
  if (form.value.scheduledAt) {
  const scheduled = new Date(form.value.scheduledAt)
  if (scheduled <= new Date()) {
- errors.scheduledAt = 'Thời gian phải ở trong tương lai'
+ errors.scheduledAt = 'The scheduled time must be in the future'
  }
  }
 
@@ -149,14 +149,14 @@ onMounted(async () => {
  @click="router.push(`/employer/applications/${applicationId}`)"
  class="text-gray-400 hover:text-gray-600 transition text-sm"
  >
- ‹ Về Hồ Sơ Ứng Tuyển
+ ‹ Back to Application
  </button>
  </div>
 
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">
  <div>
- <h1 class="text-xl font-bold text-gray-900">Lịch Phỏng Vấn</h1>
+ <h1 class="text-xl font-bold text-gray-900">Interview Schedule</h1>
  <p v-if="appStore.currentApplication" class="text-sm text-gray-500 mt-1">
  {{ appStore.currentApplication.candidateName }}
  <span class="text-gray-300 mx-1">·</span>
@@ -168,7 +168,7 @@ onMounted(async () => {
  @click="openScheduleDialog"
  class="btn-primary"
  >
- <span class="text-lg leading-none">+</span> Lên Lịch Phỏng Vấn
+ <span class="text-lg leading-none">+</span> Schedule Interview
  </button>
  </div>
 
@@ -192,14 +192,14 @@ onMounted(async () => {
  class="premium-card p-16 text-center"
  >
  <div class="text-slate-900 mb-2">
- <p class="font-extrabold text-xl mb-1">Chưa có lịch phỏng vấn</p>
- <p class="text-sm text-slate-500 mb-6 mt-2">Hãy lên lịch phỏng vấn để bắt đầu quá trình đánh giá.</p>
+ <p class="font-extrabold text-xl mb-1">No interviews scheduled</p>
+ <p class="text-sm text-slate-500 mb-6 mt-2">Schedule an interview to begin the evaluation process.</p>
  <button
  v-if="canManage"
  @click="openScheduleDialog"
  class="btn-primary inline-flex"
  >
- + Lên Lịch Phỏng Vấn
+ + Schedule Interview
  </button>
  </div>
  </div>
@@ -277,7 +277,7 @@ onMounted(async () => {
  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showScheduleDialog = false" />
  <div class="premium-modal-content w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
  <div class="flex items-center justify-between mb-6">
- <h2 class="text-xl font-bold text-slate-900 ">Lên Lịch Phỏng Vấn</h2>
+ <h2 class="text-xl font-bold text-slate-900 ">Schedule Interview</h2>
  <button
  @click="showScheduleDialog = false"
  class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 :text-slate-200 :bg-slate-800 transition"
@@ -290,12 +290,12 @@ onMounted(async () => {
  <!-- Title -->
  <div>
  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
- Tiêu Đề <span class="text-rose-500">*</span>
+ Title <span class="text-rose-500">*</span>
  </label>
  <input
  v-model="form.title"
  type="text"
- placeholder="VD: Phỏng vấn kỹ thuật vòng 1"
+ placeholder="e.g. Technical interview round 1"
  class="w-full px-4 py-3 text-sm border rounded-xl bg-slate-50 outline-none transition"
  :class="formErrors.title ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
  />
@@ -305,7 +305,7 @@ onMounted(async () => {
  <!-- Date & Time -->
  <div>
  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
- Ngày & Giờ <span class="text-rose-500">*</span>
+ Date & Time <span class="text-rose-500">*</span>
  </label>
  <input
  v-model="form.scheduledAt"
@@ -320,7 +320,7 @@ onMounted(async () => {
  <div class="grid grid-cols-2 gap-4">
  <div>
  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
- Thời Lượng (phút)
+ Duration (minutes)
  </label>
  <input
  v-model.number="form.durationMinutes"
@@ -333,7 +333,7 @@ onMounted(async () => {
  </div>
  <div>
  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
- Hình Thức
+ Format
  </label>
  <select
  v-model="form.interviewType"
@@ -349,12 +349,12 @@ onMounted(async () => {
  <!-- Location / Link -->
  <div>
  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
- Địa Điểm / Liên Kết Meeting
+ Location / Meeting Link
  </label>
  <input
  v-model="form.locationOrLink"
  type="text"
- placeholder="VD: https://meet.google.com/abc-xyz hoặc Phòng 301"
+ placeholder="e.g. https://meet.google.com/abc-xyz or Room 301"
  class="w-full px-4 py-3 text-sm border border-slate-300 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
  />
  </div>
@@ -362,13 +362,13 @@ onMounted(async () => {
  <!-- Interviewer IDs -->
  <div>
  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
- Người Phỏng Vấn <span class="text-rose-500">*</span>
+ Interviewers <span class="text-rose-500">*</span>
  </label>
  <div class="flex items-center gap-2">
  <input
  v-model="interviewerIdInput"
  type="text"
- placeholder="Nhập ID người phỏng vấn"
+ placeholder="Enter interviewer ID"
  class="flex-1 px-4 py-3 text-sm border rounded-xl bg-slate-50 outline-none transition"
  :class="formErrors.interviewerIds ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
  @keydown.enter.prevent="addInterviewerId"
@@ -378,7 +378,7 @@ onMounted(async () => {
  type="button"
  class="btn-secondary"
  >
- Thêm
+ Add
  </button>
  </div>
  <p v-if="formErrors.interviewerIds" class="text-xs text-rose-500 mt-1.5">{{ formErrors.interviewerIds }}</p>
@@ -407,7 +407,7 @@ onMounted(async () => {
  @click="showScheduleDialog = false"
  class="btn-secondary"
  >
- Hủy Bỏ
+ Cancel
  </button>
  <button
  @click="submitSchedule"
@@ -415,7 +415,7 @@ onMounted(async () => {
  class="btn-primary"
  >
  <span v-if="interviewStore.createLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ interviewStore.createLoading ? 'Đang Lên Lịch…' : 'Xác Nhận' }}
+ {{ interviewStore.createLoading ? 'Scheduling…' : 'Confirm' }}
  </button>
  </div>
  </div>
