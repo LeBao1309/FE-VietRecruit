@@ -35,10 +35,10 @@ const passwordRules = computed(() => {
 const passwordStrength = computed(() => {
  const rules = passwordRules.value
  const passed = [rules.length, rules.upper, rules.lower, rules.digit, rules.special].filter(Boolean).length
- if (passed <= 2) return { label: 'Yếu', color: 'bg-error', width: 'w-1/5' }
- if (passed <= 3) return { label: 'Trung bình', color: 'bg-warning', width: 'w-2/5' }
- if (passed <= 4) return { label: 'Khá', color: 'bg-info', width: 'w-3/5' }
- return { label: 'Mạnh', color: 'bg-success', width: 'w-full' }
+ if (passed <= 2) return { label: 'Weak', color: 'bg-error', width: 'w-1/5' }
+ if (passed <= 3) return { label: 'Fair', color: 'bg-warning', width: 'w-2/5' }
+ if (passed <= 4) return { label: 'Good', color: 'bg-info', width: 'w-3/5' }
+ return { label: 'Strong', color: 'bg-success', width: 'w-full' }
 })
 
 function selectType(type: AccountType): void {
@@ -65,26 +65,26 @@ function validate(): boolean {
  errors.value = {}
 
  if (!form.value.fullName.trim()) {
- errors.value.fullName = 'Họ và tên là bắt buộc.'
+ errors.value.fullName = 'Full name is required.'
  }
 
  if (!form.value.email.trim()) {
- errors.value.email = 'Email là bắt buộc.'
+ errors.value.email = 'Email address is required.'
  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
- errors.value.email = 'Vui lòng nhập email hợp lệ.'
+ errors.value.email = 'Please enter a valid email address.'
  }
 
  if (!form.value.password) {
- errors.value.password = 'Mật khẩu là bắt buộc.'
+ errors.value.password = 'Password is required.'
  } else {
  const rules = passwordRules.value
  if (!rules.length || !rules.upper || !rules.lower || !rules.digit || !rules.special) {
- errors.value.password = 'Mật khẩu chưa đáp ứng đủ yêu cầu.'
+ errors.value.password = 'Password does not meet the requirements.'
  }
  }
 
  if (form.value.password !== form.value.confirmPassword) {
- errors.value.confirmPassword = 'Mật khẩu xác nhận không khớp.'
+ errors.value.confirmPassword = 'Passwords do not match.'
  }
 
  return Object.keys(errors.value).length === 0
@@ -117,12 +117,12 @@ async function handleSubmit(): Promise<void> {
    <button
     @click="navigateBack"
     class="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors group"
-    aria-label="Quay trở lại"
+    aria-label="Go Back"
    >
     <svg class="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
     </svg>
-    <span>Quay lại</span>
+    <span>Back</span>
    </button>
    <div class="flex-1 flex justify-center">
     <router-link to="/" class="flex items-center gap-2">
@@ -141,8 +141,8 @@ async function handleSubmit(): Promise<void> {
  <!-- Step 1: Account Type Selection -->
  <template v-if="step === 1">
  <div class="text-center mb-8">
- <h1 class="text-2xl font-bold text-slate-900">Tạo tài khoản</h1>
- <p class="text-sm font-medium text-slate-500 mt-1">Chọn cách bạn muốn sử dụng VietRecruit</p>
+ <h1 class="text-2xl font-bold text-slate-900">Create Account</h1>
+ <p class="text-sm font-medium text-slate-500 mt-1">Choose how you would like to use VietRecruit</p>
  </div>
 
  <div class="space-y-4">
@@ -151,10 +151,10 @@ async function handleSubmit(): Promise<void> {
  class="w-full p-5 border border-slate-200 rounded-xl text-left hover:border-teal-500 hover:bg-teal-50 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-300 group bg-slate-50"
  >
  <div class="font-bold text-slate-900 group-hover:text-teal-600 transition-colors">
- <span class="mr-2">🔍</span> Tôi đang tìm việc làm
+ <span class="mr-2">🔍</span> I am looking for a job
  </div>
  <p class="text-sm font-medium text-slate-500 mt-1.5 line-clamp-2">
- Tìm kiếm và ứng tuyển vị trí, theo dõi đơn ứng tuyển của bạn
+ Search and apply for positions, track your applications
  </p>
  </button>
 
@@ -163,18 +163,18 @@ async function handleSubmit(): Promise<void> {
  class="w-full p-5 border border-slate-200 rounded-xl text-left hover:border-teal-500 hover:bg-teal-50 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-300 group bg-slate-50"
  >
  <div class="font-bold text-slate-900 group-hover:text-teal-600 transition-colors">
- <span class="mr-2">🏢</span> Tôi đang tuyển dụng
+ <span class="mr-2">🏢</span> I am hiring
  </div>
  <p class="text-sm font-medium text-slate-500 mt-1.5 line-clamp-2">
- Đăng tin tuyển dụng, quản lý ứng viên và xây dựng đội nhóm
+ Post job listings, manage candidates and build your team
  </p>
  </button>
  </div>
 
  <p class="text-center text-sm font-medium text-slate-500 mt-8">
- Đã có tài khoản?
+ Already have an account?
  <router-link to="/login" class="text-teal-600 hover:text-teal-500 font-bold transition-colors">
- Đăng nhập
+ Sign In
  </router-link>
  </p>
  </template>
@@ -183,21 +183,21 @@ async function handleSubmit(): Promise<void> {
  <template v-else>
  <div class="text-center mb-8">
  <h1 class="text-2xl font-bold text-slate-900">
- {{ accountType === 'CANDIDATE' ? 'Đăng ký Ứng Viên' : 'Đăng ký Nhà Tuyển Dụng' }}
+ {{ accountType === 'CANDIDATE' ? 'Candidate Registration' : 'Employer Registration' }}
  </h1>
- <p class="text-sm font-medium text-slate-500 mt-1">Điền thông tin để bắt đầu</p>
+ <p class="text-sm font-medium text-slate-500 mt-1">Fill in your information to get started</p>
  </div>
 
  <form @submit.prevent="handleSubmit" class="space-y-5">
  <!-- Full Name -->
  <div>
- <label for="reg-name" class="block text-sm font-bold text-slate-700 mb-1.5">Họ và tên</label>
+ <label for="reg-name" class="block text-sm font-bold text-slate-700 mb-1.5">Full Name</label>
  <input
  id="reg-name"
  v-model="form.fullName"
  type="text"
  autocomplete="name"
- placeholder="Nguyễn Văn A"
+ placeholder="Your full name"
  class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition-all duration-300 bg-slate-50"
  :class="errors.fullName ? 'border-rose-500 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/50' : 'border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:bg-white'"
  />
@@ -212,7 +212,7 @@ async function handleSubmit(): Promise<void> {
  v-model="form.email"
  type="email"
  autocomplete="email"
- placeholder="ban@example.com"
+ placeholder="you@example.com"
  class="w-full px-4 py-3 text-sm border rounded-xl outline-none transition-all duration-300 bg-slate-50"
  :class="errors.email ? 'border-rose-500 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/50' : 'border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 focus:bg-white'"
  />
@@ -221,7 +221,7 @@ async function handleSubmit(): Promise<void> {
 
  <!-- Password -->
  <div>
- <label for="reg-password" class="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu</label>
+ <label for="reg-password" class="block text-sm font-bold text-slate-700 mb-1.5">Password</label>
  <div class="relative">
  <input
  id="reg-password"
@@ -237,7 +237,7 @@ async function handleSubmit(): Promise<void> {
  @click="showPassword = !showPassword"
  class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-slate-400 hover:text-slate-600 transition-colors bg-white/50 rounded-md text-xs font-bold"
  >
- {{ showPassword ? 'Ẩn' : 'Hiện' }}
+ {{ showPassword ? 'Hide' : 'Show' }}
  </button>
  </div>
  <p v-if="errors.password" class="text-xs font-bold text-rose-500 mt-1.5">{{ errors.password }}</p>
@@ -255,11 +255,11 @@ async function handleSubmit(): Promise<void> {
  :class="passed ? 'text-emerald-500' : 'text-slate-400'">
  <span class="font-bold flex-shrink-0">{{ passed ? '✓' : '○' }}</span>
  <span>
- {{ rule === 'length' ? 'Ít nhất 8 ký tự' :
- rule === 'upper' ? 'Một chữ hoa' :
- rule === 'lower' ? 'Một chữ thường' :
- rule === 'digit' ? 'Một chữ số' :
- 'Một ký tự đặc biệt' }}
+ {{ rule === 'length' ? 'At least 8 characters' :
+ rule === 'upper' ? 'One uppercase letter' :
+ rule === 'lower' ? 'One lowercase letter' :
+ rule === 'digit' ? 'One digit' :
+ 'One special character' }}
  </span>
  </li>
  </ul>
@@ -268,7 +268,7 @@ async function handleSubmit(): Promise<void> {
 
  <!-- Confirm Password -->
  <div>
- <label for="reg-confirm" class="block text-sm font-bold text-slate-700 mb-1.5">Xác nhận mật khẩu</label>
+ <label for="reg-confirm" class="block text-sm font-bold text-slate-700 mb-1.5">Confirm Password</label>
  <input
  id="reg-confirm"
  v-model="form.confirmPassword"
@@ -288,14 +288,14 @@ async function handleSubmit(): Promise<void> {
  class="btn-primary w-full py-3 mt-4 flex items-center justify-center gap-2"
  >
  <span v-if="auth.loading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ auth.loading ? 'Đang tạo tài khoản…' : 'Tạo tài khoản' }}
+ {{ auth.loading ? 'Creating account…' : 'Create Account' }}
  </button>
  </form>
 
  <p class="text-center text-sm font-medium text-slate-500 mt-8">
- Đã có tài khoản?
+ Already have an account?
  <router-link to="/login" class="text-teal-600 hover:text-teal-500 font-bold transition-colors">
- Đăng nhập
+ Sign In
  </router-link>
  </p>
  </template>
