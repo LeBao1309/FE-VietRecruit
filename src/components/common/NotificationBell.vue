@@ -42,7 +42,7 @@ function viewAll() {
     <button
       @click="toggleDropdown"
       class="relative flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-teal-600 hover:bg-teal-50 transition-colors"
-      aria-label="Thông báo"
+      aria-label="Notifications"
     >
       <!-- Bell icon -->
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -64,13 +64,13 @@ function viewAll() {
       class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200/60 z-50 overflow-hidden"
     >
       <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-        <span class="text-sm font-semibold text-slate-800">Thông Báo</span>
+        <span class="text-sm font-semibold text-slate-800">Notifications</span>
         <button
           v-if="notificationStore.unreadCount > 0"
           @click="notificationStore.markAllAsRead()"
           class="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
         >
-          Đánh dấu tất cả đã đọc
+          Mark All as Read
         </button>
       </div>
 
@@ -83,7 +83,7 @@ function viewAll() {
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
         </svg>
-        <p class="text-sm text-slate-400">Không có thông báo mới</p>
+        <p class="text-sm text-slate-400">No new notifications.</p>
       </div>
 
       <ul v-else class="max-h-72 overflow-y-auto divide-y divide-slate-100">
@@ -104,7 +104,7 @@ function viewAll() {
           @click="viewAll"
           class="text-xs text-teal-600 hover:text-teal-700 font-medium w-full text-center transition-colors"
         >
-          Xem tất cả thông báo →
+          View All Notifications →
         </button>
       </div>
     </div>

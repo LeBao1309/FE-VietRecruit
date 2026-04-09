@@ -35,8 +35,8 @@ async function loadRecommendations(): Promise<void> {
     if (recsResult.data) {
       recommendations.value = recsResult.data
     } else if (recsResult.error) {
-      apiError.value = recsResult.error.message ?? 'Không thể tải đề xuất'
-      ui.toastError('Tải đề xuất thất bại', recsResult.error.message)
+      apiError.value = recsResult.error.message ?? 'Unable to load recommendations'
+      ui.toastError('Failed to load recommendations', recsResult.error.message)
     }
   } finally {
     loading.value = false
@@ -67,8 +67,8 @@ onMounted(loadRecommendations)
 <template>
  <div class="max-w-4xl mx-auto px-6 py-10">
  <div class="mb-8">
- <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Việc Làm Đề Xuất</h1>
- <p class="text-sm font-medium text-slate-500">Các việc làm được AI đề xuất dựa trên hồ sơ, năng lực và nguyện vọng của bạn.</p>
+ <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Job Recommendations</h1>
+ <p class="text-sm font-medium text-slate-500">AI-powered job recommendations based on your profile, skills, and career goals.</p>
  </div>
 
  <!-- Loading -->
@@ -88,34 +88,34 @@ onMounted(loadRecommendations)
  <!-- Error state -->
  <div v-else-if="apiError" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
  <span class="text-5xl mb-4 opacity-50">⚠️</span>
- <p class="text-lg font-bold text-slate-900 mb-2">Không thể tải đề xuất</p>
+ <p class="text-lg font-bold text-slate-900 mb-2">Unable to load recommendations</p>
  <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">{{ apiError }}</p>
  <button @click="loadRecommendations" class="btn-primary py-2.5 px-6">
- Thử Lại
+ Retry
  </button>
  </div>
 
  <!-- Empty state: profile incomplete -->
  <div v-else-if="recommendations.length === 0 && !profileComplete" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
  <span class="text-5xl mb-4 opacity-50">🤖</span>
- <p class="text-lg font-bold text-slate-900 mb-2">Chưa có đề xuất nào</p>
- <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Hoàn thiện hồ sơ và tải lên CV để nhận các đề xuất việc làm từ AI.</p>
+ <p class="text-lg font-bold text-slate-900 mb-2">No recommendations yet</p>
+ <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Complete your profile and upload a CV to receive AI-powered job recommendations.</p>
  <router-link to="/candidate/candidate-profile" class="btn-primary py-2.5 px-6">
- Hoàn Thiện Hồ Sơ Của Bạn
+ Complete Your Profile
  </router-link>
  </div>
 
  <!-- Empty state: profile complete but no results -->
  <div v-else-if="recommendations.length === 0 && profileComplete" class="premium-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
  <span class="text-5xl mb-4 opacity-50">🔍</span>
- <p class="text-lg font-bold text-slate-900 mb-2">Hiện chưa có việc làm phù hợp</p>
- <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Hồ sơ của bạn đã đầy đủ. Hệ thống đang tìm kiếm — hãy thử lại sau hoặc khám phá tất cả việc làm.</p>
+ <p class="text-lg font-bold text-slate-900 mb-2">No matching jobs at the moment</p>
+ <p class="text-sm font-medium text-slate-500 mb-6 max-w-md mx-auto">Your profile is complete. The system is still searching — try again later or browse all available jobs.</p>
  <div class="flex items-center gap-3">
  <button @click="loadRecommendations" class="btn-secondary py-2.5 px-5">
- Thử Lại
+ Retry
  </button>
  <router-link to="/jobs" class="btn-primary py-2.5 px-5">
- Xem Tất Cả Việc Làm
+ View All Jobs
  </router-link>
  </div>
  </div>
@@ -156,14 +156,14 @@ onMounted(loadRecommendations)
  </p>
  <div v-if="hasCv" class="bg-slate-50 p-3 rounded-lg border border-slate-100 ">
  <p class="text-xs font-medium text-slate-600 line-clamp-2 leading-relaxed">
- <span class="font-bold text-slate-700 mr-1">Lý do phù hợp:</span>{{ rec.matchReason }}
+ <span class="font-bold text-slate-700 mr-1">Why it matches:</span>{{ rec.matchReason }}
  </p>
  </div>
  </div>
 
  <!-- CTA -->
  <div class="shrink-0 flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto">
- <span class="sm:hidden text-xs font-bold text-teal-600">Xem Việc Làm</span>
+ <span class="sm:hidden text-xs font-bold text-teal-600">View Job</span>
  <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-teal-50 :bg-teal-900/30 group-hover:text-teal-600 :text-teal-400 transition-colors">
  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -174,7 +174,7 @@ onMounted(loadRecommendations)
 
  <!-- Footer note -->
  <p class="text-xs font-medium text-slate-400 text-center mt-8">
- Đề xuất được AI tạo tự động dựa vào hồ sơ và CV của bạn. Hãy cập nhật hồ sơ để có kết quả tốt hơn.
+ Recommendations are automatically generated by AI based on your profile and CV. Keep your profile up to date for better results.
  </p>
  </div>
  </div>

@@ -26,95 +26,95 @@ const menuOpen = ref(false)
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Tổng Quan
+  Overview
   </router-link>
 
   <!-- Job Search section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tìm Việc Làm</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Find Jobs</span>
   </div>
   <router-link
   to="/candidate/recommendations"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Việc Làm Đề Xuất
+  AI Job Recommendations
   </router-link>
   <router-link
   to="/candidate/salary-benchmark"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Mức Lương Tham Khảo
+  Salary Reference
   </router-link>
   <router-link
   to="/jobs"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   >
-  Xem Việc Làm ↗
+  View Jobs ↗
   </router-link>
 
   <!-- Applications section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hồ Sơ Ứng Tuyển</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Applications</span>
   </div>
   <router-link
   to="/candidate/applications"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Đơn Ứng Tuyển Của Tôi
+  My Applications
   </router-link>
 
   <!-- Profile section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hồ Sơ</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Profile</span>
   </div>
   <router-link
   to="/candidate/candidate-profile"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Hồ Sơ Năng Lực
+  Professional Profile
   </router-link>
   <router-link
   to="/candidate/cv"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Quản Lý CV
+  CV Management
   </router-link>
 
   <!-- Account section -->
   <div class="mt-4 mb-1 px-3">
-  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tài Khoản</span>
+  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Account</span>
   </div>
   <router-link
   to="/candidate/profile"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Quản Lý Tài Khoản
+  Account Management
   </router-link>
   <router-link
   to="/candidate/settings"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Cài Đặt
+  Settings
   </router-link>
   <router-link
   to="/candidate/notifications"
   class="block px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all border-l-2 border-transparent"
   active-class="!bg-teal-50 !border-l-teal-500 !text-teal-700 !font-semibold"
   >
-  Thông Báo
+  Notifications
   </router-link>
   </nav>
   <div class="px-4 py-3 border-t border-border">
-  <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Ứng Viên' }}</span>
+  <span class="text-sm text-gray-500">{{ auth.user?.fullName ?? 'Candidate' }}</span>
   <button @click="auth.logout()" class="block text-xs text-gray-400 hover:text-error mt-1 transition">
-  Đăng Xuất
+  Sign Out
   </button>
   </div>
   </aside>

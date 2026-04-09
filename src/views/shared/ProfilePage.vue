@@ -58,13 +58,13 @@ async function handleSave(): Promise<void> {
  try {
  const result = await userService.updateProfile(form.value)
  if (result.error) {
- ui.toastError('Cập nhật thất bại', result.error.message)
+ ui.toastError('Update failed', result.error.message)
  return
  }
  if (result.data) {
  auth.setUser(result.data)
  }
- ui.toastSuccess('Đã lưu hồ sơ', 'Thông tin của bạn đã được cập nhật.')
+ ui.toastSuccess('Profile saved', 'Your information has been updated.')
  } finally {
  saving.value = false
  }
@@ -75,11 +75,11 @@ async function handleAvatarUpload(file: File): Promise<void> {
  try {
  const result = await userService.uploadAvatar(file)
  if (result.error) {
- ui.toastError('Tải lên thất bại', result.error.message)
+ ui.toastError('Upload failed', result.error.message)
  return
  }
  avatarUrl.value = result.data!.avatarUrl
- ui.toastSuccess('Đã cập nhật ảnh đại diện')
+ ui.toastSuccess('Avatar updated')
  await loadProfile()
  } finally {
  avatarLoading.value = false
@@ -91,11 +91,11 @@ async function handleAvatarDelete(): Promise<void> {
  try {
  const result = await userService.deleteAvatar()
  if (result.error) {
- ui.toastError('Xoá thất bại', result.error.message)
+ ui.toastError('Delete failed', result.error.message)
  return
  }
  avatarUrl.value = null
- ui.toastSuccess('Đã xoá ảnh đại diện')
+ ui.toastSuccess('Avatar removed')
  await loadProfile()
  } finally {
  avatarLoading.value = false
@@ -107,11 +107,11 @@ async function handleBannerUpload(file: File): Promise<void> {
  try {
  const result = await userService.uploadBanner(file)
  if (result.error) {
- ui.toastError('Tải lên thất bại', result.error.message)
+ ui.toastError('Upload failed', result.error.message)
  return
  }
  bannerUrl.value = result.data!.bannerUrl
- ui.toastSuccess('Đã cập nhật ảnh bìa')
+ ui.toastSuccess('Cover photo updated')
  await loadProfile()
  } finally {
  bannerLoading.value = false
@@ -123,11 +123,11 @@ async function handleBannerDelete(): Promise<void> {
  try {
  const result = await userService.deleteBanner()
  if (result.error) {
- ui.toastError('Xoá thất bại', result.error.message)
+ ui.toastError('Delete failed', result.error.message)
  return
  }
  bannerUrl.value = null
- ui.toastSuccess('Đã xoá ảnh bìa')
+ ui.toastSuccess('Cover photo removed')
  await loadProfile()
  } finally {
  bannerLoading.value = false
@@ -141,8 +141,8 @@ onMounted(loadProfile)
  <div class="max-w-3xl mx-auto px-6 py-10">
  <!-- Page header -->
  <div class="mb-8">
- <h1 class="text-2xl font-extrabold text-slate-900">Hồ Sơ Của Tôi</h1>
- <p class="text-sm font-medium text-slate-500 mt-1">Quản lý thông tin cá nhân và hình ảnh của bạn</p>
+ <h1 class="text-2xl font-extrabold text-slate-900">My Profile</h1>
+ <p class="text-sm font-medium text-slate-500 mt-1">Manage your personal information and images</p>
  </div>
 
  <!-- Loading skeleton -->
@@ -169,14 +169,14 @@ onMounted(loadProfile)
  <!-- Banner card -->
  <div class="premium-card overflow-hidden mb-8">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Ảnh Bìa</h2>
+ <h2 class="text-lg font-bold text-slate-900">Cover Photo</h2>
  </div>
  <div class="p-6">
  <MediaUpload
  :model-value="bannerUrl"
  variant="banner"
  :loading="bannerLoading"
- placeholder="Kéo thả hoặc nhấn để tải ảnh bìa (khuyến nghị 1200×300)"
+ placeholder="Drag and drop or click to upload cover photo (recommended 1200x300)"
  @upload="handleBannerUpload"
  @delete="handleBannerDelete"
  />
@@ -186,7 +186,7 @@ onMounted(loadProfile)
  <!-- Avatar card -->
  <div class="premium-card overflow-hidden mb-8">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Ảnh Đại Diện</h2>
+ <h2 class="text-lg font-bold text-slate-900">Profile Photo</h2>
  </div>
  <div class="p-6">
  <MediaUpload
@@ -202,13 +202,13 @@ onMounted(loadProfile)
  <!-- Personal Information -->
  <div class="premium-card overflow-hidden">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Thông Tin Cá Nhân</h2>
+ <h2 class="text-lg font-bold text-slate-900">Personal Information</h2>
  </div>
  <form @submit.prevent="handleSave" class="p-6 space-y-6">
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
  <!-- Full Name -->
  <div>
- <label for="prof-name" class="block text-sm font-bold text-slate-700 mb-1.5">Họ và tên</label>
+ <label for="prof-name" class="block text-sm font-bold text-slate-700 mb-1.5">Full Name</label>
  <input
  id="prof-name"
  v-model="form.fullName"
@@ -219,7 +219,7 @@ onMounted(loadProfile)
 
  <!-- Phone -->
  <div>
- <label for="prof-phone" class="block text-sm font-bold text-slate-700 mb-1.5">Số điện thoại</label>
+ <label for="prof-phone" class="block text-sm font-bold text-slate-700 mb-1.5">Phone Number</label>
  <input
  id="prof-phone"
  v-model="form.phone"
@@ -231,19 +231,19 @@ onMounted(loadProfile)
 
  <!-- Location -->
  <div>
- <label for="prof-location" class="block text-sm font-bold text-slate-700 mb-1.5">Địa điểm</label>
+ <label for="prof-location" class="block text-sm font-bold text-slate-700 mb-1.5">Location</label>
  <input
  id="prof-location"
  v-model="form.location"
  type="text"
- placeholder="VD: Hồ Chí Minh"
+ placeholder="e.g. Ho Chi Minh City"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
 
  <!-- Date of birth -->
  <div>
- <label for="prof-dob" class="block text-sm font-bold text-slate-700 mb-1.5">Ngày sinh</label>
+ <label for="prof-dob" class="block text-sm font-bold text-slate-700 mb-1.5">Date of Birth</label>
  <input
  id="prof-dob"
  v-model="form.dob"
@@ -254,23 +254,23 @@ onMounted(loadProfile)
 
  <!-- Gender -->
  <div>
- <label for="prof-gender" class="block text-sm font-bold text-slate-700 mb-1.5">Giới tính</label>
+ <label for="prof-gender" class="block text-sm font-bold text-slate-700 mb-1.5">Gender</label>
  <select
  id="prof-gender"
  v-model="form.gender"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
  >
- <option value="">Không muốn tiết lộ</option>
- <option value="MALE">Nam</option>
- <option value="FEMALE">Nữ</option>
- <option value="OTHER">Khác</option>
+ <option value="">Prefer not to say</option>
+ <option value="MALE">Male</option>
+ <option value="FEMALE">Female</option>
+ <option value="OTHER">Other</option>
  </select>
  </div>
  </div>
 
  <!-- Social Links -->
  <div class="border-t border-slate-200 pt-6 mt-2">
- <h3 class="text-base font-extrabold text-slate-900 mb-5">Mạng Xã Hội</h3>
+ <h3 class="text-base font-extrabold text-slate-900 mb-5">Social Links</h3>
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
  <div>
  <label for="prof-linkedin" class="block text-sm font-bold text-slate-700 mb-1.5">LinkedIn</label>
@@ -315,7 +315,7 @@ onMounted(loadProfile)
  class="btn-primary py-2.5 px-6 flex items-center gap-2"
  >
  <span v-if="saving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ saving ? 'Đang lưu…' : 'Lưu thay đổi' }}
+ {{ saving ? 'Saving…' : 'Save Changes' }}
  </button>
  </div>
  </form>

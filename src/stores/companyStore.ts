@@ -35,11 +35,11 @@ export const useCompanyStore = defineStore('company', () => {
       const result = await companyService.updateCompany(body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Cập nhật thất bại', result.error.message)
+        ui.toastError('Update Failed', result.error.message)
         return false
       }
       company.value = result.data
-      ui.toastSuccess('Thành công', 'Thông tin công ty đã được cập nhật.')
+      ui.toastSuccess('Success', 'Company information has been updated.')
       return true
     } finally {
       isSaving.value = false

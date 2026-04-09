@@ -93,7 +93,7 @@ const routes: RouteRecordRaw[] = [
     path: '/companies',
     name: 'CompanyList',
     component: () => import('@/views/public/CompanyListPage.vue'),
-    meta: { title: 'Khám Phá Doanh Nghiệp' },
+    meta: { title: 'Explore Companies' },
   },
 
   // ── Candidate ──
@@ -164,7 +164,7 @@ const routes: RouteRecordRaw[] = [
         path: 'notifications',
         name: 'CandidateNotifications',
         component: () => import('@/views/shared/NotificationsPage.vue'),
-        meta: { title: 'Thông Báo' },
+        meta: { title: 'Notifications' },
       },
     ],
   },
@@ -219,7 +219,7 @@ const routes: RouteRecordRaw[] = [
         path: 'notifications',
         name: 'EmployerNotifications',
         component: () => import('@/views/shared/NotificationsPage.vue'),
-        meta: { title: 'Thông Báo' },
+        meta: { title: 'Notifications' },
       },
       {
         path: 'pricing',
@@ -282,13 +282,13 @@ const routes: RouteRecordRaw[] = [
         path: 'candidates',
         name: 'EmployerCandidateSearch',
         component: () => import('@/views/employer/CandidateSearchPage.vue'),
-        meta: { title: 'Tìm Kiếm Ứng Viên', roles: ['COMPANY_ADMIN', 'HR'] },
+        meta: { title: 'Search Candidates', roles: ['COMPANY_ADMIN', 'HR'] },
       },
       {
         path: 'candidates/:id',
         name: 'EmployerCandidateDetail',
         component: () => import('@/views/employer/CandidateDetailPage.vue'),
-        meta: { title: 'Hồ Sơ Ứng Viên', roles: ['COMPANY_ADMIN', 'HR'] },
+        meta: { title: 'Candidate Profile', roles: ['COMPANY_ADMIN', 'HR'] },
       },
       // ── Application Pipeline ──
       {

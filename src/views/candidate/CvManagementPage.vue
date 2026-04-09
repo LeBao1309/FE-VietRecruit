@@ -73,12 +73,12 @@ function onDrop(e: DragEvent): void {
 async function processFile(file: File): Promise<void> {
  // Validate type
  if (!ALLOWED_TYPES.includes(file.type)) {
- ui.toastError('Định dạng không hợp lệ', 'Vui lòng tải lên file PDF, DOCX, JPEG hoặc PNG.')
+ ui.toastError('Invalid file format', 'Please upload a PDF, DOCX, JPEG, or PNG file.')
  return
  }
  // Validate size
  if (file.size > MAX_SIZE_BYTES) {
- ui.toastError('File quá lớn', `Dung lượng tối đa là ${MAX_SIZE_MB}MB.`)
+ ui.toastError('File too large', `Maximum size is ${MAX_SIZE_MB}MB.`)
  return
  }
 
@@ -95,9 +95,9 @@ async function processFile(file: File): Promise<void> {
  profile.value.cvUploadedAt = result.data.cvUploadedAt
  }
  improvement.value = null // Clear previous analysis
- ui.toastSuccess('Tải lên hoàn tất', `Hồ sơ "${result.data.cvOriginalFilename}" đã được tải lên thành công.`)
+ ui.toastSuccess('Upload complete', `"${result.data.cvOriginalFilename}" has been uploaded successfully.`)
  } else {
- ui.toastError('Tải lên thất bại', result.error?.message)
+ ui.toastError('Upload failed', result.error?.message)
  }
  } finally {
  uploading.value = false
@@ -106,7 +106,7 @@ async function processFile(file: File): Promise<void> {
 
 // ── Delete ──
 async function handleDelete(): Promise<void> {
- if (!confirm('Bạn có chắc chắn muốn xóa CV không? Thao tác này không thể hoàn tác.')) return
+ if (!confirm('Are you sure you want to delete your CV? This action cannot be undone.')) return
  deleting.value = true
  try {
  const result = await candidateService.deleteCv()
@@ -119,9 +119,9 @@ async function handleDelete(): Promise<void> {
  profile.value.cvUploadedAt = null
  }
  improvement.value = null
- ui.toastSuccess('Đã xóa CV')
+ ui.toastSuccess('CV deleted')
  } else {
- ui.toastError('Xóa thất bại', result.error.message)
+ ui.toastError('Delete failed', result.error.message)
  }
  } finally {
  deleting.value = false
@@ -131,7 +131,7 @@ async function handleDelete(): Promise<void> {
 // ── AI Improvement ──
 async function runAnalysis(): Promise<void> {
  if (!hasCv.value) {
- ui.toastWarning('Chưa có CV', 'Vui lòng tải lên CV trước khi phân tích.')
+ ui.toastWarning('No CV uploaded', 'Please upload your CV before running the analysis.')
  return
  }
  analysisUsed.value = true
@@ -140,9 +140,9 @@ async function runAnalysis(): Promise<void> {
  const result = await candidateService.getCvImprovement()
  if (result.data) {
  improvement.value = result.data
- ui.toastSuccess('Đã hoàn thành phân tích')
+ ui.toastSuccess('Analysis complete')
  } else {
- ui.toastError('Phân tích thất bại', result.error?.message)
+ ui.toastError('Analysis failed', result.error?.message)
  }
  } finally {
  analyzing.value = false
@@ -163,43 +163,43 @@ function formatDate(iso: string): string {
 }
 
 const PRIORITY_MAP: Record<string, string> = {
- HIGH: 'Cao',
- MEDIUM: 'Trung bình',
- LOW: 'Thấp',
+ HIGH: 'High',
+ MEDIUM: 'Medium',
+ LOW: 'Low',
 }
 
 const SECTION_MAP: Record<string, string> = {
- 'Work Experience': 'Kinh Nghiệm Làm Việc',
- 'Experience': 'Kinh Nghiệm Làm Việc',
- 'Professional Experience': 'Kinh Nghiệm Chuyên Môn',
- 'Skills': 'Kỹ Năng',
- 'Technical Skills': 'Kỹ Năng Kỹ Thuật',
- 'Soft Skills': 'Kỹ Năng Mềm',
- 'Education': 'Học Vấn',
- 'Summary': 'Tóm Tắt',
- 'Professional Summary': 'Tóm Tắt Chuyên Môn',
- 'Objective': 'Mục Tiêu Nghề Nghiệp',
- 'Career Objective': 'Mục Tiêu Nghề Nghiệp',
- 'Certifications': 'Chứng Chỉ',
- 'Certificates': 'Chứng Chỉ',
- 'Languages': 'Ngôn Ngữ',
- 'Projects': 'Dự Án',
- 'Achievements': 'Thành Tích',
- 'Accomplishments': 'Thành Tích',
- 'Awards': 'Giải Thưởng',
- 'References': 'Tài Liệu Tham Khảo',
- 'Contact': 'Thông Tin Liên Hệ',
- 'Contact Information': 'Thông Tin Liên Hệ',
- 'Hobbies': 'Sở Thích',
- 'Interests': 'Sở Thích',
- 'Volunteer': 'Hoạt Động Tình Nguyện',
- 'Volunteer Experience': 'Hoạt Động Tình Nguyện',
- 'Publications': 'Bài Đăng / Nghiên Cứu',
- 'Overall': 'Tổng Quan',
- 'Format': 'Định Dạng',
- 'Formatting': 'Định Dạng',
- 'Layout': 'Bố Cục',
- 'Length': 'Độ Dài',
+ 'Work Experience': 'Work Experience',
+ 'Experience': 'Experience',
+ 'Professional Experience': 'Professional Experience',
+ 'Skills': 'Skills',
+ 'Technical Skills': 'Technical Skills',
+ 'Soft Skills': 'Soft Skills',
+ 'Education': 'Education',
+ 'Summary': 'Summary',
+ 'Professional Summary': 'Professional Summary',
+ 'Objective': 'Career Objective',
+ 'Career Objective': 'Career Objective',
+ 'Certifications': 'Certifications',
+ 'Certificates': 'Certifications',
+ 'Languages': 'Languages',
+ 'Projects': 'Projects',
+ 'Achievements': 'Achievements',
+ 'Accomplishments': 'Accomplishments',
+ 'Awards': 'Awards',
+ 'References': 'References',
+ 'Contact': 'Contact Information',
+ 'Contact Information': 'Contact Information',
+ 'Hobbies': 'Hobbies',
+ 'Interests': 'Interests',
+ 'Volunteer': 'Volunteer Work',
+ 'Volunteer Experience': 'Volunteer Experience',
+ 'Publications': 'Publications / Research',
+ 'Overall': 'Overall',
+ 'Format': 'Format',
+ 'Formatting': 'Formatting',
+ 'Layout': 'Layout',
+ 'Length': 'Length',
 }
 
 function translatePriority(priority: string): string {
@@ -217,8 +217,8 @@ onMounted(loadProfile)
 <template>
  <div class="max-w-4xl mx-auto px-6 py-10">
  <div class="mb-8">
- <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Quản Lý CV</h1>
- <p class="text-sm font-medium text-slate-500">Tải CV lên và nhận các gợi ý nâng cấp từ trợ lý AI.</p>
+ <h1 class="text-3xl font-extrabold text-slate-900 mb-2">CV Management</h1>
+ <p class="text-sm font-medium text-slate-500">Upload your CV and receive improvement suggestions from your AI assistant.</p>
  </div>
 
  <!-- Loading -->
@@ -230,7 +230,7 @@ onMounted(loadProfile)
  <template v-else>
  <!-- Upload Area -->
  <div class="premium-card p-8 mb-8">
- <h2 class="text-lg font-bold text-slate-900 mb-6">CV Của Bạn</h2>
+ <h2 class="text-lg font-bold text-slate-900 mb-6">Your CV</h2>
 
  <!-- Has CV -->
  <div v-if="hasCv && cvInfo" class="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-slate-50 border border-slate-200 rounded-xl gap-6">
@@ -241,7 +241,7 @@ onMounted(loadProfile)
  <div class="min-w-0">
  <p class="text-base font-bold text-slate-900 truncate">{{ cvInfo.filename }}</p>
  <p class="text-xs font-medium text-slate-500 mt-1">
- {{ formatFileSize(cvInfo.size) }} <span class="mx-1.5 opacity-50">•</span> Tải lên lúc {{ formatDate(cvInfo.uploadedAt) }}
+ {{ formatFileSize(cvInfo.size) }} <span class="mx-1.5 opacity-50">•</span> Uploaded {{ formatDate(cvInfo.uploadedAt) }}
  </p>
  </div>
  </div>
@@ -252,14 +252,14 @@ onMounted(loadProfile)
  class="btn-secondary px-4 py-2"
  >
  <span v-if="uploading" class="inline-block w-4 h-4 border-2 border-slate-500 border-t-transparent rounded-full animate-spin mr-1"></span>
- {{ uploading ? 'Đang tải…' : 'Thay Thế' }}
+ {{ uploading ? 'Uploading…' : 'Replace' }}
  </button>
  <button
  @click="handleDelete"
  :disabled="deleting"
  class="px-4 py-2 text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 :bg-rose-900/40 transition-colors disabled:opacity-50"
  >
- {{ deleting ? 'Đang xóa…' : 'Xóa' }}
+ {{ deleting ? 'Deleting…' : 'Delete' }}
  </button>
  </div>
  </div>
@@ -280,9 +280,9 @@ onMounted(loadProfile)
  </svg>
  </div>
  <p class="text-base font-bold text-slate-800 mb-2 text-center">
- {{ uploading ? 'Đang tải…' : 'Kéo thả CV vào đây hoặc bấm để chọn file' }}
+ {{ uploading ? 'Uploading…' : 'Drag and drop your CV here or click to select a file' }}
  </p>
- <p class="text-xs font-medium text-slate-500">PDF, DOCX, JPEG, hoặc PNG — tối đa {{ MAX_SIZE_MB }}MB</p>
+ <p class="text-xs font-medium text-slate-500">PDF, DOCX, JPEG, or PNG — max {{ MAX_SIZE_MB }}MB</p>
  <div v-if="uploading" class="mt-4 inline-block w-6 h-6 border-2 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
  </div>
 
@@ -300,8 +300,8 @@ onMounted(loadProfile)
  <div class="premium-card p-8">
  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
  <div>
- <h2 class="text-lg font-bold text-slate-900 mb-1">AI Phân Tích CV</h2>
- <p class="text-sm font-medium text-slate-500 max-w-lg">Nhận các gợi ý tối ưu từ AI giúp CV của bạn vượt qua các hệ thống sàng lọc và thu hút nhà tuyển dụng.</p>
+ <h2 class="text-lg font-bold text-slate-900 mb-1">AI CV Analysis</h2>
+ <p class="text-sm font-medium text-slate-500 max-w-lg">Get AI-powered optimization suggestions to help your CV pass screening systems and attract recruiters.</p>
  </div>
  <div class="flex flex-col items-end gap-1.5 shrink-0">
   <button
@@ -313,16 +313,16 @@ onMounted(loadProfile)
   <svg v-else class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
   </svg>
-  {{ analyzing ? 'Đang Phân Tích…' : 'Bắt Đầu Phân Tích CV' }}
+  {{ analyzing ? 'Analyzing…' : 'Analyze CV' }}
   </button>
   <p v-if="analysisUsed && !analyzing" class="text-xs text-slate-400">
-  Tạm thời không khả dụng — tải lại trang để dùng lại.
+  Temporarily unavailable — reload the page to run again.
   </p>
  </div>
  </div>
 
  <div v-if="!hasCv" class="bg-slate-50 border border-slate-200 rounded-xl p-10 text-center">
- <p class="text-sm font-bold text-slate-500">Tải lên CV trước để có thể phân tích bằng AI.</p>
+ <p class="text-sm font-bold text-slate-500">Upload your CV first to run the AI analysis.</p>
  </div>
 
  <!-- Results -->
@@ -346,16 +346,16 @@ onMounted(loadProfile)
  </div>
  </div>
  <div>
- <p class="text-lg font-bold text-slate-900 mb-1">Điểm Đánh Giá CV</p>
+ <p class="text-lg font-bold text-slate-900 mb-1">CV Score</p>
  <p class="text-sm font-medium text-slate-500">
- Đã phân tích: {{ formatDate(improvement.analysedAt) }}
+ Analyzed: {{ formatDate(improvement.analysedAt) }}
  </p>
  </div>
  </div>
 
  <!-- Strengths -->
  <div v-if="improvement.strengths.length">
- <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-4 bg-slate-100 inline-block px-3 py-1 rounded-full">Điểm Mạnh Nổi Bật</h3>
+ <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-4 bg-slate-100 inline-block px-3 py-1 rounded-full">Key Strengths</h3>
  <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
  <li v-for="(s, i) in improvement.strengths" :key="i" class="flex items-start gap-3 p-3 bg-emerald-50/50 border border-emerald-100 rounded-lg text-sm font-medium text-emerald-900 ">
  <span class="text-emerald-500 shrink-0 mt-0.5">
@@ -370,7 +370,7 @@ onMounted(loadProfile)
  <div v-if="improvement.suggestions.length">
  <div class="flex items-center gap-3 mb-4">
  <h3 class="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 inline-block px-3 py-1 rounded-full">
- Điểm Cần Cải Thiện
+ Areas for Improvement
  </h3>
  <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{{ improvement.suggestions.length }}</span>
  </div>
@@ -387,16 +387,16 @@ onMounted(loadProfile)
  :class="sug.priority === 'HIGH' ? 'bg-rose-100 text-rose-700 ' :
  (sug.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700 ' : 'bg-blue-100 text-blue-700 ')"
  >
- Ưu tiên {{ translatePriority(sug.priority) }}
+ {{ translatePriority(sug.priority) }} Priority
  </span>
  <span class="text-sm font-bold text-slate-700 ">{{ translateSection(sug.section) }}</span>
  </div>
  <p class="text-sm text-slate-600 mb-2 leading-relaxed">
- <strong class="font-bold text-slate-900 mr-1">Vấn đề:</strong> {{ sug.issue }}
+ <strong class="font-bold text-slate-900 mr-1">Issue:</strong> {{ sug.issue }}
  </p>
  <div class="p-3 bg-teal-50 border border-teal-100 rounded-lg">
  <p class="text-sm text-teal-800 leading-relaxed">
- <strong class="font-bold text-teal-900 mr-1">Cách sửa:</strong> {{ sug.suggestion }}
+ <strong class="font-bold text-teal-900 mr-1">Fix:</strong> {{ sug.suggestion }}
  </p>
  </div>
  </div>
@@ -405,7 +405,7 @@ onMounted(loadProfile)
  </div>
 
  <div v-else-if="!analyzing" class="bg-slate-50 border border-slate-200 rounded-xl p-10 text-center">
- <p class="text-sm font-bold text-slate-500">Bấm "Bắt Đầu Phân Tích CV" để nhận các gợi ý từ AI.</p>
+ <p class="text-sm font-bold text-slate-500">Click "Analyze CV" to receive AI-powered suggestions.</p>
  </div>
  </div>
  </template>

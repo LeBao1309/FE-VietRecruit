@@ -26,7 +26,7 @@ const groupedQuestions = computed(() => {
  if (!props.questions) return {}
  return props.questions.reduce((acc, q) => {
  if (!acc[q.category]) acc[q.category] = []
- acc[q.category].push(q)
+ acc[q.category]!.push(q)
  return acc
  }, {} as Record<string, Question[]>)
 })
@@ -47,15 +47,15 @@ const difficultyConfig = {
  <Sparkles class="w-5 h-5" />
  </div>
  <div>
- <h3 class="text-sm font-black text-brand uppercase tracking-tighter">Gợi ý Câu hỏi Phỏng vấn AI</h3>
- <p class="text-[10px] text-brand/60 font-bold uppercase tracking-widest">Dựa trên mô tả công việc và hồ sơ</p>
+ <h3 class="text-sm font-black text-brand uppercase tracking-tighter">AI Interview Question Suggestions</h3>
+ <p class="text-[10px] text-brand/60 font-bold uppercase tracking-widest">Based on the job description and candidate profile</p>
  </div>
  </div>
  <div class="flex items-center gap-2">
  <button 
  @click="emit('copyAll')"
  class="p-2 rounded-lg hover:bg-brand/10 text-brand transition-colors"
- title="Sao chép tất cả"
+ title="Copy All"
  >
  <Copy class="w-4 h-4" />
  </button>
@@ -72,7 +72,7 @@ const difficultyConfig = {
  <div class="p-6 overflow-y-auto max-h-[500px] space-y-8">
  <div v-if="isGenerating" class="flex flex-col items-center justify-center py-12 space-y-4">
  <div class="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin"></div>
- <p class="text-xs font-bold text-text-muted uppercase tracking-widest animate-pulse">Đang phân tích và tạo câu hỏi...</p>
+ <p class="text-xs font-bold text-text-muted uppercase tracking-widest animate-pulse">Analyzing and generating questions...</p>
  </div>
 
  <div v-else-if="error" class="p-6 text-center space-y-4">
@@ -81,7 +81,7 @@ const difficultyConfig = {
  @click="emit('retry')"
  class="px-6 py-2 bg-brand text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 mx-auto"
  >
- <RefreshCw class="w-4 h-4" /> Thử lại
+ <RefreshCw class="w-4 h-4" /> Retry
  </button>
  </div>
 
@@ -112,14 +112,14 @@ const difficultyConfig = {
  </div>
 
  <div v-else class="text-center py-12">
- <p class="text-xs text-text-muted italic">Nhấn vào "Gợi ý câu hỏi AI" để bắt đầu.</p>
+ <p class="text-xs text-text-muted italic">Click "AI Question Suggestions" to begin.</p>
  </div>
  </div>
 
  <!-- Footer -->
  <footer class="p-4 border-t border-border bg-surface-soft/30 text-center">
  <p class="text-[9px] text-text-muted font-bold uppercase tracking-widest">
- Lưu ý: Câu hỏi do AI tạo ra chỉ mang tính chất tham khảo.
+ Note: AI-generated questions are for reference purposes only.
  </p>
  </footer>
  </div>

@@ -16,16 +16,16 @@ const statusFilter = ref<string>('')
 
 // ── Status config ──
 const STATUS_CONFIG: Record<InterviewStatus, { label: string; class: string; dotClass: string; bgClass: string }> = {
- SCHEDULED: { label: 'Đã Lên Lịch', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400', bgClass: 'border-blue-200 bg-blue-50/30' },
- COMPLETED: { label: 'Đã Hoàn Thành', class: 'bg-success-bg text-success', dotClass: 'bg-green-500', bgClass: 'border-green-200 bg-green-50/30' },
- CANCELED: { label: 'Đã Hủy', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400', bgClass: 'border-gray-200 bg-gray-50/30' },
+ SCHEDULED: { label: 'Scheduled', class: 'bg-blue-50 text-blue-600', dotClass: 'bg-blue-400', bgClass: 'border-blue-200 bg-blue-50/30' },
+ COMPLETED: { label: 'Completed', class: 'bg-success-bg text-success', dotClass: 'bg-green-500', bgClass: 'border-green-200 bg-green-50/30' },
+ CANCELED: { label: 'Cancelled', class: 'bg-gray-100 text-gray-500', dotClass: 'bg-gray-400', bgClass: 'border-gray-200 bg-gray-50/30' },
 }
 
 const STATUS_FILTERS: { label: string; value: string; icon: string }[] = [
- { label: 'Tất cả', value: '', icon: '📋' },
- { label: 'Đã xếp lịch', value: 'SCHEDULED', icon: '📅' },
- { label: 'Đã hoàn thành', value: 'COMPLETED', icon: '✓' },
- { label: 'Đã Huỷ', value: 'CANCELED', icon: '✕' },
+ { label: 'All', value: '', icon: '📋' },
+ { label: 'Scheduled', value: 'SCHEDULED', icon: '📅' },
+ { label: 'Completed', value: 'COMPLETED', icon: '✓' },
+ { label: 'Cancelled', value: 'CANCELED', icon: '✕' },
 ]
 
 // ── Computed ──
@@ -109,9 +109,9 @@ onMounted(async () => {
  <div class="max-w-4xl mx-auto px-6 pb-8">
  <!-- Header -->
  <div class="mb-6">
- <h1 class="text-xl font-bold text-gray-900">Phỏng Vấn Của Tôi</h1>
+ <h1 class="text-xl font-bold text-gray-900">My Interviews</h1>
  <p class="text-sm text-gray-500 mt-1">
- Chào mừng, {{ auth.user?.fullName?.split(' ')[0] ?? 'Interviewer' }}. Dưới đây là danh sách phỏng vấn.
+ Welcome, {{ auth.user?.fullName?.split(' ')[0] ?? 'Interviewer' }}. Here is your interview list.
  </p>
  </div>
 
@@ -146,12 +146,12 @@ onMounted(async () => {
  </div>
  <div>
  <div class="flex items-center gap-2">
- <h2 class="text-sm font-semibold text-gray-900">Sắp Diễn Ra</h2>
+ <h2 class="text-sm font-semibold text-gray-900">Upcoming</h2>
  <span
  v-if="isNextToday"
  class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary text-white"
  >
- HÔM NAY
+ TODAY
  </span>
  <span class="text-xs text-gray-400">{{ timeUntilNext }}</span>
  </div>
@@ -175,13 +175,13 @@ onMounted(async () => {
  rel="noopener"
  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
  >
- Tham Gia ↗
+ Join ↗
  </a>
  <button
  @click="router.push(`/employer/interviews/${nextInterview.id}`)"
  class="px-4 py-2 text-sm font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
  >
- Xem Chi Tiết
+ View Details
  </button>
  </div>
  </div>
@@ -190,15 +190,15 @@ onMounted(async () => {
  <!-- ─── Stats ─── -->
  <div class="grid grid-cols-3 gap-4 mb-6">
  <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Đã Lên Lịch</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Scheduled</span>
  <p class="text-2xl font-bold text-blue-600 mt-1">{{ stats.scheduled }}</p>
  </div>
  <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Hoàn Thành</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Completed</span>
  <p class="text-2xl font-bold text-success mt-1">{{ stats.completed }}</p>
  </div>
  <div class="bg-surface border border-border rounded-lg p-5 shadow-sm">
- <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Đã Hủy</span>
+ <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Cancelled</span>
  <p class="text-2xl font-bold text-gray-400 mt-1">{{ stats.canceled }}</p>
  </div>
  </div>
@@ -226,13 +226,13 @@ onMounted(async () => {
  <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl mx-auto mb-4">
  📋
  </div>
- <h2 class="text-lg font-bold text-gray-900 mb-2">Chưa Có Phỏng Vấn</h2>
- <p class="text-sm text-gray-500">Bạn chưa được phân công cuộc phỏng vấn nào. Nhân sự sẽ phân công khi có yêu cầu.</p>
+ <h2 class="text-lg font-bold text-gray-900 mb-2">No Interviews Yet</h2>
+ <p class="text-sm text-gray-500">You have not been assigned any interviews. HR will assign them when needed.</p>
  </div>
 
  <!-- ─── Filtered empty ─── -->
  <div v-else-if="filteredInterviews.length === 0" class="bg-surface border border-border rounded-lg p-8 shadow-sm text-center">
- <p class="text-sm text-gray-400">Không có phỏng vấn nào khớp với bộ lọc.</p>
+ <p class="text-sm text-gray-400">No interviews match the selected filter.</p>
  </div>
 
  <!-- ─── Interview List ─── -->
@@ -312,7 +312,7 @@ onMounted(async () => {
  @click.stop="router.push(`/employer/interviews/${interview.id}/scorecard`)"
  class="px-3 py-1.5 text-xs font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
  >
- Phiếu Đánh Giá
+ Evaluation Scorecard
  </button>
  <span class="text-gray-300 group-hover:text-gray-400 transition text-sm">→</span>
  </div>

@@ -26,32 +26,32 @@ const showScreening = ref(false)
 
 // ── Kanban column config ──
 const PIPELINE_COLUMNS: { status: ApplicationStatus; label: string; color: string; dotClass: string }[] = [
- { status: 'NEW', label: 'Ứng Tuyển', color: 'border-t-blue-400', dotClass: 'bg-blue-400' },
- { status: 'SCREENING', label: 'Sàng Lọc', color: 'border-t-amber-400', dotClass: 'bg-amber-400' },
- { status: 'INTERVIEW', label: 'Phỏng Vấn', color: 'border-t-purple-500', dotClass: 'bg-purple-500' },
- { status: 'OFFER', label: 'Thư Mời', color: 'border-t-primary', dotClass: 'bg-primary' },
- { status: 'HIRED', label: 'Đã Tuyển', color: 'border-t-green-500', dotClass: 'bg-green-500' },
- { status: 'REJECTED', label: 'Bị Từ Chối', color: 'border-t-red-400', dotClass: 'bg-red-400' },
+ { status: 'NEW', label: 'Applied', color: 'border-t-blue-400', dotClass: 'bg-blue-400' },
+ { status: 'SCREENING', label: 'Screening', color: 'border-t-amber-400', dotClass: 'bg-amber-400' },
+ { status: 'INTERVIEW', label: 'Interview', color: 'border-t-purple-500', dotClass: 'bg-purple-500' },
+ { status: 'OFFER', label: 'Offer', color: 'border-t-primary', dotClass: 'bg-primary' },
+ { status: 'HIRED', label: 'Hired', color: 'border-t-green-500', dotClass: 'bg-green-500' },
+ { status: 'REJECTED', label: 'Rejected', color: 'border-t-red-400', dotClass: 'bg-red-400' },
 ]
 
 // Status badge styling
 const statusBadgeConfig: Record<ApplicationStatus, { label: string; class: string }> = {
- NEW: { label: 'Ứng Tuyển', class: 'bg-blue-50 text-blue-600' },
- SCREENING: { label: 'Sàng Lọc', class: 'bg-amber-50 text-amber-600' },
- INTERVIEW: { label: 'Phỏng Vấn', class: 'bg-purple-50 text-purple-600' },
- OFFER: { label: 'Thư Mời', class: 'bg-primary-bg text-primary' },
- HIRED: { label: 'Đã Tuyển', class: 'bg-success-bg text-success' },
- REJECTED: { label: 'Bị Từ Chối', class: 'bg-error-bg text-error' },
+ NEW: { label: 'Applied', class: 'bg-blue-50 text-blue-600' },
+ SCREENING: { label: 'Screening', class: 'bg-amber-50 text-amber-600' },
+ INTERVIEW: { label: 'Interview', class: 'bg-purple-50 text-purple-600' },
+ OFFER: { label: 'Offer', class: 'bg-primary-bg text-primary' },
+ HIRED: { label: 'Hired', class: 'bg-success-bg text-success' },
+ REJECTED: { label: 'Rejected', class: 'bg-error-bg text-error' },
 }
 
 const statusFilterOptions: { label: string; value: ApplicationStatus | '' }[] = [
- { label: 'Mọi Trạng Thái', value: '' },
- { label: 'Mới Ứng Tuyển', value: 'NEW' },
- { label: 'Đang Sàng Lọc', value: 'SCREENING' },
- { label: 'Phỏng Vấn', value: 'INTERVIEW' },
- { label: 'Thư Mời', value: 'OFFER' },
- { label: 'Đã Tuyển', value: 'HIRED' },
- { label: 'Bị Từ Chối', value: 'REJECTED' },
+ { label: 'All Statuses', value: '' },
+ { label: 'New Application', value: 'NEW' },
+ { label: 'Screening', value: 'SCREENING' },
+ { label: 'Interview', value: 'INTERVIEW' },
+ { label: 'Offer', value: 'OFFER' },
+ { label: 'Hired', value: 'HIRED' },
+ { label: 'Rejected', value: 'REJECTED' },
 ]
 
 // ── Load data ──
@@ -158,19 +158,19 @@ onMounted(async () => {
  <!-- Header -->
  <div class="flex items-center gap-3 mb-2">
  <button @click="router.push(`/employer/jobs/${jobId}`)" class="text-gray-400 hover:text-gray-600 transition text-sm">
- ‹ Về công việc
+ ‹ Back to Job
  </button>
  </div>
 
  <div class="flex items-start justify-between mb-6">
  <div>
  <h1 class="text-xl font-bold text-gray-900">
- Tuyển Dụng
+ Recruitment Pipeline
  </h1>
  <p v-if="jobStore.currentJob" class="text-sm text-gray-500 mt-1">
  {{ jobStore.currentJob.title }}
  <span class="text-gray-300 mx-1">·</span>
- {{ appStore.totalApplications }} ứng viên
+ {{ appStore.totalApplications }} candidates
  </p>
  </div>
 
@@ -191,7 +191,7 @@ onMounted(async () => {
  @click="loadScreeningResults"
  class="btn-outline"
  >
- 📊 Kết Quả
+ 📊 Results
  </button>
 
  <!-- View mode toggle -->
@@ -201,14 +201,14 @@ onMounted(async () => {
  class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all"
  :class="viewMode === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 :text-slate-300'"
  >
- Bảng
+ Board
  </button>
  <button
  @click="viewMode = 'table'"
  class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all"
  :class="viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700 :text-slate-300'"
  >
- Danh Sách
+ List
  </button>
  </div>
  </div>
@@ -218,7 +218,7 @@ onMounted(async () => {
  <div v-if="appStore.loading" class="flex items-center justify-center py-24">
  <div class="text-center">
  <div class="inline-block w-8 h-8 border-3 border-primary/20 border-t-primary rounded-full animate-spin mb-3" />
- <p class="text-sm text-gray-400">Đang tải hồ sơ…</p>
+ <p class="text-sm text-gray-400">Loading applications...</p>
  </div>
  </div>
 
@@ -258,14 +258,14 @@ onMounted(async () => {
  <div class="flex items-center justify-between pt-2 border-t border-slate-100 ">
  <span class="text-xs font-medium text-slate-400">{{ formatDate(app.createdAt) }}</span>
  <span class="text-teal-600 text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
- Chi Tiết →
+ Details →
  </span>
  </div>
  </div>
 
  <!-- Empty column -->
  <div v-if="columnCount(col.status) === 0" class="py-8 text-center">
- <p class="text-[11px] text-gray-400">Không có ứng viên</p>
+ <p class="text-[11px] text-gray-400">No candidates</p>
  </div>
  </div>
  </div>
@@ -285,7 +285,7 @@ onMounted(async () => {
  </option>
  </select>
  <span class="text-xs text-gray-400 ml-auto">
- {{ appStore.totalApplications }} hồ sơ
+ {{ appStore.totalApplications }} applications
  </span>
  </div>
 
@@ -294,17 +294,17 @@ onMounted(async () => {
  <table class="w-full">
  <thead>
  <tr class="border-b border-slate-200 bg-slate-50 ">
- <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Ứng Viên</th>
- <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-36">Trạng Thái</th>
- <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Ngày Nộp</th>
+ <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Candidate</th>
+ <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-36">Status</th>
+ <th class="text-left py-4 px-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Applied Date</th>
  </tr>
  </thead>
  <tbody>
  <tr v-if="appStore.applicationList.length === 0">
  <td colspan="3" class="text-center py-16">
  <div class="text-gray-400 text-sm">
- <p class="font-medium mb-1">Không có hồ sơ nào</p>
- <p class="text-xs">Các hồ sơ ứng tuyển sẽ xuất hiện tại đây.</p>
+ <p class="font-medium mb-1">No applications found</p>
+ <p class="text-xs">Applications will appear here.</p>
  </div>
  </td>
  </tr>
@@ -336,14 +336,14 @@ onMounted(async () => {
  <!-- Pagination -->
  <div v-if="appStore.totalPages > 1" class="flex items-center justify-between px-5 py-4 border-t border-slate-200 bg-slate-50/50 ">
  <span class="text-sm font-medium text-slate-500">
- Trang {{ currentPage + 1 }} / {{ appStore.totalPages }}
+ Page {{ currentPage + 1 }} / {{ appStore.totalPages }}
  </span>
  <div class="flex items-center gap-2">
  <button @click="prevPage" :disabled="!canGoPrev" class="btn-outline px-3 py-1 text-sm">
- ‹ Trước
+ ‹ Previous
  </button>
  <button @click="nextPage" :disabled="!canGoNext" class="btn-outline px-3 py-1 text-sm">
- Tiếp ›
+ Next ›
  </button>
  </div>
  </div>
@@ -358,9 +358,9 @@ onMounted(async () => {
  <!-- Header -->
  <div class="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between z-10">
  <div>
- <h2 class="text-lg font-bold text-gray-900">Kết Quả Phân Tích AI</h2>
+ <h2 class="text-lg font-bold text-gray-900">AI Analysis Results</h2>
  <p class="text-xs text-gray-400 mt-0.5">
- {{ appStore.screeningResults.length }} ứng viên đã chấm điểm
+ {{ appStore.screeningResults.length }} candidates scored
  </p>
  </div>
  <div class="flex items-center gap-2">
@@ -370,7 +370,7 @@ onMounted(async () => {
  class="px-3 py-1.5 text-xs font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition disabled:opacity-50 flex items-center gap-1.5"
  >
  <span v-if="appStore.triggerScreeningLoading" class="inline-block w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
- Chấm Lại
+ Re-score
  </button>
  <button @click="showScreening = false" class="w-8 h-8 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
  ✕
@@ -385,8 +385,8 @@ onMounted(async () => {
 
  <!-- Empty -->
  <div v-else-if="appStore.screeningResults.length === 0" class="text-center py-24 px-6">
- <p class="text-sm text-gray-400 mb-2">Chưa có kết quả phân tích.</p>
- <p class="text-xs text-gray-400">Bấm "Phân Tích AI" để đánh giá mức độ phù hợp của các ứng viên.</p>
+ <p class="text-sm text-gray-400 mb-2">No analysis results yet.</p>
+ <p class="text-xs text-gray-400">Click "AI Screen" to evaluate candidate fit.</p>
  </div>
 
  <!-- Results -->
@@ -412,7 +412,7 @@ onMounted(async () => {
  >
  {{ sr.aiScore !== null ? sr.aiScore : '—' }}
  </span>
- <span class="block text-[10px] text-gray-400 mt-0.5">Điểm AI</span>
+ <span class="block text-[10px] text-gray-400 mt-0.5">AI Score</span>
  </div>
  </div>
 
@@ -427,7 +427,7 @@ onMounted(async () => {
 
  <!-- Similarity score if available -->
  <div v-if="sr.similarityScore !== null" class="flex items-center gap-2 mb-2 text-xs text-gray-500">
- <span>Độ Tương Thích:</span>
+ <span>Similarity:</span>
  <span class="font-medium" :class="getScoreColor(sr.similarityScore)">
  {{ sr.similarityScore }}%
  </span>
@@ -448,26 +448,26 @@ onMounted(async () => {
  <!-- Strengths & Gaps (collapsed preview) -->
  <div class="grid grid-cols-2 gap-3">
  <div v-if="sr.strengths.length">
- <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Điểm Mạnh</span>
+ <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Strengths</span>
  <ul class="space-y-0.5">
  <li v-for="(s, i) in sr.strengths.slice(0, 2)" :key="i" class="text-[11px] text-gray-600 flex items-start gap-1">
  <span class="text-green-500 mt-px shrink-0">✓</span>
  <span class="line-clamp-1">{{ s }}</span>
  </li>
  <li v-if="sr.strengths.length > 2" class="text-[10px] text-gray-400">
- +{{ sr.strengths.length - 2 }} nữa
+ +{{ sr.strengths.length - 2 }} more
  </li>
  </ul>
  </div>
  <div v-if="sr.gaps.length">
- <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Cần Cải Thiện</span>
+ <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Gaps</span>
  <ul class="space-y-0.5">
  <li v-for="(g, i) in sr.gaps.slice(0, 2)" :key="i" class="text-[11px] text-gray-600 flex items-start gap-1">
  <span class="text-red-400 mt-px shrink-0">✗</span>
  <span class="line-clamp-1">{{ g }}</span>
  </li>
  <li v-if="sr.gaps.length > 2" class="text-[10px] text-gray-400">
- +{{ sr.gaps.length - 2 }} nữa
+ +{{ sr.gaps.length - 2 }} more
  </li>
  </ul>
  </div>

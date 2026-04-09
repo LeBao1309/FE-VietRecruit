@@ -40,13 +40,13 @@ export const useTeamStore = defineStore('team', () => {
       const result = await invitationService.createInvitation(body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Gửi lời mời thất bại', result.error.message)
+        ui.toastError('Invitation Failed', result.error.message)
         return false
       }
       if (result.data) {
         invitations.value = [...invitations.value, result.data]
       }
-      ui.toastSuccess('Thành công', `Lời mời đã được gửi đến ${body.email}.`)
+      ui.toastSuccess('Success', `Invitation sent to ${body.email}.`)
       return true
     } finally {
       isSaving.value = false
@@ -56,21 +56,21 @@ export const useTeamStore = defineStore('team', () => {
   // TODO: implement when BE exposes DELETE /invitations/:id
   async function revokeInvitation(_invitationId: string): Promise<boolean> {
     const ui = useUiStore()
-    ui.toastWarning('Chưa hỗ trợ', 'Tính năng thu hồi lời mời chưa được triển khai.')
+    ui.toastWarning('Not Yet Supported', 'The invitation revocation feature has not been implemented yet.')
     return false
   }
 
   // TODO: implement when BE exposes PUT /company/me/members/:id/role
   async function updateRole(_memberId: string, _role: string): Promise<boolean> {
     const ui = useUiStore()
-    ui.toastWarning('Chưa hỗ trợ', 'Tính năng thay đổi vai trò chưa được triển khai.')
+    ui.toastWarning('Not Yet Supported', 'The role change feature has not been implemented yet.')
     return false
   }
 
   // TODO: implement when BE exposes DELETE /company/me/members/:id
   async function removeMember(_memberId: string): Promise<boolean> {
     const ui = useUiStore()
-    ui.toastWarning('Chưa hỗ trợ', 'Tính năng xóa thành viên chưa được triển khai.')
+    ui.toastWarning('Not Yet Supported', 'The member removal feature has not been implemented yet.')
     return false
   }
 

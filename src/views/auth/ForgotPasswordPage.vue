@@ -50,11 +50,11 @@ async function handleSubmit(): Promise<void> {
 
  <!-- Auth Header -->
  <header class="sticky top-0 z-50 flex items-center h-14 px-4 bg-white/95 backdrop-blur-md border-b border-slate-200/60 shadow-sm">
- <button @click="goBack" class="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors group" aria-label="Quay trở lại">
+ <button @click="goBack" class="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors group" aria-label="Go Back">
  <svg class="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
  </svg>
- <span>Quay lại</span>
+ <span>Back</span>
  </button>
  <div class="flex-1 flex justify-center">
  <router-link to="/" class="flex items-center gap-2">

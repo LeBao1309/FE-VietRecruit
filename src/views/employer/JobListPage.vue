@@ -17,17 +17,17 @@ const pageSize = ref(10)
 const statusFilter = ref<JobStatus | ''>('')
 
 const statusOptions: { label: string; value: JobStatus | '' }[] = [
- { label: 'Tất Cả', value: '' },
- { label: 'Bản Nháp', value: 'DRAFT' },
- { label: 'Đang Mở', value: 'PUBLISHED' },
- { label: 'Đã Đóng', value: 'CLOSED' },
+ { label: 'All', value: '' },
+ { label: 'Draft', value: 'DRAFT' },
+ { label: 'Published', value: 'PUBLISHED' },
+ { label: 'Closed', value: 'CLOSED' },
 ]
 
 // ── Status display config ──
 const statusConfig: Record<JobStatus, { label: string; class: string }> = {
- DRAFT: { label: 'Bản Nháp', class: 'bg-gray-100 text-gray-600' },
- PUBLISHED: { label: 'Đang Mở', class: 'bg-success-bg text-success' },
- CLOSED: { label: 'Đã Đóng', class: 'bg-error-bg text-error' },
+ DRAFT: { label: 'Draft', class: 'bg-gray-100 text-gray-600' },
+ PUBLISHED: { label: 'Published', class: 'bg-success-bg text-success' },
+ CLOSED: { label: 'Closed', class: 'bg-error-bg text-error' },
 }
 
 // ── Load ──
@@ -61,8 +61,8 @@ function nextPage(): void {
 const quotaText = computed(() => {
  const q = subStore.currentQuota
  if (!q) return null
- if (q.maxActiveJobs < 0) return 'Không giới hạn bài rải'
- return `Đã dùng ${q.jobsActive} / ${q.maxActiveJobs} bài đăng`
+ if (q.maxActiveJobs < 0) return 'Unlimited postings'
+ return `Used ${q.jobsActive} / ${q.maxActiveJobs} active postings`
 })
 
 // ── Navigation ──
@@ -80,12 +80,12 @@ function formatDate(iso: string): string {
 }
 
 function formatSalary(min: number | null, max: number | null, currency: string | null, negotiable: boolean | null): string {
- if (!min && !max) return negotiable ? 'Thỏa thuận' : '—'
+ if (!min && !max) return negotiable ? 'Negotiable' : '—'
  const cur = currency ?? 'VND'
  const fmt = (n: number) => n.toLocaleString('vi-VN')
  if (min && max) return `${fmt(min)} – ${fmt(max)} ${cur}`
- if (min) return `Từ ${fmt(min)} ${cur}`
- if (max) return `Lên tới ${fmt(max)} ${cur}`
+ if (min) return `From ${fmt(min)} ${cur}`
+ if (max) return `Up to ${fmt(max)} ${cur}`
  return '—'
 }
 
@@ -101,9 +101,9 @@ onMounted(() => {
  <!-- Header -->
  <div class="flex items-start justify-between mb-6">
  <div>
- <h1 class="text-xl font-bold text-slate-900 ">Tin Tuyển Dụng</h1>
+ <h1 class="text-xl font-bold text-slate-900 ">Job Listings</h1>
  <p class="text-sm text-slate-500 mt-1">
- Quản lý bài tuyển dụng, đăng tin mới và theo dõi trạng thái.
+ Manage job listings, post new openings, and track their status.
  </p>
  <!-- Quota indicator -->
  <div v-if="quotaText" class="mt-3 flex items-center gap-2">
@@ -123,7 +123,7 @@ onMounted(() => {
  @click="goToCreate"
  class="px-4 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 hover:-translate-y-0.5 hover:shadow-md rounded-lg transition-all flex items-center gap-1.5 shrink-0 outline-none focus:ring-2 focus:ring-teal-500/50"
  >
- <span class="text-lg leading-none">+</span> Tạo Mới
+ <span class="text-lg leading-none">+</span> Create New
  </button>
  </div>
 
@@ -142,7 +142,7 @@ onMounted(() => {
  <svg class="absolute right-2.5 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
  </div>
  <span class="text-xs font-medium text-slate-400 ml-auto">
- Tổng {{ jobStore.totalJobs }} tin
+ Total {{ jobStore.totalJobs }} listing(s)
  </span>
  </div>
 
@@ -158,24 +158,24 @@ onMounted(() => {
  <table class="w-full whitespace-nowrap text-left">
  <thead>
  <tr class="border-b border-slate-200/60 bg-slate-50 text-slate-500 uppercase tracking-wider text-[11px] font-bold">
- <th class="px-5 py-3">Tiêu Đề Vị Trí</th>
- <th class="px-5 py-3 w-28">Trạng Thái</th>
- <th class="px-5 py-3">Thu Nhập</th>
- <th class="px-5 py-3 w-28">Hạn Chót</th>
- <th class="px-5 py-3 w-28 text-right">Ngày Tạo</th>
+ <th class="px-5 py-3">Position Title</th>
+ <th class="px-5 py-3 w-28">Status</th>
+ <th class="px-5 py-3">Salary</th>
+ <th class="px-5 py-3 w-28">Deadline</th>
+ <th class="px-5 py-3 w-28 text-right">Created Date</th>
  </tr>
  </thead>
  <tbody>
  <tr v-if="jobStore.jobList.length === 0">
  <td colspan="5" class="p-4">
- <BaseEmptyState 
- title="Chưa có tin tuyển dụng nào" 
- description="Bạn hãy ấn tạo mới để bắt đầu tuyển ứng viên nhé." 
+ <BaseEmptyState
+ title="No job listings yet"
+ description="Click Create New to start recruiting candidates."
  icon="📝"
  >
  <template #action>
  <button @click="goToCreate" class="px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors outline-none focus:ring-2 focus:ring-teal-500/50">
- + Tạo Mới
+ + Create New
  </button>
  </template>
  </BaseEmptyState>
@@ -215,7 +215,7 @@ onMounted(() => {
  <!-- Pagination -->
  <div v-if="jobStore.totalPages > 1" class="flex items-center justify-between px-5 py-4 border-t border-slate-200/60 bg-slate-50/50 text-sm font-medium text-slate-500">
  <span>
- Trang {{ currentPage + 1 }} / {{ jobStore.totalPages }}
+ Page {{ currentPage + 1 }} / {{ jobStore.totalPages }}
  </span>
  <div class="flex items-center gap-2">
  <button
@@ -223,14 +223,14 @@ onMounted(() => {
  :disabled="!canGoPrev"
  class="px-3 py-1.5 border border-slate-200 rounded-lg transition-all shadow-sm outline-none focus:ring-2 focus:ring-slate-400/50 bg-white hover:bg-slate-50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
  >
- ‹ Trước
+ ‹ Previous
  </button>
  <button
  @click="nextPage"
  :disabled="!canGoNext"
  class="px-3 py-1.5 border border-slate-200 rounded-lg transition-all shadow-sm outline-none focus:ring-2 focus:ring-slate-400/50 bg-white hover:bg-slate-50 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
  >
- Sau ›
+ Next ›
  </button>
  </div>
  </div>

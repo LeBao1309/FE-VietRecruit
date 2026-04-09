@@ -32,25 +32,25 @@ const passwordRules = computed(() => {
 const passwordStrength = computed(() => {
  const rules = passwordRules.value
  const passed = [rules.length, rules.upper, rules.lower, rules.digit, rules.special].filter(Boolean).length
- if (passed <= 2) return { label: 'Yếu', color: 'bg-rose-500', width: 'w-1/5' }
- if (passed <= 3) return { label: 'Trung Bình', color: 'bg-amber-500', width: 'w-2/5' }
- if (passed <= 4) return { label: 'Khá', color: 'bg-blue-500', width: 'w-3/5' }
- return { label: 'Mạnh', color: 'bg-emerald-500', width: 'w-full' }
+ if (passed <= 2) return { label: 'Weak', color: 'bg-rose-500', width: 'w-1/5' }
+ if (passed <= 3) return { label: 'Fair', color: 'bg-amber-500', width: 'w-2/5' }
+ if (passed <= 4) return { label: 'Good', color: 'bg-blue-500', width: 'w-3/5' }
+ return { label: 'Strong', color: 'bg-emerald-500', width: 'w-full' }
 })
 
 function validatePw(): boolean {
  pwErrors.value = {}
- if (!pwForm.value.currentPassword) pwErrors.value.currentPassword = 'Vui lòng nhập mật khẩu hiện tại.'
+ if (!pwForm.value.currentPassword) pwErrors.value.currentPassword = 'Please enter your current password.'
  if (!pwForm.value.newPassword) {
- pwErrors.value.newPassword = 'Vui lòng nhập mật khẩu mới.'
+ pwErrors.value.newPassword = 'Please enter a new password.'
  } else {
  const rules = passwordRules.value
  if (!rules.length || !rules.upper || !rules.lower || !rules.digit || !rules.special) {
- pwErrors.value.newPassword = 'Mật khẩu chưa đáp ứng đủ yêu cầu.'
+ pwErrors.value.newPassword = 'Password does not meet all requirements.'
  }
  }
  if (pwForm.value.newPassword !== pwForm.value.confirmPassword) {
- pwErrors.value.confirmPassword = 'Mật khẩu xác nhận không khớp.'
+ pwErrors.value.confirmPassword = 'Passwords do not match.'
  }
  return Object.keys(pwErrors.value).length === 0
 }
@@ -64,10 +64,10 @@ async function handleChangePassword(): Promise<void> {
  newPassword: pwForm.value.newPassword,
  })
  if (result.error) {
- ui.toastError('Đổi mật khẩu thất bại', result.error.message)
+ ui.toastError('Password change failed', result.error.message)
  return
  }
- ui.toastSuccess('Đổi mật khẩu thành công', 'Tất cả phiên đăng nhập khác đã bị huỷ. Vui lòng đăng nhập lại.')
+ ui.toastSuccess('Password changed', 'All other sessions have been revoked. Please log in again.')
  pwForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
  await auth.logout()
  } finally {
@@ -79,14 +79,14 @@ async function handleChangePassword(): Promise<void> {
 <template>
  <div class="max-w-3xl mx-auto px-6 py-10">
  <div class="mb-8">
- <h1 class="text-2xl font-extrabold text-slate-900">Cài Đặt</h1>
- <p class="text-sm font-medium text-slate-500 mt-1">Quản lý bảo mật tài khoản của bạn</p>
+ <h1 class="text-2xl font-extrabold text-slate-900">Settings</h1>
+ <p class="text-sm font-medium text-slate-500 mt-1">Manage your account security</p>
  </div>
 
  <!-- Account info -->
  <div class="premium-card overflow-hidden mb-8">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Tài Khoản</h2>
+ <h2 class="text-lg font-bold text-slate-900">Account</h2>
  </div>
  <div class="p-6 space-y-4">
  <div class="flex items-center justify-between">
@@ -94,7 +94,7 @@ async function handleChangePassword(): Promise<void> {
  <span class="text-sm font-bold text-slate-900">{{ auth.user?.email ?? '—' }}</span>
  </div>
  <div class="flex items-center justify-between">
- <span class="text-sm font-bold text-slate-500">Vai trò</span>
+ <span class="text-sm font-bold text-slate-500">Role</span>
  <div class="flex gap-1.5">
  <span
  v-for="role in auth.roles"
@@ -111,13 +111,13 @@ async function handleChangePassword(): Promise<void> {
  <!-- Change Password -->
  <div class="premium-card overflow-hidden">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Đổi Mật Khẩu</h2>
- <p class="text-xs font-medium text-slate-400 mt-1">Tất cả phiên đăng nhập sẽ bị huỷ sau khi đổi mật khẩu.</p>
+ <h2 class="text-lg font-bold text-slate-900">Change Password</h2>
+ <p class="text-xs font-medium text-slate-400 mt-1">All active sessions will be revoked after changing your password.</p>
  </div>
  <form @submit.prevent="handleChangePassword" class="p-6 space-y-6">
  <!-- Current password -->
  <div>
- <label for="set-current-pw" class="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu hiện tại</label>
+ <label for="set-current-pw" class="block text-sm font-bold text-slate-700 mb-1.5">Current Password</label>
  <div class="relative">
  <input
  id="set-current-pw"
@@ -133,7 +133,7 @@ async function handleChangePassword(): Promise<void> {
  @click="showCurrentPw = !showCurrentPw"
  class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-slate-400 hover:text-slate-600 transition-colors bg-white/50 rounded-md text-xs font-bold"
  >
- {{ showCurrentPw ? 'Ẩn' : 'Hiện' }}
+ {{ showCurrentPw ? 'Hide' : 'Show' }}
  </button>
  </div>
  <p v-if="pwErrors.currentPassword" class="text-xs font-bold text-rose-500 mt-1.5">{{ pwErrors.currentPassword }}</p>
@@ -141,7 +141,7 @@ async function handleChangePassword(): Promise<void> {
 
  <!-- New password -->
  <div>
- <label for="set-new-pw" class="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu mới</label>
+ <label for="set-new-pw" class="block text-sm font-bold text-slate-700 mb-1.5">New Password</label>
  <div class="relative">
  <input
  id="set-new-pw"
@@ -157,7 +157,7 @@ async function handleChangePassword(): Promise<void> {
  @click="showNewPw = !showNewPw"
  class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-slate-400 hover:text-slate-600 transition-colors bg-white/50 rounded-md text-xs font-bold"
  >
- {{ showNewPw ? 'Ẩn' : 'Hiện' }}
+ {{ showNewPw ? 'Hide' : 'Show' }}
  </button>
  </div>
  <p v-if="pwErrors.newPassword" class="text-xs font-bold text-rose-500 mt-1.5">{{ pwErrors.newPassword }}</p>
@@ -176,11 +176,11 @@ async function handleChangePassword(): Promise<void> {
  :class="passed ? 'text-emerald-500' : 'text-slate-400'">
  <span class="font-bold flex-shrink-0">{{ passed ? '✓' : '○' }}</span>
  <span>
- {{ rule === 'length' ? 'Ít nhất 8 ký tự' :
- rule === 'upper' ? 'Có chữ hoa' :
- rule === 'lower' ? 'Có chữ thường' :
- rule === 'digit' ? 'Có chữ số' :
- 'Có ký tự đặc biệt' }}
+ {{ rule === 'length' ? 'At least 8 characters' :
+ rule === 'upper' ? 'One uppercase letter' :
+ rule === 'lower' ? 'One lowercase letter' :
+ rule === 'digit' ? 'One digit' :
+ 'One special character' }}
  </span>
  </li>
  </ul>
@@ -189,7 +189,7 @@ async function handleChangePassword(): Promise<void> {
 
  <!-- Confirm password -->
  <div>
- <label for="set-confirm-pw" class="block text-sm font-bold text-slate-700 mb-1.5">Xác nhận mật khẩu mới</label>
+ <label for="set-confirm-pw" class="block text-sm font-bold text-slate-700 mb-1.5">Confirm New Password</label>
  <input
  id="set-confirm-pw"
  v-model="pwForm.confirmPassword"
@@ -209,7 +209,7 @@ async function handleChangePassword(): Promise<void> {
  class="btn-primary py-2.5 px-6 flex items-center gap-2"
  >
  <span v-if="pwLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ pwLoading ? 'Đang đổi…' : 'Đổi mật khẩu' }}
+ {{ pwLoading ? 'Saving…' : 'Change Password' }}
  </button>
  </div>
  </form>

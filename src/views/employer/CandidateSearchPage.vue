@@ -29,20 +29,20 @@ const experienceMin = ref<number | null>(null)
 const isOpenToWork = ref(false)
 
 const workTypeOptions = [
-  { label: 'Tất Cả', value: '' },
-  { label: 'Toàn Thời Gian', value: 'FULL_TIME' },
-  { label: 'Bán Thời Gian', value: 'PART_TIME' },
-  { label: 'Từ Xa', value: 'REMOTE' },
-  { label: 'Kết Hợp', value: 'HYBRID' },
-  { label: 'Hợp Đồng', value: 'CONTRACT' },
+  { label: 'All', value: '' },
+  { label: 'Full-Time', value: 'FULL_TIME' },
+  { label: 'Part-Time', value: 'PART_TIME' },
+  { label: 'Remote', value: 'REMOTE' },
+  { label: 'Hybrid', value: 'HYBRID' },
+  { label: 'Contract', value: 'CONTRACT' },
 ]
 
 const educationOptions = [
-  { label: 'Tất Cả', value: '' },
-  { label: 'Dưới Đại Học', value: 'BELOW_BACHELOR' },
-  { label: 'Đại Học', value: 'BACHELOR' },
-  { label: 'Thạc Sĩ', value: 'MASTER' },
-  { label: 'Tiến Sĩ', value: 'PHD' },
+  { label: 'All', value: '' },
+  { label: "Below Bachelor's Degree", value: 'BELOW_BACHELOR' },
+  { label: "Bachelor's Degree", value: 'BACHELOR' },
+  { label: "Master's Degree", value: 'MASTER' },
+  { label: 'Doctorate', value: 'PHD' },
 ]
 
 // ── Search ──
@@ -60,7 +60,7 @@ async function search(page = 0): Promise<void> {
       size: pageSize,
     })
     if (result.error) {
-      ui.toastError('Tìm kiếm thất bại', result.error.message)
+      ui.toastError('Search failed', result.error.message)
       return
     }
     const data = result.data as SearchPageResponse<CandidateSearchResponse>
@@ -122,16 +122,16 @@ function viewCandidate(id: string): void {
 // ── Helpers ──
 function formatExperience(years: number | null): string {
   if (years === null) return '—'
-  if (years === 0) return 'Mới ra trường'
-  return `${years} năm`
+  if (years === 0) return 'Fresh Graduate'
+  return `${years} yr${years === 1 ? '' : 's'}`
 }
 
 function formatSalary(min: number | null, max: number | null): string {
   if (!min && !max) return '—'
   const fmt = (n: number) => n.toLocaleString('vi-VN')
   if (min && max) return `${fmt(min)} – ${fmt(max)}`
-  if (min) return `Từ ${fmt(min)}`
-  if (max) return `Đến ${fmt(max)}`
+  if (min) return `From ${fmt(min)}`
+  if (max) return `Up to ${fmt(max)}`
   return '—'
 }
 
@@ -149,8 +149,8 @@ onMounted(() => search(0))
 
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-xl font-bold text-slate-900">Tìm Kiếm Ứng Viên</h1>
-      <p class="text-sm text-slate-500 mt-1">Tìm kiếm và xem hồ sơ ứng viên phù hợp.</p>
+      <h1 class="text-xl font-bold text-slate-900">Search Candidates</h1>
+      <p class="text-sm text-slate-500 mt-1">Search and view matching candidate profiles.</p>
     </div>
 
     <!-- Search + Filters -->
@@ -160,7 +160,7 @@ onMounted(() => search(0))
         <input
           v-model="query"
           type="text"
-          placeholder="Tìm theo kỹ năng, vị trí, từ khóa..."
+          placeholder="Search by skill, position, keyword..."
           class="flex-1 px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all"
           @keydown.enter="search(0)"
         />
@@ -168,13 +168,13 @@ onMounted(() => search(0))
           @click="search(0)"
           class="px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors outline-none focus:ring-2 focus:ring-teal-500/50"
         >
-          Tìm Kiếm
+          Search
         </button>
         <button
           @click="resetFilters"
           class="px-4 py-2.5 text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors"
         >
-          Đặt Lại
+          Reset
         </button>
       </div>
 
@@ -216,7 +216,7 @@ onMounted(() => search(0))
           type="number"
           min="0"
           max="30"
-          placeholder="Kinh nghiệm tối thiểu (năm)"
+          placeholder="Min. experience (years)"
           class="w-52 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all"
           @change="search(0)"
         />
@@ -228,7 +228,7 @@ onMounted(() => search(0))
             type="checkbox"
             class="w-4 h-4 accent-teal-600 rounded"
           />
-          Đang tìm việc
+          Open to Work
         </label>
       </div>
 
@@ -247,7 +247,7 @@ onMounted(() => search(0))
         <input
           v-model="skillInput"
           type="text"
-          placeholder="Thêm kỹ năng (Enter hoặc dấu phẩy để thêm)..."
+          placeholder="Add skill (Enter or comma to add)..."
           class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all"
           @keydown="onSkillKeydown"
         />
@@ -256,7 +256,7 @@ onMounted(() => search(0))
 
     <!-- Result count -->
     <p v-if="!loading" class="text-sm text-slate-500 mb-4">
-      Tìm thấy <span class="font-semibold text-slate-700">{{ totalElements }}</span> ứng viên
+      Found <span class="font-semibold text-slate-700">{{ totalElements }}</span> candidate{{ totalElements !== 1 ? 's' : '' }}
     </p>
 
     <!-- Loading skeleton -->
@@ -267,8 +267,8 @@ onMounted(() => search(0))
     <!-- Empty state -->
     <BaseEmptyState
       v-else-if="results.length === 0"
-      title="Không tìm thấy ứng viên"
-      description="Thử thay đổi từ khóa hoặc bộ lọc để tìm kiếm ứng viên phù hợp hơn."
+      title="No candidates found"
+      description="Try adjusting your keywords or filters to find more relevant candidates."
       icon="🔍"
     />
 
@@ -283,7 +283,7 @@ onMounted(() => search(0))
         <!-- Headline -->
         <div>
           <p class="text-sm font-semibold text-slate-900 leading-snug">
-            {{ candidate.desiredPosition ?? 'Chưa cập nhật vị trí' }}
+            {{ candidate.desiredPosition ?? 'Position not specified' }}
           </p>
           <p v-if="candidate.desiredPositionLevel" class="text-xs text-slate-500 mt-0.5">
             {{ candidate.desiredPositionLevel }}
@@ -293,26 +293,26 @@ onMounted(() => search(0))
         <!-- Open to work badge -->
         <div v-if="candidate.isOpenToWork" class="flex items-center gap-1">
           <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-600 border border-green-200">
-            Đang tìm việc
+            Open to Work
           </span>
         </div>
 
         <!-- Stats -->
         <div class="text-xs text-slate-500 space-y-1">
           <div class="flex items-center justify-between">
-            <span>Kinh nghiệm</span>
+            <span>Experience</span>
             <span class="font-medium text-slate-700">{{ formatExperience(candidate.yearsOfExperience) }}</span>
           </div>
           <div v-if="candidate.educationLevel" class="flex items-center justify-between">
-            <span>Học vấn</span>
+            <span>Education</span>
             <span class="font-medium text-slate-700">{{ candidate.educationLevel }}</span>
           </div>
           <div v-if="candidate.workType" class="flex items-center justify-between">
-            <span>Loại công việc</span>
+            <span>Work Type</span>
             <span class="font-medium text-slate-700">{{ candidate.workType }}</span>
           </div>
           <div v-if="candidate.desiredSalaryMin || candidate.desiredSalaryMax" class="flex items-center justify-between">
-            <span>Lương mong muốn</span>
+            <span>Expected Salary</span>
             <span class="font-medium text-slate-700 text-right">
               {{ formatSalary(candidate.desiredSalaryMin, candidate.desiredSalaryMax) }}
             </span>
@@ -339,7 +339,7 @@ onMounted(() => search(0))
         <!-- View button -->
         <div class="mt-auto pt-2 border-t border-slate-100">
           <span class="text-xs font-semibold text-teal-600 hover:text-teal-700">
-            Xem hồ sơ →
+            View Profile →
           </span>
         </div>
       </div>
@@ -347,21 +347,21 @@ onMounted(() => search(0))
 
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 text-sm font-medium text-slate-500">
-      <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+      <span>Page {{ currentPage + 1 }} / {{ totalPages }}</span>
       <div class="flex items-center gap-2">
         <button
           @click="prevPage"
           :disabled="!canGoPrev"
           class="px-3 py-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          ‹ Trước
+          ‹ Prev
         </button>
         <button
           @click="nextPage"
           :disabled="!canGoNext"
           class="px-3 py-1.5 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Sau ›
+          Next ›
         </button>
       </div>
     </div>

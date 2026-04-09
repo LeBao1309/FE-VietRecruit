@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { companyService } from '@/services/companyService'
 import type { CompanySearchResponse } from '@/types/company'
 import type { SearchPageResponse } from '@/types/common'
@@ -32,7 +32,7 @@ async function search(page = 0): Promise<void> {
       size: pageSize,
     })
     if (result.error) {
-      ui.toastError('Tìm kiếm thất bại', result.error.message)
+      ui.toastError('Search failed', result.error.message)
       return
     }
     const data = result.data as SearchPageResponse<CompanySearchResponse>
@@ -84,8 +84,8 @@ onMounted(() => search(0))
     <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-10 md:px-8">
       <!-- Header -->
       <div class="mb-8 text-center">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Khám Phá Doanh Nghiệp</h1>
-        <p class="text-slate-500 mt-2 text-sm">Tìm hiểu về các công ty đang tuyển dụng tại VietRecruit</p>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Explore Companies</h1>
+        <p class="text-slate-500 mt-2 text-sm">Discover companies actively hiring on VietRecruit</p>
       </div>
 
       <!-- Search bar -->
@@ -100,14 +100,14 @@ onMounted(() => search(0))
           v-model="query"
           @input="onQueryInput"
           type="text"
-          placeholder="Tìm kiếm công ty..."
+          placeholder="Search for companies..."
           class="w-full pl-10 pr-4 py-3 text-sm border border-slate-200 rounded-xl bg-white shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all"
         />
       </div>
 
       <!-- Result count -->
       <p v-if="!loading" class="text-sm text-slate-500 mb-6 text-center">
-        Tìm thấy <span class="font-semibold text-slate-700">{{ totalElements }}</span> doanh nghiệp
+        Found <span class="font-semibold text-slate-700">{{ totalElements }}</span> compan{{ totalElements === 1 ? 'y' : 'ies' }}
       </p>
 
       <!-- Loading -->
@@ -118,8 +118,8 @@ onMounted(() => search(0))
       <!-- Empty state -->
       <BaseEmptyState
         v-else-if="results.length === 0"
-        title="Không tìm thấy doanh nghiệp"
-        description="Thử thay đổi từ khóa tìm kiếm."
+        title="No companies found"
+        description="Try adjusting your search keywords."
         icon="🏢"
       />
 
@@ -157,13 +157,13 @@ onMounted(() => search(0))
           <!-- Footer -->
           <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
             <span class="text-[10px] text-slate-400 font-medium">
-              Tham gia {{ company.createdAt ? new Date(company.createdAt).toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' }) : '—' }}
+              Joined {{ company.createdAt ? new Date(company.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—' }}
             </span>
             <a
               :href="`/jobs?company=${company.id}`"
               class="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors"
             >
-              Xem việc làm →
+              View jobs →
             </a>
           </div>
         </div>
@@ -176,7 +176,7 @@ onMounted(() => search(0))
           :disabled="!canGoPrev"
           class="px-4 py-2 border border-slate-200 rounded-lg bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
-          ‹ Trước
+          ‹ Previous
         </button>
         <span class="text-sm text-slate-500 font-medium">{{ currentPage + 1 }} / {{ totalPages }}</span>
         <button
@@ -184,7 +184,7 @@ onMounted(() => search(0))
           :disabled="!canGoNext"
           class="px-4 py-2 border border-slate-200 rounded-lg bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
-          Sau ›
+          Next ›
         </button>
       </div>
     </main>

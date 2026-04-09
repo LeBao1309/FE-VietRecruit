@@ -98,7 +98,7 @@ function handleApplyClick(): void {
    return
  }
  if (!auth.isCandidate) {
-   ui.toastWarning('Chỉ dành cho ứng viên', 'Chỉ ứng viên mới có thể ứng tuyển.')
+   ui.toastWarning('For candidates only', 'Only candidates can apply for jobs.')
    return
  }
  showApplyModal.value = true
@@ -113,13 +113,13 @@ async function submitApplication(): Promise<void> {
  })
  if (result.error) {
    if (result.error.code === 'APPLICATION_ALREADY_EXISTS') applied.value = true
-   ui.toastError('Ứng tuyển thất bại', result.error.message)
+   ui.toastError('Application failed', result.error.message)
    return
  }
  applied.value = true
  showApplyModal.value = false
  coverLetter.value = ''
- ui.toastSuccess('Ứng tuyển thành công!', 'Bạn sẽ nhận được thông báo khi có cập nhật.')
+ ui.toastSuccess('Application submitted!', 'You will be notified when there are updates.')
  } finally {
  applying.value = false
  }
@@ -205,14 +205,14 @@ onMounted(() => {
  <div class="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center shrink-0 text-teal-600">
  <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
  </div>
- <p class="text-sm font-semibold text-teal-800">Đăng nhập để xem mức lương, nhận gợi ý việc làm và nộp đơn ngay.</p>
+ <p class="text-sm font-semibold text-teal-800">Sign in to view salary, get job recommendations, and apply now.</p>
  </div>
  <div class="flex items-center gap-2 shrink-0">
  <router-link to="/login" class="px-4 py-2 text-sm font-bold text-teal-700 bg-white border border-teal-300 rounded-xl hover:bg-teal-50 transition-colors shadow-sm">
- Đăng Nhập
+ Sign In
  </router-link>
  <router-link to="/register" class="px-4 py-2 text-sm font-bold text-white bg-[#008c8c] rounded-xl hover:bg-[#007070] transition-colors shadow-sm">
- Đăng Ký
+ Register
  </router-link>
  </div>
  </div>
@@ -257,11 +257,11 @@ onMounted(() => {
    {{ aiMatchScore }}%
  </div>
  <div>
-   <p class="text-xs font-extrabold uppercase tracking-wider" :class="scoreTextClass(aiMatchScore)">Độ Phù Hợp AI</p>
+   <p class="text-xs font-extrabold uppercase tracking-wider" :class="scoreTextClass(aiMatchScore)">AI Match Score</p>
    <div class="flex items-center gap-1 mt-0.5">
    <span class="w-1.5 h-1.5 rounded-full" :class="scoreDotColor(aiMatchScore)"></span>
    <span class="text-xs font-bold text-slate-600">
-     {{ aiMatchScore >= 70 ? 'Rất phù hợp' : aiMatchScore >= 40 ? 'Khá phù hợp' : 'Ít phù hợp' }}
+     {{ aiMatchScore >= 70 ? 'Strong match' : aiMatchScore >= 40 ? 'Moderate match' : 'Low match' }}
    </span>
    </div>
  </div>
@@ -276,7 +276,7 @@ onMounted(() => {
  @click="handleApplyClick"
  class="btn-primary w-full py-4 flex items-center justify-center gap-2 text-lg font-bold shadow-teal-500/30 hover:shadow-teal-500/50 hover:-translate-y-0.5 transition-all"
  >
- Ứng Tuyển
+ Apply Now
  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
  </button>
  <div v-else class="text-center py-4 bg-emerald-50 rounded-2xl border border-emerald-100">
@@ -284,12 +284,12 @@ onMounted(() => {
  <span class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-1">
  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
  </span>
- Đã Ứng Tuyển
+ Applied
  </span>
- <p class="text-xs font-bold text-emerald-600/70 mt-2 px-4">Bạn sẽ nhận thông báo khi có cập nhật về đơn ứng tuyển.</p>
+ <p class="text-xs font-bold text-emerald-600/70 mt-2 px-4">You will be notified when there are updates on your application.</p>
  </div>
  <p v-if="!auth.isAuthenticated" class="text-xs font-bold text-slate-400 text-center mt-4">
- Bạn sẽ được yêu cầu đăng nhập để ứng tuyển.
+ You will be asked to sign in before applying.
  </p>
  </div>
 
@@ -319,7 +319,7 @@ onMounted(() => {
  </template>
  <router-link v-else to="/login" class="inline-flex items-center gap-1.5 mt-1 px-3 py-1 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold border border-slate-200 hover:border-teal-300 hover:text-teal-600 transition-colors">
  <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
- Đăng nhập để xem
+ Sign in to view
  </router-link>
  </div>
  </div>
@@ -385,21 +385,21 @@ onMounted(() => {
  <div v-if="showApplyModal" class="fixed inset-0 z-50 flex items-center justify-center">
  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showApplyModal = false" />
  <div class="relative premium-card w-full max-w-lg p-8 animate-slide-up mx-4 shadow-2xl">
- <h2 class="text-xl font-extrabold text-slate-900 mb-2">Ứng tuyển vào <span class="text-teal-600">{{ job?.title }}</span></h2>
+ <h2 class="text-xl font-extrabold text-slate-900 mb-2">Apply for <span class="text-teal-600">{{ job?.title }}</span></h2>
  <p class="text-sm font-medium text-slate-500 mb-6">
- CV mặc định của bạn sẽ được đính kèm tự động.
+ Your default CV will be attached automatically.
  </p>
 
  <form @submit.prevent="submitApplication" class="space-y-6">
  <div>
  <label for="cover-letter" class="block text-sm font-bold text-slate-700 mb-2">
- Thư Xin Việc <span class="text-slate-400 font-medium ml-1">(không bắt buộc)</span>
+ Cover Letter <span class="text-slate-400 font-medium ml-1">(optional)</span>
  </label>
  <textarea
  id="cover-letter"
  v-model="coverLetter"
  rows="6"
- placeholder="Viết thư xin việc ngắn gọn để giới thiệu bản thân và lý do bạn phù hợp với vị trí này…"
+ placeholder="Write a brief cover letter to introduce yourself and explain why you are a great fit for this position..."
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y"
  />
  </div>
@@ -410,7 +410,7 @@ onMounted(() => {
  @click="showApplyModal = false"
  class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
  >
- Hủy
+ Cancel
  </button>
  <button
  type="submit"
@@ -418,7 +418,7 @@ onMounted(() => {
  class="btn-primary py-2.5 px-6 flex items-center justify-center gap-2 min-w-[150px]"
  >
  <span v-if="applying" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ applying ? 'Đang gửi…' : 'Nộp Đơn Ứng Tuyển' }}
+ {{ applying ? 'Submitting...' : 'Submit Application' }}
  </button>
  </div>
  </form>

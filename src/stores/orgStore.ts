@@ -63,10 +63,10 @@ export const useOrgStore = defineStore('org', () => {
       const result = await departmentService.create(body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Tạo thất bại', result.error.message)
+        ui.toastError('Creation Failed', result.error.message)
         return false
       }
-      ui.toastSuccess('Thành công', 'Phòng ban đã được tạo.')
+      ui.toastSuccess('Success', 'Department created successfully.')
       await fetchDepartments(deptPage.value)
       return true
     } finally {
@@ -82,12 +82,12 @@ export const useOrgStore = defineStore('org', () => {
       const result = await departmentService.update(id, body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Cập nhật thất bại', result.error.message)
+        ui.toastError('Update Failed', result.error.message)
         return false
       }
       const idx = departments.value.findIndex((d) => d.id === id)
       if (idx !== -1 && result.data) departments.value[idx] = result.data
-      ui.toastSuccess('Thành công', 'Phòng ban đã được cập nhật.')
+      ui.toastSuccess('Success', 'Department updated successfully.')
       return true
     } finally {
       isSaving.value = false
@@ -102,11 +102,11 @@ export const useOrgStore = defineStore('org', () => {
       const result = await departmentService.delete(id)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Xóa thất bại', result.error.message)
+        ui.toastError('Delete Failed', result.error.message)
         return false
       }
       departments.value = departments.value.filter((d) => d.id !== id)
-      ui.toastSuccess('Thành công', 'Phòng ban đã được xóa.')
+      ui.toastSuccess('Success', 'Department deleted successfully.')
       return true
     } finally {
       isDeleting.value = false
@@ -141,10 +141,10 @@ export const useOrgStore = defineStore('org', () => {
       const result = await locationService.create(body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Tạo thất bại', result.error.message)
+        ui.toastError('Creation Failed', result.error.message)
         return false
       }
-      ui.toastSuccess('Thành công', 'Địa điểm đã được tạo.')
+      ui.toastSuccess('Success', 'Location created successfully.')
       await fetchLocations()
       return true
     } finally {
@@ -160,12 +160,12 @@ export const useOrgStore = defineStore('org', () => {
       const result = await locationService.update(id, body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Cập nhật thất bại', result.error.message)
+        ui.toastError('Update Failed', result.error.message)
         return false
       }
       const idx = locations.value.findIndex((l) => l.id === id)
       if (idx !== -1 && result.data) locations.value[idx] = result.data
-      ui.toastSuccess('Thành công', 'Địa điểm đã được cập nhật.')
+      ui.toastSuccess('Success', 'Location updated successfully.')
       return true
     } finally {
       isSaving.value = false
@@ -180,11 +180,11 @@ export const useOrgStore = defineStore('org', () => {
       const result = await locationService.delete(id)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Xóa thất bại', result.error.message)
+        ui.toastError('Delete Failed', result.error.message)
         return false
       }
       locations.value = locations.value.filter((l) => l.id !== id)
-      ui.toastSuccess('Thành công', 'Địa điểm đã được xóa.')
+      ui.toastSuccess('Success', 'Location deleted successfully.')
       return true
     } finally {
       isDeleting.value = false
@@ -219,10 +219,10 @@ export const useOrgStore = defineStore('org', () => {
       const result = await categoryService.create(body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Tạo thất bại', result.error.message)
+        ui.toastError('Creation Failed', result.error.message)
         return false
       }
-      ui.toastSuccess('Thành công', 'Danh mục đã được tạo.')
+      ui.toastSuccess('Success', 'Category created successfully.')
       await fetchCategories()
       return true
     } finally {
@@ -238,12 +238,12 @@ export const useOrgStore = defineStore('org', () => {
       const result = await categoryService.update(id, body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Cập nhật thất bại', result.error.message)
+        ui.toastError('Update Failed', result.error.message)
         return false
       }
       const idx = categories.value.findIndex((c) => c.id === id)
       if (idx !== -1 && result.data) categories.value[idx] = result.data
-      ui.toastSuccess('Thành công', 'Danh mục đã được cập nhật.')
+      ui.toastSuccess('Success', 'Category updated successfully.')
       return true
     } finally {
       isSaving.value = false
@@ -258,11 +258,11 @@ export const useOrgStore = defineStore('org', () => {
       const result = await categoryService.delete(id)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Xóa thất bại', result.error.message)
+        ui.toastError('Delete Failed', result.error.message)
         return false
       }
       categories.value = categories.value.filter((c) => c.id !== id)
-      ui.toastSuccess('Thành công', 'Danh mục đã được xóa.')
+      ui.toastSuccess('Success', 'Category deleted successfully.')
       return true
     } finally {
       isDeleting.value = false

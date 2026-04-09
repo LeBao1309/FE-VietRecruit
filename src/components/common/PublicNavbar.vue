@@ -13,10 +13,10 @@ const dashboardPath = computed(() => {
 })
 
 const dashboardLabel = computed(() => {
-  if (auth.isCandidate) return 'Bảng Điều Khiển Ứng Viên'
-  if (auth.isEmployer) return 'Bảng Điều Khiển Nhà Tuyển Dụng'
-  if (auth.isSystemAdmin) return 'Quản Trị Hệ Thống'
-  return 'Trang Chủ'
+  if (auth.isCandidate) return 'Candidate Dashboard'
+  if (auth.isEmployer) return 'Employer Dashboard'
+  if (auth.isSystemAdmin) return 'System Administration'
+  return 'Home'
 })
 </script>
 
@@ -38,27 +38,27 @@ const dashboardLabel = computed(() => {
           class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors"
           active-class="text-[#008c8c] font-bold"
         >
-          Tìm Việc
+          Find Jobs
         </router-link>
       </nav>
 
       <!-- Right: auth -->
       <div class="flex items-center gap-3">
-        <!-- Tìm Việc on mobile (hidden in center nav) -->
+        <!-- Find Jobs on mobile (hidden in center nav) -->
         <router-link
           to="/jobs"
           class="md:hidden text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors"
           active-class="text-[#008c8c] font-bold"
         >
-          Tìm Việc
+          Find Jobs
         </router-link>
 
         <template v-if="!auth.isAuthenticated">
           <router-link to="/login" class="text-sm font-bold text-slate-700 hover:text-[#008c8c] transition-colors hidden sm:block">
-            Đăng Nhập
+            Sign In
           </router-link>
           <router-link to="/register" class="btn-primary px-5 py-2 rounded-full shadow-sm hover:shadow-md shrink-0">
-            Bắt Đầu
+            Get Started
           </router-link>
         </template>
 
@@ -92,14 +92,14 @@ const dashboardLabel = computed(() => {
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.193 23.193 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                Xem Việc Làm
+                View Jobs
               </router-link>
               <div class="border-t border-slate-100 mt-1 pt-1">
                 <button @click="auth.logout(); userMenuOpen = false" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  Đăng Xuất
+                  Sign Out
                 </button>
               </div>
             </div>

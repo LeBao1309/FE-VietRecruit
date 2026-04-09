@@ -13,21 +13,21 @@ const rawPlans = ref<PlanResponse[]>([])
 function deriveFeatures(plan: PlanResponse): string[] {
   const features: string[] = []
   if (plan.maxActiveJobs === 0 || plan.maxActiveJobs < 0) {
-    features.push('Tin tuyển dụng không giới hạn')
+    features.push('Unlimited job listings')
   } else {
-    features.push(`Tối đa ${plan.maxActiveJobs} tin tuyển dụng`)
+    features.push(`Up to ${plan.maxActiveJobs} job listings`)
   }
-  if (plan.resumeAccess) features.push('Truy cập hồ sơ')
-  if (plan.aiMatching) features.push('Đề xuất bằng AI')
-  if (plan.priorityListing) features.push('Tin tuyển dụng nổi bật')
+  if (plan.resumeAccess) features.push('Resume access')
+  if (plan.aiMatching) features.push('AI-powered recommendations')
+  if (plan.priorityListing) features.push('Featured job listings')
   return features
 }
 
 function deriveButtonText(code: string): string {
   const c = code.toUpperCase()
-  if (c.includes('FREE')) return 'Bắt Đầu Miễn Phí'
-  if (c.includes('ENTERPRISE')) return 'Liên Hệ Bán Hàng'
-  return 'Dùng Thử'
+  if (c.includes('FREE')) return 'Get Started Free'
+  if (c.includes('ENTERPRISE')) return 'Contact Sales'
+  return 'Start Free Trial'
 }
 
 
@@ -56,9 +56,9 @@ onMounted(async () => {
  <!-- Navbar -->
  <PublicNavbar>
  <template #nav>
- <a href="#features" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Tính Năng</a>
- <a href="#demo" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Sản Phẩm</a>
- <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Bảng Giá</a>
+ <a href="#features" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Features</a>
+ <a href="#demo" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Product</a>
+ <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-[#008c8c] transition-colors">Pricing</a>
  </template>
  </PublicNavbar>
 
@@ -66,20 +66,20 @@ onMounted(async () => {
  <section class="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-100 text-teal-700 text-sm font-semibold mb-8 animate-fade-in">
  <span class="flex h-2 w-2 rounded-full bg-teal-500"></span>
- VietRecruit 2.0 đã ra mắt
+ VietRecruit 2.0 is live
  </div>
  <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6 max-w-4xl mx-auto">
- Tuyển dụng nhân tài, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#008c8c] to-teal-400">nhanh & thông minh hơn.</span>
+ Hire top talent, <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#008c8c] to-teal-400">faster & smarter.</span>
  </h1>
  <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
- Hệ thống quản lý tuyển dụng tích hợp AI toàn diện dành cho các đội ngũ hiện đại. Tối ưu hóa quy trình từ đăng tin đến gửi thư mời nhận việc.
+ A comprehensive AI-powered applicant tracking system built for modern teams. Streamline your workflow from job posting to offer letter.
  </p>
  <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
  <router-link to="/register" class="btn-primary text-lg px-8 py-4 rounded-full w-full sm:w-auto shadow-xl shadow-teal-500/20 hover:-translate-y-1">
- Bắt đầu miễn phí
+ Get started for free
  </router-link>
  <router-link to="/jobs" class="btn-secondary text-lg px-8 py-4 rounded-full w-full sm:w-auto border border-slate-200">
- Xem tin tuyển dụng
+ Browse job listings
  </router-link>
  </div>
  </section>
@@ -90,13 +90,13 @@ onMounted(async () => {
    <div class="text-center mb-12">
      <div class="inline-flex items-center gap-2 bg-[#e0f4f4] text-[#007070] text-xs font-bold px-3 py-1 rounded-full mb-4">
        <span class="w-1.5 h-1.5 rounded-full bg-[#008c8c] animate-pulse"></span>
-       Xem Demo
+       Live Demo
      </div>
      <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-       Một nền tảng cho <span class="bg-gradient-to-r from-[#008c8c] to-teal-400 bg-clip-text text-transparent">mọi</span> vai trò
+       One platform for <span class="bg-gradient-to-r from-[#008c8c] to-teal-400 bg-clip-text text-transparent">every</span> role
      </h2>
      <p class="text-slate-500 text-base max-w-xl mx-auto">
-       Từ chấm điểm ứng viên bằng AI đến theo dõi pipeline thời gian thực — VietRecruit giúp cả đội ngũ của bạn luôn đồng bộ.
+       From AI candidate scoring to real-time pipeline tracking — VietRecruit keeps your entire team in sync.
      </p>
    </div>
 
@@ -119,7 +119,7 @@ onMounted(async () => {
 
       <!-- Tag -->
       <span class="inline-flex items-center gap-1.5 bg-[#c4ecec] text-[#007070] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-4">
-        ✦ Điểm AI
+        ✦ AI Score
       </span>
 
       <!-- Score ring + subject -->
@@ -138,18 +138,18 @@ onMounted(async () => {
         <!-- Meta -->
         <div>
           <div class="text-sm font-bold text-slate-900 mb-0.5">Nguyen Van A</div>
-          <div class="text-[10px] text-slate-500 leading-snug mb-2">Kỹ Sư Frontend<br>TechCorp Vietnam</div>
-          <span class="inline-flex items-center gap-1 bg-[#e0f4f4] border border-[#b2e0e0] text-[#007070] text-[9px] font-bold px-2 py-0.5 rounded">✦ AI Đề Xuất</span>
+          <div class="text-[10px] text-slate-500 leading-snug mb-2">Frontend Engineer<br>TechCorp Vietnam</div>
+          <span class="inline-flex items-center gap-1 bg-[#e0f4f4] border border-[#b2e0e0] text-[#007070] text-[9px] font-bold px-2 py-0.5 rounded">✦ AI Recommended</span>
         </div>
       </div>
 
       <!-- Score bars -->
       <div class="space-y-2.5 mb-5">
         <div v-for="bar in [
-          { label: 'Kỹ Năng Chuyên Môn', value: 9,  max: 10,  pct: '90%' },
-          { label: 'Thái Độ',            value: 8,  max: 10,  pct: '80%' },
-          { label: 'Tiếng Anh',          value: 7,  max: 10,  pct: '70%' },
-          { label: 'Khớp CV',            value: 92, max: 100, pct: '92%', suffix: '%' },
+          { label: 'Technical Skills',   value: 9,  max: 10,  pct: '90%' },
+          { label: 'Work Attitude',      value: 8,  max: 10,  pct: '80%' },
+          { label: 'English',            value: 7,  max: 10,  pct: '70%' },
+          { label: 'CV Match',           value: 92, max: 100, pct: '92%', suffix: '%' },
         ]" :key="bar.label">
           <div class="flex justify-between mb-1">
             <span class="text-[10px] text-slate-500 font-semibold">{{ bar.label }}</span>
@@ -162,12 +162,12 @@ onMounted(async () => {
       </div>
 
       <!-- Candidate ranking list -->
-      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-2">3 ứng viên đã phân tích</div>
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-2">3 candidates analyzed</div>
       <div class="space-y-2">
         <div v-for="cand in [
-          { initials: 'NA', name: 'Nguyen Van A', role: 'Kỹ Sư Frontend',     pct: '87%', bg: 'bg-[#e0f4f4]', color: 'text-[#008c8c]' },
-          { initials: 'TL', name: 'Tran Le B',    role: 'Lập Trình Web',      pct: '74%', bg: 'bg-violet-100',  color: 'text-violet-600' },
-          { initials: 'PD', name: 'Pham Duc C',   role: 'Chuyên Viên Vue.js', pct: '61%', bg: 'bg-sky-100',     color: 'text-sky-600' },
+          { initials: 'NA', name: 'Nguyen Van A', role: 'Frontend Engineer',  pct: '87%', bg: 'bg-[#e0f4f4]', color: 'text-[#008c8c]' },
+          { initials: 'TL', name: 'Tran Le B',    role: 'Web Developer',      pct: '74%', bg: 'bg-violet-100',  color: 'text-violet-600' },
+          { initials: 'PD', name: 'Pham Duc C',   role: 'Vue.js Specialist',  pct: '61%', bg: 'bg-sky-100',     color: 'text-sky-600' },
         ]" :key="cand.initials"
           class="flex items-center gap-2.5 p-2 bg-white border border-slate-200 rounded-xl hover:border-[#008c8c]/30 transition-colors">
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0" :class="[cand.bg, cand.color]">
@@ -185,31 +185,31 @@ onMounted(async () => {
     <!-- ② Job Board — cols 2–3, row 1 -->
     <div class="md:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#008c8c]/30 transition-all">
       <span class="inline-flex items-center gap-1.5 bg-[#e0f4f4] text-[#008c8c] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-3">
-        Bảng Việc Làm
+        Job Board
       </span>
 
       <!-- Mock search bar -->
       <div class="flex items-stretch bg-slate-50 border border-slate-200 rounded-xl overflow-hidden mb-4">
         <div class="flex items-center gap-2 flex-1 px-3 py-2.5 border-r border-slate-200">
           <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <span class="text-[11px] text-slate-400">Tiêu đề, kỹ năng, từ khóa…</span>
+          <span class="text-[11px] text-slate-400">Title, skills, keywords…</span>
         </div>
         <div class="flex items-center gap-1.5 px-3 py-2.5 border-r border-slate-200">
           <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-          <span class="text-[11px] text-slate-400">TP. Hồ Chí Minh</span>
+          <span class="text-[11px] text-slate-400">Ho Chi Minh City</span>
         </div>
         <div class="flex items-center px-3 py-2.5 bg-[#008c8c] text-white text-[10px] font-bold cursor-default">
-          Tìm Kiếm
+          Search
         </div>
       </div>
 
       <!-- Job chips -->
       <div class="flex flex-wrap gap-2">
         <div v-for="job in [
-          { title: 'Kỹ Sư Frontend',           salary: '$3k–5k',    loc: 'HCMC',   color: '#008c8c' },
-          { title: 'Quản Lý Sản Phẩm',         salary: 'Thỏa thuận', loc: 'Remote', color: '#2dd4bf' },
-          { title: 'Kỹ Sư Dữ Liệu',            salary: '$2.5k–4k',  loc: 'Hanoi',  color: '#6366f1' },
-          { title: 'Thiết Kế UX / UI',         salary: '$2k–3.5k',  loc: 'HCMC',   color: '#f59e0b' },
+          { title: 'Frontend Engineer',          salary: '$3k–5k',     loc: 'HCMC',   color: '#008c8c' },
+          { title: 'Product Manager',           salary: 'Negotiable', loc: 'Remote', color: '#2dd4bf' },
+          { title: 'Data Engineer',             salary: '$2.5k–4k',   loc: 'Hanoi',  color: '#6366f1' },
+          { title: 'UX / UI Designer',          salary: '$2k–3.5k',   loc: 'HCMC',   color: '#f59e0b' },
         ]" :key="job.title"
           class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-600 hover:border-[#008c8c]/40 transition-colors">
           <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ background: job.color }"></span>
@@ -218,7 +218,7 @@ onMounted(async () => {
           <span class="bg-slate-100 text-slate-500 text-[9px] px-1.5 py-0.5 rounded">{{ job.loc }}</span>
         </div>
         <router-link to="/jobs" class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-400 italic hover:border-[#008c8c]/30 transition-colors">
-          +338 việc làm mở →
+          +338 open positions →
         </router-link>
       </div>
     </div>
@@ -226,15 +226,15 @@ onMounted(async () => {
     <!-- ③ Candidate Pipeline — col 2, row 2 -->
     <div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#008c8c]/30 transition-all">
       <span class="inline-flex items-center gap-1.5 bg-[#e0f4f4] text-[#008c8c] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-3">
-        Ứng Viên
+        Candidate
       </span>
-      <div class="text-xs font-bold text-slate-900 mb-3">Hồ Sơ Của Tôi</div>
+      <div class="text-xs font-bold text-slate-900 mb-3">My Applications</div>
 
       <div class="divide-y divide-slate-50">
         <div v-for="app in [
-          { title: 'Kỹ Sư Frontend',        company: 'TechCorp · Apr 1',    status: 'INTERVIEW', badge: 'Phỏng Vấn', badgeClass: 'bg-[#e0f4f4] text-[#008c8c]' },
-          { title: 'Thiết Kế Sản Phẩm',     company: 'Saola Studio · Mar 20', status: 'OFFER',   badge: 'Đã nhận Offer 🎉',  badgeClass: 'bg-green-50 text-green-700' },
-          { title: 'Kỹ Sư Backend',         company: 'VietCode · Apr 3',    status: 'NEW',       badge: 'Đã ứng tuyển',   badgeClass: 'bg-amber-50 text-amber-700' },
+          { title: 'Frontend Engineer',      company: 'TechCorp · Apr 1',      status: 'INTERVIEW', badge: 'Interview',        badgeClass: 'bg-[#e0f4f4] text-[#008c8c]' },
+          { title: 'Product Designer',      company: 'Saola Studio · Mar 20', status: 'OFFER',     badge: 'Offer Received 🎉', badgeClass: 'bg-green-50 text-green-700' },
+          { title: 'Backend Engineer',      company: 'VietCode · Apr 3',      status: 'NEW',       badge: 'Applied',          badgeClass: 'bg-amber-50 text-amber-700' },
         ]" :key="app.title" class="py-2.5 first:pt-0 last:pb-0">
           <div class="flex items-start justify-between mb-1.5">
             <div>
@@ -251,15 +251,15 @@ onMounted(async () => {
     <!-- ④ Recruiter Job List — col 3, row 2 -->
     <div class="bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-[#008c8c]/30 transition-all">
       <span class="inline-flex items-center gap-1.5 bg-[#e0f4f4] text-[#008c8c] text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md mb-3">
-        Nhà Tuyển Dụng
+        Recruiter
       </span>
-      <div class="text-xs font-bold text-slate-900 mb-3">Danh Sách Việc Làm</div>
+      <div class="text-xs font-bold text-slate-900 mb-3">Job Listings</div>
 
       <!-- Quota bar -->
       <div class="mb-3">
         <div class="flex justify-between items-center mb-1">
-          <span class="text-[10px] text-slate-500 font-semibold">Hạn mức đã dùng</span>
-          <span class="text-[10px] font-extrabold text-slate-700">7 / 10 tin</span>
+          <span class="text-[10px] text-slate-500 font-semibold">Quota used</span>
+          <span class="text-[10px] font-extrabold text-slate-700">7 / 10 listings</span>
         </div>
         <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div class="h-full w-[70%] rounded-full bg-gradient-to-r from-[#008c8c] to-teal-400"></div>
@@ -269,9 +269,9 @@ onMounted(async () => {
       <!-- Job rows -->
       <div class="space-y-1.5">
         <div v-for="job in [
-          { title: 'Kỹ Sư Trưởng',    apps: '24 ứng viên', pill: 'Đang mở', pillClass: 'bg-green-50 text-green-700' },
-          { title: 'Nhóm Trưởng SP',  apps: '7 ứng viên',  pill: 'Bản nháp',     pillClass: 'bg-slate-100 text-slate-500' },
-          { title: 'Phân Tích DL',    apps: '52 ứng viên', pill: 'Đã đóng',    pillClass: 'bg-red-50 text-red-600' },
+          { title: 'Lead Engineer',    apps: '24 applicants', pill: 'Open',   pillClass: 'bg-green-50 text-green-700' },
+          { title: 'PM Team Lead',    apps: '7 applicants',  pill: 'Draft',   pillClass: 'bg-slate-100 text-slate-500' },
+          { title: 'Data Analyst',    apps: '52 applicants', pill: 'Closed',  pillClass: 'bg-red-50 text-red-600' },
         ]" :key="job.title"
           class="flex items-center justify-between px-2.5 py-2 bg-slate-50 rounded-lg">
           <div>
@@ -290,25 +290,25 @@ onMounted(async () => {
  <section id="features" class="py-24 bg-slate-50 relative border-t border-slate-200/50">
  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  <div class="text-center mb-16">
- <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Mọi thứ bạn cần để phát triển đội ngũ</h2>
- <p class="text-lg text-slate-500 max-w-2xl mx-auto">Công cụ mạnh mẽ được thiết kế để giảm thời gian tuyển dụng và cải thiện trải nghiệm ứng viên.</p>
+ <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Everything you need to grow your team</h2>
+ <p class="text-lg text-slate-500 max-w-2xl mx-auto">Powerful tools designed to reduce time-to-hire and improve the candidate experience.</p>
  </div>
  
  <div class="grid md:grid-cols-3 gap-8">
  <!-- Feat 1 -->
  <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
- <h3 class="text-xl font-bold text-slate-900 mb-3">Công Cụ Tích Hợp AI</h3>
- <p class="text-slate-500 leading-relaxed">Tạo ngay Mô tả công việc, câu hỏi phỏng vấn và đánh giá CV sử dụng AI tạo sinh.</p>
+ <h3 class="text-xl font-bold text-slate-900 mb-3">Built-in AI Tools</h3>
+ <p class="text-slate-500 leading-relaxed">Instantly generate job descriptions, interview questions, and CV assessments using generative AI.</p>
  </div>
  <!-- Feat 2 -->
  <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
- <h3 class="text-xl font-bold text-slate-900 mb-3">Phối Hợp Tuyển Dụng</h3>
- <p class="text-slate-500 leading-relaxed">Đồng bộ đội ngũ tuyển dụng với bảng điểm thời gian thực, theo dõi phỏng vấn và nhận thông báo.</p>
+ <h3 class="text-xl font-bold text-slate-900 mb-3">Hiring Collaboration</h3>
+ <p class="text-slate-500 leading-relaxed">Keep your hiring team aligned with real-time scorecards, interview tracking, and instant notifications.</p>
  </div>
  <!-- Feat 3 -->
  <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
- <h3 class="text-xl font-bold text-slate-900 mb-3">Quản Lý Offer</h3>
- <p class="text-slate-500 leading-relaxed">Dễ dàng gửi thư mời điện tử an toàn và cho phép ứng viên chấp nhận/từ chối với một cú nhấp chuột.</p>
+ <h3 class="text-xl font-bold text-slate-900 mb-3">Offer Management</h3>
+ <p class="text-slate-500 leading-relaxed">Effortlessly send secure digital offer letters and let candidates accept or decline with a single click.</p>
  </div>
  </div>
  </div>
@@ -317,13 +317,13 @@ onMounted(async () => {
  <!-- 4. Pricing / Subscription -->
  <section id="pricing" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
  <div class="text-center mb-16">
- <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Bảng giá đơn giản, minh bạch</h2>
- <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-8">Chọn gói phù hợp với quy mô doanh nghiệp của bạn.</p>
+ <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Simple, transparent pricing</h2>
+ <p class="text-lg text-slate-500 max-w-2xl mx-auto mb-8">Choose the plan that fits your business size.</p>
  
  <div class="inline-flex items-center bg-slate-100 p-1 rounded-xl">
- <button @click="isAnnual = false" :class="!isAnnual ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'" class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all">Hàng tháng</button>
+ <button @click="isAnnual = false" :class="!isAnnual ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'" class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all">Monthly</button>
  <button @click="isAnnual = true" :class="isAnnual ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'" class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all">
- Hàng năm <span class="text-[#008c8c] text-xs ml-1">-20%</span>
+ Annual <span class="text-[#008c8c] text-xs ml-1">-20%</span>
  </button>
  </div>
  </div>
@@ -337,7 +337,7 @@ onMounted(async () => {
 
   <!-- Popular badge -->
   <div v-if="plan.isPopular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#008c8c] text-white px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
-  Phổ biến nhất
+  Most Popular
   </div>
 
   <!-- Plan name + desc -->
@@ -352,10 +352,10 @@ onMounted(async () => {
    <span class="text-3xl font-extrabold" :class="plan.isPopular ? 'text-[#008c8c]' : 'text-slate-900'">
    {{ ((isAnnual ? plan.priceAnnual : plan.priceMonthly) ?? 0).toLocaleString('vi-VN') }}₫
    </span>
-   <span class="text-slate-400 text-xs font-medium">/tháng</span>
+   <span class="text-slate-400 text-xs font-medium">/month</span>
   </div>
   <p v-if="isAnnual" class="text-[11px] text-slate-400 mt-0.5">
-   Thanh toán {{ ((plan.priceAnnual ?? 0) * 12).toLocaleString('vi-VN') }}₫/năm
+   Billed {{ ((plan.priceAnnual ?? 0) * 12).toLocaleString('vi-VN') }}₫/year
   </p>
   </div>
 

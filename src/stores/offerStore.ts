@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { OfferStatus } from '@/types/enums'
 import type { OfferCreateRequest, OfferResponse } from '@/types/application'
 import { offerService } from '@/services/offerService'
 import { useUiStore } from './uiStore'

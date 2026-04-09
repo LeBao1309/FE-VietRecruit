@@ -74,9 +74,9 @@ onMounted(async () => {
  <!-- Header -->
  <div class="mb-8">
  <h1 class="text-3xl font-extrabold text-slate-900 mb-2">
- Chào mừng trở lại, {{ auth.user?.fullName?.split(' ')[0] ?? 'Ứng Viên' }}
+ Welcome back, {{ auth.user?.fullName?.split(' ')[0] ?? 'Candidate' }}
  </h1>
- <p class="text-sm font-medium text-slate-500">Dưới đây là tổng quan về hoạt động tìm kiếm việc làm của bạn.</p>
+ <p class="text-sm font-medium text-slate-500">Here is an overview of your job search activity.</p>
  </div>
 
  <!-- Loading -->
@@ -91,15 +91,15 @@ onMounted(async () => {
  <!-- Stats -->
  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
  <div class="premium-card p-6 flex flex-col justify-between">
- <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Đơn Ứng Tuyển</span>
+ <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Applications</span>
  <p class="text-4xl font-black text-slate-900 mt-2">{{ applications.length }}</p>
  </div>
  <div class="premium-card p-6 flex flex-col justify-between">
- <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Việc Làm Đề Xuất</span>
+ <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recommended Jobs</span>
  <p class="text-4xl font-black text-teal-600 mt-2">{{ recommendations.length }}</p>
  </div>
  <div class="premium-card p-6 flex flex-col justify-between">
- <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Độ Hoàn Thiện Hồ Sơ</span>
+ <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Profile Completion</span>
  <div class="flex items-center gap-2 mt-2">
  <p class="text-4xl font-black" :class="profileCompletion >= 80 ? 'text-emerald-500' : profileCompletion >= 50 ? 'text-amber-500' : 'text-rose-500'">
  {{ profileCompletion }}%
@@ -111,9 +111,9 @@ onMounted(async () => {
  <!-- Profile completion CTA -->
  <div v-if="profileCompletion < 80" class="premium-card bg-teal-50 border-teal-200 p-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
  <div>
- <p class="text-base font-bold text-slate-900 mb-1">Hoàn thiện hồ sơ của bạn</p>
+ <p class="text-base font-bold text-slate-900 mb-1">Complete your profile</p>
  <p class="text-sm font-medium text-slate-500">
- {{ !hasCv ? 'Tải lên CV và điền thông tin chi tiết' : 'Điền thêm thông tin chi tiết' }} để gợi ý việc làm tốt hơn.
+ {{ !hasCv ? 'Upload your CV and fill in your details' : 'Fill in more details' }} for better job recommendations.
  </p>
  </div>
  <div class="flex gap-3 shrink-0">
@@ -122,13 +122,13 @@ onMounted(async () => {
  to="/candidate/cv"
  class="btn-primary py-2"
  >
- Tải Lên CV
+ Upload CV
  </router-link>
  <router-link
  to="/candidate/candidate-profile"
  class="btn-secondary py-2"
  >
- Chỉnh Sửa Hồ Sơ
+ Edit Profile
  </router-link>
  </div>
  </div>
@@ -138,16 +138,16 @@ onMounted(async () => {
  <!-- Recent Applications -->
  <div class="premium-card flex flex-col">
  <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
- <h2 class="text-base font-bold text-slate-900 ">Đơn Ứng Tuyển Gần Đây</h2>
+ <h2 class="text-base font-bold text-slate-900 ">Recent Applications</h2>
  <router-link to="/candidate/applications" class="text-xs font-bold text-teal-600 hover:text-teal-700 :text-teal-300 transition-colors">
- Xem Tất Cả &rarr;
+ View All &rarr;
  </router-link>
  </div>
  <div v-if="applications.length === 0" class="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[200px]">
  <span class="text-4xl mb-3 opacity-50">📋</span>
- <p class="text-sm font-medium text-slate-500 mb-4">Chưa có đơn ứng tuyển nào.</p>
+ <p class="text-sm font-medium text-slate-500 mb-4">No applications yet.</p>
  <router-link to="/jobs" class="btn-primary py-2">
- Xem Việc Làm
+ Browse Jobs
  </router-link>
  </div>
  <div v-else class="flex-1">
@@ -176,14 +176,14 @@ onMounted(async () => {
  <!-- Top Recommendations -->
  <div class="premium-card flex flex-col">
  <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
- <h2 class="text-base font-bold text-slate-900 ">Việc Làm Phù Hợp Nhất</h2>
+ <h2 class="text-base font-bold text-slate-900 ">Top Job Matches</h2>
  <router-link to="/candidate/recommendations" class="text-xs font-bold text-teal-600 hover:text-teal-700 :text-teal-300 transition-colors">
- Xem Tất Cả &rarr;
+ View All &rarr;
  </router-link>
  </div>
  <div v-if="recommendations.length === 0" class="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[200px]">
  <span class="text-4xl mb-3 opacity-50">✨</span>
- <p class="text-sm font-medium text-slate-500">Hoàn thiện hồ sơ để xem các đề xuất phù hợp.</p>
+ <p class="text-sm font-medium text-slate-500">Complete your profile to see relevant recommendations.</p>
  </div>
  <div v-else class="flex-1">
  <div
@@ -208,16 +208,16 @@ onMounted(async () => {
 
  <!-- Quick Actions -->
  <div class="premium-card p-6">
- <h2 class="text-base font-bold text-slate-900 mb-4">Thao Tác Nhanh</h2>
+ <h2 class="text-base font-bold text-slate-900 mb-4">Quick Actions</h2>
  <div class="flex items-center gap-3 flex-wrap">
  <router-link to="/jobs" class="btn-primary py-2 px-6">
- Xem Việc Làm
+ Browse Jobs
  </router-link>
  <router-link to="/candidate/cv" class="btn-secondary py-2 px-6">
- Quản Lý CV
+ Manage CV
  </router-link>
  <router-link to="/candidate/salary-benchmark" class="btn-secondary py-2 px-6 bg-slate-50 hover:bg-slate-100 :bg-slate-700">
- Mức Lương Tham Khảo
+ Salary Benchmark
  </router-link>
  </div>
  </div>

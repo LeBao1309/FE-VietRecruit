@@ -100,7 +100,7 @@ async function loadProfile(): Promise<void> {
  isOpenToWork: p.isOpenToWork,
  }
  } else {
- ui.toastError('Lỗi hồ sơ', result.error?.message)
+ ui.toastError('Profile error', result.error?.message)
  }
  } finally {
  loading.value = false
@@ -131,9 +131,9 @@ async function handleSave(): Promise<void> {
  const result = await candidateService.updateProfile(payload)
  if (result.data) {
  profile.value = result.data
- ui.toastSuccess('Hồ sơ đã cập nhật', 'Thay đổi của bạn đã được lưu.')
+ ui.toastSuccess('Profile updated', 'Your changes have been saved.')
  } else {
- ui.toastError('Cập nhật thất bại', result.error?.message)
+ ui.toastError('Update failed', result.error?.message)
  }
  } finally {
  saving.value = false
@@ -151,12 +151,12 @@ onMounted(loadProfile)
  <div class="max-w-4xl mx-auto px-6 py-10">
  <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
  <div>
- <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Hồ Sơ Ứng Viên</h1>
- <p class="text-sm font-medium text-slate-500">Hoàn thiện hồ sơ để được các công ty săn đón và có nhiều lựa chọn công việc tốt hơn.</p>
+ <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Candidate Profile</h1>
+ <p class="text-sm font-medium text-slate-500">Complete your profile to get discovered by companies and access better job opportunities.</p>
  </div>
  <!-- Add Improve CV button here -->
  <router-link to="/candidate/cv" class="btn-secondary flex items-center gap-2 shrink-0 border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-700 :bg-teal-900/50 transition-colors">
- <span class="text-lg">✨</span> Nâng Cấp CV
+ <span class="text-lg">✨</span> Improve CV
  </router-link>
  </div>
 
@@ -174,26 +174,26 @@ onMounted(loadProfile)
  <form v-else @submit.prevent="handleSave" class="space-y-8">
  <!-- Headline & Summary -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Thông Tin Cá Nhân</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">Personal Information</h2>
 
  <div>
- <label for="headline" class="block text-sm font-bold text-slate-700 mb-2">Tiêu Đề Nghề Nghiệp</label>
+ <label for="headline" class="block text-sm font-bold text-slate-700 mb-2">Professional Headline</label>
  <input
  id="headline"
  v-model="form.headline"
  type="text"
- placeholder="VD: Full-Stack Developer | 5 năm kinh nghiệm"
+ placeholder="e.g. Full-Stack Developer | 5 years of experience"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
 
  <div>
- <label for="summary" class="block text-sm font-bold text-slate-700 mb-2">Tóm Tắt</label>
+ <label for="summary" class="block text-sm font-bold text-slate-700 mb-2">Summary</label>
  <textarea
  id="summary"
  v-model="form.summary"
  rows="4"
- placeholder="Tóm tắt ngắn gọn về kinh nghiệm, thế mạnh và mục tiêu nghề nghiệp của bạn…"
+ placeholder="A brief summary of your experience, strengths, and career goals…"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y font-medium min-h-[100px]"
  />
  </div>
@@ -211,18 +211,18 @@ onMounted(loadProfile)
  />
  </div>
  <div>
- <span class="block text-sm font-bold text-slate-900 leading-tight">Sẵn sáng làm việc</span>
- <span class="block text-xs font-medium text-slate-500">Nhà tuyển dụng sẽ có thể tìm thấy bạn</span>
+ <span class="block text-sm font-bold text-slate-900 leading-tight">Open to Work</span>
+ <span class="block text-xs font-medium text-slate-500">Recruiters will be able to find you</span>
  </div>
  </label>
  </div>
 
  <!-- Skills -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Kinh Nghiệm & Kỹ Năng</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">Experience & Skills</h2>
 
  <div>
- <label for="skills-input" class="block text-sm font-bold text-slate-700 mb-2">Kỹ Năng</label>
+ <label for="skills-input" class="block text-sm font-bold text-slate-700 mb-2">Skills</label>
  <div class="flex flex-wrap items-center gap-2 min-h-[48px] px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus-within:bg-white :bg-slate-900 focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-500/10 transition-all">
  <span
  v-for="(skill, i) in form.skills"
@@ -238,33 +238,33 @@ onMounted(loadProfile)
  @keydown="onSkillKeydown"
  @blur="addSkill"
  type="text"
- placeholder="Nhập kỹ năng và nhấn Enter…"
+ placeholder="Type a skill and press Enter…"
  class="flex-1 min-w-[120px] text-sm font-medium outline-none bg-transparent px-2"
  />
  </div>
- <p class="text-[11px] font-medium text-slate-400 mt-2">Nhấn phím Enter hoặc dấu phẩy để thêm. Nhấn phím xóa lùi chữ cuối để loại bỏ.</p>
+ <p class="text-[11px] font-medium text-slate-400 mt-2">Press Enter or comma to add. Press Backspace to remove the last tag.</p>
  </div>
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
- <label for="desired-position" class="block text-sm font-bold text-slate-700 mb-2">Vị Trí Mong Muốn</label>
+ <label for="desired-position" class="block text-sm font-bold text-slate-700 mb-2">Desired Position</label>
  <input
  id="desired-position"
  v-model="form.desiredPosition"
  type="text"
- placeholder="VD: Frontend Developer"
+ placeholder="e.g. Frontend Developer"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
  <div>
- <label for="position-level" class="block text-sm font-bold text-slate-700 mb-2">Cấp Bậc Quan Tâm</label>
+ <label for="position-level" class="block text-sm font-bold text-slate-700 mb-2">Desired Level</label>
  <div class="relative">
  <select
  id="position-level"
  v-model="form.desiredPositionLevel"
  class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="" disabled>— Lựa Chọn —</option>
+ <option value="" disabled>— Select —</option>
  <option v-for="level in positionLevels" :key="level" :value="level">{{ formatLabel(level) }}</option>
  </select>
  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
@@ -274,25 +274,25 @@ onMounted(loadProfile)
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
- <label for="years-exp" class="block text-sm font-bold text-slate-700 mb-2">Thâm Niên</label>
+ <label for="years-exp" class="block text-sm font-bold text-slate-700 mb-2">Years of Experience</label>
  <input
  id="years-exp"
  v-model="form.yearsOfExperience"
  type="text"
  inputmode="numeric"
- placeholder="VD: 5"
+ placeholder="e.g. 5"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
  <div>
- <label for="primary-lang" class="block text-sm font-bold text-slate-700 mb-2">Ngoại Ngữ Chính</label>
+ <label for="primary-lang" class="block text-sm font-bold text-slate-700 mb-2">Primary Language</label>
  <div class="relative">
  <select
  id="primary-lang"
  v-model="form.primaryLanguage"
  class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="" disabled>— Lựa Chọn —</option>
+ <option value="" disabled>— Select —</option>
  <option v-for="lang in languages" :key="lang" :value="lang">{{ lang }}</option>
  </select>
  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
@@ -303,30 +303,30 @@ onMounted(loadProfile)
 
  <!-- Education & Work Preferences -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Học Vấn & Tuyển Dụng</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">Education & Hiring Preferences</h2>
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
- <label for="edu-level" class="block text-sm font-bold text-slate-700 mb-2">Trình Độ Học Vấn</label>
+ <label for="edu-level" class="block text-sm font-bold text-slate-700 mb-2">Education Level</label>
  <div class="relative">
  <select
  id="edu-level"
  v-model="form.educationLevel"
  class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="" disabled>— Lựa Chọn —</option>
+ <option value="" disabled>— Select —</option>
  <option v-for="level in educationLevels" :key="level" :value="level">{{ formatLabel(level) }}</option>
  </select>
  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
  </div>
  </div>
  <div>
- <label for="edu-major" class="block text-sm font-bold text-slate-700 mb-2">Chuyên Ngành</label>
+ <label for="edu-major" class="block text-sm font-bold text-slate-700 mb-2">Major / Field of Study</label>
  <input
  id="edu-major"
  v-model="form.educationMajor"
  type="text"
- placeholder="VD: Computer Science"
+ placeholder="e.g. Computer Science"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
@@ -334,21 +334,21 @@ onMounted(loadProfile)
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
- <label for="work-type" class="block text-sm font-bold text-slate-700 mb-2">Hình Thức Công Việc</label>
+ <label for="work-type" class="block text-sm font-bold text-slate-700 mb-2">Work Type</label>
  <div class="relative">
  <select
  id="work-type"
  v-model="form.workType"
  class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
  >
- <option value="" disabled>— Lựa Chọn —</option>
+ <option value="" disabled>— Select —</option>
  <option v-for="t in workTypes" :key="t" :value="t">{{ formatLabel(t) }}</option>
  </select>
  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
  </div>
  </div>
  <div>
- <label for="available-from" class="block text-sm font-bold text-slate-700 mb-2">Thời Gian Bắt Đầu Dự Kiến</label>
+ <label for="available-from" class="block text-sm font-bold text-slate-700 mb-2">Expected Start Date</label>
  <input
  id="available-from"
  v-model="form.availableFrom"
@@ -361,28 +361,28 @@ onMounted(loadProfile)
 
  <!-- Salary Expectations -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Mức Lương Kỳ Vọng</h2>
+ <h2 class="text-lg font-bold text-slate-900 ">Expected Salary</h2>
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
- <label for="salary-min" class="block text-sm font-bold text-slate-700 mb-2">Tối Thiểu (VND)</label>
+ <label for="salary-min" class="block text-sm font-bold text-slate-700 mb-2">Minimum (VND)</label>
  <input
  id="salary-min"
  v-model="form.desiredSalaryMin"
  type="text"
  inputmode="numeric"
- placeholder="VD: 15.000.000"
+ placeholder="e.g. 15,000,000"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium tabular-nums"
  />
  </div>
  <div>
- <label for="salary-max" class="block text-sm font-bold text-slate-700 mb-2">Tối Đa (VND)</label>
+ <label for="salary-max" class="block text-sm font-bold text-slate-700 mb-2">Maximum (VND)</label>
  <input
  id="salary-max"
  v-model="form.desiredSalaryMax"
  type="text"
  inputmode="numeric"
- placeholder="VD: 30.000.000"
+ placeholder="e.g. 30,000,000"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium tabular-nums"
  />
  </div>
@@ -397,7 +397,7 @@ onMounted(loadProfile)
  class="btn-primary w-full sm:w-auto px-10 py-3 text-base flex justify-center items-center gap-2"
  >
  <span v-if="saving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ saving ? 'Đang Lưu...' : 'Lưu Thay Đổi' }}
+ {{ saving ? 'Saving...' : 'Save Changes' }}
  </button>
  </div>
  </form>

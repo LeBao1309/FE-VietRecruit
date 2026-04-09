@@ -7,7 +7,7 @@ import { candidateService } from '@/services/candidateService'
 import PublicNavbar from '@/components/common/PublicNavbar.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import type { JobSearchResponse, JobRecommendationResponse } from '@/types/job'
-import type { SearchPageResponse, PageResponse } from '@/types/common'
+import type { SearchPageResponse } from '@/types/common'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -260,12 +260,12 @@ function goToJob(id: string): void {
 
 // ── Formatting ──
 function formatSalary(min: number | null, max: number | null, cur: string | null, negotiable: boolean | null): string {
- if (!min && !max) return negotiable ? 'Thỏa thuận' : '—'
+ if (!min && !max) return negotiable ? 'Negotiable' : '—'
  const c = cur ?? 'VND'
  const fmt = (n: number) => n.toLocaleString('vi-VN')
  if (min && max) return `${fmt(min)} – ${fmt(max)} ${c}`
- if (min) return `Từ ${fmt(min)} ${c}`
- if (max) return `Đến ${fmt(max)} ${c}`
+ if (min) return `From ${fmt(min)} ${c}`
+ if (max) return `Up to ${fmt(max)} ${c}`
  return '—'
 }
 
@@ -277,17 +277,14 @@ function formatDate(iso: string | null | undefined): string {
 function timeAgo(iso: string): string {
  const diff = Date.now() - new Date(iso).getTime()
  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
- if (days === 0) return 'Hôm nay'
- if (days === 1) return '1 ngày trước'
- if (days < 30) return `${days} ngày trước`
+ if (days === 0) return 'Today'
+ if (days === 1) return '1 day ago'
+ if (days < 30) return `${days} days ago`
  const months = Math.floor(days / 30)
- return months === 1 ? '1 tháng trước' : `${months} tháng trước`
+ return months === 1 ? '1 month ago' : `${months} months ago`
 }
 
-// ── Score normalization & color ──
-function normalizeScore(raw: number): number {
-  return Math.min(Math.round(raw * 100), 100)
-}
+// ── Score color ──
 function scoreColorClass(pct: number): string {
   if (pct >= 70) return 'bg-emerald-100 text-emerald-700 border border-emerald-200'
   if (pct >= 40) return 'bg-amber-100 text-amber-700 border border-amber-200'
@@ -345,10 +342,10 @@ onUnmounted(() => {
 
  <div class="max-w-4xl mx-auto text-center mb-12 animate-fade-in-up">
  <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight">
- Tìm Kiếm <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">Cơ Hội Tiếp Theo</span>
+ Find Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">Next Opportunity</span>
  </h1>
  <p class="text-lg sm:text-xl font-medium text-slate-500 max-w-2xl mx-auto">
- Khám phá các vị trí mở từ những công ty hàng đầu và tiến xa hơn trong sự nghiệp.
+ Explore open positions at top companies and take your career further.
  </p>
  </div>
 
@@ -366,7 +363,7 @@ onUnmounted(() => {
  @focus="showAutocomplete = autocompleteResults.length > 0"
  @blur="onSearchBlur"
  type="text"
- placeholder="Chức danh, kỹ năng, hoặc công ty..."
+ placeholder="Job title, skill, or company..."
  class="w-full pl-12 pr-10 py-3.5 text-base sm:text-lg bg-transparent border-0 outline-none focus:ring-0 text-slate-900 placeholder:text-slate-400 font-medium"
  />
  <button
@@ -403,7 +400,7 @@ onUnmounted(() => {
  <input
  v-model="locationQuery"
  type="text"
- placeholder="Thành phố, quận, hoặc remote..."
+ placeholder="City, district, or remote..."
  class="w-full pl-12 pr-10 py-3.5 text-base sm:text-lg bg-transparent border-0 outline-none focus:ring-0 text-slate-900 placeholder:text-slate-400 font-medium"
  />
  <button
@@ -421,17 +418,17 @@ onUnmounted(() => {
  type="submit"
  class="btn-primary py-3.5 px-8 shrink-0 rounded-2xl shadow-sm hover:shadow-md sm:w-auto w-full text-lg"
  >
- Tìm Kiếm
+ Search
  </button>
  </form>
 
  <!-- Active search indicator -->
  <div v-if="mode === 'search' && debouncedQuery" class="flex items-center justify-center gap-2 mt-6">
  <span class="text-sm font-medium text-slate-500">
- Kết quả cho "<span class="font-bold text-slate-900">{{ debouncedQuery }}</span>"
+ Results for "<span class="font-bold text-slate-900">{{ debouncedQuery }}</span>"
  </span>
  <button @click="clearSearch" class="text-sm text-teal-600 hover:text-teal-500 font-bold ml-2 transition-colors border-b border-teal-600/30">
- Xóa Tất Cả
+ Clear All
  </button>
  </div>
  </div>
@@ -442,7 +439,7 @@ onUnmounted(() => {
  <!-- Results count -->
  <div class="flex items-center justify-between mb-6">
  <span class="text-sm font-bold text-slate-500">
- {{ totalElements }} việc làm được tìm thấy
+ {{ totalElements }} job listing{{ totalElements !== 1 ? 's' : '' }} found
  </span>
  </div>
 
@@ -463,13 +460,13 @@ onUnmounted(() => {
  </div>
  <div class="text-slate-500 text-sm">
  <p class="font-bold text-slate-900 mb-1.5 text-base">
- {{ mode === 'search' ? 'Không tìm thấy việc làm phù hợp' : 'Chưa có vị trí mở nào' }}
+ {{ mode === 'search' ? 'No matching job listings found' : 'No open positions yet' }}
  </p>
  <p class="font-medium">
- {{ mode === 'search' ? 'Thử từ khóa khác hoặc xóa bộ lọc.' : 'Quay lại sau để xem cơ hội mới.' }}
+ {{ mode === 'search' ? 'Try different keywords or clear filters.' : 'Check back later for new opportunities.' }}
  </p>
  <button v-if="mode === 'search'" @click="clearSearch" class="mt-4 px-4 py-2 text-teal-600 bg-teal-50 hover:bg-teal-100 rounded-xl font-bold transition-colors">
- Xóa Tìm Kiếm
+ Clear Search
  </button>
  </div>
  </div>
@@ -504,7 +501,7 @@ onUnmounted(() => {
  </span>
  <router-link v-else to="/login" @click.stop class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold border border-slate-200 hover:border-teal-300 hover:text-teal-600 transition-colors">
  <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
- Đăng nhập để xem mức lương
+ Sign in to view salary
  </router-link>
  <div v-if="hasCv && getScore(job.id) !== null" class="shrink-0">
  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wide"
@@ -516,7 +513,7 @@ onUnmounted(() => {
  </div>
  <div v-if="job.deadline" class="text-xs font-medium text-rose-500/80 flex items-center gap-1.5">
  <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
- Hạn: {{ formatDate(job.deadline) }}
+ Deadline: {{ formatDate(job.deadline) }}
  </div>
  </div>
  </div>
@@ -573,7 +570,7 @@ onUnmounted(() => {
  </span>
  <router-link v-else to="/login" @click.stop class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold border border-slate-200 hover:border-teal-300 hover:text-teal-600 transition-colors shadow-sm">
  <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
- Đăng nhập để xem
+ Sign in to view
  </router-link>
  <p class="text-xs font-bold text-slate-400 flex items-center justify-end gap-1.5">
  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -583,7 +580,7 @@ onUnmounted(() => {
  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wide"
  :class="scoreColorClass(getScore(job.id)!)">
  <span class="w-1.5 h-1.5 rounded-full" :class="scoreDotColor(getScore(job.id)!)"></span>
- {{ getScore(job.id) }}% phù hợp
+ {{ getScore(job.id) }}% match
  </span>
  </div>
  </div>
@@ -595,7 +592,7 @@ onUnmounted(() => {
  <!-- Pagination -->
  <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-slate-200">
  <span class="text-sm font-bold text-slate-500 order-2 sm:order-1">
- Trang {{ currentPage + 1 }} / {{ totalPages }} &mdash; {{ totalElements }} việc làm
+ Page {{ currentPage + 1 }} / {{ totalPages }} &mdash; {{ totalElements }} job listing{{ totalElements !== 1 ? 's' : '' }}
  </span>
  <div class="flex items-center gap-1.5 order-1 sm:order-2 flex-wrap justify-center">
  <button
