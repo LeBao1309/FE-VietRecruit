@@ -200,12 +200,12 @@ export const useApplicationStore = defineStore('application', () => {
     triggerScreeningLoading.value = true
     try {
       const result = await applicationService.triggerScreening(jobId)
-      if (result.data !== null) {
-        ui.toastSuccess('AI Screening started', 'Results will appear shortly.')
-        return true
+      if (result.error) {
+        ui.toastError('Screening failed', result.error.message)
+        return false
       }
-      ui.toastError('Screening failed', result.error?.message)
-      return false
+      ui.toastSuccess('AI Screening started', 'Results will appear shortly.')
+      return true
     } finally {
       triggerScreeningLoading.value = false
     }

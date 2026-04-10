@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useUiStore } from '@/stores/uiStore'
 import { jobService } from '@/services/jobService'
 import { candidateService } from '@/services/candidateService'
 import PublicNavbar from '@/components/common/PublicNavbar.vue'
@@ -11,6 +12,7 @@ import type { PageResponse, SearchPageResponse } from '@/types/common'
 
 const router = useRouter()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 // ── CV guard + AI recommendations map ──
 const hasCv = ref(false)
@@ -22,7 +24,11 @@ async function loadCvStatus(): Promise<void> {
  if (!result.data) return
  hasCv.value = !!result.data.defaultCvUrl
  if (!hasCv.value) return
- const recsResult = await candidateService.getRecommendations(50)
+ const recsResult = await candidateService.getRecommendations(200)
+ if (recsResult.error) {
+   ui.toastWarning('Match scores unavailable', 'AI scoring is temporarily unavailable. Job scores cannot be loaded right now.')
+   return
+ }
  if (recsResult.data) {
    const map = new Map<string, JobRecommendationResponse>()
    for (const rec of recsResult.data) map.set(rec.jobId, rec)
@@ -271,7 +277,7 @@ function formatSalary(min: number | null, max: number | null, cur: string | null
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function timeAgo(iso: string): string {
