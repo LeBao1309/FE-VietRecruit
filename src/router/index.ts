@@ -29,7 +29,6 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'Landing',
     component: () => import('@/views/LandingPage.vue'),
-    meta: { title: 'VietRecruit — Modern ATS' },
   },
   {
     path: '/login',

@@ -3,12 +3,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useUiStore } from '@/stores/uiStore'
 import type { BillingCycle } from '@/types/enums'
 import type { PlanResponse } from '@/types/subscription'
 
 const router = useRouter()
 const subStore = useSubscriptionStore()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const billingCycle = ref<BillingCycle>('YEARLY')
 const checkoutLoading = ref<string | null>(null) // planId being checked out
@@ -103,6 +105,10 @@ async function handleCheckout(plan: PlanResponse): Promise<void> {
   const checkoutUrl = await subStore.checkout(plan.id, billingCycle.value)
   if (checkoutUrl) {
    window.location.href = checkoutUrl
+  } else if (plan.priceMonthly === 0) {
+   // Free plan activated server-side — no redirect needed
+   ui.toastSuccess('Free Plan Activated', 'Your free plan is now active. You can start posting jobs.')
+   await router.push('/employer/subscription')
   }
  } finally {
   checkoutLoading.value = null
@@ -216,7 +222,7 @@ onMounted(() => {
  @click="handleCheckout(plan)"
  >
  <span v-if="checkoutLoading === plan.id" class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
- <span class="block px-2 text-center" v-else>Subscribe Now</span>
+ <span class="block px-2 text-center" v-else>{{ plan.priceMonthly === 0 ? 'Get Started Free' : 'Subscribe Now' }}</span>
  </button>
  </div>
  </div>

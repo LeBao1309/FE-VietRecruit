@@ -141,6 +141,25 @@ export const useJobStore = defineStore('job', () => {
     }
   }
 
+  async function deleteJob(id: string): Promise<boolean> {
+    const ui = useUiStore()
+    actionLoading.value = true
+    try {
+      const result = await jobService.deleteJob(id)
+      if (result.error) {
+        ui.toastError('Delete Failed', result.error.message)
+        return false
+      }
+      ui.toastSuccess('Job Deleted', 'The draft job listing has been removed.')
+      if (jobs.value) {
+        await fetchJobs(_lastFetchParams.value)
+      }
+      return true
+    } finally {
+      actionLoading.value = false
+    }
+  }
+
   async function fetchSalaryBenchmark(id: string): Promise<void> {
     benchmarkLoading.value = true
     try {
@@ -186,6 +205,7 @@ export const useJobStore = defineStore('job', () => {
     fetchJob,
     publishJob,
     closeJob,
+    deleteJob,
     fetchSalaryBenchmark,
     clearCurrentJob,
   }

@@ -97,7 +97,10 @@ http.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Do not try to refresh tokens for the login request itself —
+    // a 401 there means wrong credentials, not an expired session.
+    const isLoginRequest = originalRequest.url?.includes('/auth/login')
+    if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
       if (isRefreshing) {
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject })

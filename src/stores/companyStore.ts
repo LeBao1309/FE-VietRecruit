@@ -43,12 +43,12 @@ export const useCompanyStore = defineStore('company', () => {
       const result = await companyService.createCompany(body)
       if (result.error) {
         error.value = result.error.message
-        ui.toastError('Tạo công ty thất bại', result.error.message)
+        ui.toastError('Company Creation Failed', result.error.message)
         return false
       }
       company.value = result.data
       isNew.value = false
-      ui.toastSuccess('Thành công', 'Đã tạo hồ sơ công ty.')
+      ui.toastSuccess('Success', 'Company profile has been created.')
       return true
     } finally {
       isSaving.value = false

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUiStore } from '@/stores/uiStore'
@@ -325,7 +325,7 @@ onMounted(async () => {
  v-model="form.departmentId"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  >
- <option value="">— None —</option>
+ <option value="">Select...</option>
  <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
  </select>
  </div>
@@ -336,7 +336,7 @@ onMounted(async () => {
  v-model="form.locationId"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  >
- <option value="">— None —</option>
+ <option value="">Select...</option>
  <option v-for="l in locations" :key="l.id" :value="l.id">{{ l.name }}</option>
  </select>
  </div>
@@ -347,7 +347,7 @@ onMounted(async () => {
  v-model="form.categoryId"
  class="w-full px-3 py-2.5 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
  >
- <option value="">— None —</option>
+ <option value="">Select...</option>
  <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
  </select>
  </div>

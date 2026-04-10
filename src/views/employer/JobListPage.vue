@@ -11,6 +11,19 @@ const router = useRouter()
 const jobStore = useJobStore()
 const subStore = useSubscriptionStore()
 
+// ── Delete confirm ──
+const deleteTargetId = ref<string | null>(null)
+
+function requestDelete(id: string): void {
+ deleteTargetId.value = id
+}
+
+async function confirmDelete(): Promise<void> {
+ if (!deleteTargetId.value) return
+ const success = await jobStore.deleteJob(deleteTargetId.value)
+ if (success) deleteTargetId.value = null
+}
+
 // ── Filter / Pagination ──
 const currentPage = ref(0)
 const pageSize = ref(10)
@@ -163,11 +176,12 @@ onMounted(() => {
  <th class="px-5 py-3">Salary</th>
  <th class="px-5 py-3 w-28">Deadline</th>
  <th class="px-5 py-3 w-28 text-right">Created Date</th>
+ <th class="px-3 py-3 w-16"></th>
  </tr>
  </thead>
  <tbody>
  <tr v-if="jobStore.jobList.length === 0">
- <td colspan="5" class="p-4">
+ <td colspan="6" class="p-4">
  <BaseEmptyState
  title="No job listings yet"
  description="Click Create New to start recruiting candidates."
@@ -207,6 +221,16 @@ onMounted(() => {
  <td class="px-5 py-4 text-sm font-medium text-slate-400 text-right">
  {{ formatDate(job.createdAt) }}
  </td>
+ <td class="px-3 py-4 text-right" @click.stop>
+ <button
+ v-if="job.status === 'DRAFT'"
+ @click="requestDelete(job.id)"
+ class="p-1.5 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all duration-150"
+ title="Delete draft"
+ >
+ <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+ </button>
+ </td>
  </tr>
  </tbody>
  </table>
@@ -236,4 +260,27 @@ onMounted(() => {
  </div>
  </div>
  </div>
+
+ <!-- Delete confirm modal -->
+ <Teleport to="body">
+ <div v-if="deleteTargetId" class="premium-modal-backdrop">
+ <div class="premium-modal-content w-full max-w-sm p-6">
+ <h2 class="text-lg font-extrabold text-slate-900 mb-2">Delete Draft Job?</h2>
+ <p class="text-sm font-medium text-slate-500 mb-6 leading-relaxed">
+ This action cannot be undone. The draft listing will be permanently removed.
+ </p>
+ <div class="flex justify-end gap-3">
+ <button class="btn-secondary" @click="deleteTargetId = null">Cancel</button>
+ <button
+ class="btn-primary bg-rose-600 hover:bg-rose-700 shadow-sm"
+ :disabled="jobStore.actionLoading"
+ @click="confirmDelete"
+ >
+ <span v-if="jobStore.actionLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+ <span v-else>Delete</span>
+ </button>
+ </div>
+ </div>
+ </div>
+ </Teleport>
 </template>

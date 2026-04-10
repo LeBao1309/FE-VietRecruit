@@ -23,12 +23,12 @@ const form = ref<CompanyCreateRequest>({
 function validate(): boolean {
   errors.value = {}
   if (!form.value.name.trim()) {
-    errors.value.name = 'Vui lòng nhập tên công ty.'
+    errors.value.name = 'Company name is required.'
   } else if (form.value.name.length > 255) {
-    errors.value.name = 'Tên công ty không được vượt quá 255 ký tự.'
+    errors.value.name = 'Company name must not exceed 255 characters.'
   }
   if (form.value.website && !/^https?:\/\/.+/.test(form.value.website)) {
-    errors.value.website = 'Vui lòng nhập URL hợp lệ (https://...).'
+    errors.value.website = 'Please enter a valid URL (https://...).'
   }
   return Object.keys(errors.value).length === 0
 }
@@ -92,21 +92,21 @@ function goToTeam(): void {
           <div class="w-14 h-14 bg-primary-light rounded-full flex items-center justify-center text-primary text-2xl mx-auto mb-4">
             🏢
           </div>
-          <h1 class="text-2xl font-bold text-gray-900">Thiết lập công ty</h1>
-          <p class="text-sm text-gray-500 mt-1">Cung cấp thông tin cơ bản về tổ chức của bạn để bắt đầu</p>
+          <h1 class="text-2xl font-bold text-gray-900">Set Up Your Company</h1>
+          <p class="text-sm text-gray-500 mt-1">Provide basic information about your organization to get started.</p>
         </div>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <!-- Company name -->
           <div>
             <label for="co-name" class="block text-sm font-medium text-gray-700 mb-1">
-              Tên công ty <span class="text-error">*</span>
+              Company Name <span class="text-error">*</span>
             </label>
             <input
               id="co-name"
               v-model="form.name"
               type="text"
-              placeholder="Ví dụ: Công ty TNHH ABC"
+              placeholder="e.g. Acme Corporation"
               class="w-full px-3 py-2.5 text-sm border rounded-md outline-none transition"
               :class="errors.name ? 'border-error focus:ring-2 focus:ring-error-bg' : 'border-border focus:border-primary focus:ring-2 focus:ring-primary-light'"
             />
@@ -116,13 +116,13 @@ function goToTeam(): void {
           <!-- Domain -->
           <div>
             <label for="co-domain" class="block text-sm font-medium text-gray-700 mb-1">
-              Lĩnh vực hoạt động
+              Industry / Domain
             </label>
             <input
               id="co-domain"
               v-model="form.domain"
               type="text"
-              placeholder="Ví dụ: Công nghệ thông tin, Y tế, Tài chính"
+              placeholder="e.g. Information Technology, Healthcare, Finance"
               class="w-full px-3 py-2.5 text-sm border border-border rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition"
             />
           </div>
@@ -130,7 +130,7 @@ function goToTeam(): void {
           <!-- Website -->
           <div>
             <label for="co-website" class="block text-sm font-medium text-gray-700 mb-1">
-              Website công ty
+              Company Website
             </label>
             <input
               id="co-website"
@@ -149,7 +149,7 @@ function goToTeam(): void {
             class="w-full py-2.5 px-4 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
           >
             <span v-if="companyStore.isSaving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            {{ companyStore.isSaving ? 'Đang khởi tạo…' : 'Tạo công ty' }}
+            {{ companyStore.isSaving ? 'Creating…' : 'Create Company' }}
           </button>
         </form>
       </div>
@@ -160,8 +160,8 @@ function goToTeam(): void {
           <div class="w-14 h-14 bg-success-bg rounded-full flex items-center justify-center text-success text-2xl mx-auto mb-4">
             ✓
           </div>
-          <h1 class="text-2xl font-bold text-gray-900">Hoàn tất!</h1>
-          <p class="text-sm text-gray-500 mt-1">Hồ sơ công ty đã sẵn sàng. Bạn muốn làm gì tiếp theo?</p>
+          <h1 class="text-2xl font-bold text-gray-900">You're all set!</h1>
+          <p class="text-sm text-gray-500 mt-1">Your company profile is ready. What would you like to do next?</p>
         </div>
 
         <div class="space-y-3 mb-6">
@@ -170,10 +170,10 @@ function goToTeam(): void {
             class="w-full p-4 border border-border rounded-lg text-left hover:border-primary hover:bg-primary-bg transition group"
           >
             <div class="font-semibold text-gray-900 group-hover:text-primary transition">
-              📊 Thiết lập phòng ban & cơ sở
+              📊 Set up departments & offices
             </div>
             <p class="text-sm text-gray-500 mt-1">
-              Cấu hình cơ cấu tổ chức để quản lý nhân sự hiệu quả hơn
+              Configure your organizational structure to manage your workforce more effectively.
             </p>
           </button>
 
@@ -182,10 +182,10 @@ function goToTeam(): void {
             class="w-full p-4 border border-border rounded-lg text-left hover:border-primary hover:bg-primary-bg transition group"
           >
             <div class="font-semibold text-gray-900 group-hover:text-primary transition">
-              👥 Mời thành viên
+              👥 Invite team members
             </div>
             <p class="text-sm text-gray-500 mt-1">
-              Thêm HR và phỏng vấn viên để cùng tham gia tuyển dụng
+              Add HR managers and interviewers to collaborate on hiring.
             </p>
           </button>
 
@@ -194,10 +194,10 @@ function goToTeam(): void {
             class="w-full p-4 border border-border rounded-lg text-left hover:border-primary hover:bg-primary-bg transition group"
           >
             <div class="font-semibold text-gray-900 group-hover:text-primary transition">
-              🚀 Bảng điều khiển
+              🚀 Go to Dashboard
             </div>
             <p class="text-sm text-gray-500 mt-1">
-              Bỏ qua và bắt đầu sử dụng hệ thống ngay
+              Skip for now and start using the platform right away.
             </p>
           </button>
         </div>
