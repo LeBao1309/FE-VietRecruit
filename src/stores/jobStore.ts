@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { JobResponse, JobSummaryResponse } from '@/types/job'
+import type { JobStatus } from '@/types/enums'
 import type { PageResponse, PaginationParams } from '@/types/common'
 import type { SalaryBenchmarkResponse } from '@/types/ai'
 import { jobService } from '@/services/jobService'
@@ -17,8 +18,13 @@ export const useJobStore = defineStore('job', () => {
   const actionLoading = ref(false)
   const benchmarkLoading = ref(false)
   const subscriptionRequired = ref(false)
-  // Track last fetch params so actions can refresh the list
+  // Track last fetch params so deleteJob can refresh the list after removal
   const _lastFetchParams = ref<(PaginationParams & { status?: string }) | undefined>(undefined)
+
+  // Non-reactive map: locally-confirmed status changes that must survive any subsequent
+  // fetchJobs/fetchJob call (backend may return stale cached data after a write).
+  // An entry is cleared once the backend itself returns the expected status.
+  const _pendingOverrides = new Map<string, JobStatus>()
 
   // ── Getters ────────────────────────────────────────────────────────
   const jobList = computed(() => jobs.value?.content ?? [])
@@ -32,6 +38,31 @@ export const useJobStore = defineStore('job', () => {
   const canPublish = computed(() => isDraft.value)
   const canClose = computed(() => isPublished.value)
 
+  // ── Helpers ────────────────────────────────────────────────────────
+  /** Apply any pending overrides to a fetched list. Overrides are never removed on reads — they
+   *  persist for the session so that stale data from any endpoint or read-replica cannot
+   *  overwrite a locally-confirmed status change. */
+  function applyOverridesToList(content: JobSummaryResponse[]): JobSummaryResponse[] {
+    if (_pendingOverrides.size === 0) return content
+    return content.map((j) => {
+      const override = _pendingOverrides.get(j.id)
+      if (!override) return j
+      return { ...j, status: override }
+    })
+  }
+
+  /** Record a locally-confirmed status change and apply it to the list immediately. */
+  function patchJobStatus(id: string, newStatus: JobStatus): void {
+    _pendingOverrides.set(id, newStatus)
+    if (!jobs.value) return
+    jobs.value = {
+      ...jobs.value,
+      content: jobs.value.content.map((j) =>
+        j.id === id ? { ...j, status: newStatus } : j,
+      ),
+    }
+  }
+
   // ── Actions ────────────────────────────────────────────────────────
   async function fetchJobs(params?: PaginationParams & { status?: string }): Promise<void> {
     _lastFetchParams.value = params
@@ -39,7 +70,10 @@ export const useJobStore = defineStore('job', () => {
     try {
       const result = await jobService.listJobs(params)
       if (result.data) {
-        jobs.value = result.data
+        jobs.value = {
+          ...result.data,
+          content: applyOverridesToList(result.data.content),
+        }
       } else {
         const ui = useUiStore()
         ui.toastError('Failed to load jobs', result.error?.message)
@@ -54,7 +88,13 @@ export const useJobStore = defineStore('job', () => {
     try {
       const result = await jobService.getJob(id)
       if (result.data) {
-        currentJob.value = result.data
+        const override = _pendingOverrides.get(id)
+        if (override) {
+          // Always apply the locally-confirmed status — backend may lag behind
+          currentJob.value = { ...result.data, status: override }
+        } else {
+          currentJob.value = result.data
+        }
         return true
       }
       const ui = useUiStore()
@@ -94,19 +134,16 @@ export const useJobStore = defineStore('job', () => {
         }
         return false
       }
-      // Success — force PUBLISHED status immediately regardless of what data the backend returns
+      // Success — update local state; override survives any subsequent fetch
       if (result.data) {
         currentJob.value = { ...result.data, status: 'PUBLISHED' }
       } else if (currentJob.value) {
         currentJob.value = { ...currentJob.value, status: 'PUBLISHED' }
       }
+      patchJobStatus(id, 'PUBLISHED')
       subscriptionRequired.value = false
       ui.toastSuccess('Published Successfully', 'The job listing is now publicly visible to candidates.')
-      // Refresh list + quota in background (non-blocking)
-      Promise.all([
-        sub.fetchCurrentQuota(),
-        ...(jobs.value ? [fetchJobs(_lastFetchParams.value)] : []),
-      ]).catch(() => {})
+      sub.fetchCurrentQuota().catch(() => {})
       return true
     } finally {
       actionLoading.value = false
@@ -122,19 +159,16 @@ export const useJobStore = defineStore('job', () => {
         ui.toastError('Close Listing Failed', result.error.message)
         return false
       }
-      // Success — force CLOSED status immediately regardless of what data the backend returns
+      // Success — update local state; override survives any subsequent fetch
       if (result.data) {
         currentJob.value = { ...result.data, status: 'CLOSED' }
       } else if (currentJob.value) {
         currentJob.value = { ...currentJob.value, status: 'CLOSED' }
       }
+      patchJobStatus(id, 'CLOSED')
       ui.toastSuccess('Listing Closed', 'The job listing has been closed.')
-      // Refresh list + quota in background (non-blocking)
       const sub = useSubscriptionStore()
-      Promise.all([
-        sub.fetchCurrentQuota(),
-        ...(jobs.value ? [fetchJobs(_lastFetchParams.value)] : []),
-      ]).catch(() => {})
+      sub.fetchCurrentQuota().catch(() => {})
       return true
     } finally {
       actionLoading.value = false

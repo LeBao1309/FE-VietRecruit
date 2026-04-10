@@ -16,24 +16,70 @@ const ui = useUiStore()
 
 // ── CV guard + AI recommendations map ──
 const hasCv = ref(false)
+const recsLoading = ref(false)
+const recsEmpty = ref(false)   // true when CV exists but API returned []
 const recommendationMap = ref(new Map<string, JobRecommendationResponse>())
 
 async function loadCvStatus(): Promise<void> {
- if (!auth.isCandidate) return
- const result = await candidateService.getProfile()
- if (!result.data) return
- hasCv.value = !!result.data.defaultCvUrl
- if (!hasCv.value) return
- const recsResult = await candidateService.getRecommendations(200)
- if (recsResult.error) {
-   ui.toastWarning('Match scores unavailable', 'AI scoring is temporarily unavailable. Job scores cannot be loaded right now.')
-   return
- }
- if (recsResult.data) {
-   const map = new Map<string, JobRecommendationResponse>()
-   for (const rec of recsResult.data) map.set(rec.jobId, rec)
-   recommendationMap.value = map
- }
+  if (!auth.isCandidate) return
+  const result = await candidateService.getProfile()
+  if (!result.data) return
+  hasCv.value = !!result.data.defaultCvUrl
+  if (!hasCv.value) return
+  recsLoading.value = true
+  recsEmpty.value = false
+  try {
+    const recsResult = await candidateService.getRecommendations(50)
+    if (recsResult.error) {
+      ui.toastWarning('Match scores unavailable', 'AI scoring is temporarily unavailable. Please try again later.')
+      return
+    }
+    const list = recsResult.data ?? []
+    if (list.length === 0) {
+      recsEmpty.value = true
+      startScoresPoll()
+      return
+    }
+    const map = new Map<string, JobRecommendationResponse>()
+    for (const rec of list) map.set(rec.jobId, rec)
+    recommendationMap.value = map
+    recsEmpty.value = false
+  } finally {
+    recsLoading.value = false
+  }
+}
+
+async function refreshScores(): Promise<void> {
+  recommendationMap.value = new Map()
+  await loadCvStatus()
+}
+
+// ── Auto-poll when scores not ready (every 30s, stops once scores arrive) ──
+let scoresPollTimer: ReturnType<typeof setInterval> | null = null
+
+function startScoresPoll(): void {
+  if (scoresPollTimer) return
+  scoresPollTimer = setInterval(async () => {
+    if (!recsEmpty.value) {
+      stopScoresPoll()
+      return
+    }
+    const recsResult = await candidateService.getRecommendations(50)
+    if (recsResult.data && recsResult.data.length > 0) {
+      const map = new Map<string, JobRecommendationResponse>()
+      for (const rec of recsResult.data) map.set(rec.jobId, rec)
+      recommendationMap.value = map
+      recsEmpty.value = false
+      stopScoresPoll()
+    }
+  }, 30_000)
+}
+
+function stopScoresPoll(): void {
+  if (scoresPollTimer) {
+    clearInterval(scoresPollTimer)
+    scoresPollTimer = null
+  }
 }
 
 // ── Search mode ──
@@ -332,6 +378,7 @@ onMounted(() => {
 
 onUnmounted(() => {
  if (debounceTimer) clearTimeout(debounceTimer)
+ stopScoresPoll()
 })
 </script>
 
@@ -442,6 +489,34 @@ onUnmounted(() => {
 
  <!-- Results -->
  <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-10 bg-white border-t border-slate-200">
+
+ <!-- AI match score status banner -->
+ <div
+ v-if="auth.isCandidate && hasCv && (recsLoading || recsEmpty)"
+ class="flex items-center justify-between gap-3 px-4 py-3 mb-6 rounded-xl border"
+ :class="recsLoading ? 'border-slate-200 bg-slate-50' : 'border-amber-200 bg-amber-50'"
+ >
+ <div class="flex items-center gap-3 min-w-0">
+ <span v-if="recsLoading" class="inline-block w-4 h-4 border-2 border-teal-300 border-t-teal-600 rounded-full animate-spin shrink-0" />
+ <span v-else class="text-amber-500 shrink-0">⚡</span>
+ <div class="min-w-0">
+ <p class="text-sm font-semibold" :class="recsLoading ? 'text-slate-700' : 'text-amber-800'">
+ {{ recsLoading ? 'Loading AI match scores…' : 'AI match scores are being calculated' }}
+ </p>
+ <p v-if="recsEmpty" class="text-xs text-amber-600 mt-0.5">
+ Scores are not ready yet — the AI is processing your CV. Checking automatically every 30 s.
+ </p>
+ </div>
+ </div>
+ <button
+ v-if="recsEmpty && !recsLoading"
+ @click="refreshScores"
+ class="shrink-0 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg transition-colors"
+ >
+ Refresh
+ </button>
+ </div>
+
  <!-- Results count -->
  <div class="flex items-center justify-between mb-6">
  <span class="text-sm font-bold text-slate-500">

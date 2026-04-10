@@ -3,14 +3,19 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApplicationStore, VALID_TRANSITIONS } from '@/stores/applicationStore'
 import { useJobStore } from '@/stores/jobStore'
+import { useInterviewStore } from '@/stores/interviewStore'
+import { useOfferStore } from '@/stores/offerStore'
 import { useUiStore } from '@/stores/uiStore'
+import { interviewService } from '@/services/interviewService'
 import type { ApplicationStatus } from '@/types/enums'
-import type { ApplicationSummaryResponse } from '@/types/application'
+import type { ApplicationSummaryResponse, InterviewCreateRequest } from '@/types/application'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useApplicationStore()
 const jobStore = useJobStore()
+const interviewStore = useInterviewStore()
+const offerStore = useOfferStore()
 const ui = useUiStore()
 
 const jobId = computed(() => route.params.id as string)
@@ -38,7 +43,6 @@ interface StageModalConfig {
   confirmLabel: string
   confirmClass: string
   showRejectionReason: boolean
-  showInterviewReminder: boolean
 }
 const STAGE_MODAL_CONFIG: Record<ApplicationStatus, StageModalConfig> = {
   SCREENING: {
@@ -47,23 +51,23 @@ const STAGE_MODAL_CONFIG: Record<ApplicationStatus, StageModalConfig> = {
     description: 'The candidate will enter the screening stage for initial evaluation.',
     noteLabel: 'Screening Notes', notePlaceholder: 'What criteria will you screen on? (optional)',
     confirmLabel: 'Start Screening', confirmClass: 'bg-amber-500 hover:bg-amber-600 text-white',
-    showRejectionReason: false, showInterviewReminder: false,
+    showRejectionReason: false,
   },
   INTERVIEW: {
     icon: '📅', iconBg: 'bg-purple-50', iconColor: 'text-purple-600',
-    title: 'Move to Interview?',
-    description: 'The candidate passed screening. Schedule the interview after confirming.',
-    noteLabel: 'Focus Areas', notePlaceholder: 'What should the interview focus on? (optional)',
-    confirmLabel: 'Move to Interview', confirmClass: 'bg-purple-600 hover:bg-purple-700 text-white',
-    showRejectionReason: false, showInterviewReminder: true,
+    title: 'Schedule Interview',
+    description: 'Candidate passed screening. Fill in the interview details — the session will be created immediately.',
+    noteLabel: 'Additional Notes', notePlaceholder: 'Focus areas or instructions for the interviewer... (optional)',
+    confirmLabel: 'Move & Schedule Interview', confirmClass: 'bg-purple-600 hover:bg-purple-700 text-white',
+    showRejectionReason: false,
   },
   OFFER: {
     icon: '🤝', iconBg: 'bg-teal-50', iconColor: 'text-teal-600',
-    title: 'Proceed to Offer Stage?',
-    description: 'Great candidate! Draft the offer letter after confirming this move.',
-    noteLabel: 'Offer Notes', notePlaceholder: 'Any notes on compensation or start date? (optional)',
-    confirmLabel: 'Proceed to Offer', confirmClass: 'bg-teal-600 hover:bg-teal-700 text-white',
-    showRejectionReason: false, showInterviewReminder: false,
+    title: 'Create Offer',
+    description: 'Fill in the offer details below. The application will move to Offer stage and the draft will be created immediately.',
+    noteLabel: 'Additional Notes', notePlaceholder: 'Any notes on compensation or conditions... (optional)',
+    confirmLabel: 'Move & Create Offer', confirmClass: 'bg-teal-600 hover:bg-teal-700 text-white',
+    showRejectionReason: false,
   },
   REJECTED: {
     icon: '✕', iconBg: 'bg-red-50', iconColor: 'text-red-500',
@@ -71,10 +75,10 @@ const STAGE_MODAL_CONFIG: Record<ApplicationStatus, StageModalConfig> = {
     description: 'This application will be marked Rejected. This action cannot be undone.',
     noteLabel: 'Additional Notes', notePlaceholder: 'Any additional feedback... (optional)',
     confirmLabel: 'Confirm Rejection', confirmClass: 'bg-red-600 hover:bg-red-700 text-white',
-    showRejectionReason: true, showInterviewReminder: false,
+    showRejectionReason: true,
   },
-  NEW: { icon: '', iconBg: '', iconColor: '', title: '', description: '', noteLabel: '', notePlaceholder: '', confirmLabel: '', confirmClass: '', showRejectionReason: false, showInterviewReminder: false },
-  HIRED: { icon: '', iconBg: '', iconColor: '', title: '', description: '', noteLabel: '', notePlaceholder: '', confirmLabel: '', confirmClass: '', showRejectionReason: false, showInterviewReminder: false },
+  NEW: { icon: '', iconBg: '', iconColor: '', title: '', description: '', noteLabel: '', notePlaceholder: '', confirmLabel: '', confirmClass: '', showRejectionReason: false },
+  HIRED: { icon: '', iconBg: '', iconColor: '', title: '', description: '', noteLabel: '', notePlaceholder: '', confirmLabel: '', confirmClass: '', showRejectionReason: false },
 }
 
 const REJECTION_REASONS = [
@@ -100,6 +104,36 @@ const showConfirm = ref(false)
 const confirmNotes = ref('')
 const rejectionReason = ref('')
 
+// ── Interview form (used when moving to INTERVIEW stage) ──
+const interviewForm = ref<InterviewCreateRequest>({
+  title: '',
+  scheduledAt: '',
+  durationMinutes: 60,
+  locationOrLink: '',
+  interviewType: 'ONLINE',
+  interviewerIds: [],
+})
+const interviewFormErrors = ref<Record<string, string>>({})
+const interviewerIdInput = ref('')
+
+// ── Offer form (used when moving to OFFER stage) ──
+const offerForm = ref({
+  baseSalary: null as number | null,
+  currency: 'VND',
+  startDate: '',
+  note: '',
+  offerLetterUrl: '',
+})
+const offerFormErrors = ref<Record<string, string>>({})
+
+// ── Interview completion check (for OFFER stage gate) ──
+const interviewsForOffer = ref<{ id: string; title: string; status: string }[]>([])
+const interviewsForOfferLoading = ref(false)
+
+const hasCompletedInterview = computed(() =>
+  interviewsForOffer.value.some((i) => i.status === 'COMPLETED'),
+)
+
 const stageConfig = computed<StageModalConfig | null>(() =>
   pendingMove.value ? STAGE_MODAL_CONFIG[pendingMove.value.toStatus] : null,
 )
@@ -107,23 +141,61 @@ const stageConfig = computed<StageModalConfig | null>(() =>
 function resetConfirmForm(): void {
   confirmNotes.value = ''
   rejectionReason.value = ''
+  interviewForm.value = { title: '', scheduledAt: '', durationMinutes: 60, locationOrLink: '', interviewType: 'ONLINE', interviewerIds: [] }
+  interviewFormErrors.value = {}
+  interviewerIdInput.value = ''
+  offerForm.value = { baseSalary: null, currency: 'VND', startDate: '', note: '', offerLetterUrl: '' }
+  offerFormErrors.value = {}
+  interviewsForOffer.value = []
 }
 
-// Optimistic: move card visually into target column immediately
-function applyOptimisticMove(id: string, toStatus: ApplicationStatus): void {
-  if (!appStore.applications) return
-  const idx = appStore.applications.content.findIndex((a) => a.id === id)
-  if (idx !== -1) {
-    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: toStatus } as ApplicationSummaryResponse
+// ── Interview form helpers ──
+function validateInterviewForm(): boolean {
+  const errors: Record<string, string> = {}
+  if (!interviewForm.value.title.trim()) errors.title = 'Interview title is required.'
+  if (!interviewForm.value.scheduledAt) {
+    errors.scheduledAt = 'Date and time are required.'
+  } else if (new Date(interviewForm.value.scheduledAt) <= new Date()) {
+    errors.scheduledAt = 'Scheduled time must be in the future.'
+  }
+  if (interviewForm.value.interviewerIds.length === 0) {
+    errors.interviewerIds = 'At least one interviewer is required.'
+  }
+  interviewFormErrors.value = errors
+  return Object.keys(errors).length === 0
+}
+
+function addInterviewerId(): void {
+  const id = interviewerIdInput.value.trim()
+  if (id && !interviewForm.value.interviewerIds.includes(id)) {
+    interviewForm.value.interviewerIds.push(id)
+    interviewerIdInput.value = ''
+    delete interviewFormErrors.value.interviewerIds
   }
 }
 
-// Revert if user cancels or API fails
-function revertOptimisticMove(id: string, fromStatus: ApplicationStatus): void {
-  if (!appStore.applications) return
-  const idx = appStore.applications.content.findIndex((a) => a.id === id)
-  if (idx !== -1) {
-    appStore.applications.content[idx] = { ...appStore.applications.content[idx], status: fromStatus } as ApplicationSummaryResponse
+function removeInterviewerId(id: string): void {
+  interviewForm.value.interviewerIds = interviewForm.value.interviewerIds.filter((i) => i !== id)
+}
+
+// ── Offer form helpers ──
+function validateOfferForm(): boolean {
+  const errors: Record<string, string> = {}
+  if (!offerForm.value.baseSalary || offerForm.value.baseSalary <= 0) {
+    errors.baseSalary = 'Base salary must be a positive number.'
+  }
+  offerFormErrors.value = errors
+  return Object.keys(errors).length === 0
+}
+
+// ── Fetch interviews for OFFER gate check ──
+async function loadInterviewsForOffer(applicationId: string): Promise<void> {
+  interviewsForOfferLoading.value = true
+  try {
+    const result = await interviewService.listInterviews(applicationId)
+    interviewsForOffer.value = result.data ?? []
+  } finally {
+    interviewsForOfferLoading.value = false
   }
 }
 
@@ -159,38 +231,71 @@ function onDrop(toStatus: ApplicationStatus): void {
     ui.toastError('Invalid move', `Cannot move ${app.candidateName} from ${app.status} to ${toStatus}.`)
     return
   }
-  // Move card visually to target column before showing modal
-  applyOptimisticMove(app.id, toStatus)
+  // Card stays in original column — no optimistic update until API succeeds
   pendingMove.value = { app, fromStatus: app.status, toStatus }
   resetConfirmForm()
   showConfirm.value = true
+  // For OFFER: immediately load interviews to check completion requirement
+  if (toStatus === 'OFFER') {
+    loadInterviewsForOffer(app.id)
+  }
 }
 
 async function confirmMove(): Promise<void> {
   if (!pendingMove.value) return
   const { app, fromStatus, toStatus } = pendingMove.value
-  const notes = [
-    rejectionReason.value ? `Reason: ${rejectionReason.value}` : '',
-    confirmNotes.value.trim(),
-  ].filter(Boolean).join(' — ') || undefined
 
-  const success = await appStore.kanbanMove(app.id, fromStatus, toStatus, notes)
-  if (success) {
-    pendingMove.value = null
-    showConfirm.value = false
-    resetConfirmForm()
+  if (toStatus === 'INTERVIEW') {
+    if (!validateInterviewForm()) return
+    const notes = confirmNotes.value.trim() || undefined
+    const moved = await appStore.kanbanMove(app.id, fromStatus, toStatus, notes)
+    if (!moved) return
+    // Schedule interview atomically with the stage move
+    await interviewStore.scheduleInterview(app.id, {
+      ...interviewForm.value,
+      durationMinutes: interviewForm.value.durationMinutes || undefined,
+      locationOrLink: interviewForm.value.locationOrLink || undefined,
+      interviewType: interviewForm.value.interviewType || undefined,
+    })
+    closeConfirm()
+  } else if (toStatus === 'OFFER') {
+    if (interviewsForOfferLoading.value) return  // still loading
+    if (!hasCompletedInterview.value) {
+      ui.toastWarning('Interview required', 'Complete at least one interview before advancing to Offer.')
+      return
+    }
+    if (!validateOfferForm()) return
+    const notes = confirmNotes.value.trim() || undefined
+    const moved = await appStore.kanbanMove(app.id, fromStatus, toStatus, notes)
+    if (!moved) return
+    // Create offer draft atomically with the stage move
+    await offerStore.createOffer(app.id, {
+      baseSalary: offerForm.value.baseSalary!,
+      currency: offerForm.value.currency || undefined,
+      startDate: offerForm.value.startDate || undefined,
+      note: offerForm.value.note || undefined,
+      offerLetterUrl: offerForm.value.offerLetterUrl || undefined,
+    })
+    closeConfirm()
   } else {
-    revertOptimisticMove(app.id, fromStatus)
-    pendingMove.value = null
-    showConfirm.value = false
-    resetConfirmForm()
+    // SCREENING or REJECTED — simple status update
+    const notes = [
+      rejectionReason.value ? `Reason: ${rejectionReason.value}` : '',
+      confirmNotes.value.trim(),
+    ].filter(Boolean).join(' — ') || undefined
+    const success = await appStore.kanbanMove(app.id, fromStatus, toStatus, notes)
+    if (success) closeConfirm()
   }
 }
 
+function closeConfirm(): void {
+  pendingMove.value = null
+  showConfirm.value = false
+  resetConfirmForm()
+}
+
 function cancelConfirm(): void {
-  if (pendingMove.value) {
-    revertOptimisticMove(pendingMove.value.app.id, pendingMove.value.fromStatus)
-  }
+  // Card was never moved (no optimistic update) — nothing to rollback
   pendingMove.value = null
   showConfirm.value = false
   resetConfirmForm()
@@ -545,15 +650,17 @@ onMounted(async () => {
  </div>
  </div>
 
- <!-- ─── MOVE CONFIRMATION MODAL ─── -->
+ <!-- ─── STAGE ACTION MODAL ─── -->
  <Teleport to="body">
  <div v-if="showConfirm && pendingMove && stageConfig" class="fixed inset-0 z-50 flex items-center justify-center p-4">
  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="cancelConfirm" />
- <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md animate-fade-in overflow-hidden">
-
+ <div
+ class="relative bg-white rounded-2xl shadow-2xl w-full animate-fade-in overflow-hidden max-h-[92vh] flex flex-col"
+ :class="pendingMove.toStatus === 'INTERVIEW' || pendingMove.toStatus === 'OFFER' ? 'max-w-lg' : 'max-w-md'"
+ >
  <!-- Stage colour bar -->
  <div
- class="h-1 w-full"
+ class="h-1 w-full shrink-0"
  :class="{
  'bg-amber-400': pendingMove.toStatus === 'SCREENING',
  'bg-purple-500': pendingMove.toStatus === 'INTERVIEW',
@@ -563,25 +670,21 @@ onMounted(async () => {
  />
 
  <!-- Header -->
- <div class="flex items-start gap-4 px-6 pt-5 pb-4 border-b border-slate-100">
- <div
- class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
- :class="stageConfig.iconBg"
- >{{ stageConfig.icon }}</div>
+ <div class="flex items-start gap-4 px-6 pt-5 pb-4 border-b border-slate-100 shrink-0">
+ <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" :class="stageConfig.iconBg">
+ {{ stageConfig.icon }}
+ </div>
  <div class="flex-1 min-w-0">
  <h3 class="text-base font-bold text-slate-900">{{ stageConfig.title }}</h3>
  <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">{{ stageConfig.description }}</p>
  </div>
- <button
- @click="cancelConfirm"
- class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
- aria-label="Close"
- >
+ <button @click="cancelConfirm" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0" aria-label="Close">
  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
  </button>
  </div>
 
- <div class="px-6 py-5 space-y-4">
+ <!-- Scrollable body -->
+ <div class="px-6 py-5 space-y-4 overflow-y-auto custom-scrollbar">
  <!-- Candidate pill + transition arrow -->
  <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
  <div class="flex-1 min-w-0">
@@ -601,7 +704,7 @@ onMounted(async () => {
  </div>
  </div>
 
- <!-- REJECTION: reason dropdown -->
+ <!-- ── REJECTION: reason dropdown ── -->
  <div v-if="stageConfig.showRejectionReason">
  <label class="block text-sm font-bold text-slate-700 mb-1.5">
  Rejection Reason <span class="text-red-500">*</span>
@@ -615,15 +718,203 @@ onMounted(async () => {
  </select>
  </div>
 
- <!-- INTERVIEW: schedule reminder -->
- <div v-if="stageConfig.showInterviewReminder" class="flex items-start gap-3 p-3 bg-purple-50 border border-purple-100 rounded-xl">
- <span class="text-purple-500 text-base shrink-0 mt-px">ℹ️</span>
- <p class="text-xs text-purple-700 leading-relaxed">
- After confirming, go to the <strong>Application detail → Interview</strong> button to schedule the interview session.
- </p>
+ <!-- ── INTERVIEW: full scheduling form ── -->
+ <template v-if="pendingMove.toStatus === 'INTERVIEW'">
+ <div class="space-y-4 pt-1">
+ <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Interview Details</p>
+
+ <!-- Title -->
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">
+ Title <span class="text-red-500">*</span>
+ </label>
+ <input
+ v-model="interviewForm.title"
+ type="text"
+ placeholder="e.g. Technical Interview Round 1"
+ class="w-full px-3 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="interviewFormErrors.title ? 'border-red-300 focus:ring-2 focus:ring-red-400/10' : 'border-slate-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10'"
+ />
+ <p v-if="interviewFormErrors.title" class="text-xs text-red-500 mt-1">{{ interviewFormErrors.title }}</p>
  </div>
 
- <!-- Notes -->
+ <!-- Date/Time + Duration -->
+ <div class="grid grid-cols-2 gap-3">
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">
+ Date & Time <span class="text-red-500">*</span>
+ </label>
+ <input
+ v-model="interviewForm.scheduledAt"
+ type="datetime-local"
+ :min="new Date().toISOString().slice(0, 16)"
+ class="w-full px-3 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="interviewFormErrors.scheduledAt ? 'border-red-300 focus:ring-2 focus:ring-red-400/10' : 'border-slate-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10'"
+ />
+ <p v-if="interviewFormErrors.scheduledAt" class="text-xs text-red-500 mt-1">{{ interviewFormErrors.scheduledAt }}</p>
+ </div>
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">Duration (min)</label>
+ <input
+ v-model.number="interviewForm.durationMinutes"
+ type="number"
+ min="15" max="480" step="15"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 transition"
+ />
+ </div>
+ </div>
+
+ <!-- Type + Location -->
+ <div class="grid grid-cols-2 gap-3">
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">Format</label>
+ <select
+ v-model="interviewForm.interviewType"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 transition bg-white"
+ >
+ <option value="ONLINE">Online</option>
+ <option value="ONSITE">Onsite</option>
+ <option value="PHONE">Phone</option>
+ </select>
+ </div>
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">Location / Link</label>
+ <input
+ v-model="interviewForm.locationOrLink"
+ type="text"
+ placeholder="https://meet.google.com/…"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 transition"
+ />
+ </div>
+ </div>
+
+ <!-- Interviewers -->
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">
+ Interviewers <span class="text-red-500">*</span>
+ </label>
+ <div class="flex items-center gap-2">
+ <input
+ v-model="interviewerIdInput"
+ type="text"
+ placeholder="Enter interviewer user ID"
+ class="flex-1 px-3 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="interviewFormErrors.interviewerIds ? 'border-red-300 focus:ring-2 focus:ring-red-400/10' : 'border-slate-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10'"
+ @keydown.enter.prevent="addInterviewerId"
+ />
+ <button
+ type="button"
+ @click="addInterviewerId"
+ class="px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl hover:bg-slate-50 transition text-slate-700 shrink-0"
+ >Add</button>
+ </div>
+ <p v-if="interviewFormErrors.interviewerIds" class="text-xs text-red-500 mt-1">{{ interviewFormErrors.interviewerIds }}</p>
+ <div v-if="interviewForm.interviewerIds.length" class="flex flex-wrap gap-2 mt-2">
+ <span
+ v-for="iId in interviewForm.interviewerIds"
+ :key="iId"
+ class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-purple-50 text-purple-700 rounded-full border border-purple-100"
+ >
+ {{ iId.slice(0, 8) }}…
+ <button type="button" @click="removeInterviewerId(iId)" class="text-purple-400 hover:text-red-500 transition">✕</button>
+ </span>
+ </div>
+ </div>
+ </div>
+ </template>
+
+ <!-- ── OFFER: interview gate + offer form ── -->
+ <template v-if="pendingMove.toStatus === 'OFFER'">
+ <!-- Loading interviews check -->
+ <div v-if="interviewsForOfferLoading" class="flex items-center gap-2 py-3 text-sm text-slate-500">
+ <span class="inline-block w-4 h-4 border-2 border-slate-300 border-t-teal-500 rounded-full animate-spin shrink-0" />
+ Checking interview history…
+ </div>
+
+ <!-- No completed interview warning -->
+ <div
+ v-else-if="!hasCompletedInterview"
+ class="flex items-start gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50"
+ >
+ <span class="text-amber-500 shrink-0 mt-0.5">⚠</span>
+ <div>
+ <p class="text-sm font-semibold text-amber-800">No completed interviews</p>
+ <p class="text-xs text-amber-700 mt-0.5">
+ At least one interview must be marked <strong>Completed</strong> before creating an offer.
+ Schedule and complete an interview first, then try again.
+ </p>
+ <p v-if="interviewsForOffer.length > 0" class="text-xs text-amber-600 mt-1.5">
+ {{ interviewsForOffer.length }} interview(s) scheduled but none completed yet.
+ </p>
+ </div>
+ </div>
+
+ <!-- Offer form (only shown when interviews are OK) -->
+ <div v-else class="space-y-4 pt-1">
+ <!-- Interviews summary -->
+ <div class="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl">
+ <span class="text-green-600 text-sm">✓</span>
+ <span class="text-xs font-semibold text-green-700">
+ {{ interviewsForOffer.filter(i => i.status === 'COMPLETED').length }} completed interview(s) found
+ </span>
+ </div>
+
+ <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Offer Details</p>
+
+ <!-- Salary + Currency -->
+ <div class="grid grid-cols-2 gap-3">
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">
+ Base Salary <span class="text-red-500">*</span>
+ </label>
+ <input
+ v-model.number="offerForm.baseSalary"
+ type="number"
+ min="0"
+ step="100000"
+ placeholder="e.g. 20000000"
+ class="w-full px-3 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="offerFormErrors.baseSalary ? 'border-red-300 focus:ring-2 focus:ring-red-400/10' : 'border-slate-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10'"
+ />
+ <p v-if="offerFormErrors.baseSalary" class="text-xs text-red-500 mt-1">{{ offerFormErrors.baseSalary }}</p>
+ </div>
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">Currency</label>
+ <select
+ v-model="offerForm.currency"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10 transition bg-white"
+ >
+ <option value="VND">VND</option>
+ <option value="USD">USD</option>
+ <option value="EUR">EUR</option>
+ </select>
+ </div>
+ </div>
+
+ <!-- Start Date -->
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">Start Date</label>
+ <input
+ v-model="offerForm.startDate"
+ type="date"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10 transition"
+ />
+ </div>
+
+ <!-- Offer Letter URL -->
+ <div>
+ <label class="block text-xs font-bold text-slate-600 mb-1.5">Offer Letter URL (PDF)</label>
+ <input
+ v-model="offerForm.offerLetterUrl"
+ type="url"
+ placeholder="https://drive.google.com/…"
+ class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10 transition"
+ />
+ </div>
+ </div>
+ </template>
+
+ <!-- Notes (all stages) -->
  <div>
  <label class="block text-sm font-bold text-slate-700 mb-1.5">
  {{ stageConfig.noteLabel }}
@@ -631,7 +922,7 @@ onMounted(async () => {
  </label>
  <textarea
  v-model="confirmNotes"
- rows="3"
+ rows="2"
  :placeholder="stageConfig.notePlaceholder"
  class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 resize-none transition-all"
  />
@@ -639,7 +930,7 @@ onMounted(async () => {
  </div>
 
  <!-- Actions -->
- <div class="flex gap-3 px-6 pb-6">
+ <div class="flex gap-3 px-6 pb-6 shrink-0 border-t border-slate-100 pt-4">
  <button
  @click="cancelConfirm"
  class="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
@@ -648,12 +939,21 @@ onMounted(async () => {
  </button>
  <button
  @click="confirmMove"
- :disabled="appStore.statusLoading || (stageConfig.showRejectionReason && !rejectionReason)"
+ :disabled="
+ appStore.statusLoading ||
+ interviewStore.createLoading ||
+ offerStore.createLoading ||
+ (stageConfig.showRejectionReason && !rejectionReason) ||
+ (pendingMove.toStatus === 'OFFER' && (interviewsForOfferLoading || !hasCompletedInterview))
+ "
  class="flex-1 px-4 py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors flex items-center justify-center gap-2"
  :class="stageConfig.confirmClass"
  >
- <span v-if="appStore.statusLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ appStore.statusLoading ? 'Moving…' : stageConfig.confirmLabel }}
+ <span
+ v-if="appStore.statusLoading || interviewStore.createLoading || offerStore.createLoading"
+ class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+ />
+ <template v-else>{{ stageConfig.confirmLabel }}</template>
  </button>
  </div>
  </div>

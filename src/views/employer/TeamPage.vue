@@ -3,12 +3,32 @@ import { ref, computed, onMounted } from 'vue'
 import { useUiStore } from '@/stores/uiStore'
 import { useAuthStore } from '@/stores/authStore'
 import { invitationService } from '@/services/invitationService'
+import { companyService } from '@/services/companyService'
+import type { CompanyMemberResponse } from '@/types/company'
 
 const ui = useUiStore()
 const auth = useAuthStore()
 
-// ── Persisted invitation storage key ──
-const INVITES_KEY = 'vr_sent_invitations'
+// ── Persisted invitation storage key — scoped to current user so different accounts don't share data ──
+const invitesKey = computed(() => `vr_sent_invitations_${auth.user?.id ?? 'anon'}`)
+
+// ── Team members ──
+const members = ref<CompanyMemberResponse[]>([])
+const membersLoading = ref(false)
+
+async function fetchMembers(): Promise<void> {
+  membersLoading.value = true
+  try {
+    const result = await companyService.getMembers()
+    if (result.error) {
+      ui.toastWarning('Could not load team members', result.error.message)
+      return
+    }
+    members.value = result.data ?? []
+  } finally {
+    membersLoading.value = false
+  }
+}
 
 // ── Invite form ──
 const showInviteModal = ref(false)
@@ -34,26 +54,19 @@ const expiredInvites = computed(() =>
   sentInvites.value.filter((i) => new Date(i.expiresAt) <= new Date()),
 )
 
-// ── Current user as team member ──
-const currentUserRole = computed(() => {
-  if (auth.isCompanyAdmin) return 'COMPANY_ADMIN'
-  if (auth.isHR) return 'HR'
-  if (auth.isInterviewer) return 'INTERVIEWER'
-  return 'MEMBER'
-})
-
 // ── Persistence helpers ──
 function loadInvites(): void {
   try {
-    const raw = localStorage.getItem(INVITES_KEY)
+    const raw = localStorage.getItem(invitesKey.value)
     if (raw) sentInvites.value = JSON.parse(raw)
+    else sentInvites.value = []
   } catch {
     sentInvites.value = []
   }
 }
 
 function saveInvites(): void {
-  localStorage.setItem(INVITES_KEY, JSON.stringify(sentInvites.value))
+  localStorage.setItem(invitesKey.value, JSON.stringify(sentInvites.value))
 }
 
 // ── Invite modal ──
@@ -99,6 +112,7 @@ async function handleInvite(): Promise<void> {
     saveInvites()
     ui.toastSuccess('Invitation Email Sent', `Invitation successfully sent to ${inviteForm.value.email}`)
     closeInviteModal()
+    await fetchMembers()
   } finally {
     inviteLoading.value = false
   }
@@ -112,7 +126,7 @@ function removeExpired(id: string): void {
 // ── Helpers ──
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('vi-VN', {
+  return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -146,8 +160,16 @@ function initials(name: string): string {
     .toUpperCase()
 }
 
+function primaryRole(roles: string[]): string {
+  if (roles.includes('COMPANY_ADMIN')) return 'COMPANY_ADMIN'
+  if (roles.includes('HR')) return 'HR'
+  if (roles.includes('INTERVIEWER')) return 'INTERVIEWER'
+  return roles[0] ?? 'MEMBER'
+}
+
 onMounted(() => {
   loadInvites()
+  fetchMembers()
 })
 </script>
 
@@ -169,51 +191,82 @@ onMounted(() => {
 
     <!-- ═══ Current Team Members ═══ -->
     <div class="premium-card overflow-hidden mb-6">
-      <div class="p-6 border-b border-slate-200">
-        <h2 class="text-lg font-bold text-slate-900">Team Members</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Your current workspace</p>
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Team Members</h2>
+          <p class="text-xs text-slate-400 mt-0.5">All active members in your company workspace</p>
+        </div>
+        <span
+          v-if="!membersLoading && members.length > 0"
+          class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-bold text-teal-700 bg-teal-100 rounded-full"
+        >
+          {{ members.length }}
+        </span>
       </div>
 
-      <table class="w-full">
+      <!-- Loading skeleton -->
+      <div v-if="membersLoading" class="divide-y divide-slate-100">
+        <div v-for="n in 3" :key="n" class="px-6 py-4 flex items-center gap-3 animate-pulse">
+          <div class="w-9 h-9 rounded-full bg-slate-200 shrink-0" />
+          <div class="flex-1 space-y-2">
+            <div class="h-3 bg-slate-200 rounded w-1/3" />
+            <div class="h-2.5 bg-slate-100 rounded w-1/4" />
+          </div>
+          <div class="h-5 w-20 bg-slate-200 rounded-full" />
+        </div>
+      </div>
+
+      <!-- Member list from API -->
+      <table v-else-if="members.length > 0" class="w-full">
         <thead>
           <tr class="border-b border-slate-200 bg-slate-50">
             <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Member</th>
             <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Role</th>
+            <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Joined</th>
             <th class="text-left text-xs font-bold text-slate-500 uppercase tracking-wider px-6 py-4">Status</th>
           </tr>
         </thead>
         <tbody>
-          <!-- Current authenticated user -->
-          <tr v-if="auth.user" class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+          <tr
+            v-for="member in members"
+            :key="member.id"
+            class="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+          >
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
                 <div
-                  v-if="auth.user.avatarUrl"
+                  v-if="member.avatarUrl"
                   class="w-9 h-9 rounded-full bg-cover bg-center shrink-0 ring-2 ring-white shadow-sm"
-                  :style="{ backgroundImage: `url(${auth.user.avatarUrl})` }"
+                  :style="{ backgroundImage: `url(${member.avatarUrl})` }"
                 />
                 <div
                   v-else
                   class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm bg-teal-500"
                 >
-                  {{ initials(auth.user.fullName) }}
+                  {{ initials(member.fullName) }}
                 </div>
                 <div>
                   <div class="text-sm font-bold text-slate-900">
-                    {{ auth.user.fullName }}
-                    <span class="text-[10px] font-medium text-slate-400 ml-1">(you)</span>
+                    {{ member.fullName }}
+                    <span
+                      v-if="auth.user && member.id === auth.user.id"
+                      class="text-[10px] font-medium text-slate-400 ml-1"
+                    >(you)</span>
                   </div>
-                  <div class="text-xs text-slate-400">{{ auth.user.email }}</div>
+                  <div class="text-xs text-slate-400">{{ member.email }}</div>
                 </div>
               </div>
             </td>
             <td class="px-6 py-4">
               <span
                 class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full"
-                :class="roleBadgeClass(currentUserRole)"
+                :class="roleBadgeClass(primaryRole(member.roles))"
               >
-                {{ roleLabel(currentUserRole) }}
+                {{ roleLabel(primaryRole(member.roles)) }}
               </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-slate-500">
+              {{ formatDate(member.joinedAt) }}
             </td>
             <td class="px-6 py-4">
               <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-green-50 text-green-700">
@@ -222,17 +275,13 @@ onMounted(() => {
               </span>
             </td>
           </tr>
-
-          <!-- Accepted invitations (tracked locally, showing as members) -->
-          <!-- NOTE: Backend does not have a GET /companies/me/members endpoint.
-               Other team members will appear here once the backend adds such an API. -->
         </tbody>
       </table>
 
-      <div class="px-6 py-3 bg-slate-50 border-t border-slate-100">
-        <p class="text-[11px] text-slate-400">
-          ℹ Only your own account is displayed. A future backend API <code class="text-[10px] px-1 py-0.5 bg-slate-200 rounded">GET /companies/me/members</code> will enable showing all team members.
-        </p>
+      <!-- Empty state -->
+      <div v-else class="text-center py-12 px-6">
+        <p class="text-sm font-bold text-slate-400">No team members found.</p>
+        <p class="text-xs text-slate-400 mt-1">Invite colleagues to build your team.</p>
       </div>
     </div>
 

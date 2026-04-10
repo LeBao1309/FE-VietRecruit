@@ -6,6 +6,7 @@ import type {
   CompanyUpdateRequest,
   CompanyResponse,
   CompanySearchResponse,
+  CompanyMemberResponse,
 } from '@/types/company'
 
 // ── Company Service ──────────────────────────────────────────────────
@@ -34,6 +35,16 @@ export const companyService = {
   async updateCompany(body: CompanyUpdateRequest): Promise<ServiceResult<CompanyResponse>> {
     try {
       const { data } = await http.put<ApiResponse<CompanyResponse>>('/companies/me', body)
+      return ok(data.data)
+    } catch (error) {
+      return fail(error)
+    }
+  },
+
+  /** GET /companies/me/members */
+  async getMembers(): Promise<ServiceResult<CompanyMemberResponse[]>> {
+    try {
+      const { data } = await http.get<ApiResponse<CompanyMemberResponse[]>>('/companies/me/members')
       return ok(data.data)
     } catch (error) {
       return fail(error)

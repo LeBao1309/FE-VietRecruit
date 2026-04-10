@@ -24,36 +24,6 @@ const statusConfig: Record<ApplicationStatus, { label: string; class: string; do
  REJECTED: { label: 'Rejected', class: 'bg-error-bg text-error', dotClass: 'bg-red-400' },
 }
 
-// ── Transition button config ──
-const transitionButtonConfig: Record<ApplicationStatus, { label: string; class: string; confirmTitle: string; confirmDesc: string }> = {
- SCREENING: {
- label: 'Move to Screening',
- class: 'bg-amber-500 hover:bg-amber-600 text-white',
- confirmTitle: 'Move to Screening?',
- confirmDesc: 'Confirm to move this candidate to the screening stage.',
- },
- INTERVIEW: {
- label: 'Move to Interview',
- class: 'bg-purple-500 hover:bg-purple-600 text-white',
- confirmTitle: 'Move to Interview?',
- confirmDesc: 'The candidate will be advanced to the Interview stage, where you can schedule interviews.',
- },
- OFFER: {
- label: 'Move to Offer',
- class: 'bg-primary hover:bg-primary-hover text-white',
- confirmTitle: 'Move to Offer?',
- confirmDesc: "The candidate will be advanced to the Offer stage. You can draft the offer letter immediately after.",
- },
- REJECTED: {
- label: 'Reject',
- class: 'bg-error hover:bg-red-700 text-white',
- confirmTitle: 'Reject Candidate?',
- confirmDesc: 'This application will be marked as Rejected. This action cannot be undone.',
- },
- NEW: { label: '', class: '', confirmTitle: '', confirmDesc: '' },
- HIRED: { label: '', class: '', confirmTitle: '', confirmDesc: '' },
-}
-
 // ── Pipeline step display ──
 const PIPELINE_STEPS: { status: ApplicationStatus; label: string }[] = [
  { status: 'NEW', label: 'Applied' },
@@ -85,7 +55,6 @@ function getStepState(stepStatus: ApplicationStatus): 'completed' | 'current' | 
 /** Determine which stage the rejection happened at (from history) */
 const stageBeforeRejection = computed(() => {
  if (appStore.currentApplication?.status !== 'REJECTED') return -1
- // Find the last non-REJECTED status from history
  for (let i = appStore.statusHistory.length - 1; i >= 0; i--) {
  const entry = appStore.statusHistory[i]
  if (entry && entry.newStatus === 'REJECTED' && entry.oldStatus) {
@@ -95,39 +64,12 @@ const stageBeforeRejection = computed(() => {
  return 0
 })
 
-// ── Confirmation modal ──
-const showConfirm = ref(false)
-const pendingTransition = ref<ApplicationStatus | null>(null)
-const transitionNotes = ref('')
-
-function openTransition(status: ApplicationStatus): void {
- pendingTransition.value = status
- transitionNotes.value = ''
- showConfirm.value = true
-}
-
-async function confirmTransition(): Promise<void> {
- if (!pendingTransition.value) return
- const success = await appStore.updateStatus(
- applicationId.value,
- pendingTransition.value,
- transitionNotes.value || undefined,
- )
- if (success) {
- showConfirm.value = false
- // Refresh history
- appStore.fetchStatusHistory(applicationId.value)
- }
-}
-
 // ── Helpers ──
 const canManage = computed(() => auth.isCompanyAdmin || auth.isHR)
 
-// formatDate removed — all usages use formatDateTime instead
-
 function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleString('en-US', {
+ if (!iso) return '—'
+ return new Date(iso).toLocaleString('en-US', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
@@ -139,40 +81,40 @@ const matchLoading = ref(false)
 const matchError = ref(false)
 
 function getScoreColor(score: number | null): string {
-  if (score === null) return 'text-gray-400'
-  if (score >= 80) return 'text-green-600'
-  if (score >= 60) return 'text-amber-600'
-  return 'text-red-500'
+ if (score === null) return 'text-gray-400'
+ if (score >= 80) return 'text-green-600'
+ if (score >= 60) return 'text-amber-600'
+ return 'text-red-500'
 }
 function getScoreBarColor(score: number | null): string {
-  if (score === null) return 'bg-gray-200'
-  if (score >= 80) return 'bg-green-400'
-  if (score >= 60) return 'bg-amber-400'
-  return 'bg-red-400'
+ if (score === null) return 'bg-gray-200'
+ if (score >= 80) return 'bg-green-400'
+ if (score >= 60) return 'bg-amber-400'
+ return 'bg-red-400'
 }
 
 async function loadMatchScore(jobId: string): Promise<void> {
-  matchLoading.value = true
-  matchError.value = false
-  try {
-    const result = await applicationService.getScreeningResults(jobId)
-    if (result.error) {
-      matchError.value = true
-    } else if (result.data) {
-      matchScore.value = result.data.find((r) => r.applicationId === applicationId.value) ?? null
-    }
-  } finally {
-    matchLoading.value = false
-  }
+ matchLoading.value = true
+ matchError.value = false
+ try {
+ const result = await applicationService.getScreeningResults(jobId)
+ if (result.error) {
+ matchError.value = true
+ } else if (result.data) {
+ matchScore.value = result.data.find((r) => r.applicationId === applicationId.value) ?? null
+ }
+ } finally {
+ matchLoading.value = false
+ }
 }
 
 // ── Init ──
 onMounted(async () => {
  const loaded = await appStore.fetchApplication(applicationId.value)
  if (loaded) {
-   appStore.fetchStatusHistory(applicationId.value)
-   const app = appStore.currentApplication
-   if (app) loadMatchScore(app.jobId)
+ appStore.fetchStatusHistory(applicationId.value)
+ const app = appStore.currentApplication
+ if (app) loadMatchScore(app.jobId)
  }
 })
 
@@ -235,23 +177,6 @@ onBeforeUnmount(() => {
  Applied at {{ formatDateTime(appStore.currentApplication.createdAt) }}
  </span>
  </div>
- </div>
-
- <!-- Quick actions -->
- <div v-if="canManage" class="flex items-center gap-2 shrink-0">
- <router-link
- :to="`/employer/applications/${applicationId}/interviews`"
- class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
- >
- Interview
- </router-link>
- <router-link
- v-if="appStore.currentApplication.status === 'OFFER'"
- :to="`/employer/offers/${applicationId}`"
- class="px-3 py-1.5 text-xs font-medium text-primary bg-primary-bg border border-primary/10 rounded-md hover:bg-primary-light transition"
- >
- View Offer Letter
- </router-link>
  </div>
  </div>
 
@@ -321,21 +246,12 @@ onBeforeUnmount(() => {
  </div>
  </div>
 
- <!-- ─── Status Transition Buttons ─── -->
- <div v-if="canManage && appStore.canTransition" class="bg-surface border border-border rounded-lg p-5 shadow-sm">
- <h2 class="text-sm font-semibold text-gray-900 mb-3">Change Status</h2>
- <div class="flex items-center gap-2 flex-wrap">
- <button
- v-for="nextStatus in appStore.validTransitions"
- :key="nextStatus"
- @click="openTransition(nextStatus)"
- :disabled="appStore.statusLoading"
- class="px-4 py-2 text-sm font-medium rounded-md transition disabled:opacity-50 flex items-center gap-1.5"
- :class="transitionButtonConfig[nextStatus].class"
- >
- {{ transitionButtonConfig[nextStatus].label }}
- </button>
- </div>
+ <!-- ─── Pipeline navigation hint ─── -->
+ <div v-if="canManage && appStore.canTransition" class="flex items-center gap-3 px-4 py-3 rounded-lg border border-blue-100 bg-blue-50 text-sm text-blue-700">
+ <span class="shrink-0">ℹ</span>
+ <span>To advance this candidate, drag their card on the
+ <router-link :to="`/employer/jobs/${appStore.currentApplication?.jobId}/applications`" class="font-semibold underline hover:text-blue-900 transition">Recruitment Pipeline board</router-link>.
+ </span>
  </div>
 
  <!-- ─── Candidate Info ─── -->
@@ -578,59 +494,5 @@ onBeforeUnmount(() => {
  ← Back
  </button>
  </div>
-
- <!-- ─── Confirmation Modal ─── -->
- <Teleport to="body">
- <div v-if="showConfirm && pendingTransition" class="fixed inset-0 z-50 flex items-center justify-center">
- <div class="absolute inset-0 bg-black/40" @click="showConfirm = false" />
- <div class="relative bg-surface rounded-lg shadow-xl border border-border w-full max-w-md p-6 animate-slide-up">
- <div class="text-center mb-5">
- <div
- class="w-12 h-12 rounded-full flex items-center justify-center text-xl mx-auto mb-3"
- :class="pendingTransition === 'REJECTED' ? 'bg-error-bg text-error' : 'bg-primary-bg text-primary'"
- >
- {{ pendingTransition === 'REJECTED' ? '✕' : '→' }}
- </div>
- <h2 class="text-lg font-bold text-gray-900 mb-1">
- {{ transitionButtonConfig[pendingTransition].confirmTitle }}
- </h2>
- <p class="text-sm text-gray-500">
- {{ transitionButtonConfig[pendingTransition].confirmDesc }}
- </p>
- </div>
-
- <!-- Optional notes -->
- <div class="mb-5">
- <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
- Notes (Optional)
- </label>
- <textarea
- v-model="transitionNotes"
- rows="3"
- placeholder="Add a note here..."
- class="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary-light transition resize-none"
- />
- </div>
-
- <div class="flex justify-center gap-2">
- <button
- @click="showConfirm = false"
- class="px-4 py-2 text-sm font-medium text-gray-700 bg-surface border border-border rounded-md hover:bg-gray-50 transition"
- >
- Cancel
- </button>
- <button
- @click="confirmTransition"
- :disabled="appStore.statusLoading"
- class="px-4 py-2 text-sm font-medium text-white rounded-md transition disabled:opacity-50 flex items-center gap-2"
- :class="transitionButtonConfig[pendingTransition].class"
- >
- <span v-if="appStore.statusLoading" class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ appStore.statusLoading ? 'Processing...' : 'Confirm' }}
- </button>
- </div>
- </div>
- </div>
- </Teleport>
  </div>
 </template>
