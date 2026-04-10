@@ -142,7 +142,7 @@ onMounted(loadProfile)
  <!-- Page header -->
  <div class="mb-8">
  <h1 class="text-2xl font-extrabold text-slate-900">My Profile</h1>
- <p class="text-sm font-medium text-slate-500 mt-1">Manage your personal information and images</p>
+ <p class="text-sm font-medium text-slate-500 mt-1">Manage your personal information and photos</p>
  </div>
 
  <!-- Loading skeleton -->
@@ -176,7 +176,7 @@ onMounted(loadProfile)
  :model-value="bannerUrl"
  variant="banner"
  :loading="bannerLoading"
- placeholder="Drag and drop or click to upload cover photo (recommended 1200x300)"
+ placeholder="Drag & drop or click to upload cover photo (recommended 1200x300)"
  @upload="handleBannerUpload"
  @delete="handleBannerDelete"
  />
@@ -273,7 +273,7 @@ onMounted(loadProfile)
  <h3 class="text-base font-extrabold text-slate-900 mb-5">Social Links</h3>
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
  <div>
- <label for="prof-linkedin" class="block text-sm font-bold text-slate-700 mb-1.5">LinkedIn</label>
+ <label for="prof-linkedin" class="block text-sm font-bold text-slate-700 mb-1.5">LinkedIn URL</label>
  <input
  id="prof-linkedin"
  v-model="form.linkedinUrl"
@@ -284,7 +284,7 @@ onMounted(loadProfile)
  </div>
 
  <div>
- <label for="prof-github" class="block text-sm font-bold text-slate-700 mb-1.5">GitHub</label>
+ <label for="prof-github" class="block text-sm font-bold text-slate-700 mb-1.5">GitHub URL</label>
  <input
  id="prof-github"
  v-model="form.githubUrl"
@@ -295,7 +295,7 @@ onMounted(loadProfile)
  </div>
 
  <div class="sm:col-span-2">
- <label for="prof-portfolio" class="block text-sm font-bold text-slate-700 mb-1.5">Portfolio / Website</label>
+ <label for="prof-portfolio" class="block text-sm font-bold text-slate-700 mb-1.5">Portfolio URL</label>
  <input
  id="prof-portfolio"
  v-model="form.portfolioUrl"

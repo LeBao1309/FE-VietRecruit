@@ -143,6 +143,16 @@ export const jobService = {
     }
   },
 
+  /** DELETE /jobs/:id — Delete a DRAFT job */
+  async deleteJob(id: string): Promise<ServiceResult<void>> {
+    try {
+      await http.delete<ApiResponse<void>>(`/jobs/${id}`)
+      return ok(undefined as unknown as void)
+    } catch (error) {
+      return fail(error)
+    }
+  },
+
   /** GET /jobs/:id/salary-benchmark — Salary benchmark for a job */
   async getSalaryBenchmark(id: string): Promise<ServiceResult<SalaryBenchmarkResponse>> {
     try {

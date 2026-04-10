@@ -127,7 +127,7 @@ const canManage = computed(() => auth.isCompanyAdmin || auth.isHR)
 
 function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('vi-VN', {
+  return new Date(iso).toLocaleString('en-US', {
  month: 'short', day: 'numeric', year: 'numeric',
  hour: '2-digit', minute: '2-digit',
  })
@@ -136,6 +136,7 @@ function formatDateTime(iso: string | null | undefined): string {
 // ── AI Match Score ──
 const matchScore = ref<ApplicationScreeningResponse | null>(null)
 const matchLoading = ref(false)
+const matchError = ref(false)
 
 function getScoreColor(score: number | null): string {
   if (score === null) return 'text-gray-400'
@@ -150,12 +151,15 @@ function getScoreBarColor(score: number | null): string {
   return 'bg-red-400'
 }
 
-async function loadMatchScore(jobId: string, candidateId: string): Promise<void> {
+async function loadMatchScore(jobId: string): Promise<void> {
   matchLoading.value = true
+  matchError.value = false
   try {
     const result = await applicationService.getScreeningResults(jobId)
-    if (result.data) {
-      matchScore.value = result.data.find((r) => r.candidateId === candidateId) ?? null
+    if (result.error) {
+      matchError.value = true
+    } else if (result.data) {
+      matchScore.value = result.data.find((r) => r.applicationId === applicationId.value) ?? null
     }
   } finally {
     matchLoading.value = false
@@ -168,7 +172,7 @@ onMounted(async () => {
  if (loaded) {
    appStore.fetchStatusHistory(applicationId.value)
    const app = appStore.currentApplication
-   if (app) loadMatchScore(app.jobId, app.candidateId)
+   if (app) loadMatchScore(app.jobId)
  }
 })
 
@@ -398,6 +402,12 @@ onBeforeUnmount(() => {
  <div class="h-2 bg-gray-100 rounded w-full" />
  </div>
  </div>
+ </div>
+
+ <!-- API error -->
+ <div v-else-if="matchError" class="text-center py-6">
+ <p class="text-sm text-red-400 mb-1">Failed to load AI analysis.</p>
+ <p class="text-xs text-gray-400">Check your connection or try again later.</p>
  </div>
 
  <!-- No results yet -->

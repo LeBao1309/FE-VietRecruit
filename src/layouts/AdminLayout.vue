@@ -21,16 +21,16 @@ const navItems = [
     <!-- Sidebar -->
     <aside
       :class="menuOpen ? 'flex' : 'hidden md:flex'"
-      class="w-full md:w-60 bg-gray-900 flex-col shrink-0"
+      class="w-full md:w-60 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex-col shrink-0"
     >
       <!-- Logo -->
-      <div class="hidden md:flex items-center gap-3 px-5 h-[60px] border-b border-white/8 shrink-0">
-        <div class="w-7 h-7 rounded-lg bg-[#009898]/20 flex items-center justify-center shrink-0">
-          <Settings class="w-3.5 h-3.5 text-[#00cccc]" />
+      <div class="hidden md:flex items-center gap-3 px-5 h-[60px] border-b border-slate-200 shrink-0">
+        <div class="w-7 h-7 rounded-lg bg-[#009898]/12 flex items-center justify-center shrink-0">
+          <Settings class="w-3.5 h-3.5 text-[#009898]" />
         </div>
         <router-link
           to="/admin/users"
-          class="text-sm font-bold text-white tracking-tight hover:text-[#00cccc] transition-colors duration-150"
+          class="text-sm font-bold text-[#007070] tracking-tight hover:opacity-80 transition-opacity duration-150"
         >
           VietRecruit Admin
         </router-link>
@@ -38,7 +38,7 @@ const navItems = [
 
       <!-- Section label -->
       <div class="px-5 pt-5 pb-1 shrink-0">
-        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">System</span>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">System</span>
       </div>
 
       <!-- Navigation -->
@@ -48,8 +48,8 @@ const navItems = [
           :key="item.to"
           :to="item.to"
           @click="menuOpen = false"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-white/8 hover:text-slate-100 transition-all duration-150 border-l-2 border-transparent"
-          active-class="!bg-[#009898]/15 !border-l-[#009898] !text-[#00d4d4] !font-semibold"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all duration-150 border-l-2 border-transparent"
+          active-class="!bg-[#009898]/10 !border-l-[#009898] !text-[#007070] !font-semibold"
         >
           <component :is="item.icon" class="w-4 h-4 shrink-0" />
           {{ item.label }}
@@ -57,18 +57,18 @@ const navItems = [
       </nav>
 
       <!-- User footer -->
-      <div class="px-3 py-3 border-t border-white/8 shrink-0">
+      <div class="px-3 py-3 border-t border-slate-200 bg-slate-50/60 shrink-0">
         <div class="flex items-center gap-2.5 px-2">
-          <div class="w-7 h-7 rounded-full bg-[#009898]/25 text-[#00cccc] flex items-center justify-center text-xs font-bold shrink-0 ring-1 ring-[#009898]/30">
+          <div class="w-7 h-7 rounded-full bg-[#009898]/15 text-[#007070] flex items-center justify-center text-xs font-bold shrink-0 ring-1 ring-[#009898]/20">
             {{ auth.user?.fullName?.charAt(0)?.toUpperCase() ?? 'A' }}
           </div>
           <div class="flex flex-col min-w-0 flex-1">
-            <span class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth.user?.fullName ?? 'Administrator' }}</span>
-            <span class="text-[10px] text-slate-500 leading-tight mt-0.5">{{ auth.isCustomerService ? 'Customer Service' : 'System Admin' }}</span>
+            <span class="text-xs font-semibold text-slate-700 truncate leading-tight">{{ auth.user?.fullName ?? 'Administrator' }}</span>
+            <span class="text-[10px] text-slate-400 leading-tight mt-0.5">{{ auth.isCustomerService ? 'Customer Service' : 'System Admin' }}</span>
           </div>
           <button
             @click="auth.logout()"
-            class="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-all duration-150 shrink-0"
+            class="p-1.5 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all duration-150 shrink-0"
             title="Sign Out"
           >
             <LogOut class="w-3.5 h-3.5" />
@@ -77,7 +77,7 @@ const navItems = [
       </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto bg-slate-50 border-l border-border md:border-none">
+    <main class="flex-1 overflow-y-auto bg-slate-50">
       <router-view />
     </main>
   </div>

@@ -94,16 +94,19 @@ export const useJobStore = defineStore('job', () => {
         }
         return false
       }
-      // Success — update currentJob if backend returned the full object
-      if (result.data) currentJob.value = result.data
+      // Success — force PUBLISHED status immediately regardless of what data the backend returns
+      if (result.data) {
+        currentJob.value = { ...result.data, status: 'PUBLISHED' }
+      } else if (currentJob.value) {
+        currentJob.value = { ...currentJob.value, status: 'PUBLISHED' }
+      }
       subscriptionRequired.value = false
       ui.toastSuccess('Published Successfully', 'The job listing is now publicly visible to candidates.')
-      // Re-fetch the job to get the latest status, then refresh the list
-      await Promise.all([
-        fetchJob(id),
+      // Refresh list + quota in background (non-blocking)
+      Promise.all([
         sub.fetchCurrentQuota(),
-        fetchJobs({ size: 100, page: 0 }),
-      ])
+        ...(jobs.value ? [fetchJobs(_lastFetchParams.value)] : []),
+      ]).catch(() => {})
       return true
     } finally {
       actionLoading.value = false
@@ -119,16 +122,38 @@ export const useJobStore = defineStore('job', () => {
         ui.toastError('Close Listing Failed', result.error.message)
         return false
       }
-      // Success — update currentJob if backend returned the full object
-      if (result.data) currentJob.value = result.data
+      // Success — force CLOSED status immediately regardless of what data the backend returns
+      if (result.data) {
+        currentJob.value = { ...result.data, status: 'CLOSED' }
+      } else if (currentJob.value) {
+        currentJob.value = { ...currentJob.value, status: 'CLOSED' }
+      }
       ui.toastSuccess('Listing Closed', 'The job listing has been closed.')
-      // Re-fetch the job to get the latest status, then refresh the list
+      // Refresh list + quota in background (non-blocking)
       const sub = useSubscriptionStore()
-      await Promise.all([
-        fetchJob(id),
+      Promise.all([
         sub.fetchCurrentQuota(),
-        fetchJobs({ size: 100, page: 0 }),
-      ])
+        ...(jobs.value ? [fetchJobs(_lastFetchParams.value)] : []),
+      ]).catch(() => {})
+      return true
+    } finally {
+      actionLoading.value = false
+    }
+  }
+
+  async function deleteJob(id: string): Promise<boolean> {
+    const ui = useUiStore()
+    actionLoading.value = true
+    try {
+      const result = await jobService.deleteJob(id)
+      if (result.error) {
+        ui.toastError('Delete Failed', result.error.message)
+        return false
+      }
+      ui.toastSuccess('Job Deleted', 'The draft job listing has been removed.')
+      if (jobs.value) {
+        await fetchJobs(_lastFetchParams.value)
+      }
       return true
     } finally {
       actionLoading.value = false
@@ -180,6 +205,7 @@ export const useJobStore = defineStore('job', () => {
     fetchJob,
     publishJob,
     closeJob,
+    deleteJob,
     fetchSalaryBenchmark,
     clearCurrentJob,
   }

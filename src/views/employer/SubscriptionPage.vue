@@ -10,7 +10,7 @@ const cancelling = ref(false)
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('vi-VN', { dateStyle: 'medium' })
+  return new Date(dateStr).toLocaleDateString('en-US', { dateStyle: 'medium' })
 }
 
 
@@ -177,9 +177,8 @@ onMounted(async () => {
 
  <!-- Cancel Confirmation Modal -->
  <Teleport to="body">
- <div v-if="showCancelConfirm" class="premium-modal-backdrop">
- <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click.self="showCancelConfirm = false" />
- <div class="premium-modal-content w-full max-w-sm">
+ <div v-if="showCancelConfirm" class="premium-modal-backdrop" @click.self="showCancelConfirm = false">
+ <div class="premium-modal-content w-full max-w-sm p-6">
  <h2 class="text-xl font-extrabold text-slate-900 mb-3">Cancel Service Plan?</h2>
  <p class="text-sm font-medium text-slate-500 mb-8 leading-relaxed">
  Your plan will remain active until the end of the current billing period, after which access to premium features will be revoked.
