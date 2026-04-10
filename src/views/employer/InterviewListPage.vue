@@ -112,14 +112,14 @@ function goToDetail(interviewId: string): void {
 // ── Helpers ──
 function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('vi-VN', {
- weekday: 'short',
- month: 'short',
- day: 'numeric',
- year: 'numeric',
- hour: '2-digit',
- minute: '2-digit',
- })
+  return new Date(iso).toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function formatDuration(minutes: number | null): string {

@@ -69,6 +69,18 @@ function onSkillKeydown(e: KeyboardEvent): void {
  }
 }
 
+function onSkillPaste(e: ClipboardEvent): void {
+ e.preventDefault()
+ const text = e.clipboardData?.getData('text') ?? ''
+ const parts = text.split(',').map(s => s.trim()).filter(Boolean)
+ for (const part of parts) {
+ if (!form.value.skills.includes(part)) {
+ form.value.skills.push(part)
+ }
+ }
+ skillInput.value = ''
+}
+
 // ── Dropdown options ──
 const positionLevels = ['INTERN', 'JUNIOR', 'MID', 'SENIOR', 'LEAD', 'MANAGER', 'DIRECTOR', 'VP', 'C_LEVEL']
 const workTypes = ['REMOTE', 'ONSITE', 'HYBRID']
@@ -154,7 +166,6 @@ onMounted(loadProfile)
  <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Candidate Profile</h1>
  <p class="text-sm font-medium text-slate-500">Complete your profile to get discovered by companies and access better job opportunities.</p>
  </div>
- <!-- Add Improve CV button here -->
  <router-link to="/candidate/cv" class="btn-secondary flex items-center gap-2 shrink-0 border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-700 :bg-teal-900/50 transition-colors">
  <span class="text-lg">✨</span> Improve CV
  </router-link>
@@ -174,7 +185,7 @@ onMounted(loadProfile)
  <form v-else @submit.prevent="handleSave" class="space-y-8">
  <!-- Headline & Summary -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Personal Information</h2>
+ <h2 class="text-lg font-bold text-slate-900">Personal Information</h2>
 
  <div>
  <label for="headline" class="block text-sm font-bold text-slate-700 mb-2">Professional Headline</label>
@@ -183,7 +194,7 @@ onMounted(loadProfile)
  v-model="form.headline"
  type="text"
  placeholder="e.g. Full-Stack Developer | 5 years of experience"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
 
@@ -194,15 +205,15 @@ onMounted(loadProfile)
  v-model="form.summary"
  rows="4"
  placeholder="A brief summary of your experience, strengths, and career goals…"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y font-medium min-h-[100px]"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all resize-y font-medium min-h-[100px]"
  />
  </div>
 
  <!-- Open to work toggle -->
- <label class="inline-flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 :bg-slate-800/50 transition-colors">
+ <label class="inline-flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors">
  <div
  class="relative w-11 h-6 rounded-full transition-colors duration-200"
- :class="form.isOpenToWork ? 'bg-teal-500' : 'bg-slate-300 '"
+ :class="form.isOpenToWork ? 'bg-teal-500' : 'bg-slate-300'"
  @click.prevent="form.isOpenToWork = !form.isOpenToWork"
  >
  <div
@@ -219,33 +230,35 @@ onMounted(loadProfile)
 
  <!-- Skills -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Experience & Skills</h2>
+ <h2 class="text-lg font-bold text-slate-900">Experience & Skills</h2>
 
+ <!-- Skills tag input -->
  <div>
  <label for="skills-input" class="block text-sm font-bold text-slate-700 mb-2">Skills</label>
- <div class="flex flex-wrap items-center gap-2 min-h-[48px] px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus-within:bg-white :bg-slate-900 focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-500/10 transition-all">
+ <div class="flex flex-wrap items-center gap-2 min-h-[48px] px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus-within:bg-white focus-within:border-teal-500 focus-within:ring-4 focus-within:ring-teal-500/10 transition-all">
  <span
  v-for="(skill, i) in form.skills"
  :key="i"
- class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-teal-50 text-teal-700 rounded-lg border border-teal-200 "
+ class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-teal-50 text-teal-700 rounded-lg border border-teal-200"
  >
  {{ skill }}
- <button type="button" @click="removeSkill(i)" class="text-teal-700/50 hover:text-teal-700 :text-teal-300 transition-colors text-sm leading-none focus:outline-none">&times;</button>
+ <button type="button" @click="removeSkill(i)" class="text-teal-700/50 hover:text-teal-700 transition-colors text-sm leading-none focus:outline-none">&times;</button>
  </span>
  <input
  id="skills-input"
  v-model="skillInput"
  @keydown="onSkillKeydown"
+ @paste="onSkillPaste"
  @blur="addSkill"
  type="text"
- placeholder="Type a skill and press Enter…"
+ placeholder="Type a skill and press Enter, or paste comma-separated…"
  class="flex-1 min-w-[120px] text-sm font-medium outline-none bg-transparent px-2"
  />
  </div>
- <p class="text-[11px] font-medium text-slate-400 mt-2">Press Enter or comma to add. Press Backspace to remove the last tag.</p>
+ <p class="text-[11px] font-medium text-slate-400 mt-2">Press Enter or comma to add. Paste "java,spring boot,mysql" to add multiple at once. Backspace removes the last tag.</p>
  </div>
 
- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <!-- Desired Position + Level -->
  <div>
  <label for="desired-position" class="block text-sm font-bold text-slate-700 mb-2">Desired Position</label>
  <input
@@ -253,25 +266,29 @@ onMounted(loadProfile)
  v-model="form.desiredPosition"
  type="text"
  placeholder="e.g. Frontend Developer"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
+
  <div>
- <label for="position-level" class="block text-sm font-bold text-slate-700 mb-2">Desired Level</label>
- <div class="relative">
- <select
- id="position-level"
- v-model="form.desiredPositionLevel"
- class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
+ <p class="text-sm font-bold text-slate-700 mb-2">Desired Level</p>
+ <div class="flex flex-wrap gap-2">
+ <button
+ v-for="level in positionLevels"
+ :key="level"
+ type="button"
+ @click="form.desiredPositionLevel = form.desiredPositionLevel === level ? '' : level"
+ :class="form.desiredPositionLevel === level
+ ? 'bg-teal-500 text-white border-teal-500'
+ : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-600'"
+ class="px-3 py-1.5 text-sm font-semibold border rounded-lg transition-colors"
  >
- <option value="" disabled>— Select —</option>
- <option v-for="level in positionLevels" :key="level" :value="level">{{ formatLabel(level) }}</option>
- </select>
- <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
- </div>
+ {{ formatLabel(level) }}
+ </button>
  </div>
  </div>
 
+ <!-- Years of Experience + Primary Language -->
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
  <label for="years-exp" class="block text-sm font-bold text-slate-700 mb-2">Years of Experience</label>
@@ -281,21 +298,24 @@ onMounted(loadProfile)
  type="text"
  inputmode="numeric"
  placeholder="e.g. 5"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
  <div>
- <label for="primary-lang" class="block text-sm font-bold text-slate-700 mb-2">Primary Language</label>
- <div class="relative">
- <select
- id="primary-lang"
- v-model="form.primaryLanguage"
- class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
+ <p class="text-sm font-bold text-slate-700 mb-2">Primary Language</p>
+ <div class="flex flex-wrap gap-2">
+ <button
+ v-for="lang in languages"
+ :key="lang"
+ type="button"
+ @click="form.primaryLanguage = form.primaryLanguage === lang ? '' : lang"
+ :class="form.primaryLanguage === lang
+ ? 'bg-teal-500 text-white border-teal-500'
+ : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-600'"
+ class="px-3 py-1.5 text-sm font-semibold border rounded-lg transition-colors"
  >
- <option value="" disabled>— Select —</option>
- <option v-for="lang in languages" :key="lang" :value="lang">{{ lang }}</option>
- </select>
- <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ {{ lang }}
+ </button>
  </div>
  </div>
  </div>
@@ -303,23 +323,27 @@ onMounted(loadProfile)
 
  <!-- Education & Work Preferences -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Education & Hiring Preferences</h2>
+ <h2 class="text-lg font-bold text-slate-900">Education & Hiring Preferences</h2>
 
- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <!-- Education Level -->
  <div>
- <label for="edu-level" class="block text-sm font-bold text-slate-700 mb-2">Education Level</label>
- <div class="relative">
- <select
- id="edu-level"
- v-model="form.educationLevel"
- class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
+ <p class="text-sm font-bold text-slate-700 mb-2">Education Level</p>
+ <div class="flex flex-wrap gap-2">
+ <button
+ v-for="level in educationLevels"
+ :key="level"
+ type="button"
+ @click="form.educationLevel = form.educationLevel === level ? '' : level"
+ :class="form.educationLevel === level
+ ? 'bg-teal-500 text-white border-teal-500'
+ : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-600'"
+ class="px-3 py-1.5 text-sm font-semibold border rounded-lg transition-colors"
  >
- <option value="" disabled>— Select —</option>
- <option v-for="level in educationLevels" :key="level" :value="level">{{ formatLabel(level) }}</option>
- </select>
- <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+ {{ formatLabel(level) }}
+ </button>
  </div>
  </div>
+
  <div>
  <label for="edu-major" class="block text-sm font-bold text-slate-700 mb-2">Major / Field of Study</label>
  <input
@@ -327,41 +351,43 @@ onMounted(loadProfile)
  v-model="form.educationMajor"
  type="text"
  placeholder="e.g. Computer Science"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
+ </div>
+
+ <!-- Work Type -->
+ <div>
+ <p class="text-sm font-bold text-slate-700 mb-2">Work Type</p>
+ <div class="flex flex-wrap gap-2">
+ <button
+ v-for="t in workTypes"
+ :key="t"
+ type="button"
+ @click="form.workType = form.workType === t ? '' : t"
+ :class="form.workType === t
+ ? 'bg-teal-500 text-white border-teal-500'
+ : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-600'"
+ class="px-4 py-1.5 text-sm font-semibold border rounded-lg transition-colors"
+ >
+ {{ formatLabel(t) }}
+ </button>
  </div>
  </div>
 
- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
- <div>
- <label for="work-type" class="block text-sm font-bold text-slate-700 mb-2">Work Type</label>
- <div class="relative">
- <select
- id="work-type"
- v-model="form.workType"
- class="w-full px-4 py-3 pr-10 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none cursor-pointer"
- >
- <option value="" disabled>— Select —</option>
- <option v-for="t in workTypes" :key="t" :value="t">{{ formatLabel(t) }}</option>
- </select>
- <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
- </div>
- </div>
  <div>
  <label for="available-from" class="block text-sm font-bold text-slate-700 mb-2">Expected Start Date</label>
  <input
  id="available-from"
  v-model="form.availableFrom"
  type="date"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
- </div>
  </div>
  </div>
 
  <!-- Salary Expectations -->
  <div class="premium-card p-8 space-y-6">
- <h2 class="text-lg font-bold text-slate-900 ">Expected Salary</h2>
+ <h2 class="text-lg font-bold text-slate-900">Expected Salary</h2>
 
  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
  <div>
@@ -372,7 +398,7 @@ onMounted(loadProfile)
  type="text"
  inputmode="numeric"
  placeholder="e.g. 15,000,000"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium tabular-nums"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium tabular-nums"
  />
  </div>
  <div>
@@ -383,7 +409,7 @@ onMounted(loadProfile)
  type="text"
  inputmode="numeric"
  placeholder="e.g. 30,000,000"
- class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white :bg-slate-900 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium tabular-nums"
+ class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium tabular-nums"
  />
  </div>
  </div>

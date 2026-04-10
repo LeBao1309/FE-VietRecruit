@@ -36,3 +36,12 @@ export interface CompanySearchResponse {
   highlights: Record<string, string[]> | null
   score: number | null
 }
+
+export interface CompanyMemberResponse {
+  id: string
+  email: string
+  fullName: string
+  avatarUrl: string | null
+  roles: string[]
+  joinedAt: string | null
+}

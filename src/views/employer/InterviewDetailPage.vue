@@ -77,31 +77,31 @@ async function loadQuestions(): Promise<void> {
 // ── Helpers ──
 function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('vi-VN', {
- weekday: 'long',
- month: 'long',
- day: 'numeric',
- year: 'numeric',
- hour: '2-digit',
- minute: '2-digit',
- })
+  return new Date(iso).toLocaleString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function formatDuration(minutes: number | null): string {
- if (!minutes) return '—'
- if (minutes < 60) return `${minutes} minutes`
- const h = Math.floor(minutes / 60)
- const m = minutes % 60
- return m > 0 ? `${h}h ${m}m` : `${h} hour${h > 1 ? 's' : ''}`
+  if (!minutes) return '—'
+  if (minutes < 60) return `${minutes} minutes`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m > 0 ? `${h}h ${m}m` : `${h} hour${h > 1 ? 's' : ''}`
 }
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('vi-VN', {
- month: 'short',
- day: 'numeric',
- year: 'numeric',
- })
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 function getScoreColor(score: number): string {

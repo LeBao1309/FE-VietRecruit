@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useOfferStore } from '@/stores/offerStore'
 import { useApplicationStore } from '@/stores/applicationStore'
+import { useInterviewStore } from '@/stores/interviewStore'
 import { useAuthStore } from '@/stores/authStore'
 import type { OfferStatus } from '@/types/enums'
 import type { OfferCreateRequest } from '@/types/application'
@@ -11,7 +12,13 @@ const route = useRoute()
 // useRouter not needed — navigation uses <router-link> in template
 const offerStore = useOfferStore()
 const appStore = useApplicationStore()
+const interviewStore = useInterviewStore()
 const auth = useAuthStore()
+
+/** BE requires at least one COMPLETED interview before an offer can be created */
+const hasCompletedInterview = computed(() =>
+  interviewStore.interviews.some((i) => i.status === 'COMPLETED'),
+)
 
 /** The route param `:id` is the applicationId */
 const applicationId = computed(() => route.params.id as string)
@@ -145,39 +152,42 @@ const canCreateNew = computed(() => {
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('vi-VN', {
- month: 'short',
- day: 'numeric',
- year: 'numeric',
- })
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('vi-VN', {
- month: 'short', day: 'numeric', year: 'numeric',
- hour: '2-digit', minute: '2-digit',
- })
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
 }
 
 function formatSalary(amount: number | null | undefined, currency: string | null): string {
   if (amount == null) return '—'
- const cur = currency ?? 'VND'
- try {
- return new Intl.NumberFormat('vi-VN', {
- style: 'currency',
- currency: cur,
- maximumFractionDigits: 0,
- }).format(amount)
- } catch {
- return `${amount.toLocaleString()} ${cur}`
- }
+  const cur = currency ?? 'VND'
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: cur,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  } catch {
+    return `${amount.toLocaleString()} ${cur}`
+  }
 }
 
 // ── Init ──
 onMounted(async () => {
- await appStore.fetchApplication(applicationId.value)
- await offerStore.fetchOffers(applicationId.value)
+  await appStore.fetchApplication(applicationId.value)
+  await Promise.all([
+    offerStore.fetchOffers(applicationId.value),
+    interviewStore.fetchInterviews(applicationId.value),
+  ])
 })
 
 onBeforeUnmount(() => {
@@ -227,15 +237,35 @@ onBeforeUnmount(() => {
  </template>
  </p>
  </div>
- <!-- Create offer button -->
+ <!-- Create offer button — disabled until at least one interview is COMPLETED -->
  <button
  v-if="canManage && canCreateNew"
  @click="showCreateForm = true"
- class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition flex items-center gap-1.5 shrink-0"
+ :disabled="!hasCompletedInterview"
+ class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition flex items-center gap-1.5 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+ :title="!hasCompletedInterview ? 'At least one interview must be completed before creating an offer.' : undefined"
  >
  <span class="text-base leading-none">+</span>
  Create Offer
  </button>
+ </div>
+ </div>
+
+ <!-- ─── Interview requirement warning ─── -->
+ <div
+ v-if="canManage && !hasCompletedInterview && !interviewStore.listLoading"
+ class="flex items-start gap-3 px-5 py-4 mb-5 rounded-lg border border-amber-200 bg-amber-50"
+ >
+ <span class="text-amber-500 text-lg shrink-0 mt-0.5">⚠</span>
+ <div>
+ <p class="text-sm font-semibold text-amber-800">Interview required before creating an offer</p>
+ <p class="text-xs text-amber-700 mt-0.5">
+ At least one interview must be marked <span class="font-bold">Completed</span> for this candidate before you can draft an offer.
+ <router-link
+ :to="`/employer/applications/${applicationId}/interviews`"
+ class="underline font-semibold ml-1 hover:text-amber-900 transition"
+ >Go to Interviews →</router-link>
+ </p>
  </div>
  </div>
 
@@ -249,7 +279,9 @@ onBeforeUnmount(() => {
  <button
  v-if="canManage"
  @click="showCreateForm = true"
- class="px-5 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition"
+ :disabled="!hasCompletedInterview"
+ class="px-5 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition disabled:opacity-40 disabled:cursor-not-allowed"
+ :title="!hasCompletedInterview ? 'At least one interview must be completed first.' : undefined"
  >
  Compose Offer
  </button>
