@@ -114,7 +114,10 @@ export const useInterviewStore = defineStore('interview', () => {
       const result = await interviewService.scheduleInterview(applicationId, body)
       if (result.data) {
         interviews.value.unshift(result.data)
-        ui.toastSuccess('Interview scheduled', `"${result.data.title}" has been scheduled.`)
+        ui.toastSuccess(
+          'Interview scheduled',
+          `"${result.data.title}" has been scheduled. ID: ${result.data.id}`
+        )
         return true
       }
       ui.toastError('Failed to schedule', result.error?.message)

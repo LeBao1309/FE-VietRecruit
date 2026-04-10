@@ -298,10 +298,11 @@ onMounted(async () => {
  <div class="space-y-5">
  <!-- Title -->
  <div>
- <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+ <label for="interview-title" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
  Title <span class="text-rose-500">*</span>
  </label>
  <input
+ id="interview-title"
  v-model="form.title"
  type="text"
  placeholder="e.g. Technical interview round 1"
@@ -313,12 +314,14 @@ onMounted(async () => {
 
  <!-- Date & Time -->
  <div>
- <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+ <label for="interview-datetime" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
  Date & Time <span class="text-rose-500">*</span>
  </label>
  <input
+ id="interview-datetime"
  v-model="form.scheduledAt"
  type="datetime-local"
+ :min="new Date().toISOString().slice(0, 16)"
  class="w-full px-4 py-3 text-sm border rounded-xl bg-slate-50 outline-none transition"
  :class="formErrors.scheduledAt ? 'border-rose-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20'"
  />
@@ -328,10 +331,11 @@ onMounted(async () => {
  <!-- Duration & Type -->
  <div class="grid grid-cols-2 gap-4">
  <div>
- <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+ <label for="interview-duration" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
  Duration (minutes)
  </label>
  <input
+ id="interview-duration"
  v-model.number="form.durationMinutes"
  type="number"
  min="15"
@@ -341,10 +345,11 @@ onMounted(async () => {
  />
  </div>
  <div>
- <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+ <label for="interview-type" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
  Format
  </label>
  <select
+ id="interview-type"
  v-model="form.interviewType"
  class="w-full px-4 py-3 text-sm border border-slate-300 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition"
  >
@@ -357,10 +362,11 @@ onMounted(async () => {
 
  <!-- Location / Link -->
  <div>
- <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+ <label for="interview-location" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
  Location / Meeting Link
  </label>
  <input
+ id="interview-location"
  v-model="form.locationOrLink"
  type="text"
  placeholder="e.g. https://meet.google.com/abc-xyz or Room 301"
@@ -370,11 +376,12 @@ onMounted(async () => {
 
  <!-- Interviewer IDs -->
  <div>
- <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+ <label for="interviewer-input" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
  Interviewers <span class="text-rose-500">*</span>
  </label>
  <div class="flex items-center gap-2">
  <input
+ id="interviewer-input"
  v-model="interviewerIdInput"
  type="text"
  placeholder="Enter interviewer ID"
@@ -420,8 +427,8 @@ onMounted(async () => {
  </button>
  <button
  @click="submitSchedule"
- :disabled="interviewStore.createLoading"
- class="btn-primary"
+ :disabled="interviewStore.createLoading || !form.title.trim() || !form.scheduledAt || form.interviewerIds.length === 0"
+ class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
  >
  <span v-if="interviewStore.createLoading" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
  {{ interviewStore.createLoading ? 'Scheduling…' : 'Confirm' }}
