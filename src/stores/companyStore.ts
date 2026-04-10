@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { CompanyResponse, CompanyUpdateRequest } from '@/types/company'
+import type { CompanyResponse, CompanyCreateRequest, CompanyUpdateRequest } from '@/types/company'
 import { companyService } from '@/services/companyService'
 import { useUiStore } from './uiStore'
 
@@ -10,6 +10,8 @@ export const useCompanyStore = defineStore('company', () => {
   const isLoading = ref(false)
   const isSaving = ref(false)
   const error = ref<string | null>(null)
+  // true when GET /companies/me returns 403 — user has no company yet
+  const isNew = ref(false)
 
   // ── Actions ────────────────────────────────────────────────────────
   async function fetchCompany(): Promise<void> {
@@ -18,12 +20,38 @@ export const useCompanyStore = defineStore('company', () => {
     try {
       const result = await companyService.getCompany()
       if (result.error) {
-        error.value = result.error.message
+        if (result.error.status === 403) {
+          // User is not yet associated with a company — show creation flow
+          isNew.value = true
+        } else {
+          error.value = result.error.message
+        }
       } else {
         company.value = result.data
+        isNew.value = false
       }
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function createCompany(body: CompanyCreateRequest): Promise<boolean> {
+    const ui = useUiStore()
+    isSaving.value = true
+    error.value = null
+    try {
+      const result = await companyService.createCompany(body)
+      if (result.error) {
+        error.value = result.error.message
+        ui.toastError('Tạo công ty thất bại', result.error.message)
+        return false
+      }
+      company.value = result.data
+      isNew.value = false
+      ui.toastSuccess('Thành công', 'Đã tạo hồ sơ công ty.')
+      return true
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -52,10 +80,12 @@ export const useCompanyStore = defineStore('company', () => {
 
   return {
     company,
+    isNew,
     isLoading,
     isSaving,
     error,
     fetchCompany,
+    createCompany,
     updateCompany,
     clearError,
   }

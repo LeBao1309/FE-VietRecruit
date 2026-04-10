@@ -296,7 +296,7 @@ function getScoreBarColor(score: number | null): string {
 
 // ── Navigation ──
 function goToDetail(appId: string): void {
- router.push(`/employer/jobs/${jobId}/applications/${appId}`)
+ router.push(`/employer/jobs/${jobId.value}/applications/${appId}`)
 }
 
 // ── Helpers ──
@@ -757,27 +757,27 @@ onMounted(async () => {
 
  <!-- Strengths & Gaps (collapsed preview) -->
  <div class="grid grid-cols-2 gap-3">
- <div v-if="sr.strengths.length">
+ <div v-if="sr.strengths?.length">
  <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Strengths</span>
  <ul class="space-y-0.5">
- <li v-for="(s, i) in sr.strengths.slice(0, 2)" :key="i" class="text-[11px] text-gray-600 flex items-start gap-1">
+ <li v-for="(s, i) in (sr.strengths ?? []).slice(0, 2)" :key="i" class="text-[11px] text-gray-600 flex items-start gap-1">
  <span class="text-green-500 mt-px shrink-0">✓</span>
  <span class="line-clamp-1">{{ s }}</span>
  </li>
- <li v-if="sr.strengths.length > 2" class="text-[10px] text-gray-400">
- +{{ sr.strengths.length - 2 }} more
+ <li v-if="(sr.strengths?.length ?? 0) > 2" class="text-[10px] text-gray-400">
+ +{{ (sr.strengths?.length ?? 0) - 2 }} more
  </li>
  </ul>
  </div>
- <div v-if="sr.gaps.length">
+ <div v-if="sr.gaps?.length">
  <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Gaps</span>
  <ul class="space-y-0.5">
- <li v-for="(g, i) in sr.gaps.slice(0, 2)" :key="i" class="text-[11px] text-gray-600 flex items-start gap-1">
+ <li v-for="(g, i) in (sr.gaps ?? []).slice(0, 2)" :key="i" class="text-[11px] text-gray-600 flex items-start gap-1">
  <span class="text-red-400 mt-px shrink-0">✗</span>
  <span class="line-clamp-1">{{ g }}</span>
  </li>
- <li v-if="sr.gaps.length > 2" class="text-[10px] text-gray-400">
- +{{ sr.gaps.length - 2 }} more
+ <li v-if="(sr.gaps?.length ?? 0) > 2" class="text-[10px] text-gray-400">
+ +{{ (sr.gaps?.length ?? 0) - 2 }} more
  </li>
  </ul>
  </div>

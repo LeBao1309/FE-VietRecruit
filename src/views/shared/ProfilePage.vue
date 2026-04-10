@@ -141,8 +141,8 @@ onMounted(loadProfile)
  <div class="max-w-3xl mx-auto px-6 py-10">
  <!-- Page header -->
  <div class="mb-8">
- <h1 class="text-2xl font-extrabold text-slate-900">My Profile</h1>
- <p class="text-sm font-medium text-slate-500 mt-1">Manage your personal information and images</p>
+ <h1 class="text-2xl font-extrabold text-slate-900">Hồ sơ của tôi</h1>
+ <p class="text-sm font-medium text-slate-500 mt-1">Quản lý thông tin cá nhân và hình ảnh của bạn</p>
  </div>
 
  <!-- Loading skeleton -->
@@ -169,14 +169,14 @@ onMounted(loadProfile)
  <!-- Banner card -->
  <div class="premium-card overflow-hidden mb-8">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Cover Photo</h2>
+ <h2 class="text-lg font-bold text-slate-900">Ảnh bìa</h2>
  </div>
  <div class="p-6">
  <MediaUpload
  :model-value="bannerUrl"
  variant="banner"
  :loading="bannerLoading"
- placeholder="Drag and drop or click to upload cover photo (recommended 1200x300)"
+ placeholder="Kéo thả hoặc nhấn để tải ảnh bìa (khuyến nghị 1200x300)"
  @upload="handleBannerUpload"
  @delete="handleBannerDelete"
  />
@@ -186,7 +186,7 @@ onMounted(loadProfile)
  <!-- Avatar card -->
  <div class="premium-card overflow-hidden mb-8">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Profile Photo</h2>
+ <h2 class="text-lg font-bold text-slate-900">Ảnh đại diện</h2>
  </div>
  <div class="p-6">
  <MediaUpload
@@ -202,13 +202,13 @@ onMounted(loadProfile)
  <!-- Personal Information -->
  <div class="premium-card overflow-hidden">
  <div class="p-6 border-b border-slate-200">
- <h2 class="text-lg font-bold text-slate-900">Personal Information</h2>
+ <h2 class="text-lg font-bold text-slate-900">Thông tin cá nhân</h2>
  </div>
  <form @submit.prevent="handleSave" class="p-6 space-y-6">
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
  <!-- Full Name -->
  <div>
- <label for="prof-name" class="block text-sm font-bold text-slate-700 mb-1.5">Full Name</label>
+ <label for="prof-name" class="block text-sm font-bold text-slate-700 mb-1.5">Họ và tên</label>
  <input
  id="prof-name"
  v-model="form.fullName"
@@ -219,7 +219,7 @@ onMounted(loadProfile)
 
  <!-- Phone -->
  <div>
- <label for="prof-phone" class="block text-sm font-bold text-slate-700 mb-1.5">Phone Number</label>
+ <label for="prof-phone" class="block text-sm font-bold text-slate-700 mb-1.5">Số điện thoại</label>
  <input
  id="prof-phone"
  v-model="form.phone"
@@ -231,19 +231,19 @@ onMounted(loadProfile)
 
  <!-- Location -->
  <div>
- <label for="prof-location" class="block text-sm font-bold text-slate-700 mb-1.5">Location</label>
+ <label for="prof-location" class="block text-sm font-bold text-slate-700 mb-1.5">Địa điểm</label>
  <input
  id="prof-location"
  v-model="form.location"
  type="text"
- placeholder="e.g. Ho Chi Minh City"
+ placeholder="Ví dụ: Thành phố Hồ Chí Minh"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium"
  />
  </div>
 
  <!-- Date of birth -->
  <div>
- <label for="prof-dob" class="block text-sm font-bold text-slate-700 mb-1.5">Date of Birth</label>
+ <label for="prof-dob" class="block text-sm font-bold text-slate-700 mb-1.5">Ngày sinh</label>
  <input
  id="prof-dob"
  v-model="form.dob"
@@ -254,26 +254,26 @@ onMounted(loadProfile)
 
  <!-- Gender -->
  <div>
- <label for="prof-gender" class="block text-sm font-bold text-slate-700 mb-1.5">Gender</label>
+ <label for="prof-gender" class="block text-sm font-bold text-slate-700 mb-1.5">Giới tính</label>
  <select
  id="prof-gender"
  v-model="form.gender"
  class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium appearance-none"
  >
- <option value="">Prefer not to say</option>
- <option value="MALE">Male</option>
- <option value="FEMALE">Female</option>
- <option value="OTHER">Other</option>
+ <option value="">Không muốn tiết lộ</option>
+ <option value="MALE">Nam</option>
+ <option value="FEMALE">Nữ</option>
+ <option value="OTHER">Khác</option>
  </select>
  </div>
  </div>
 
  <!-- Social Links -->
  <div class="border-t border-slate-200 pt-6 mt-2">
- <h3 class="text-base font-extrabold text-slate-900 mb-5">Social Links</h3>
+ <h3 class="text-base font-extrabold text-slate-900 mb-5">Liên kết mạng xã hội</h3>
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
  <div>
- <label for="prof-linkedin" class="block text-sm font-bold text-slate-700 mb-1.5">LinkedIn</label>
+ <label for="prof-linkedin" class="block text-sm font-bold text-slate-700 mb-1.5">LinkedIn URL</label>
  <input
  id="prof-linkedin"
  v-model="form.linkedinUrl"
@@ -284,7 +284,7 @@ onMounted(loadProfile)
  </div>
 
  <div>
- <label for="prof-github" class="block text-sm font-bold text-slate-700 mb-1.5">GitHub</label>
+ <label for="prof-github" class="block text-sm font-bold text-slate-700 mb-1.5">GitHub URL</label>
  <input
  id="prof-github"
  v-model="form.githubUrl"
@@ -295,7 +295,7 @@ onMounted(loadProfile)
  </div>
 
  <div class="sm:col-span-2">
- <label for="prof-portfolio" class="block text-sm font-bold text-slate-700 mb-1.5">Portfolio / Website</label>
+ <label for="prof-portfolio" class="block text-sm font-bold text-slate-700 mb-1.5">Portfolio URL</label>
  <input
  id="prof-portfolio"
  v-model="form.portfolioUrl"
@@ -315,7 +315,7 @@ onMounted(loadProfile)
  class="btn-primary py-2.5 px-6 flex items-center gap-2"
  >
  <span v-if="saving" class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- {{ saving ? 'Saving…' : 'Save Changes' }}
+ {{ saving ? 'Đang lưu…' : 'Lưu thay đổi' }}
  </button>
  </div>
  </form>
