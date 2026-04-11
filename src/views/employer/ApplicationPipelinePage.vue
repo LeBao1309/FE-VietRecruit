@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApplicationStore, VALID_TRANSITIONS } from '@/stores/applicationStore'
 import { useJobStore } from '@/stores/jobStore'
@@ -184,6 +184,9 @@ function validateOfferForm(): boolean {
   if (!offerForm.value.baseSalary || offerForm.value.baseSalary <= 0) {
     errors.baseSalary = 'Base salary must be a positive number.'
   }
+  if (offerForm.value.offerLetterUrl && !offerForm.value.offerLetterUrl.startsWith('https://')) {
+    errors.offerLetterUrl = 'Offer letter URL must start with https://'
+  }
   offerFormErrors.value = errors
   return Object.keys(errors).length === 0
 }
@@ -251,8 +254,13 @@ async function confirmMove(): Promise<void> {
     const moved = await appStore.kanbanMove(app.id, fromStatus, toStatus, notes)
     if (!moved) return
     // Schedule interview atomically with the stage move
+    // Convert datetime-local value ("2026-04-11T15:30") to full ISO-8601 with timezone
+    const scheduledAtIso = interviewForm.value.scheduledAt
+      ? new Date(interviewForm.value.scheduledAt).toISOString()
+      : interviewForm.value.scheduledAt
     await interviewStore.scheduleInterview(app.id, {
       ...interviewForm.value,
+      scheduledAt: scheduledAtIso,
       durationMinutes: interviewForm.value.durationMinutes || undefined,
       locationOrLink: interviewForm.value.locationOrLink || undefined,
       interviewType: interviewForm.value.interviewType || undefined,
@@ -364,20 +372,41 @@ watch([currentPage, statusFilter], () => {
  }
 })
 
-// ── Screening ──
+// ── Screening + polling ──
+let _screeningPollTimer: ReturnType<typeof setInterval> | null = null
+let _screeningPollCount = 0
+const screeningPolling = ref(false)
+
+function stopScreeningPoll(): void {
+  if (_screeningPollTimer) { clearInterval(_screeningPollTimer); _screeningPollTimer = null }
+  screeningPolling.value = false
+  _screeningPollCount = 0
+}
+
+/** Poll every 5 s until at least one candidate has a non-null aiScore, or 60 s elapsed. */
+function startScreeningPoll(): void {
+  stopScreeningPoll()
+  screeningPolling.value = true
+  _screeningPollCount = 0
+  _screeningPollTimer = setInterval(async () => {
+    _screeningPollCount++
+    await appStore.fetchScreeningResults(jobId.value)
+    const hasScores = appStore.screeningResults.some((r) => r.aiScore !== null)
+    if (hasScores || _screeningPollCount >= 12) stopScreeningPoll()
+  }, 5000)
+}
+
 async function handleTriggerScreening(): Promise<void> {
- const success = await appStore.triggerScreening(jobId.value)
- if (success) {
- // Wait a beat then fetch results
- setTimeout(() => {
- appStore.fetchScreeningResults(jobId.value)
- }, 2000)
- }
+  const success = await appStore.triggerScreening(jobId.value)
+  if (success) {
+    showScreening.value = true
+    startScreeningPoll()
+  }
 }
 
 async function loadScreeningResults(): Promise<void> {
- showScreening.value = true
- await appStore.fetchScreeningResults(jobId.value)
+  showScreening.value = true
+  await appStore.fetchScreeningResults(jobId.value)
 }
 
 function getScoreColor(score: number | null): string {
@@ -427,6 +456,10 @@ function nextPage(): void { if (canGoNext.value) currentPage.value++ }
 onMounted(async () => {
  await jobStore.fetchJob(jobId.value)
  loadKanban()
+})
+
+onUnmounted(() => {
+  stopScreeningPoll()
 })
 </script>
 
@@ -908,8 +941,10 @@ onMounted(async () => {
  v-model="offerForm.offerLetterUrl"
  type="url"
  placeholder="https://drive.google.com/…"
- class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10 transition"
+ class="w-full px-3 py-2.5 text-sm border rounded-xl outline-none transition"
+ :class="offerFormErrors.offerLetterUrl ? 'border-red-300 focus:ring-2 focus:ring-red-400/10' : 'border-slate-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/10'"
  />
+ <p v-if="offerFormErrors.offerLetterUrl" class="text-xs text-red-500 mt-1">{{ offerFormErrors.offerLetterUrl }}</p>
  </div>
  </div>
  </template>
@@ -969,8 +1004,10 @@ onMounted(async () => {
  <div class="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between z-10">
  <div>
  <h2 class="text-lg font-bold text-gray-900">AI Analysis Results</h2>
- <p class="text-xs text-gray-400 mt-0.5">
- {{ appStore.screeningResults.length }} candidates scored
+ <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
+  <span v-if="screeningPolling" class="inline-block w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin shrink-0" />
+  <span v-if="screeningPolling">Processing AI scores — checking every 5s…</span>
+  <span v-else>{{ appStore.screeningResults.length }} candidate(s) scored</span>
  </p>
  </div>
  <div class="flex items-center gap-2">
@@ -1015,25 +1052,35 @@ onMounted(async () => {
  </span>
  <span class="block text-xs text-gray-400 mt-0.5">{{ sr.candidateEmail }}</span>
  </div>
- <div class="text-right">
- <span
- class="text-2xl font-bold tabular-nums"
- :class="getScoreColor(sr.aiScore)"
- >
- {{ sr.aiScore !== null ? sr.aiScore : '—' }}
- </span>
- <span class="block text-[10px] text-gray-400 mt-0.5">AI Score</span>
+ <div class="text-right shrink-0 ml-3">
+ <template v-if="sr.aiScore !== null">
+  <span class="text-2xl font-bold tabular-nums" :class="getScoreColor(sr.aiScore)">
+  {{ sr.aiScore }}
+  </span>
+  <span class="block text-[10px] text-gray-400 mt-0.5">AI Score</span>
+ </template>
+ <template v-else>
+  <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+  Pending
+  </span>
+ </template>
  </div>
  </div>
 
- <!-- Score bar -->
- <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
+ <!-- Score bar (only when scored) -->
+ <div v-if="sr.aiScore !== null" class="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
  <div
  class="h-full rounded-full transition-all duration-500"
  :class="getScoreBarColor(sr.aiScore)"
  :style="{ width: getScoreBarWidth(sr.aiScore) }"
  />
  </div>
+
+ <!-- Pending explanation -->
+ <p v-if="sr.aiScore === null" class="text-[11px] text-amber-600/80 mb-3">
+ AI has not scored this candidate yet. This may mean their CV was not attached when applying, or scoring is still in progress.
+ </p>
 
  <!-- Similarity score if available -->
  <div v-if="sr.similarityScore !== null" class="flex items-center gap-2 mb-2 text-xs text-gray-500">
@@ -1056,7 +1103,7 @@ onMounted(async () => {
  </div>
 
  <!-- Strengths & Gaps (collapsed preview) -->
- <div class="grid grid-cols-2 gap-3">
+ <div v-if="(sr.strengths?.length ?? 0) > 0 || (sr.gaps?.length ?? 0) > 0" class="grid grid-cols-2 gap-3">
  <div v-if="sr.strengths?.length">
  <span class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Strengths</span>
  <ul class="space-y-0.5">
