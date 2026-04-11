@@ -85,7 +85,7 @@ async function loadJob(): Promise<void> {
 
 async function checkAlreadyApplied(): Promise<void> {
  if (!auth.isCandidate) return
- const result = await applicationService.listMyApplications({ page: 0, size: 200 })
+ const result = await applicationService.listMyApplications({ page: 0, size: 50 })
  if (result.data) {
    applied.value = result.data.content.some(a => a.jobId === jobId.value)
  }

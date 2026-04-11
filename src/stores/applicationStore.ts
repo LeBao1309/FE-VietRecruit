@@ -98,7 +98,7 @@ export const useApplicationStore = defineStore('application', () => {
       const result = await applicationService.listApplications({
         jobId,
         page: 0,
-        size: 200,
+        size: 50,       // BE Pageable has no explicit @Max; cap at 50 for safety
         sort: 'createdAt,desc',
       })
       if (result.data) {

@@ -87,7 +87,6 @@ export interface JobSearchResponse {
   maxSalary: number | null
   currency: string | null
   isNegotiable: boolean | null
-  deadline: string | null
   status: string | null
   publicLink: string | null
   createdAt: string
