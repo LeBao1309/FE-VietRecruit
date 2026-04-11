@@ -321,11 +321,6 @@ function formatSalary(min: number | null, max: number | null, cur: string | null
  return '—'
 }
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 function timeAgo(iso: string): string {
  const diff = Date.now() - new Date(iso).getTime()
  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
@@ -591,10 +586,6 @@ onUnmounted(() => {
    {{ getScore(job.id) }}%
  </span>
  </div>
- </div>
- <div v-if="job.deadline" class="text-xs font-medium text-rose-500/80 flex items-center gap-1.5">
- <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
- Deadline: {{ formatDate(job.deadline) }}
  </div>
  </div>
  </div>
